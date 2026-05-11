@@ -9,7 +9,7 @@
 class VakaDataService {
 
   // ─── CONFIG ──────────────────────────────────────────────────
-  #baseUrl = 'http://localhost:3000/api/v1';
+  #baseUrl = 'http://192.168.1.131:3000/api/v1';
   #token   = null;
   #queue   = [];   // operaciones pendientes offline
   #KEYS    = {
@@ -303,3 +303,5 @@ class VakaDataService {
 
 // ─── Instancia global ────────────────────────────────────────────
 const vakaData = new VakaDataService();
+
+
