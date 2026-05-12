@@ -3243,7 +3243,10 @@ async function ejecutarBorradoDatos() {
 async function ejecutarEliminarCuenta() {
   try {
     await vakaData.deleteAccount();
-  } catch(_) {}
+    console.log('✅ Cuenta eliminada del backend');
+  } catch(err) {
+    console.error('❌ Error al eliminar cuenta:', err);
+  }
   clearAll();
   localStorage.clear();
   document.getElementById('modal-eliminar-cuenta').style.display='none';
