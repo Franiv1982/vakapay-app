@@ -119,16 +119,22 @@ class VakaDataService {
   }
 
   async deleteAllData() {
-  const g = await this.#req('GET', '/groups');
-  for (const gr of g) await this.#req('DELETE', `/groups/${gr.id}`);
-  const f = await this.#req('GET', '/friends');
-  for (const fr of f) await this.#req('DELETE', `/friends/${fr.id}`);
-  await this.#req('DELETE', '/activity');
+  try {
+    const g = await this.#fetch('GET', '/groups');
+    for (const gr of g) await this.#fetch('DELETE', `/groups/${gr.id}`);
+  } catch(_) {}
+  try {
+    const f = await this.#fetch('GET', '/friends');
+    for (const fr of f) await this.#fetch('DELETE', `/friends/${fr.id}`);
+  } catch(_) {}
+  try { await this.#fetch('DELETE', '/activity'); } catch(_) {}
+  Object.values(this.#KEYS).forEach(k => localStorage.removeItem(k));
 }
 
 async deleteAccount() {
   await this.deleteAllData();
-  await this.#req('DELETE', '/users/me');
+  try { await this.#fetch('DELETE', '/users/me'); } catch(_) {}
+  this.setToken(null);
 }
 
   // ================================================================
