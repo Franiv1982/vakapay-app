@@ -9,7 +9,7 @@ const router = express.Router();
 // ── POST /auth/register ──────────────────────────────────────────
 router.post('/register', async (req, res, next) => {
   try {
-    const { nombre = '', apellido = '', email, password } = req.body;
+    const { nombre = '', apellido = '', email, password, tel = '' } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
     }
@@ -22,9 +22,9 @@ router.post('/register', async (req, res, next) => {
     const hash = bcrypt.hashSync(password, 10);
 
     const result = await db.query(`
-      INSERT INTO users (nombre, apellido, email, password_hash)
-      VALUES ($1, $2, $3, $4) RETURNING id, nombre, apellido, email, created_at
-    `, [nombre, apellido, email, hash]);
+      INSERT INTO users (nombre, apellido, email, password_hash, tel)
+      VALUES ($1, $2, $3, $4, $5) RETURNING id, nombre, apellido, email, tel, created_at
+    `, [nombre, apellido, email, hash, tel]);
 
     const user  = result.rows[0];
     const token = signToken(user);
