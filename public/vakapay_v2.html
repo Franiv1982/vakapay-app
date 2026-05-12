@@ -1293,7 +1293,7 @@ try {
           email: me.email || '',
           tel: me.tel || '',
           bio: me.bio || '',
-          avatar: me.avatar_url || null
+          avatar: me.avatar_url ? `${window.location.origin}${me.avatar_url}` : null
         };
         await vakaData.saveProfile(profile);
       }
@@ -3196,17 +3196,14 @@ function updateProfilePreview() {
   }
 }
 
-function handleAvatarChange(ev) {
+async function handleAvatarChange(ev) {
   const file = ev.target.files[0];
   if (!file) return;
-  
+
+  // Mostrar preview inmediato
   const reader = new FileReader();
   reader.onload = function(e) {
     const data = e.target.result;
-    profile.avatar = data;
-    vakaData.saveProfile(profile); //
-    
-    // 1. Actualiza la foto grande en la página de Cuenta
     const wrap = document.getElementById('avatarDisplay');
     if (wrap.tagName === 'DIV') {
       const img = document.createElement('img');
@@ -3218,8 +3215,6 @@ function handleAvatarChange(ev) {
     } else {
       wrap.src = data;
     }
-    
-    // 2. ¡NUEVO! Actualiza el circulito pequeño de la barra de navegación
     const navImg = document.getElementById('user-nav-photo');
     const navInitials = document.getElementById('user-nav-initials');
     if (navImg && navInitials) {
@@ -3227,10 +3222,28 @@ function handleAvatarChange(ev) {
       navImg.style.display = 'block';
       navInitials.style.display = 'none';
     }
-    
-    toast('Foto actualizada ✓', 's');
   };
   reader.readAsDataURL(file);
+
+  // Subir al backend
+  try {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    const res = await fetch(`${window.location.origin}/api/v1/users/me/avatar`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: formData
+    });
+    const data = await res.json();
+    if (data.avatar_url) {
+      profile.avatar = data.avatar_url;
+      await vakaData.saveProfile(profile);
+      toast('Foto actualizada ✓', 's');
+    }
+  } catch(err) {
+    console.error('Error subiendo avatar:', err);
+    toast('Error al subir la foto', 'e');
+  }
 }
 
 // ═══ STATS ═══════════════════════════════════════════════════════════
