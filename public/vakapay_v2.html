@@ -1258,16 +1258,9 @@ const TYPE_ICONS={viaje:'✈️',casa:'🏠',pareja:'💑',otros:'🎯'};
 	
 	// 3. CARGA DE DATOS
 try {
-    const localRaw = localStorage.getItem('vaka_groups');
-    const localGroups = localRaw ? JSON.parse(localRaw) : null;
-
-    if (localGroups && Array.isArray(localGroups) && localGroups.length > 0) {
-        groups = localGroups;
-    } else {
-        const remote = await vakaData.getGroups();
-        groups = Array.isArray(remote) ? remote : [];
-        localStorage.setItem('vaka_groups', JSON.stringify(groups));
-    }
+    const remote = await vakaData.getGroups();
+    groups = Array.isArray(remote) ? remote : [];
+    localStorage.setItem('vaka_groups', JSON.stringify(groups));
 
     friends = await vakaData.getFriends() || [];
     activity = (await vakaData.getActivity() || []).map(a => ({...a,
