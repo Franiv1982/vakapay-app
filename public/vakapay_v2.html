@@ -980,7 +980,7 @@ document.getElementById('logoImg').src = "logo_vakapay.png";
 // ================================================================
 class VakaDataService {
   #KEYS    = { groups:'vp_groups', friends:'vp_friends', activity:'vp_activity', profile:'vp_profile', token:'vp_token' };
-  #API_URL = 'http://192.168.1.131:3000/api/v1';
+  #API_URL = `${window.location.origin}/api/v1`;
   #token   = null;
 
   constructor() {
