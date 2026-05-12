@@ -1282,15 +1282,23 @@ try {
     activity = (await vakaData.getActivity() || []).map(a => ({...a,
   groupName: a.groupName || null
 }));
-    profile = await vakaData.getProfile() || {};
     try {
-      const me = await vakaData.getMe?.();
-      if (me && me.nombre) {
-        profile.nombre = profile.nombre || me.nombre;
-        profile.email = profile.email || me.email;
+      const me = await vakaData.#req?.('GET', '/users/me') || await fetch(`${window.location.origin}/api/v1/users/me`, {
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+      }).then(r => r.json());
+      if (me && !me.error) {
+        profile = {
+          nombre: me.nombre || me.name || '',
+          email: me.email || '',
+          tel: me.tel || '',
+          bio: me.bio || '',
+          avatar: me.avatar_url || null
+        };
         await vakaData.saveProfile(profile);
       }
-    } catch(_) {}
+    } catch(_) {
+      profile = await vakaData.getProfile() || {};
+    }
 
 } catch (err) {
     console.error("Error en carga:", err);
