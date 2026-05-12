@@ -118,6 +118,19 @@ class VakaDataService {
     this.clearAll();
   }
 
+  async deleteAllData() {
+  const g = await this.#req('GET', '/groups');
+  for (const gr of g) await this.#req('DELETE', `/groups/${gr.id}`);
+  const f = await this.#req('GET', '/friends');
+  for (const fr of f) await this.#req('DELETE', `/friends/${fr.id}`);
+  await this.#req('DELETE', '/activity');
+}
+
+async deleteAccount() {
+  await this.deleteAllData();
+  await this.#req('DELETE', '/users/me');
+}
+
   // ================================================================
   //  PERFIL
   // ================================================================

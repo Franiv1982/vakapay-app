@@ -65,4 +65,11 @@ router.put('/me/avatar', requireAuth, upload.single('avatar'), async (req, res, 
   } catch (err) { next(err); }
 });
 
+router.delete('/me', requireAuth, async (req, res, next) => {
+  try {
+    await db.query('DELETE FROM users WHERE id = $1', [req.user.id]);
+    res.status(204).end();
+  } catch (err) { next(err); }
+});
+
 module.exports = router;

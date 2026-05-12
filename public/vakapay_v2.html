@@ -653,7 +653,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     </div>
     <button class="btn btn-gold btn-full" onclick="addFriend()">+ Añadir Amigo</button>
   </div>
-  <div id="friendsList"><div class="no-items"><div class="ni">👥</div><div>Sin amigos añadidos aún</div></div></div>
+  <div id="friendsList"><div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div>Sin amigos añadidos aún</div></div></div>
 </main>
 </div>
 
@@ -666,7 +666,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     </div>
   </div>
 <main>
-  <div id="activityList"><div class="no-items"><div class="ni">🕐</div><div>Sin actividad reciente</div></div></div>
+  <div id="activityList"><div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div>Sin actividad reciente</div></div></div>
 </main>
 </div>
 
@@ -745,6 +745,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Opciones</div>
     <button class="btn btn-danger btn-full" onclick="document.getElementById('modal-borrar-datos').style.display='flex';document.body.style.overflow='hidden'" style="margin-bottom:10px;">Borrar todos mis datos</button>
     <button class="btn btn-full" onclick="handleLogout()" style="background:none;border:1px solid #ff4d4d;color:#ff4d4d;border-radius:10px;padding:12px;font-weight:bold;font-size:.8rem;cursor:pointer;">Cerrar Sesión</button>
+    <button class="btn btn-full" onclick="document.getElementById('modal-eliminar-cuenta').style.display='flex';document.body.style.overflow='hidden'" style="background:none;border:1px solid #990000;color:#990000;border-radius:10px;padding:12px;font-weight:bold;font-size:.8rem;cursor:pointer;margin-top:8px;">Eliminar mi cuenta</button>
   </div>
 </main>
 </div>
@@ -1273,6 +1274,15 @@ try {
   groupName: a.groupName || null
 }));
     profile = await vakaData.getProfile() || {};
+    try {
+      const me = await vakaData.getMe?.();
+      if (me && me.nombre) {
+        profile.nombre = profile.nombre || me.nombre;
+        profile.apellido = profile.apellido || me.apellido;
+        profile.email = profile.email || me.email;
+        await vakaData.saveProfile(profile);
+      }
+    } catch(_) {}
 
 } catch (err) {
     console.error("Error en carga:", err);
@@ -2809,7 +2819,7 @@ function removeFriend(idx){
 function renderFriends(){
   populateFriendGroupSelect();
   const el=document.getElementById('friendsList');
-  if(friends.length===0){el.innerHTML='<div class="no-items"><div class="ni">👥</div><div>Sin amigos añadidos aún</div></div>';return;}
+  if(friends.length===0){el.innerHTML='<div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div>Sin amigos añadidos aún</div></div>';return;}
   el.innerHTML=friends.map((f,i)=>{
     const inGroups=groups.filter(g=>g.members.hasOwnProperty(f.name)).map(g=>TYPE_ICONS[g.type]+' '+g.name);
     const avatarContent=f.avatar
@@ -3034,7 +3044,7 @@ function renderActivity() {
     : '<span style="color:#F2F2F2;">Todas las acciones</span>';
 
   if (filtered.length === 0) {
-    el.innerHTML = '<div class="no-items"><div class="ni">🕐</div><div style="color:#F2F2F2;">Sin actividad' + (filterGroup ? ' en este grupo' : ' reciente') + '</div></div>';
+    el.innerHTML = '<div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div style="color:#F2F2F2;">Sin actividad' + (filterGroup ? ' en este grupo' : ' reciente') + '</div></div>';
     return;
   }
 
@@ -3228,9 +3238,24 @@ function cerrarModalBorrarDatos() {
   document.body.style.overflow = '';
 }
 
-function ejecutarBorradoDatos() {
+async function ejecutarBorradoDatos() {
+  try {
+    await vakaData.deleteAllData();
+  } catch(_) {}
   clearAll();
   cerrarModalBorrarDatos();
+  toast('Datos borrados correctamente','s');
+}
+
+async function ejecutarEliminarCuenta() {
+  try {
+    await vakaData.deleteAccount();
+  } catch(_) {}
+  clearAll();
+  localStorage.clear();
+  document.getElementById('modal-eliminar-cuenta').style.display='none';
+  document.body.style.overflow='';
+  window.location.href = 'Login.html';
 }
 
 // ═══ MULTI-CURRENCY ══════════════════════════════════════════════════
@@ -3919,6 +3944,24 @@ function openDeleteFromEdit() {
       <button onclick="ejecutarBorradoDatos()" 
         style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#dc3545;">
         Sí, borrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-eliminar-cuenta" style="display:none; z-index:9999;" onclick="if(event.target===this)document.getElementById('modal-eliminar-cuenta').style.display='none'">
+  <div style="background:#1e1e1e; width:90%; max-width:340px; padding:25px; border-radius:24px; border:1px solid #990000; text-align:center;">
+    <div style="font-size:2.5rem; margin-bottom:10px;">🚨</div>
+    <div style="color:#ff4d4d; font-size:1.5rem; font-weight:bold; margin-bottom:10px;">Eliminar cuenta</div>
+    <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:20px; opacity:0.8;">Se eliminarán permanentemente tu cuenta, grupos, gastos, amigos y toda tu actividad. Esta acción <strong>no se puede deshacer</strong>.</p>
+    <div style="display:flex; gap:12px; width:100%;">
+      <button onclick="document.getElementById('modal-eliminar-cuenta').style.display='none';document.body.style.overflow=''"
+        style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#28a745;">
+        No, volver
+      </button>
+      <button onclick="ejecutarEliminarCuenta()"
+        style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#990000;">
+        Sí, eliminar
       </button>
     </div>
   </div>
