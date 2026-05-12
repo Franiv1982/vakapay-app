@@ -475,7 +475,8 @@ async function handleRegistro() {
     const tel = document.getElementById('reg-tel').value.trim();
     const telefonoCompleto = tel ? `${prefijo} ${tel}` : '';
     const datosUsuario = {
-        name: nombre,
+        nombre: nombre,
+        apellido: '',
         email: email,
         password: pass,
         tel: telefonoCompleto

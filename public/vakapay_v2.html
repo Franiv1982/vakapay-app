@@ -697,8 +697,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
           <span id="readNombre" style="font-weight:700;color:var(--text)">—</span>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:.85rem;">
-          <span style="color:var(--muted)">Apellido</span>
-          <span id="readApellido" style="font-weight:700;color:var(--text)">—</span>
+          
         </div>
         <div style="display:flex;justify-content:space-between;font-size:.85rem;">
           <span style="color:var(--muted)">Email</span>
@@ -718,8 +717,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     <!-- MODO EDICIÓN (oculto por defecto) -->
     <div id="profileEditMode" style="display:none;">
       <div class="g2">
-        <div class="field"><label>Nombre</label><input type="text" id="profNombre" minlength="3" maxlength="20" placeholder="Tu nombre" oninput="updateProfilePreview()"></div>
-        <div class="field"><label>Apellido</label><input type="text" id="profApellido" minlength="3" maxlength="20" placeholder="Tu apellido" oninput="updateProfilePreview()"></div>
+        <div class="field"><label>Nombre</label><input type="text" id="profNombre" minlength="2" maxlength="40" placeholder="Tu nombre completo" oninput="updateProfilePreview()"></div>
+        
       </div>
       <div class="field"><label>Email</label><input type="email" id="profEmail" placeholder="tu@email.com" oninput="updateProfilePreview()"></div>
       <div class="field"><label>Teléfono</label><input type="tel" id="profTel" placeholder="+34 600 000 000"></div>
@@ -1288,7 +1287,6 @@ try {
       const me = await vakaData.getMe?.();
       if (me && me.nombre) {
         profile.nombre = profile.nombre || me.nombre;
-        profile.apellido = profile.apellido || me.apellido;
         profile.email = profile.email || me.email;
         await vakaData.saveProfile(profile);
       }
@@ -3100,7 +3098,6 @@ function formatRelTime(d){
 function loadProfile(){
   if(!profile)return;
   if(profile.nombre)document.getElementById('profNombre').value=profile.nombre;
-  if(profile.apellido)document.getElementById('profApellido').value=profile.apellido;
   if(profile.email)document.getElementById('profEmail').value=profile.email;
   if(profile.tel)document.getElementById('profTel').value=profile.tel;
   if(profile.bio)document.getElementById('profBio').value=profile.bio;
@@ -3135,8 +3132,7 @@ function updateReadMode() {
   const p = profile;
   if (!p) return;
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
-  set('readNombre', p.nombre);
-  set('readApellido', p.apellido);
+  set('readNombre', p.nombre || p.name || '—');
   set('readEmail', p.email);
   set('readTel', p.tel);
   set('readBio', p.bio);
@@ -3145,7 +3141,6 @@ function updateReadMode() {
 async function saveProfile() {
   const data = {
     nombre: document.getElementById('profNombre').value.trim(),
-    apellido: document.getElementById('profApellido').value.trim(),
     email: document.getElementById('profEmail').value.trim(),
     tel: document.getElementById('profTel').value.trim(),
     bio: document.getElementById('profBio').value.trim(),
@@ -3168,7 +3163,7 @@ async function saveProfile() {
 
 function updateProfilePreview() {
   const n = document.getElementById('profNombre').value.trim();
-  const a = document.getElementById('profApellido').value.trim();
+  const a = '';
   const e = document.getElementById('profEmail').value.trim();
   
   document.getElementById('profileDisplayName').textContent = (n || 'Tu') + ' ' + (a || 'Nombre');
