@@ -448,14 +448,21 @@ async function handleRegistro() {
 
     try {
         await vakaData.register(datosUsuario);
-        console.log("✅ Usuario registrado en SQLite correctamente");
+        console.log("✅ Usuario registrado correctamente");
+        try {
+          await fetch(`${window.location.origin}/api/v1/auth/send-confirmation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, nombre: nombre })
+          });
+        } catch(_) {}
         const welcomeSpan = document.getElementById('user-name-welcome');
         if(welcomeSpan) welcomeSpan.innerText = nombre;
         const modal = document.getElementById('modal-exito');
         if(modal) modal.style.display = 'flex';
     } catch (error) {
             console.error("❌ Error al registrar en el servidor:", error);
-            if (error.message && error.message.includes('409')) {
+            if (error.status === 409 || (error.message && (error.message.includes('409') || error.message.includes('Ya existe')))) {
                 document.getElementById('modal-cuenta-existente').style.display = 'flex';
             } else {
                 alert("No se pudo crear la cuenta: " + error.message);
