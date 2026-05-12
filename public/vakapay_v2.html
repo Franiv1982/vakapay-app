@@ -1283,7 +1283,7 @@ try {
   groupName: a.groupName || null
 }));
     try {
-      const me = await vakaData.#req?.('GET', '/users/me') || await fetch(`${window.location.origin}/api/v1/users/me`, {
+      const me = await fetch(`${window.location.origin}/api/v1/users/me`, {
         headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
       }).then(r => r.json());
       if (me && !me.error) {
