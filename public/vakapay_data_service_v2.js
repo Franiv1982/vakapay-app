@@ -98,8 +98,8 @@ class VakaDataService {
   //  AUTH
   // ================================================================
 
-  async register({ nombre, apellido, email, password }) {
-    const data = await this.#fetch('POST', '/auth/register', { nombre, apellido, email, password });
+  async register({ nombre, apellido, email, password, tel = '' }) {
+    const data = await this.#fetch('POST', '/auth/register', { nombre, apellido, email, password, tel });
     this.setToken(data.token);
     this.#write(this.#KEYS.profile, data.user);
     return data;
