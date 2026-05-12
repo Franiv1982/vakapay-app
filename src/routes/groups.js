@@ -1,19 +1,4 @@
-// src/routes/groups.js
-// ================================================================
-// GET    /groups                    — Lista grupos del usuario
-// POST   /groups                    — Crea grupo
-// GET    /groups/:id                — Detalle completo
-// PATCH  /groups/:id                — Edita grupo
-// DELETE /groups/:id                — Elimina grupo
-// GET    /groups/:id/members        — Participantes con balances
-// POST   /groups/:id/members        — Añade participante
-// DELETE /groups/:id/members/:name  — Elimina participante
-// GET    /groups/:id/balances       — Saldo neto por participante
-// GET    /groups/:id/debts          — Transacciones mínimas (greedy)
-// POST   /groups/:id/share-link     — Genera enlace público
-// GET    /shared/:token             — Vista pública (sin auth)
-// ================================================================
-
+// src/routes/groups.js — PostgreSQL
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const db      = require('../db/database');
@@ -21,11 +6,6 @@ const { requireAuth } = require('../middleware/auth');
 const { logActivity }  = require('../utils/activity');
 
 const router = express.Router();
-
-// ── helpers ──────────────────────────────────────────────────────
-function ownsGroup(groupId, userId) {
-  return db.prepare('SELECT id FROM groups WHERE id = ? AND owner_id = ?').get(groupId, userId);
-}
 
 function computeDebts(members) {
   const pos = [], neg = [];
@@ -48,10 +28,15 @@ function computeDebts(members) {
   return txns;
 }
 
+async function ownsGroup(groupId, userId) {
+  const r = await db.query('SELECT id FROM groups WHERE id = $1 AND owner_id = $2', [groupId, userId]);
+  return r.rows[0];
+}
+
 // ── GET /groups ───────────────────────────────────────────────────
-router.get('/', requireAuth, (req, res, next) => {
+router.get('/', requireAuth, async (req, res, next) => {
   try {
-    const groups = db.prepare(`
+    const result = await db.query(`
       SELECT g.*,
         COUNT(DISTINCT gm.id) AS member_count,
         COUNT(DISTINCT e.id)  AS expense_count,
@@ -59,17 +44,16 @@ router.get('/', requireAuth, (req, res, next) => {
       FROM groups g
       LEFT JOIN group_members gm ON gm.group_id = g.id
       LEFT JOIN expenses e       ON e.group_id  = g.id
-      WHERE g.owner_id = ?
+      WHERE g.owner_id = $1
       GROUP BY g.id
       ORDER BY g.created_at DESC
-    `).all(req.user.id);
-
-    res.json(groups);
+    `, [req.user.id]);
+    res.json(result.rows);
   } catch (err) { next(err); }
 });
 
 // ── POST /groups ──────────────────────────────────────────────────
-router.post('/', requireAuth, (req, res, next) => {
+router.post('/', requireAuth, async (req, res, next) => {
   try {
     const { name, type = 'viaje', date_start, date_end } = req.body;
     if (!name || !date_start || !date_end) {
@@ -78,173 +62,180 @@ router.post('/', requireAuth, (req, res, next) => {
     if (date_end < date_start) {
       return res.status(400).json({ error: 'date_end debe ser >= date_start' });
     }
-
-    const result = db.prepare(`
+    const result = await db.query(`
       INSERT INTO groups (owner_id, name, type, date_start, date_end)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(req.user.id, name, type, date_start, date_end);
+      VALUES ($1, $2, $3, $4, $5) RETURNING *
+    `, [req.user.id, name, type, date_start, date_end]);
 
-    const group = db.prepare('SELECT * FROM groups WHERE id = ?').get(result.lastInsertRowid);
     logActivity(req.user.id, 'group', `Grupo "${name}" creado`);
-    res.status(201).json(group);
+    res.status(201).json(result.rows[0]);
   } catch (err) { next(err); }
 });
 
 // ── GET /groups/:id ───────────────────────────────────────────────
-router.get('/:id', requireAuth, (req, res, next) => {
+router.get('/:id', requireAuth, async (req, res, next) => {
   try {
-    const group = db.prepare('SELECT * FROM groups WHERE id = ? AND owner_id = ?')
-      .get(req.params.id, req.user.id);
+    const gRes = await db.query('SELECT * FROM groups WHERE id = $1 AND owner_id = $2', [req.params.id, req.user.id]);
+    const group = gRes.rows[0];
     if (!group) return res.status(404).json({ error: 'Grupo no encontrado' });
 
-    const members  = db.prepare('SELECT * FROM group_members WHERE group_id = ? ORDER BY joined_at').all(group.id);
-    const expenses = db.prepare('SELECT * FROM expenses WHERE group_id = ? ORDER BY expense_date DESC').all(group.id);
+    const membersRes  = await db.query('SELECT * FROM group_members WHERE group_id = $1 ORDER BY joined_at', [group.id]);
+    const expensesRes = await db.query('SELECT * FROM expenses WHERE group_id = $1 ORDER BY expense_date DESC', [group.id]);
 
-    expenses.forEach(ex => {
-      ex.splits = db.prepare('SELECT * FROM expense_splits WHERE expense_id = ?').all(ex.id);
-    });
+    const expenses = expensesRes.rows;
+    for (const ex of expenses) {
+      const splits = await db.query('SELECT * FROM expense_splits WHERE expense_id = $1', [ex.id]);
+      ex.splits = splits.rows;
+    }
 
-    res.json({ ...group, members, expenses });
+    res.json({ ...group, members: membersRes.rows, expenses });
   } catch (err) { next(err); }
 });
 
 // ── PATCH /groups/:id ─────────────────────────────────────────────
-router.patch('/:id', requireAuth, (req, res, next) => {
+router.patch('/:id', requireAuth, async (req, res, next) => {
   try {
-    if (!ownsGroup(req.params.id, req.user.id)) {
+    if (!await ownsGroup(req.params.id, req.user.id)) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
     const { name, type, date_start, date_end, closed_at } = req.body;
     const fields = [], values = [];
-    if (name       !== undefined) { fields.push('name = ?');       values.push(name); }
-    if (type       !== undefined) { fields.push('type = ?');       values.push(type); }
-    if (date_start !== undefined) { fields.push('date_start = ?'); values.push(date_start); }
-    if (date_end   !== undefined) { fields.push('date_end = ?');   values.push(date_end); }
-    if (closed_at  !== undefined) { fields.push('closed_at = ?');  values.push(closed_at); }
+    let i = 1;
+    if (name       !== undefined) { fields.push(`name = $${i++}`);       values.push(name); }
+    if (type       !== undefined) { fields.push(`type = $${i++}`);       values.push(type); }
+    if (date_start !== undefined) { fields.push(`date_start = $${i++}`); values.push(date_start); }
+    if (date_end   !== undefined) { fields.push(`date_end = $${i++}`);   values.push(date_end); }
+    if (closed_at  !== undefined) { fields.push(`closed_at = $${i++}`);  values.push(closed_at); }
     if (!fields.length) return res.status(400).json({ error: 'Nada que actualizar' });
 
     values.push(req.params.id);
-    db.prepare(`UPDATE groups SET ${fields.join(', ')} WHERE id = ?`).run(...values);
-    res.json(db.prepare('SELECT * FROM groups WHERE id = ?').get(req.params.id));
+    const result = await db.query(`UPDATE groups SET ${fields.join(', ')} WHERE id = $${i} RETURNING *`, values);
+    res.json(result.rows[0]);
   } catch (err) { next(err); }
 });
 
 // ── DELETE /groups/:id ────────────────────────────────────────────
-router.delete('/:id', requireAuth, (req, res, next) => {
+router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
-    const group = ownsGroup(req.params.id, req.user.id);
-    if (!group) return res.status(404).json({ error: 'Grupo no encontrado' });
-    db.prepare('DELETE FROM groups WHERE id = ?').run(req.params.id);
+    if (!await ownsGroup(req.params.id, req.user.id)) {
+      return res.status(404).json({ error: 'Grupo no encontrado' });
+    }
+    await db.query('DELETE FROM groups WHERE id = $1', [req.params.id]);
     res.status(204).end();
   } catch (err) { next(err); }
 });
 
 // ── GET /groups/:id/members ───────────────────────────────────────
-router.get('/:id/members', requireAuth, (req, res, next) => {
+router.get('/:id/members', requireAuth, async (req, res, next) => {
   try {
-    if (!ownsGroup(req.params.id, req.user.id)) {
+    if (!await ownsGroup(req.params.id, req.user.id)) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
-    const members = db.prepare('SELECT * FROM group_members WHERE group_id = ? ORDER BY joined_at').all(req.params.id);
-    res.json(members);
+    const result = await db.query('SELECT * FROM group_members WHERE group_id = $1 ORDER BY joined_at', [req.params.id]);
+    res.json(result.rows);
   } catch (err) { next(err); }
 });
 
 // ── POST /groups/:id/members ──────────────────────────────────────
-router.post('/:id/members', requireAuth, (req, res, next) => {
+router.post('/:id/members', requireAuth, async (req, res, next) => {
   try {
-    if (!ownsGroup(req.params.id, req.user.id)) {
+    if (!await ownsGroup(req.params.id, req.user.id)) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
     const { display_name, user_id = null } = req.body;
     if (!display_name) return res.status(400).json({ error: 'display_name es obligatorio' });
 
-    const existing = db.prepare(
-      'SELECT id FROM group_members WHERE group_id = ? AND display_name = ?'
-    ).get(req.params.id, display_name);
-    if (existing) return res.status(409).json({ error: `El participante "${display_name}" ya existe` });
+    const existing = await db.query(
+      'SELECT id FROM group_members WHERE group_id = $1 AND display_name = $2',
+      [req.params.id, display_name]
+    );
+    if (existing.rows.length > 0) {
+      return res.status(409).json({ error: `El participante "${display_name}" ya existe` });
+    }
 
-    const result = db.prepare(`
+    const result = await db.query(`
       INSERT INTO group_members (group_id, user_id, display_name)
-      VALUES (?, ?, ?)
-    `).run(req.params.id, user_id, display_name);
+      VALUES ($1, $2, $3) RETURNING *
+    `, [req.params.id, user_id, display_name]);
 
     logActivity(req.user.id, 'member', `${display_name} añadido al grupo`);
-    res.status(201).json(db.prepare('SELECT * FROM group_members WHERE id = ?').get(result.lastInsertRowid));
+    res.status(201).json(result.rows[0]);
   } catch (err) { next(err); }
 });
 
 // ── DELETE /groups/:id/members/:name ─────────────────────────────
-router.delete('/:id/members/:name', requireAuth, (req, res, next) => {
+router.delete('/:id/members/:name', requireAuth, async (req, res, next) => {
   try {
-    if (!ownsGroup(req.params.id, req.user.id)) {
+    if (!await ownsGroup(req.params.id, req.user.id)) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
-    const member = db.prepare(
-      'SELECT * FROM group_members WHERE group_id = ? AND display_name = ?'
-    ).get(req.params.id, req.params.name);
-
+    const mRes = await db.query(
+      'SELECT * FROM group_members WHERE group_id = $1 AND display_name = $2',
+      [req.params.id, req.params.name]
+    );
+    const member = mRes.rows[0];
     if (!member) return res.status(404).json({ error: 'Participante no encontrado' });
     if (Math.abs(member.balance) > 0.005) {
       return res.status(422).json({ error: 'No se puede eliminar un participante con balance distinto de 0' });
     }
-
-    db.prepare('DELETE FROM group_members WHERE id = ?').run(member.id);
+    await db.query('DELETE FROM group_members WHERE id = $1', [member.id]);
     res.status(204).end();
   } catch (err) { next(err); }
 });
 
 // ── GET /groups/:id/balances ──────────────────────────────────────
-router.get('/:id/balances', requireAuth, (req, res, next) => {
+router.get('/:id/balances', requireAuth, async (req, res, next) => {
   try {
-    if (!ownsGroup(req.params.id, req.user.id)) {
+    if (!await ownsGroup(req.params.id, req.user.id)) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
-    const members = db.prepare(
-      'SELECT display_name, balance FROM group_members WHERE group_id = ? ORDER BY balance DESC'
-    ).all(req.params.id);
-    res.json(members);
+    const result = await db.query(
+      'SELECT display_name, balance FROM group_members WHERE group_id = $1 ORDER BY balance DESC',
+      [req.params.id]
+    );
+    res.json(result.rows);
   } catch (err) { next(err); }
 });
 
 // ── GET /groups/:id/debts ─────────────────────────────────────────
-router.get('/:id/debts', requireAuth, (req, res, next) => {
+router.get('/:id/debts', requireAuth, async (req, res, next) => {
   try {
-    if (!ownsGroup(req.params.id, req.user.id)) {
+    if (!await ownsGroup(req.params.id, req.user.id)) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
-    const members = db.prepare('SELECT * FROM group_members WHERE group_id = ?').all(req.params.id);
-    res.json({ transactions: computeDebts(members) });
+    const result = await db.query('SELECT * FROM group_members WHERE group_id = $1', [req.params.id]);
+    res.json({ transactions: computeDebts(result.rows) });
   } catch (err) { next(err); }
 });
 
 // ── POST /groups/:id/share-link ───────────────────────────────────
-router.post('/:id/share-link', requireAuth, (req, res, next) => {
+router.post('/:id/share-link', requireAuth, async (req, res, next) => {
   try {
-    if (!ownsGroup(req.params.id, req.user.id)) {
+    if (!await ownsGroup(req.params.id, req.user.id)) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
-    // Reutilizar token existente si ya tiene uno
-    const existing = db.prepare('SELECT token FROM share_tokens WHERE group_id = ?').get(req.params.id);
-    if (existing) return res.json({ token: existing.token, url: `/shared/${existing.token}` });
-
+    const existing = await db.query('SELECT token FROM share_tokens WHERE group_id = $1', [req.params.id]);
+    if (existing.rows.length > 0) {
+      return res.json({ token: existing.rows[0].token, url: `/shared/${existing.rows[0].token}` });
+    }
     const token = uuidv4().replace(/-/g, '');
-    db.prepare('INSERT INTO share_tokens (group_id, token) VALUES (?, ?)').run(req.params.id, token);
+    await db.query('INSERT INTO share_tokens (group_id, token) VALUES ($1, $2)', [req.params.id, token]);
     res.status(201).json({ token, url: `/shared/${token}` });
   } catch (err) { next(err); }
 });
 
-// ── GET /shared/:token (público, sin auth) ────────────────────────
-router.get('/shared/:token', (req, res, next) => {
+// ── GET /shared/:token ────────────────────────────────────────────
+router.get('/shared/:token', async (req, res, next) => {
   try {
-    const row = db.prepare('SELECT group_id FROM share_tokens WHERE token = ?').get(req.params.token);
-    if (!row) return res.status(404).json({ error: 'Enlace no válido o expirado' });
+    const row = await db.query('SELECT group_id FROM share_tokens WHERE token = $1', [req.params.token]);
+    if (!row.rows[0]) return res.status(404).json({ error: 'Enlace no válido o expirado' });
 
-    const group   = db.prepare('SELECT id, name, type, date_start, date_end FROM groups WHERE id = ?').get(row.group_id);
-    const members = db.prepare('SELECT display_name, balance FROM group_members WHERE group_id = ?').all(row.group_id);
-    const expenses = db.prepare('SELECT description, amount, currency, category, payer_name, expense_date FROM expenses WHERE group_id = ? ORDER BY expense_date DESC').all(row.group_id);
+    const groupId = row.rows[0].group_id;
+    const gRes    = await db.query('SELECT id, name, type, date_start, date_end FROM groups WHERE id = $1', [groupId]);
+    const mRes    = await db.query('SELECT display_name, balance FROM group_members WHERE group_id = $1', [groupId]);
+    const eRes    = await db.query('SELECT description, amount, currency, category, payer_name, expense_date FROM expenses WHERE group_id = $1 ORDER BY expense_date DESC', [groupId]);
 
-    res.json({ group, members, expenses, debts: computeDebts(members) });
+    res.json({ group: gRes.rows[0], members: mRes.rows, expenses: eRes.rows, debts: computeDebts(mRes.rows) });
   } catch (err) { next(err); }
 });
 

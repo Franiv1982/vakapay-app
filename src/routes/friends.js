@@ -1,13 +1,4 @@
-// src/routes/friends.js
-// ================================================================
-// GET    /friends              — Lista amigos
-// POST   /friends              — Añade amigo
-// GET    /friends/:id          — Detalle
-// PATCH  /friends/:id          — Actualiza
-// DELETE /friends/:id          — Elimina
-// PUT    /friends/:id/avatar   — Sube foto
-// ================================================================
-
+// src/routes/friends.js — PostgreSQL
 const express = require('express');
 const multer  = require('multer');
 const path    = require('path');
@@ -31,84 +22,78 @@ const storage = multer.diskStorage({
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 // ── GET /friends ──────────────────────────────────────────────────
-router.get('/', requireAuth, (req, res, next) => {
+router.get('/', requireAuth, async (req, res, next) => {
   try {
-    const friends = db.prepare(`
-      SELECT * FROM friends WHERE owner_id = ? ORDER BY name ASC
-    `).all(req.user.id);
-    res.json(friends);
+    const result = await db.query('SELECT * FROM friends WHERE owner_id = $1 ORDER BY name ASC', [req.user.id]);
+    res.json(result.rows);
   } catch (err) { next(err); }
 });
 
 // ── POST /friends ─────────────────────────────────────────────────
-router.post('/', requireAuth, (req, res, next) => {
+router.post('/', requireAuth, async (req, res, next) => {
   try {
     const { name, email = '', phone = '', notes = '' } = req.body;
     if (!name) return res.status(400).json({ error: 'name es obligatorio' });
 
-    const result = db.prepare(`
+    const result = await db.query(`
       INSERT INTO friends (owner_id, name, email, phone, notes)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(req.user.id, name, email, phone, notes);
+      VALUES ($1, $2, $3, $4, $5) RETURNING *
+    `, [req.user.id, name, email, phone, notes]);
 
-    const friend = db.prepare('SELECT * FROM friends WHERE id = ?').get(result.lastInsertRowid);
     logActivity(req.user.id, 'friend', `${name} añadido a tus contactos`);
-    res.status(201).json(friend);
+    res.status(201).json(result.rows[0]);
   } catch (err) { next(err); }
 });
 
 // ── GET /friends/:id ──────────────────────────────────────────────
-router.get('/:id', requireAuth, (req, res, next) => {
+router.get('/:id', requireAuth, async (req, res, next) => {
   try {
-    const friend = db.prepare('SELECT * FROM friends WHERE id = ? AND owner_id = ?')
-      .get(req.params.id, req.user.id);
-    if (!friend) return res.status(404).json({ error: 'Amigo no encontrado' });
-    res.json(friend);
+    const result = await db.query('SELECT * FROM friends WHERE id = $1 AND owner_id = $2', [req.params.id, req.user.id]);
+    if (!result.rows[0]) return res.status(404).json({ error: 'Amigo no encontrado' });
+    res.json(result.rows[0]);
   } catch (err) { next(err); }
 });
 
 // ── PATCH /friends/:id ────────────────────────────────────────────
-router.patch('/:id', requireAuth, (req, res, next) => {
+router.patch('/:id', requireAuth, async (req, res, next) => {
   try {
-    const friend = db.prepare('SELECT * FROM friends WHERE id = ? AND owner_id = ?')
-      .get(req.params.id, req.user.id);
-    if (!friend) return res.status(404).json({ error: 'Amigo no encontrado' });
+    const existing = await db.query('SELECT * FROM friends WHERE id = $1 AND owner_id = $2', [req.params.id, req.user.id]);
+    if (!existing.rows[0]) return res.status(404).json({ error: 'Amigo no encontrado' });
 
     const { name, email, phone, notes } = req.body;
     const fields = [], values = [];
-    if (name  !== undefined) { fields.push('name = ?');  values.push(name); }
-    if (email !== undefined) { fields.push('email = ?'); values.push(email); }
-    if (phone !== undefined) { fields.push('phone = ?'); values.push(phone); }
-    if (notes !== undefined) { fields.push('notes = ?'); values.push(notes); }
+    let i = 1;
+    if (name  !== undefined) { fields.push(`name = $${i++}`);  values.push(name); }
+    if (email !== undefined) { fields.push(`email = $${i++}`); values.push(email); }
+    if (phone !== undefined) { fields.push(`phone = $${i++}`); values.push(phone); }
+    if (notes !== undefined) { fields.push(`notes = $${i++}`); values.push(notes); }
     if (!fields.length) return res.status(400).json({ error: 'Nada que actualizar' });
 
     values.push(req.params.id);
-    db.prepare(`UPDATE friends SET ${fields.join(', ')} WHERE id = ?`).run(...values);
-    res.json(db.prepare('SELECT * FROM friends WHERE id = ?').get(req.params.id));
+    const result = await db.query(`UPDATE friends SET ${fields.join(', ')} WHERE id = $${i} RETURNING *`, values);
+    res.json(result.rows[0]);
   } catch (err) { next(err); }
 });
 
 // ── DELETE /friends/:id ───────────────────────────────────────────
-router.delete('/:id', requireAuth, (req, res, next) => {
+router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
-    const friend = db.prepare('SELECT id FROM friends WHERE id = ? AND owner_id = ?')
-      .get(req.params.id, req.user.id);
-    if (!friend) return res.status(404).json({ error: 'Amigo no encontrado' });
-    db.prepare('DELETE FROM friends WHERE id = ?').run(req.params.id);
+    const existing = await db.query('SELECT id FROM friends WHERE id = $1 AND owner_id = $2', [req.params.id, req.user.id]);
+    if (!existing.rows[0]) return res.status(404).json({ error: 'Amigo no encontrado' });
+    await db.query('DELETE FROM friends WHERE id = $1', [req.params.id]);
     res.status(204).end();
   } catch (err) { next(err); }
 });
 
 // ── PUT /friends/:id/avatar ───────────────────────────────────────
-router.put('/:id/avatar', requireAuth, upload.single('avatar'), (req, res, next) => {
+router.put('/:id/avatar', requireAuth, upload.single('avatar'), async (req, res, next) => {
   try {
-    const friend = db.prepare('SELECT id FROM friends WHERE id = ? AND owner_id = ?')
-      .get(req.params.id, req.user.id);
-    if (!friend) return res.status(404).json({ error: 'Amigo no encontrado' });
+    const existing = await db.query('SELECT id FROM friends WHERE id = $1 AND owner_id = $2', [req.params.id, req.user.id]);
+    if (!existing.rows[0]) return res.status(404).json({ error: 'Amigo no encontrado' });
     if (!req.file) return res.status(400).json({ error: 'No se recibió ningún archivo' });
 
     const avatarUrl = `/uploads/avatars/${req.file.filename}`;
-    db.prepare('UPDATE friends SET avatar_url = ? WHERE id = ?').run(avatarUrl, req.params.id);
+    await db.query('UPDATE friends SET avatar_url = $1 WHERE id = $2', [avatarUrl, req.params.id]);
     res.json({ avatar_url: avatarUrl });
   } catch (err) { next(err); }
 });

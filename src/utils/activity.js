@@ -1,26 +1,15 @@
-// src/utils/activity.js
-// Utilidad para registrar actividad desde cualquier route
+// src/utils/activity.js — PostgreSQL
 const db = require('../db/database');
 
-function logActivity(userId, type, message) {
+async function logActivity(userId, type, message) {
   try {
-    db.prepare(`
-      INSERT INTO activity_log (user_id, type, message)
-      VALUES (?, ?, ?)
-    `).run(userId, type, message);
-
-    // Mantener máximo 40 entradas por usuario
-    db.prepare(`
-      DELETE FROM activity_log
-      WHERE user_id = ?
-        AND id NOT IN (
-          SELECT id FROM activity_log
-          WHERE user_id = ?
-          ORDER BY created_at DESC
-          LIMIT 40
-        )
-    `).run(userId, userId);
-  } catch (_) { /* no bloquear si falla el log */ }
+    await db.query(
+      'INSERT INTO activity_log (user_id, type, message) VALUES ($1, $2, $3)',
+      [userId, type, message]
+    );
+  } catch (err) {
+    console.error('Error logging activity:', err.message);
+  }
 }
 
 module.exports = { logActivity };

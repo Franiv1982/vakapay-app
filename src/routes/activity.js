@@ -1,31 +1,26 @@
-// src/routes/activity.js
-// ================================================================
-// GET    /activity   — Historial (últimas 40 entradas)
-// DELETE /activity   — Limpia historial
-// ================================================================
-
+// src/routes/activity.js — PostgreSQL
 const express = require('express');
 const db      = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.get('/', requireAuth, (req, res, next) => {
+router.get('/', requireAuth, async (req, res, next) => {
   try {
-    const entries = db.prepare(`
+    const result = await db.query(`
       SELECT id, type, message, created_at
       FROM activity_log
-      WHERE user_id = ?
+      WHERE user_id = $1
       ORDER BY created_at DESC
       LIMIT 40
-    `).all(req.user.id);
-    res.json(entries);
+    `, [req.user.id]);
+    res.json(result.rows);
   } catch (err) { next(err); }
 });
 
-router.delete('/', requireAuth, (req, res, next) => {
+router.delete('/', requireAuth, async (req, res, next) => {
   try {
-    db.prepare('DELETE FROM activity_log WHERE user_id = ?').run(req.user.id);
+    await db.query('DELETE FROM activity_log WHERE user_id = $1', [req.user.id]);
     res.status(204).end();
   } catch (err) { next(err); }
 });
