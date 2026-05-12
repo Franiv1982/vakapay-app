@@ -1221,6 +1221,23 @@ class VakaDataService {
       throw err;
     }
   }
+async deleteAccount() {
+    try {
+      const gs = await this.#req('GET', '/groups');
+      if (Array.isArray(gs)) {
+        for (const g of gs) await this.#req('DELETE', `/groups/${g.id}`);
+      }
+    } catch(_) {}
+    try {
+      await this.#req('DELETE', '/users/me');
+    } catch(err) {
+      console.error('❌ Error al eliminar usuario:', err);
+      throw err;
+    }
+    this.setToken(null);
+    Object.values(this.#KEYS).forEach(k => localStorage.removeItem(k));
+    localStorage.clear();
+  }
 }
 
 const vakaData = new VakaDataService();
