@@ -135,6 +135,7 @@ async deleteAccount() {
   await this.deleteAllData();
   try { await this.#fetch('DELETE', '/users/me'); } catch(_) {}
   this.setToken(null);
+  localStorage.clear();
 }
 
   // ================================================================
