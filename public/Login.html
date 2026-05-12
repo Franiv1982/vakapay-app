@@ -334,6 +334,13 @@
                 <input type="text" id="reg-pass" placeholder="Contraseña" class="auth-input auth-pass" oninput="checkRegistroFields()" autocomplete="off">
                 <span class="toggle-password" onclick="togglePass('reg-pass', this)">👁️</span>
                 <span id="err-pass" class="error-message"></span>
+                <div id="pass-rules" style="margin-top:8px;text-align:left;display:none;">
+                    <div id="rule-len"  style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Mínimo 8 caracteres</div>
+                    <div id="rule-upper" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Una mayúscula</div>
+                    <div id="rule-lower" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Una minúscula</div>
+                    <div id="rule-num"  style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Un número</div>
+                    <div id="rule-sym"  style="font-size:.72rem;color:#ff4d4d;">✗ Un símbolo (!@#$...)</div>
+                </div>
             </div>
             <div class="input-group">
                 <input type="text" id="reg-pass-confirm" placeholder="Repite tu contraseña" class="auth-input auth-pass" oninput="checkRegistroFields()" autocomplete="off">
@@ -535,13 +542,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const regPass = document.getElementById('reg-pass');
     if(regPass) {
         regPass.addEventListener('input', function() {
+            const v = this.value.replace(/\s/g, '');
+            this.value = v;
+            const rules = document.getElementById('pass-rules');
+            if(v.length > 0) rules.style.display = 'block';
+
+            const check = (id, ok) => {
+                const el = document.getElementById(id);
+                el.style.color = ok ? '#28a745' : '#ff4d4d';
+                el.textContent = (ok ? '✓ ' : '✗ ') + el.textContent.slice(2);
+            };
+            check('rule-len',   v.length >= 8);
+            check('rule-upper', /[A-Z]/.test(v));
+            check('rule-lower', /[a-z]/.test(v));
+            check('rule-num',   /\d/.test(v));
+            check('rule-sym',   /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(v));
+
             const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
-            if (passRegex.test(this.value)) {
+            if (passRegex.test(v)) {
                 this.classList.remove('input-error');
                 const err = document.getElementById('err-pass');
                 if(err) { err.innerText = ''; err.style.display = 'none'; }
+                rules.style.display = 'none';
             }
-            this.value = this.value.replace(/\s/g, ''); 
         });
     }
 
