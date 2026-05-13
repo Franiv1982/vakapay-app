@@ -1016,7 +1016,9 @@ class VakaDataService {
       type:      g.type        || 'viaje',
       start:     g.date_start  || g.start || '',
       end:       g.date_end    || g.end   || '',
-      members:   g.members     || {},
+      members: Array.isArray(g.members)
+        ? Object.fromEntries(g.members.map(m => [m.display_name, m.balance || 0]))
+        : g.members || {},
       expenses:  g.expenses    || [],
       createdAt: g.created_at  || g.createdAt || new Date().toISOString(),
     };
