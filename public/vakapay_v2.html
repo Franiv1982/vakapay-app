@@ -2599,14 +2599,19 @@ async function generateLink(){
   if(currentGroupIdx===null){toast('Abre un grupo primero','e');return;}
   const g=groups[currentGroupIdx];
   try {
-    const res = await vakaData.getShareLink(g.id);
-    const base = window.location.origin;
-    const url = `${base}/Login.html?invite=${res.token}`;
+    const res = await fetch(`${window.location.origin}/api/v1/groups/${g.id}/share-link`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    const data = await res.json();
+    if (!data.token) throw new Error('Sin token');
+    const url = `${window.location.origin}/Login.html?invite=${data.token}`;
     const inp = document.getElementById('linkInput');
     inp.value = url;
     document.getElementById('linkBox').style.display='flex';
     toast('¡Link de invitación generado! 🔗','s');
   } catch(err) {
+    console.error('Error generando link:', err);
     toast('Error al generar el link','e');
   }
 }
