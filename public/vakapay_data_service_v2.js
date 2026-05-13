@@ -119,24 +119,24 @@ class VakaDataService {
   }
 
   async deleteAllData() {
-  try {
-    const g = await this.#fetch('GET', '/groups');
-    for (const gr of g) await this.#fetch('DELETE', `/groups/${gr.id}`);
-  } catch(_) {}
-  try {
-    const f = await this.#fetch('GET', '/friends');
-    for (const fr of f) await this.#fetch('DELETE', `/friends/${fr.id}`);
-  } catch(_) {}
-  try { await this.#fetch('DELETE', '/activity'); } catch(_) {}
-  Object.values(this.#KEYS).forEach(k => localStorage.removeItem(k));
-}
+    try {
+      const g = await this.#fetch('GET', '/groups');
+      for (const gr of g) await this.#fetch('DELETE', `/groups/${gr.id}`);
+    } catch(_) {}
+    try {
+      const f = await this.#fetch('GET', '/friends');
+      for (const fr of f) await this.#fetch('DELETE', `/friends/${fr.id}`);
+    } catch(_) {}
+    try { await this.#fetch('DELETE', '/activity'); } catch(_) {}
+    Object.values(this.#KEYS).forEach(k => localStorage.removeItem(k));
+  }
 
-async deleteAccount() {
-  await this.deleteAllData();
-  try { await this.#fetch('DELETE', '/users/me'); } catch(_) {}
-  this.setToken(null);
-  localStorage.clear();
-}
+  async deleteAccount() {
+    await this.deleteAllData();
+    try { await this.#fetch('DELETE', '/users/me'); } catch(_) {}
+    this.setToken(null);
+    localStorage.clear();
+  }
 
   // ================================================================
   //  PERFIL

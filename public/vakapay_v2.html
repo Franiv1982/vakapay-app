@@ -1225,7 +1225,7 @@ class VakaDataService {
       throw err;
     }
   }
-async deleteAccount() {
+async deleteAllData() {
     try {
       const gs = await this.#req('GET', '/groups');
       if (Array.isArray(gs)) {
@@ -1233,13 +1233,25 @@ async deleteAccount() {
       }
     } catch(_) {}
     try {
+      const fs = await this.#req('GET', '/friends');
+      if (Array.isArray(fs)) {
+        for (const f of fs) await this.#req('DELETE', `/friends/${f.id}`);
+      }
+    } catch(_) {}
+    try { await this.#req('DELETE', '/activity'); } catch(_) {}
+    Object.values(this.#KEYS).forEach(k => localStorage.removeItem(k));
+    localStorage.clear();
+  }
+
+async deleteAccount() {
+    await this.deleteAllData();
+    try {
       await this.#req('DELETE', '/users/me');
     } catch(err) {
       console.error('❌ Error al eliminar usuario:', err);
       throw err;
     }
     this.setToken(null);
-    Object.values(this.#KEYS).forEach(k => localStorage.removeItem(k));
     localStorage.clear();
   }
 }
@@ -1896,7 +1908,7 @@ async function addMember() {
   logActivity(`${n} añadido al grupo "${g.name}"`); saveActivity(); renderActivity();
 }
 
-function removeMember(n) {
+async function removeMember(n) {
   const g = groups[currentGroupIdx];
   const hasExpenses = g.expenses.some(e => e.payer === n || e.involved.includes(n));
 
@@ -1909,6 +1921,13 @@ function removeMember(n) {
     document.body.style.overflow = 'hidden';
     window._miembroABorrar = n;
   } else {
+    const groupId = g.id;
+    try {
+      await fetch(`${window.location.origin}/api/v1/groups/${groupId}/members/${encodeURIComponent(n)}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+      });
+    } catch(err) { console.error('Error eliminando miembro:', err); }
     delete g.members[n];
     save();
     renderAll();
@@ -1922,10 +1941,16 @@ function cerrarModalBorrarMiembro() {
   window._miembroABorrar = null;
 }
 
-function ejecutarBorradoMiembro() {
+async function ejecutarBorradoMiembro() {
   const n = window._miembroABorrar;
   if (!n) return;
   const g = groups[currentGroupIdx];
+  try {
+    await fetch(`${window.location.origin}/api/v1/groups/${g.id}/members/${encodeURIComponent(n)}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+  } catch(err) { console.error('Error eliminando miembro:', err); }
   g.expenses = g.expenses.filter(e => {
     if (e.payer === n && e.involved.length === 1) return false;
     if (e.involved.includes(n)) e.involved = e.involved.filter(p => p !== n);
