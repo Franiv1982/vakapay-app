@@ -1327,19 +1327,22 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
   // Procesar invitación pendiente
     const pendingInvite = localStorage.getItem('vp_pending_invite');
     if (pendingInvite) {
-      localStorage.removeItem('vp_pending_invite');
       try {
         const token = vakaData.getToken();
+        const displayName = profile.nombre || document.getElementById('profileDisplayName')?.textContent || '';
         const res = await fetch(`${window.location.origin}/api/v1/invite/${pendingInvite}/join`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ display_name: profile.nombre || '' })
+          body: JSON.stringify({ display_name: displayName })
         });
         const data = await res.json();
         if (data.joined || data.already_member) {
+          localStorage.removeItem('vp_pending_invite');
           groups = await vakaData.getGroups() || [];
           renderGroupsList();
           toast(`Te has unido al grupo "${data.group.name}" ✓`, 's');
+        } else {
+          console.error('No se pudo unir al grupo:', data);
         }
       } catch(err) {
         console.error('Error al unirse al grupo:', err);
