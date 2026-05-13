@@ -644,7 +644,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
         <input type="text" id="friendLastName" maxlength="20" placeholder="Apellido" oninput="this.value=this.value.slice(0,20)">
       </div>
     </div>
-    <div class="field"><label>Email / Teléfono (opcional)</label><input type="text" id="friendContact" placeholder="email o +34 600..."></div>
+    <div class="field"><label>Email (opcional)</label><input type="email" id="friendEmail" placeholder="amigo@email.com"></div>
+    <div class="field"><label>Teléfono (opcional)</label><input type="tel" id="friendPhone" placeholder="+34 600 000 000"></div>
     <div class="field">
       <label>Vincular a un grupo (opcional)</label>
       <select id="friendGroupLink">
@@ -2844,31 +2845,31 @@ function populateFriendGroupSelect(){
 async function addFriend(){
   const n=document.getElementById('friendName').value.trim();
   const last=document.getElementById('friendLastName').value.trim();
-  const c=document.getElementById('friendContact').value.trim();
-  const gid=document.getElementById('friendGroupLink').value;
+  const email=document.getElementById('friendEmail')?.value.trim()||'';
+  const phone=document.getElementById('friendPhone')?.value.trim()||'';
   if(!n){toast('Escribe un nombre','e');return;}
   if(n.length>20){toast('El nombre no puede superar 20 caracteres','e');return;}
   if(last.length>20){toast('El apellido no puede superar 20 caracteres','e');return;}
   const fullName=last?n+' '+last:n;
   if(friends.some(f=>f.name===fullName)){toast('Ya existe ese amigo','e');return;}
-  friends.push({name:fullName,contact:c,addedAt:new Date().toISOString()});
-  await saveFriends();
-  renderFriends();renderFriendPicker();updateStats();
-  document.getElementById('friendName').value='';
-  document.getElementById('friendLastName').value='';
-  document.getElementById('friendContact').value='';
-  document.getElementById('friendGroupLink').value='';
-  // Link to group if selected
-  if(gid){
-    const gIdx=groups.findIndex(g=>String(g.id)===String(gid));
-    if(gIdx>=0&&!groups[gIdx].members.hasOwnProperty(fullName)){
-      groups[gIdx].members[fullName]=0;save();
-      toast(`${fullName} añadido como amigo y al grupo "${groups[gIdx].name}" ✓`,'s');
-      logActivity(`${fullName} vinculado al grupo "${groups[gIdx].name}"`);
-    }else{toast(`${fullName} añadido como amigo ✓`,'s');}
-  }else{toast(`${fullName} añadido como amigo ✓`,'s');}
-  saveActivity();renderActivity();
+  try {
+    const friend = await vakaData.addFriend({name:fullName, email, phone, notes:''});
+    friends.push({...friend, name:fullName, email, phone, contact:email||phone, addedAt:new Date().toISOString()});
+    await saveFriends();
+    renderFriends();renderFriendPicker();updateStats();
+    document.getElementById('friendName').value='';
+    document.getElementById('friendLastName').value='';
+    if(document.getElementById('friendEmail')) document.getElementById('friendEmail').value='';
+    if(document.getElementById('friendPhone')) document.getElementById('friendPhone').value='';
+    document.getElementById('friendGroupLink').value='';
+    toast(`${fullName} añadido como amigo ✓`,'s');
+    saveActivity();renderActivity();
+  } catch(err) {
+    toast('Error al añadir amigo','e');
+    console.error(err);
+  }
 }
+
 function removeFriend(idx){
   const name=friends[idx].name;
   groups.forEach(g=>{if(g.members.hasOwnProperty(name)&&!g.expenses.some(e=>e.payer===name||e.involved.includes(name))){delete g.members[name];}});
