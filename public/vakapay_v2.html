@@ -1365,7 +1365,9 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
         if (data.joined || data.already_member) {
           localStorage.removeItem('vp_pending_invite');
           groups = await vakaData.getGroups() || [];
+          friends = await vakaData.getFriends() || [];
           renderGroupsList();
+          renderFriends();
           const msg = data.already_member ? `Ya eres miembro de "${data.group.name}"` : `Te has unido al grupo "${data.group.name}" ✓`;
           toast(msg, 's');
         } else {
