@@ -1342,6 +1342,7 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
           body: JSON.stringify({ display_name: displayName })
         });
         const data = await res.json();
+        console.log('📨 Respuesta invitación:', data);
         if (data.joined || data.already_member) {
           localStorage.removeItem('vp_pending_invite');
           groups = await vakaData.getGroups() || [];
@@ -3147,9 +3148,24 @@ function loadProfile(){
   if(profile.email)document.getElementById('profEmail').value=profile.email;
   if(profile.tel)document.getElementById('profTel').value=profile.tel;
   if(profile.bio)document.getElementById('profBio').value=profile.bio;
+  const wrap=document.getElementById('avatarDisplay');
   if(profile.avatar){
-    const wrap=document.getElementById('avatarDisplay');
-    wrap.outerHTML=`<img id="avatarDisplay" class="avatar-img" src="${profile.avatar}" alt="Avatar">`;
+    const img = document.createElement('img');
+    img.id = 'avatarDisplay';
+    img.className = 'avatar-img';
+    img.src = profile.avatar;
+    img.alt = 'Avatar';
+    img.onerror = function() {
+      profile.avatar = null;
+      this.outerHTML = `<div id="avatarDisplay" class="avatar-placeholder">${profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤'}</div>`;
+    };
+    if(wrap) wrap.outerHTML = img.outerHTML;
+  } else {
+    if(wrap && wrap.tagName === 'IMG') {
+      wrap.outerHTML = `<div id="avatarDisplay" class="avatar-placeholder">${profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤'}</div>`;
+    } else if(wrap) {
+      wrap.textContent = profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤';
+    }
   }
   updateProfilePreview();
   updateReadMode();
