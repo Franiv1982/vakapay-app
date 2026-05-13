@@ -1353,7 +1353,8 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
           localStorage.removeItem('vp_pending_invite');
           groups = await vakaData.getGroups() || [];
           renderGroupsList();
-          toast(`Te has unido al grupo "${data.group.name}" ✓`, 's');
+          const msg = data.already_member ? `Ya eres miembro de "${data.group.name}"` : `Te has unido al grupo "${data.group.name}" ✓`;
+          toast(msg, 's');
         } else {
           console.error('No se pudo unir al grupo:', data);
         }
@@ -2559,17 +2560,14 @@ function updateBalances() {
 
   if (g.expenses) {
     g.expenses.forEach(e => {
-      // QA: Usamos baseAmt (Euros) para el balance, no el monto nominal (ARS/USD)
-      const amt = Number(e.baseAmt || e.amount) || 0;
-      const share = amt / (e.involved.length || 1);
-      
+      const amt = Number(e.baseAmt || e.amount_base || e.amount) || 0;
+      const involved = e.involved || (e.splits ? e.splits.map(s => s.member_name) : []);
+      const share = amt / (involved.length || 1);
       const pagador = e.payer || e.payer_name;
-
       if (g.members.hasOwnProperty(pagador)) {
         g.members[pagador] = +(g.members[pagador] + amt).toFixed(2);
       }
-
-      e.involved.forEach(n => {
+      involved.forEach(n => {
         if (g.members.hasOwnProperty(n)) {
           g.members[n] = +(g.members[n] - share).toFixed(2);
         }
