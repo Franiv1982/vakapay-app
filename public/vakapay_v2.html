@@ -1332,6 +1332,8 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
     const urlInvite = urlParams.get('invite');
     if (urlInvite) localStorage.setItem('vp_pending_invite', urlInvite);
     const pendingInvite = localStorage.getItem('vp_pending_invite');
+    console.log('🔑 Invite pendiente:', pendingInvite);
+    console.log('🔑 Token usuario:', vakaData.getToken() ? 'existe' : 'no existe');
     if (pendingInvite) {
       try {
         const token = vakaData.getToken();
