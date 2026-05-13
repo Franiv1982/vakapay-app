@@ -68,6 +68,12 @@ router.post('/', requireAuth, async (req, res, next) => {
       VALUES ($1, $2, $3, $4, $5) RETURNING *
     `, [req.user.id, name, type, date_start, date_end]);
 
+    const groupId = result.rows[0].id;
+    const ownerName = req.user.nombre || req.user.email.split('@')[0];
+    await db.query(`
+      INSERT INTO group_members (group_id, user_id, display_name)
+      VALUES ($1, $2, $3)
+    `, [groupId, req.user.id, ownerName]);
     logActivity(req.user.id, 'group', `Grupo "${name}" creado`);
     res.status(201).json(result.rows[0]);
   } catch (err) { next(err); }
