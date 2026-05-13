@@ -37,7 +37,7 @@ async function ownsGroup(groupId, userId) {
 router.get('/', requireAuth, async (req, res, next) => {
   try {
     const result = await db.query(`
-      SELECT g.*,
+      SELECT DISTINCT g.*,
         COUNT(DISTINCT gm.id) AS member_count,
         COUNT(DISTINCT e.id)  AS expense_count,
         COALESCE(SUM(e.amount_base), 0) AS total
@@ -45,6 +45,7 @@ router.get('/', requireAuth, async (req, res, next) => {
       LEFT JOIN group_members gm ON gm.group_id = g.id
       LEFT JOIN expenses e       ON e.group_id  = g.id
       WHERE g.owner_id = $1
+         OR gm.user_id = $1
       GROUP BY g.id
       ORDER BY g.created_at DESC
     `, [req.user.id]);
@@ -75,7 +76,12 @@ router.post('/', requireAuth, async (req, res, next) => {
 // ── GET /groups/:id ───────────────────────────────────────────────
 router.get('/:id', requireAuth, async (req, res, next) => {
   try {
-    const gRes = await db.query('SELECT * FROM groups WHERE id = $1 AND owner_id = $2', [req.params.id, req.user.id]);
+    const gRes = await db.query(`
+      SELECT g.* FROM groups g
+      LEFT JOIN group_members gm ON gm.group_id = g.id
+      WHERE g.id = $1 AND (g.owner_id = $2 OR gm.user_id = $2)
+      LIMIT 1
+    `, [req.params.id, req.user.id]);
     const group = gRes.rows[0];
     if (!group) return res.status(404).json({ error: 'Grupo no encontrado' });
 
