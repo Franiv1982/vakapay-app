@@ -956,7 +956,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
   <button class="nav-btn" data-page="page-cuenta" onclick="switchPage('page-cuenta',this)">
     <!-- Contenedor circular para la foto o inicial -->
     <div id="user-nav-wrapper" style="width: 28px; height: 28px; border-radius: 50%; overflow: hidden; border: 1.5px solid currentColor; margin: 0 auto 4px auto; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1);">
-        <img id="user-nav-photo" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+        <img id="user-nav-photo" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;" onerror="this.style.display='none';document.getElementById('user-nav-initials').style.display='block';">
         <span id="user-nav-initials" style="font-size: 0.8rem; font-weight: bold; line-height: 1;">
             👤
         </span>
