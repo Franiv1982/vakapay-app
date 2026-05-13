@@ -3143,37 +3143,52 @@ function formatRelTime(d){
 
 // ═══ PROFILE ═════════════════════════════════════════════════════════
 function loadProfile(){
-  if(!profile)return;
-  if(profile.nombre)document.getElementById('profNombre').value=profile.nombre;
-  if(profile.email)document.getElementById('profEmail').value=profile.email;
-  if(profile.tel)document.getElementById('profTel').value=profile.tel;
-  if(profile.bio)document.getElementById('profBio').value=profile.bio;
+  if(!profile) return;
+  const set = (id, val) => { const el = document.getElementById(id); if(el && val) el.value = val; };
+  set('profNombre', profile.nombre);
+  set('profEmail',  profile.email);
+  set('profTel',    profile.tel);
+  set('profBio',    profile.bio);
+
+  // Avatar
   const wrap = document.getElementById('avatarDisplay');
   if (wrap) {
     const inicial = profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤';
     if (profile.avatar) {
       const img = document.createElement('img');
-      img.id = 'avatarDisplay';
-      img.className = 'avatar-img';
-      img.src = profile.avatar;
-      img.alt = 'Avatar';
+      img.id = 'avatarDisplay'; img.className = 'avatar-img';
+      img.src = profile.avatar; img.alt = 'Avatar';
       img.onerror = function() {
         profile.avatar = null;
         const ph = document.createElement('div');
-        ph.id = 'avatarDisplay';
-        ph.className = 'avatar-placeholder';
+        ph.id = 'avatarDisplay'; ph.className = 'avatar-placeholder';
         ph.textContent = inicial;
         if (this.parentNode) this.parentNode.replaceChild(ph, this);
       };
       if (wrap.parentNode) wrap.parentNode.replaceChild(img, wrap);
     } else {
       const ph = document.createElement('div');
-      ph.id = 'avatarDisplay';
-      ph.className = 'avatar-placeholder';
+      ph.id = 'avatarDisplay'; ph.className = 'avatar-placeholder';
       ph.textContent = inicial;
       if (wrap.parentNode) wrap.parentNode.replaceChild(ph, wrap);
     }
   }
+
+  // Nav inicial
+  const navImg = document.getElementById('user-nav-photo');
+  const navInitials = document.getElementById('user-nav-initials');
+  if (navImg && navInitials) {
+    if (profile.avatar) {
+      navImg.src = profile.avatar;
+      navImg.style.display = 'block';
+      navInitials.style.display = 'none';
+    } else {
+      navImg.style.display = 'none';
+      navInitials.style.display = 'block';
+      navInitials.textContent = profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤';
+    }
+  }
+
   updateProfilePreview();
   updateReadMode();
 }
