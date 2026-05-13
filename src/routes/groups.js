@@ -69,7 +69,8 @@ router.post('/', requireAuth, async (req, res, next) => {
     `, [req.user.id, name, type, date_start, date_end]);
 
     const groupId = result.rows[0].id;
-    const ownerName = req.user.nombre || req.user.email.split('@')[0];
+    const userRes = await db.query('SELECT nombre FROM users WHERE id = $1', [req.user.id]);
+    const ownerName = userRes.rows[0]?.nombre || req.user.email.split('@')[0];
     await db.query(`
       INSERT INTO group_members (group_id, user_id, display_name)
       VALUES ($1, $2, $3)

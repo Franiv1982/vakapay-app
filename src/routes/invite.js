@@ -15,7 +15,8 @@ router.post('/:token/join', requireAuth, async (req, res, next) => {
     const gRes = await db.query('SELECT * FROM groups WHERE id = $1', [groupId]);
     if (!gRes.rows[0]) return res.status(404).json({ error: 'Grupo no encontrado' });
 
-    const displayName = req.body.display_name || req.user.nombre || req.user.email.split('@')[0];
+    const userRes = await db.query('SELECT nombre FROM users WHERE id = $1', [req.user.id]);
+    const displayName = req.body.display_name || userRes.rows[0]?.nombre || req.user.email.split('@')[0];
 
     const existing = await db.query(
       'SELECT id FROM group_members WHERE group_id = $1 AND display_name = $2',
