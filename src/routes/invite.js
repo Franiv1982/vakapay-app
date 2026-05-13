@@ -38,17 +38,16 @@ router.post('/:token/join', requireAuth, async (req, res, next) => {
       'SELECT id FROM group_members WHERE group_id = $1 AND display_name = $2',
       [groupId, displayName]
     );
-    if (existing.rows.length > 0) {
-      return res.json({ already_member: true, group: gRes.rows[0] });
+
+    if (!existing.rows.length) {
+      // Añadir al grupo
+      await db.query(`
+        INSERT INTO group_members (group_id, user_id, display_name)
+        VALUES ($1, $2, $3)
+      `, [groupId, req.user.id, displayName]);
     }
 
-    // Añadir al grupo
-    await db.query(`
-      INSERT INTO group_members (group_id, user_id, display_name)
-      VALUES ($1, $2, $3)
-    `, [groupId, req.user.id, displayName]);
-
-    // Obtener todos los miembros existentes del grupo con sus datos de usuario
+    // Obtener todos los miembros del grupo con sus datos
     const membersRes = await db.query(`
       SELECT gm.display_name, gm.user_id, u.email, u.tel
       FROM group_members gm
@@ -56,13 +55,15 @@ router.post('/:token/join', requireAuth, async (req, res, next) => {
       WHERE gm.group_id = $1 AND gm.user_id != $2
     `, [groupId, req.user.id]);
 
-    // Añadir mutuamente como amigos
+    // Añadir mutuamente como amigos siempre
     for (const member of membersRes.rows) {
       if (!member.user_id) continue;
-      // El nuevo miembro añade a cada miembro existente
       await addFriendIfNotExists(req.user.id, member.display_name, member.email, member.tel);
-      // Cada miembro existente añade al nuevo
       await addFriendIfNotExists(member.user_id, displayName, newUser?.email, newUser?.tel);
+    }
+
+    if (existing.rows.length > 0) {
+      return res.json({ already_member: true, group: gRes.rows[0] });
     }
 
     logActivity(req.user.id, 'member', `Te uniste al grupo "${gRes.rows[0].name}"`);
