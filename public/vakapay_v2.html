@@ -3148,23 +3148,30 @@ function loadProfile(){
   if(profile.email)document.getElementById('profEmail').value=profile.email;
   if(profile.tel)document.getElementById('profTel').value=profile.tel;
   if(profile.bio)document.getElementById('profBio').value=profile.bio;
-  const wrap=document.getElementById('avatarDisplay');
-  if(profile.avatar){
-    const img = document.createElement('img');
-    img.id = 'avatarDisplay';
-    img.className = 'avatar-img';
-    img.src = profile.avatar;
-    img.alt = 'Avatar';
-    img.onerror = function() {
-      profile.avatar = null;
-      this.outerHTML = `<div id="avatarDisplay" class="avatar-placeholder">${profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤'}</div>`;
-    };
-    if(wrap) wrap.outerHTML = img.outerHTML;
-  } else {
-    if(wrap && wrap.tagName === 'IMG') {
-      wrap.outerHTML = `<div id="avatarDisplay" class="avatar-placeholder">${profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤'}</div>`;
-    } else if(wrap) {
-      wrap.textContent = profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤';
+  const wrap = document.getElementById('avatarDisplay');
+  if (wrap) {
+    const inicial = profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤';
+    if (profile.avatar) {
+      const img = document.createElement('img');
+      img.id = 'avatarDisplay';
+      img.className = 'avatar-img';
+      img.src = profile.avatar;
+      img.alt = 'Avatar';
+      img.onerror = function() {
+        profile.avatar = null;
+        const ph = document.createElement('div');
+        ph.id = 'avatarDisplay';
+        ph.className = 'avatar-placeholder';
+        ph.textContent = inicial;
+        if (this.parentNode) this.parentNode.replaceChild(ph, this);
+      };
+      if (wrap.parentNode) wrap.parentNode.replaceChild(img, wrap);
+    } else {
+      const ph = document.createElement('div');
+      ph.id = 'avatarDisplay';
+      ph.className = 'avatar-placeholder';
+      ph.textContent = inicial;
+      if (wrap.parentNode) wrap.parentNode.replaceChild(ph, wrap);
     }
   }
   updateProfilePreview();
