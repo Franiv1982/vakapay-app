@@ -902,6 +902,15 @@ function seleccionarPais(flag, code) {
   document.getElementById('reg-tel').focus();
 }
 </script>
-
+<script>
+// Detectar token de invitación en la URL
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const invite = params.get('invite');
+  if (invite) {
+    localStorage.setItem('vp_pending_invite', invite);
+  }
+})();
+</script>
 </body>
 </html>

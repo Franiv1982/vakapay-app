@@ -1324,6 +1324,27 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
   }
 	// Render inicial
 	loadProfile();renderGroupsList();renderFriends();renderActivity();updateStats();populateFriendGroupSelect();
+  // Procesar invitación pendiente
+    const pendingInvite = localStorage.getItem('vp_pending_invite');
+    if (pendingInvite) {
+      localStorage.removeItem('vp_pending_invite');
+      try {
+        const token = vakaData.getToken();
+        const res = await fetch(`${window.location.origin}/api/v1/invite/${pendingInvite}/join`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ display_name: profile.nombre || '' })
+        });
+        const data = await res.json();
+        if (data.joined || data.already_member) {
+          groups = await vakaData.getGroups() || [];
+          renderGroupsList();
+          toast(`Te has unido al grupo "${data.group.name}" ✓`, 's');
+        }
+      } catch(err) {
+        console.error('Error al unirse al grupo:', err);
+      }
+    }
 	loadFromHash();
 })();
 
@@ -2571,18 +2592,20 @@ function renderBalances(){
 }
 
 // ═══ LINK GENERATION ════════════════════════════════════════════════
-function generateLink(){
+async function generateLink(){
   if(currentGroupIdx===null){toast('Abre un grupo primero','e');return;}
   const g=groups[currentGroupIdx];
-  const payload=JSON.stringify({n:g.name,t:g.type,s:g.start,e:g.end,m:g.members,ex:g.expenses});
-  const encoded=btoa(unescape(encodeURIComponent(payload)));
-  // Build a fully clickable URL that auto-opens and loads the group
-  const base=window.location.href.split('?')[0].split('#')[0];
-  const url=base+'?vp='+encoded;
-  const inp=document.getElementById('linkInput');
-  inp.value=url;
-  document.getElementById('linkBox').style.display='flex';
-  toast('¡Link generado! Tócalo para abrir o cópialo 🔗','i');
+  try {
+    const res = await vakaData.getShareLink(g.id);
+    const base = window.location.origin;
+    const url = `${base}/Login.html?invite=${res.token}`;
+    const inp = document.getElementById('linkInput');
+    inp.value = url;
+    document.getElementById('linkBox').style.display='flex';
+    toast('¡Link de invitación generado! 🔗','s');
+  } catch(err) {
+    toast('Error al generar el link','e');
+  }
 }
 function copyLink(){
   const inp=document.getElementById('linkInput');
