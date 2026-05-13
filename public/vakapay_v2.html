@@ -1170,7 +1170,16 @@ class VakaDataService {
     return this.addExpense(idx, data);
   }
 
-  async getFriends() { return this.#read(this.#KEYS.friends)??[]; }
+  async getFriends() {
+    try {
+      const data = await this.#req('GET', '/friends');
+      if (Array.isArray(data)) {
+        this.#write(this.#KEYS.friends, data);
+        return data;
+      }
+    } catch(_) {}
+    return this.#read(this.#KEYS.friends) ?? [];
+  }
   async saveFriends(fs) { this.#write(this.#KEYS.friends,fs); return true; }
   
   async getProfile() { return this.#read(this.#KEYS.profile)??{}; }
