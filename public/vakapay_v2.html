@@ -1267,9 +1267,12 @@ const TYPE_ICONS={viaje:'✈️',casa:'🏠',pareja:'💑',otros:'🎯'};
     
     // 2. Login - Ahora dentro de async
     if (!vakaData.getToken()) {
-	  window.location.href = 'Login.html';
-	  return;
-	}
+      const params = new URLSearchParams(window.location.search);
+      const invite = params.get('invite');
+      if (invite) localStorage.setItem('vp_pending_invite', invite);
+      window.location.href = 'Login.html';
+      return;
+    }
         
 	
 	// 3. CARGA DE DATOS
@@ -1324,7 +1327,10 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
   }
 	// Render inicial
 	loadProfile();renderGroupsList();renderFriends();renderActivity();updateStats();populateFriendGroupSelect();
-  // Procesar invitación pendiente
+  // Detectar invite en URL o localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlInvite = urlParams.get('invite');
+    if (urlInvite) localStorage.setItem('vp_pending_invite', urlInvite);
     const pendingInvite = localStorage.getItem('vp_pending_invite');
     if (pendingInvite) {
       try {
