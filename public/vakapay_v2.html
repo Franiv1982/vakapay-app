@@ -3231,14 +3231,14 @@ async function saveProfile() {
 }
 
 function updateProfilePreview() {
-  const n = document.getElementById('profNombre').value.trim();
-  const a = '';
-  const e = document.getElementById('profEmail').value.trim();
+  const n = document.getElementById('profNombre')?.value.trim() || profile.nombre || '';
+  const e = document.getElementById('profEmail')?.value.trim() || profile.email || '';
   
-  document.getElementById('profileDisplayName').textContent = n || 'Tu Nombre';
-  document.getElementById('profileDisplayEmail').textContent = e || 'tu@email.com';
+  const displayName = document.getElementById('profileDisplayName');
+  const displayEmail = document.getElementById('profileDisplayEmail');
+  if (displayName) displayName.textContent = n || 'Tu Nombre';
+  if (displayEmail) displayEmail.textContent = e || 'tu@email.com';
 
-  // ACTUALIZACIÓN DEL ICONO DE NAVEGACIÓN (INFERIOR)
   const navImg = document.getElementById('user-nav-photo');
   const navInitials = document.getElementById('user-nav-initials');
   
@@ -3250,7 +3250,6 @@ function updateProfilePreview() {
     } else {
       navImg.style.display = 'none';
       navInitials.style.display = 'block';
-      // Ponemos la inicial del nombre en el circulito si no hay foto
       navInitials.textContent = n ? n.charAt(0).toUpperCase() : '👤';
     }
   }
