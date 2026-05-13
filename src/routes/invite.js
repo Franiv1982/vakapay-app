@@ -11,11 +11,13 @@ async function addFriendIfNotExists(ownerId, name, email, phone) {
     'SELECT id FROM friends WHERE owner_id = $1 AND name = $2',
     [ownerId, name]
   );
+  console.log(`🔍 Checking friend: owner=${ownerId} name=${name} exists=${existing.rows.length > 0}`);
   if (existing.rows.length === 0) {
-    await db.query(
-      'INSERT INTO friends (owner_id, name, email, phone) VALUES ($1, $2, $3, $4)',
+    const result = await db.query(
+      'INSERT INTO friends (owner_id, name, email, phone) VALUES ($1, $2, $3, $4) RETURNING id',
       [ownerId, name, email || '', phone || '']
     );
+    console.log(`✅ Friend added: id=${result.rows[0].id} owner=${ownerId} name=${name}`);
   }
 }
 
