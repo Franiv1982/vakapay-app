@@ -1040,7 +1040,9 @@ class VakaDataService {
   async getGroups() {
     try {
       const data = await this.#req('GET', '/groups');
-      const normalized = Array.isArray(data) ? data.map(g => this.#normalize(g)) : [];
+      if (!Array.isArray(data)) return this.#read(this.#KEYS.groups) ?? [];
+      const detailed = await Promise.all(data.map(g => this.#req('GET', `/groups/${g.id}`).catch(() => g)));
+      const normalized = detailed.map(g => this.#normalize(g));
       this.#write(this.#KEYS.groups, normalized);
       return normalized;
     } catch(_) {
