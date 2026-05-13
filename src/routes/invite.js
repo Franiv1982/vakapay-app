@@ -56,6 +56,8 @@ router.post('/:token/join', requireAuth, async (req, res, next) => {
     `, [groupId, req.user.id]);
 
     // Añadir mutuamente como amigos siempre
+    console.log('👥 Miembros existentes:', membersRes.rows);
+    console.log('👤 Nuevo usuario:', newUser);
     for (const member of membersRes.rows) {
       if (!member.user_id) continue;
       await addFriendIfNotExists(req.user.id, member.display_name, member.email, member.tel);
