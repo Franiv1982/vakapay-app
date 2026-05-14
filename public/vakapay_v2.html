@@ -1757,45 +1757,44 @@ function goBackToGroup() {
 
 async function deleteGroup(idx) {
   const g = groups[idx];
-  if (!g) return; // Seguridad: si el índice no existe, no hace nada
+  if (!g) return;
 
   const groupId = g.id || g._id;
 
   try {
-    // 1. Borrado en servidor (si existe ID)
     if (groupId) {
-      try {
-        await vakaData.deleteGroup(groupId);
-      } catch (serverError) {
-        // Si el servidor falla (ej. 404), avisamos en consola pero permitimos el borrado local
-        console.warn("El grupo no existe en el servidor, procediendo a borrado local.");
+      const res = await fetch(`${window.location.origin}/api/v1/groups/${groupId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+      });
+      if (res.status === 422) {
+        const data = await res.json();
+        toast(data.error, 'e');
+        return;
+      }
+      if (!res.ok && res.status !== 404) {
+        toast('Error al salir del grupo', 'e');
+        return;
       }
     }
 
-    // 2. Borrado local
     groups.splice(idx, 1);
-    save(); 
-    
-    // 3. Actualización de interfaz
+    save();
+
     renderGroupsList();
     updateStats();
-    
-    if (typeof toast === "function") {
-      await logActivity(`Grupo "${g.name}" eliminado`);
-	  toast('Grupo eliminado permanentemente', 'i');
-    }
 
-    // 4. Gestión de navegación
+    await logActivity(`Saliste del grupo "${g.name}"`);
+    toast('Has salido del grupo', 'i');
+
     if (currentGroupIdx === idx) {
       goBack();
       const badge = document.getElementById('hbadge');
       if (badge) badge.style.display = 'none';
     }
   } catch (e) {
-    console.error("Error al borrar:", e);
-    if (typeof toast === "function") {
-      toast('Error: No se pudo borrar del servidor', 'e');
-    }
+    console.error("Error al salir del grupo:", e);
+    toast('Error al salir del grupo', 'e');
   }
 }
 

@@ -130,10 +130,53 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
 // ── DELETE /groups/:id ────────────────────────────────────────────
 router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
-    if (!await ownsGroup(req.params.id, req.user.id)) {
-      return res.status(404).json({ error: 'Grupo no encontrado' });
+    const memberRes = await db.query(
+      'SELECT * FROM group_members WHERE group_id = $1 AND user_id = $2',
+      [req.params.id, req.user.id]
+    );
+    if (!memberRes.rows[0]) {
+      return res.status(404).json({ error: 'No eres miembro de este grupo' });
     }
-    await db.query('DELETE FROM groups WHERE id = $1', [req.params.id]);
+
+    const balance = parseFloat(memberRes.rows[0].balance);
+    if (Math.abs(balance) > 0.005) {
+      return res.status(422).json({
+        error: balance > 0
+          ? `Tienes un saldo positivo de ${balance.toFixed(2)}. Salda las cuentas antes de salir.`
+          : `Tienes una deuda pendiente de ${Math.abs(balance).toFixed(2)}. Salda las cuentas antes de salir.`
+      });
+    }
+
+    await db.query(
+      'DELETE FROM group_members WHERE group_id = $1 AND user_id = $2',
+      [req.params.id, req.user.id]
+    );
+
+    const remaining = await db.query(
+      'SELECT COUNT(*) FROM group_members WHERE group_id = $1',
+      [req.params.id]
+    );
+    if (parseInt(remaining.rows[0].count) === 0) {
+      await db.query('DELETE FROM groups WHERE id = $1', [req.params.id]);
+    } else {
+      const ownerCheck = await db.query(
+        'SELECT id FROM groups WHERE id = $1 AND owner_id = $2',
+        [req.params.id, req.user.id]
+      );
+      if (ownerCheck.rows[0]) {
+        const nextMember = await db.query(
+          'SELECT user_id FROM group_members WHERE group_id = $1 AND user_id IS NOT NULL LIMIT 1',
+          [req.params.id]
+        );
+        if (nextMember.rows[0]) {
+          await db.query(
+            'UPDATE groups SET owner_id = $1 WHERE id = $2',
+            [nextMember.rows[0].user_id, req.params.id]
+          );
+        }
+      }
+    }
+
     res.status(204).end();
   } catch (err) { next(err); }
 });
