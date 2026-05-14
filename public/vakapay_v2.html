@@ -3168,7 +3168,14 @@ async function ejecutarBorradoAmigo() {
   const name = friend.name;
 
   try {
-    await vakaData.deleteFriend(friend.id);
+    const res = await fetch(`${window.location.origin}/api/v1/friends/${friend.id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    if (!res.ok && res.status !== 404) {
+      toast('Error al eliminar el amigo', 'e');
+      return;
+    }
   } catch(err) {
     console.error('Error borrando amigo:', err);
     toast('Error al eliminar el amigo', 'e');
