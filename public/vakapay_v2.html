@@ -2682,10 +2682,17 @@ function renderExpenses() {
   const total = g.expenses.reduce((s, e) => s + (Number(e.baseAmt || e.amount_base) || 0), 0);
   const nm = Math.max(1, Object.keys(g.members || {}).length);
 
+  // Por persona: promedio de cuánto debe pagar cada participante en sus gastos
+  const totalPorPersona = g.expenses.reduce((s, e) => {
+    const involved = e.involved || (e.splits ? e.splits.map(sp => sp.member_name) : []);
+    const amt = Number(e.baseAmt || e.amount_base) || 0;
+    return s + (amt / Math.max(1, involved.length));
+  }, 0) / nm;
+
   if (sg) {
     sg.style.display = 'grid';
     document.getElementById('statTotal').textContent = sym + total.toFixed(2);
-    document.getElementById('statPP').textContent = sym + (total / nm).toFixed(2);
+    document.getElementById('statPP').textContent = sym + totalPorPersona.toFixed(2);
   }
 
   el.innerHTML = g.expenses.map((e, i) => {
