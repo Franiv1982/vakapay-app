@@ -2317,7 +2317,6 @@ async function saveEditExpense() {
   const g = groups[currentGroupIdx];
   const old = g.expenses[editingExpenseIdx];
 
-  // Captura de valores desde el modal
   const desc = document.getElementById('editDesc').value.trim();
   const amount = parseFloat(document.getElementById('editAmount').value);
   const currency = document.getElementById('editCurrency').value;
@@ -2325,58 +2324,66 @@ async function saveEditExpense() {
   const payer = document.getElementById('editPayer').value;
   const date = document.getElementById('editDate').value;
   const manualRate = parseFloat(document.getElementById('editExchangeRate').value);
-  
-  // Captura de participantes seleccionados (chips)
   const involved = [...document.querySelectorAll('#editInvolvedChips .modal-chip.sel')].map(c => c.dataset.name);
 
-  // Validaciones de QA
   if (!desc) { toast('Añade una descripción', 'e'); return; }
   if (!amount || amount <= 0) { toast('Monto inválido', 'e'); return; }
   if (involved.length === 0) { toast('Selecciona al menos un consumidor', 'e'); return; }
-  if (date < g.start || date > g.end) { toast('Fecha fuera del rango del grupo', 'e'); return; }
 
-  // 1. Revertir el efecto del balance antiguo
-  const oldBaseAmt = old.baseAmt || old.amount;
-  const oldQuota = oldBaseAmt / old.involved.length;
-  
-  g.members[old.payer] = +(g.members[old.payer] - oldBaseAmt).toFixed(2);
-  old.involved.forEach(p => {
-    if (g.members.hasOwnProperty(p)) {
-      g.members[p] = +(g.members[p] + oldQuota).toFixed(2);
-    }
-  });
-
-  // 2. Calcular el nuevo monto base usando la tasa manual o la tabla de tasas
-  // Si es la moneda base (EUR), la tasa es 1. Si no, usamos la manual o la fija.
   const rateToUse = (currency === getBase()) ? 1 : (manualRate || RATES[currency] || 1);
   const newBaseAmt = +(amount / rateToUse).toFixed(2);
-  const newQuota = newBaseAmt / involved.length;
 
-  // 3. Aplicar el nuevo efecto al balance
-  g.members[payer] = +(g.members[payer] + newBaseAmt).toFixed(2);
-  involved.forEach(p => {
-    if (g.members.hasOwnProperty(p)) {
-      g.members[p] = +(g.members[p] - newQuota).toFixed(2);
+  try {
+    const expId = old.id || old._id;
+    if (expId) {
+      await fetch(`${window.location.origin}/api/v1/groups/${g.id}/expenses/${expId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+        body: JSON.stringify({
+          description: desc,
+          amount,
+          currency,
+          category: cat,
+          payer_name: payer,
+          expense_date: date,
+          involved
+        })
+      });
     }
+  } catch(err) { console.error('Error guardando gasto:', err); }
+
+  // Actualizar localmente
+  const oldInvolved = old.involved || (old.splits ? old.splits.map(s => s.member_name) : []);
+  const oldBaseAmt = old.baseAmt || old.amount_base || old.amount || 0;
+  const oldQuota = oldBaseAmt / (oldInvolved.length || 1);
+  const oldPayer = old.payer || old.payer_name;
+
+  if (g.members[oldPayer] !== undefined) g.members[oldPayer] = +(g.members[oldPayer] - oldBaseAmt).toFixed(2);
+  oldInvolved.forEach(p => {
+    if (g.members[p] !== undefined) g.members[p] = +(g.members[p] + oldQuota).toFixed(2);
   });
 
-  // 4. Actualizar el objeto del gasto con los nuevos datos
+  const newQuota = newBaseAmt / involved.length;
+  if (g.members[payer] !== undefined) g.members[payer] = +(g.members[payer] + newBaseAmt).toFixed(2);
+  involved.forEach(p => {
+    if (g.members[p] !== undefined) g.members[p] = +(g.members[p] - newQuota).toFixed(2);
+  });
+
   g.expenses[editingExpenseIdx] = {
-    desc,
+    ...old,
+    desc, description: desc,
     amount,
-    cat,
-    payer,
-    date,
+    cat, category: cat,
+    payer, payer_name: payer,
+    date, expense_date: date,
     involved,
     currency,
     baseAmt: newBaseAmt,
-    exchangeRate: rateToUse // Guardamos la tasa para consistencia
+    amount_base: newBaseAmt,
   };
 
-  // 5. Recalcular el total del grupo (esto arregla el monto en la pantalla principal)
-  g.total = g.expenses.reduce((sum, exp) => sum + (exp.baseAmt || 0), 0);
+  g.total = g.expenses.reduce((sum, e) => sum + (e.baseAmt || e.amount_base || 0), 0);
 
-  // 6. Guardar cambios y actualizar interfaz
   await save();
   logActivity(`Gasto "${desc}" editado en "${g.name}"`);
   await saveActivity();
@@ -2387,10 +2394,8 @@ async function saveEditExpense() {
   clearEditOCR();
   editingExpenseIdx = null;
   if (currentExpenseIdx !== null) openGasto(currentExpenseIdx);
-  renderAll();       // Refresca la vista del grupo actual
-  renderGroups();    // Refresca la lista de grupos en la Home (tarjetas)
-  
-  await logActivity(`Gasto "${desc}" editado en "${g.name}"`);
+  renderAll();
+  renderGroups();
   toast('Gasto actualizado ✓', 's');
 }
 
