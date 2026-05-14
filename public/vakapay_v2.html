@@ -1049,6 +1049,15 @@ class VakaDataService {
   }
 
   #normalize(g) {
+    const normalizeExpense = e => ({
+      ...e,
+      desc:    e.desc    || e.description  || '',
+      payer:   e.payer   || e.payer_name   || '',
+      date:    e.date    || e.expense_date || '',
+      baseAmt: e.baseAmt || e.amount_base  || e.amount || 0,
+      cat:     e.cat     || e.category     || 'other',
+      involved: e.involved || (e.splits ? e.splits.map(s => s.member_name) : []),
+    });
     return {
       id:        g.id,
       name:      g.name,
@@ -1058,8 +1067,9 @@ class VakaDataService {
       members: Array.isArray(g.members)
         ? Object.fromEntries(g.members.map(m => [m.display_name, m.balance || 0]))
         : g.members || {},
-      expenses:  g.expenses    || [],
-      createdAt: g.created_at  || g.createdAt || new Date().toISOString(),
+      expenses: (g.expenses || []).map(normalizeExpense),
+      createdAt: g.created_at || g.createdAt || new Date().toISOString(),
+      currency:  g.currency || 'EUR',
     };
   }
 

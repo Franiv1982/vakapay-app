@@ -195,7 +195,12 @@ router.get('/:id/members', requireAuth, async (req, res, next) => {
 // ── POST /groups/:id/members ──────────────────────────────────────
 router.post('/:id/members', requireAuth, async (req, res, next) => {
   try {
-    if (!await ownsGroup(req.params.id, req.user.id)) {
+    const memberCheck = await db.query(
+      'SELECT id FROM group_members WHERE group_id = $1 AND user_id = $2',
+      [req.params.id, req.user.id]
+    );
+    const isOwner = await ownsGroup(req.params.id, req.user.id);
+    if (!isOwner && !memberCheck.rows[0]) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
     const { display_name, user_id = null } = req.body;
