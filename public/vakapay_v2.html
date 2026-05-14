@@ -2680,12 +2680,17 @@ function renderExpenses() {
   const base = getBase();
   const sym = SYMBOLS[base] || '€';
   const total = g.expenses.reduce((s, e) => s + (Number(e.baseAmt || e.amount_base) || 0), 0);
-  const nm = Math.max(1, Object.keys(g.members || {}).length);
+
+  const porPersona = g.expenses.reduce((s, e) => {
+    const nParticipants = e.splits?.length || e.involved?.length || 1;
+    const amt = Number(e.baseAmt || e.amount_base) || 0;
+    return s + (amt / nParticipants);
+  }, 0);
 
   if (sg) {
     sg.style.display = 'grid';
     document.getElementById('statTotal').textContent = sym + total.toFixed(2);
-    document.getElementById('statPP').textContent = sym + (total / nm).toFixed(2);
+    document.getElementById('statPP').textContent = sym + porPersona.toFixed(2);
   }
 
   el.innerHTML = g.expenses.map((e, i) => {
