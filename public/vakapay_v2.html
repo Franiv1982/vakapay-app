@@ -1936,23 +1936,33 @@ async function addMember() {
   const g = groups[currentGroupIdx];
   if (g.members.hasOwnProperty(n)) { toast('Ya existe ese participante', 'e'); return; }
 
-  // Añadir al grupo
+  try {
+    await fetch(`${window.location.origin}/api/v1/groups/${g.id}/members`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: JSON.stringify({ display_name: n })
+    });
+  } catch(err) { console.error('Error añadiendo miembro:', err); }
+
   g.members[n] = 0;
   save();
   inp.value = '';
 
-  // Si no existe en amigos, añadirlo automáticamente
   if (!friends.some(f => f.name === n)) {
-    friends.push({ name: n, email: '', phone: '', notes: 'Añadido desde grupo' });
-    await saveFriends();
+    try {
+      const friend = await vakaData.addFriend({ name: n, email: '', phone: '', notes: 'Añadido desde grupo' });
+      friends.push(friend);
+      await saveFriends();
+    } catch(_) {}
     toast(`${n} añadido al grupo y a tus amigos ✓`, 's');
   } else {
     toast(`${n} añadido ✓`, 's');
   }
 
+  groups = await vakaData.getGroups() || [];
   renderAll();
   renderFriends();
-  renderFriendPicker();n
+  renderFriendPicker();
   logActivity(`${n} añadido al grupo "${g.name}"`); saveActivity(); renderActivity();
 }
 
@@ -2654,7 +2664,7 @@ function renderExpenses() {
 
   const base = getBase();
   const sym = SYMBOLS[base] || '€';
-  const total = g.expenses.reduce((s, e) => s + (Number(e.baseAmt) || 0), 0);
+  const total = g.expenses.reduce((s, e) => s + (Number(e.baseAmt || e.amount_base) || 0), 0);
   const nm = Math.max(1, Object.keys(g.members || {}).length);
 
   if (sg) {
@@ -2669,11 +2679,11 @@ function renderExpenses() {
     return `<div class="group-card" onclick="openGasto(${i})" style="cursor:pointer;">
       <div class="exp-ico ${CAT_CSS[e.cat]}">${CAT_ICONS[e.cat]}</div>
       <div class="gc-info">
-        <div class="gc-name">${e.desc}</div>
-        <div class="gc-meta">Pagó <strong>${e.payer}</strong> · ${e.date}</div>
+        <div class="gc-name">${e.desc || e.description || 'Sin descripción'}</div>
+        <div class="gc-meta">Pagó <strong>${e.payer || e.payer_name}</strong> · ${e.date || e.expense_date || ''}</div>
       </div>
       <div style="text-align:right;">
-        <div class="exp-amt">${displaySym}${Number(e.amount).toFixed(2)}</div>
+        <div class="exp-amt">${displaySym}${Number(e.amount || e.amount_base).toFixed(2)}</div>
         ${displayCurrency !== base ? `<div style="font-size:.65rem;color:var(--muted);">≈ ${sym}${(Number(e.baseAmt)||0).toFixed(2)}</div>` : ''}
         ${e.ticket ? '<div style="font-size:.65rem;color:var(--gold);">🧾</div>' : ''}
       </div>
