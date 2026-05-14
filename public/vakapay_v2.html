@@ -1933,11 +1933,16 @@ async function removeMember(n) {
   } else {
     const groupId = g.id;
     try {
-      await fetch(`${window.location.origin}/api/v1/groups/${groupId}/members/${encodeURIComponent(n)}`, {
+      const res = await fetch(`${window.location.origin}/api/v1/groups/${groupId}/members/${encodeURIComponent(n)}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
       });
-    } catch(err) { console.error('Error eliminando miembro:', err); }
+      if (res.status === 422) {
+        const data = await res.json();
+        toast(data.error, 'e');
+        return;
+      }
+    } catch(err) { console.error('Error eliminando miembro:', err); return; }
     delete g.members[n];
     save();
     renderAll();
@@ -1956,11 +1961,17 @@ async function ejecutarBorradoMiembro() {
   if (!n) return;
   const g = groups[currentGroupIdx];
   try {
-    await fetch(`${window.location.origin}/api/v1/groups/${g.id}/members/${encodeURIComponent(n)}`, {
+    const res = await fetch(`${window.location.origin}/api/v1/groups/${g.id}/members/${encodeURIComponent(n)}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
     });
-  } catch(err) { console.error('Error eliminando miembro:', err); }
+    if (res.status === 422) {
+      const data = await res.json();
+      cerrarModalBorrarMiembro();
+      toast(data.error, 'e');
+      return;
+    }
+  } catch(err) { console.error('Error eliminando miembro:', err); return; }
   g.expenses = g.expenses.filter(e => {
     if (e.payer === n && e.involved.length === 1) return false;
     if (e.involved.includes(n)) e.involved = e.involved.filter(p => p !== n);
