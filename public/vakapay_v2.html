@@ -3059,16 +3059,25 @@ function cerrarModalBorrarAmigo() {
   amigoABorrarIdx = null;
 }
 
-function ejecutarBorradoAmigo() {
+async function ejecutarBorradoAmigo() {
   const idx = amigoABorrarIdx;
   if (idx === null) return;
-  const name = friends[idx].name;
-  groups.forEach(g => {
-    if (g.members.hasOwnProperty(name) && !g.expenses.some(e => e.payer === name || e.involved.includes(name))) {
-      delete g.members[name];
-    }
-  });
-  save(); friends.splice(idx, 1); saveFriends(); renderFriends(); renderFriendPicker(); updateStats();
+  const friend = friends[idx];
+  const name = friend.name;
+
+  try {
+    await vakaData.deleteFriend(friend.id);
+  } catch(err) {
+    console.error('Error borrando amigo:', err);
+    toast('Error al eliminar el amigo', 'e');
+    return;
+  }
+
+  friends.splice(idx, 1);
+  await saveFriends();
+  renderFriends();
+  renderFriendPicker();
+  updateStats();
   cerrarModalBorrarAmigo();
   closeFriendModal();
   toast(`${name} eliminado`, 'i');
