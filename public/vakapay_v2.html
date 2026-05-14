@@ -1920,10 +1920,11 @@ async function addMember() {
 
 async function removeMember(n) {
   const g = groups[currentGroupIdx];
-  const hasExpenses = g.expenses.some(e => e.payer === n || e.involved.includes(n));
+  const getInvolved = e => e.involved || (e.splits ? e.splits.map(s => s.member_name) : []);
+  const hasExpenses = g.expenses.some(e => (e.payer || e.payer_name) === n || getInvolved(e).includes(n));
 
   if (hasExpenses) {
-    const count = g.expenses.filter(e => e.payer === n || e.involved.includes(n)).length;
+    const count = g.expenses.filter(e => (e.payer || e.payer_name) === n || getInvolved(e).includes(n)).length;
     document.getElementById('del-miembro-avatar').textContent = n[0].toUpperCase();
     document.getElementById('del-miembro-name').textContent = n;
     document.getElementById('del-miembro-gastos').textContent = count + ' gasto' + (count !== 1 ? 's' : '') + ' registrado' + (count !== 1 ? 's' : '');

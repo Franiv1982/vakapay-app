@@ -232,7 +232,13 @@ router.delete('/:id/members/:name', requireAuth, async (req, res, next) => {
     const member = mRes.rows[0];
     if (!member) return res.status(404).json({ error: 'Participante no encontrado' });
     if (Math.abs(member.balance) > 0.005) {
-      return res.status(422).json({ error: 'No se puede eliminar un participante con balance distinto de 0' });
+      const bal = parseFloat(member.balance);
+      const nombre = req.params.name;
+      return res.status(422).json({
+        error: bal < 0
+          ? `${nombre} tiene una deuda pendiente de ${Math.abs(bal).toFixed(2)}€. Salda las cuentas antes de eliminarlo.`
+          : `${nombre} tiene un saldo a favor de ${bal.toFixed(2)}€. Salda las cuentas antes de eliminarlo.`
+      });
     }
     await db.query('DELETE FROM group_members WHERE id = $1', [member.id]);
     res.status(204).end();
