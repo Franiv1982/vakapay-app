@@ -2931,31 +2931,30 @@ function exportarPDF(){
   doc.setFontSize(9); sc(0,0,0);
   doc.text('QUIEN PAGA A QUIEN', pad, y);
   y += 5;
-  const balances = {};
-  mbs.forEach(m => balances[m] = +(g.members[m]||0));
-  const deudores = mbs.filter(m=>balances[m]<0).sort((a,b)=>balances[a]-balances[b]);
-  const acreedores = mbs.filter(m=>balances[m]>0).sort((a,b)=>balances[b]-balances[a]);
-  if(!deudores.length){
+  const d = Object.entries(g.members).filter(([,v])=>v<-0.01).map(([k,v])=>[k,+(v)]);
+  const c = Object.entries(g.members).filter(([,v])=>v>0.01).map(([k,v])=>[k,+(v)]);
+  const txsPDF = [];
+  while(d.length&&c.length){
+    d.sort((a,b)=>a[1]-b[1]); c.sort((a,b)=>b[1]-a[1]);
+    const amt = Math.min(Math.abs(d[0][1]), c[0][1]);
+    txsPDF.push({from:d[0][0], to:c[0][0], amount:amt});
+    d[0][1] = +(d[0][1]+amt).toFixed(2); c[0][1] = +(c[0][1]-amt).toFixed(2);
+    if(Math.abs(d[0][1])<0.01) d.shift(); if(Math.abs(c[0][1])<0.01) c.shift();
+  }
+  if(!txsPDF.length){
     doc.setFont('helvetica','normal');
     doc.setFontSize(8); sc(80,80,80);
     doc.text('Sin deudas pendientes', pad+3, y);
     y += lh;
   } else {
-    const acrs = acreedores.map(a=>({name:a,bal:balances[a]}));
-    deudores.forEach(d => {
-      let debe = Math.abs(balances[d]);
-      acrs.forEach(a => {
-        if(debe<=0||a.bal<=0) return;
-        const pago = Math.min(debe, a.bal);
-        doc.setFont('helvetica','normal');
-        doc.setFontSize(8); sc(0,0,0);
-        doc.text(`• ${d}  paga a  ${a.name}`, pad+3, y);
-        sc(20,60,160);
-        doc.text(`${g.currency||'EUR'} ${pago.toFixed(2)}`, W-pad, y, {align:'right'});
-        y += lh;
-        debe -= pago;
-        a.bal -= pago;
-      });
+    txsPDF.forEach(t => {
+      if(y > 265){ doc.addPage(); y=20; }
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(8); sc(0,0,0);
+      doc.text(`• ${t.from}  paga a  ${t.to}`, pad+3, y);
+      sc(20,60,160);
+      doc.text(`${g.currency||'EUR'} ${t.amount.toFixed(2)}`, W-pad, y, {align:'right'});
+      y += lh;
     });
   }
 
