@@ -1713,7 +1713,7 @@ async function openGroup(idx){
         members: Array.isArray(fresh.members)
           ? Object.fromEntries(fresh.members.map(m => [m.display_name, m.balance || 0]))
           : fresh.members || groups[idx].members,
-        expenses: (fresh.expenses || []).map(e => ({
+        expenses: (fresh.expenses || []).sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(e => ({
           ...e,
           desc: e.description || e.desc,
           payer: e.payer_name || e.payer,
