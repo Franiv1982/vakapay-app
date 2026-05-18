@@ -16,6 +16,14 @@ async function ownsGroup(groupId, userId) {
   return r.rows[0];
 }
 
+async function isMember(groupId, userId) {
+  const r = await db.query(
+    'SELECT id FROM group_members WHERE group_id = $1 AND user_id = $2',
+    [groupId, userId]
+  );
+  return r.rows[0];
+}
+
 async function recalcBalances(groupId) {
   const membersRes  = await db.query('SELECT display_name FROM group_members WHERE group_id = $1', [groupId]);
   const expensesRes = await db.query('SELECT * FROM expenses WHERE group_id = $1', [groupId]);
@@ -46,7 +54,9 @@ async function recalcBalances(groupId) {
 // ── GET /groups/:id/expenses ──────────────────────────────────────
 router.get('/', requireAuth, async (req, res, next) => {
   try {
-    if (!await ownsGroup(req.params.id, req.user.id)) {
+    const isOwner = await ownsGroup(req.params.id, req.user.id);
+    const member = await isMember(req.params.id, req.user.id);
+    if (!isOwner && !member) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
     const expensesRes = await db.query(`
@@ -65,7 +75,9 @@ router.get('/', requireAuth, async (req, res, next) => {
 // ── POST /groups/:id/expenses ─────────────────────────────────────
 router.post('/', requireAuth, async (req, res, next) => {
   try {
-    if (!await ownsGroup(req.params.id, req.user.id)) {
+    const isOwner = await ownsGroup(req.params.id, req.user.id);
+    const member = await isMember(req.params.id, req.user.id);
+    if (!isOwner && !member) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
 
@@ -105,7 +117,9 @@ router.post('/', requireAuth, async (req, res, next) => {
 // ── GET /groups/:id/expenses/:expId ──────────────────────────────
 router.get('/:expId', requireAuth, async (req, res, next) => {
   try {
-    if (!await ownsGroup(req.params.id, req.user.id)) {
+    const isOwner = await ownsGroup(req.params.id, req.user.id);
+    const member = await isMember(req.params.id, req.user.id);
+    if (!isOwner && !member) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
     const expRes = await db.query('SELECT * FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
@@ -120,7 +134,9 @@ router.get('/:expId', requireAuth, async (req, res, next) => {
 // ── PUT /groups/:id/expenses/:expId ──────────────────────────────
 router.put('/:expId', requireAuth, async (req, res, next) => {
   try {
-    if (!await ownsGroup(req.params.id, req.user.id)) {
+    const isOwner = await ownsGroup(req.params.id, req.user.id);
+    const member = await isMember(req.params.id, req.user.id);
+    if (!isOwner && !member) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
     const existing = await db.query('SELECT id FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
@@ -160,7 +176,9 @@ router.put('/:expId', requireAuth, async (req, res, next) => {
 // ── DELETE /groups/:id/expenses/:expId ───────────────────────────
 router.delete('/:expId', requireAuth, async (req, res, next) => {
   try {
-    if (!await ownsGroup(req.params.id, req.user.id)) {
+    const isOwner = await ownsGroup(req.params.id, req.user.id);
+    const member = await isMember(req.params.id, req.user.id);
+    if (!isOwner && !member) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
     const expRes = await db.query('SELECT id FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
