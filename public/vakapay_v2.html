@@ -3181,7 +3181,7 @@ function handleFriendAvatarChange(ev){
   };
   reader.readAsDataURL(file);
 }
-function saveEditFriend(){
+async function saveEditFriend(){
   if(editingFriendIdx===null)return;
   const f=friends[editingFriendIdx];
   const firstName=document.getElementById('editFriendName').value.trim();
