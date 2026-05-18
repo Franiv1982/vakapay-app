@@ -1154,7 +1154,7 @@ class VakaDataService {
 	const newExp = {desc, amount: Number(amount), cat, payer, date, involved, currency: currency || 'EUR', baseAmt: ba};
     
     // 2. Actualización local inmediata
-    g.expenses.push(newExp);
+    g.expenses.unshift(newExp);
     
     if (typeof updateBalances === 'function') updateBalances();
     await this.saveGroups(gs);
