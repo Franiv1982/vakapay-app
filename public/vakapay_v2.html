@@ -1703,18 +1703,24 @@ async function openGroup(idx){
 
   // Cargar datos frescos del backend
   try {
-    const fresh = await vakaData.#req('GET', `/groups/${g.id}`);
+    const res = await fetch(`${window.location.origin}/api/v1/groups/${g.id}`, {
+      headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    const fresh = await res.json();
     if (fresh && !fresh.error) {
-      groups[idx] = vakaData.normalizeGroup ? vakaData.normalizeGroup(fresh) : {
+      groups[idx] = {
         ...groups[idx],
         members: Array.isArray(fresh.members)
           ? Object.fromEntries(fresh.members.map(m => [m.display_name, m.balance || 0]))
           : fresh.members || groups[idx].members,
         expenses: (fresh.expenses || []).map(e => ({
           ...e,
-          desc: e.description, payer: e.payer_name, date: e.expense_date,
-          baseAmt: e.amount_base, cat: e.category,
-          involved: e.splits ? e.splits.map(s => s.member_name) : []
+          desc: e.description || e.desc,
+          payer: e.payer_name || e.payer,
+          date: e.expense_date || e.date,
+          baseAmt: e.amount_base || e.baseAmt,
+          cat: e.category || e.cat,
+          involved: e.splits ? e.splits.map(s => s.member_name) : (e.involved || [])
         }))
       };
     }
