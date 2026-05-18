@@ -1231,7 +1231,7 @@ class VakaDataService {
   async saveFriends(fs) { this.#write(this.#KEYS.friends,fs); return true; }
   
   async getProfile() { return this.#read(this.#KEYS.profile)??{}; }
-  async saveProfile(data) { const cur=await this.getProfile(); const upd={...cur,...data}; this.#write(this.#KEYS.profile,upd); return upd; }
+  async saveProfile(data) { const cur=await this.getProfile(); const upd={...cur,...data}; this.#write(this.#KEYS.profile,upd); try { await this.#req('PATCH', '/users/me', { nombre: data.nombre, apellido: data.apellido, email: data.email, tel: data.tel, bio: data.bio }); } catch(_) {} return upd; }
 
   async getActivity() {
   try {
