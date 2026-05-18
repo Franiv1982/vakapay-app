@@ -1690,25 +1690,41 @@ function renderGroupsList() {
 
 const renderGroups = renderGroupsList;
 
-function openGroup(idx){
-  currentGroupIdx=idx;
-  const g=groups[idx];
-  
-  // === PASO 1: RECALCULAR SALDOS ===  
-  updateBalances(); 
+async function openGroup(idx){
+  currentGroupIdx = idx;
+  const g = groups[idx];
 
-  document.getElementById('detTitle').textContent=TYPE_ICONS[g.type]+' '+g.name;
-  document.getElementById('detMeta').textContent=g.start+' → '+g.end;
-  document.getElementById('hbadge').textContent=TYPE_ICONS[g.type]+' '+g.name;
-  document.getElementById('hbadge').style.display='block';
+  document.getElementById('detTitle').textContent = TYPE_ICONS[g.type]+' '+g.name;
+  document.getElementById('detMeta').textContent = g.start+' → '+g.end;
+  document.getElementById('hbadge').textContent = TYPE_ICONS[g.type]+' '+g.name;
+  document.getElementById('hbadge').style.display = 'block';
   ['sec2','sec3','sec4','sec5','sec6'].forEach(id=>document.getElementById(id).style.opacity='1');
-  document.getElementById('linkBox').style.display='none';
+  document.getElementById('linkBox').style.display = 'none';
 
-  // === PASO 2: DIBUJAR (Ahora con datos calculados) ===
+  // Cargar datos frescos del backend
+  try {
+    const fresh = await vakaData.#req('GET', `/groups/${g.id}`);
+    if (fresh && !fresh.error) {
+      groups[idx] = vakaData.normalizeGroup ? vakaData.normalizeGroup(fresh) : {
+        ...groups[idx],
+        members: Array.isArray(fresh.members)
+          ? Object.fromEntries(fresh.members.map(m => [m.display_name, m.balance || 0]))
+          : fresh.members || groups[idx].members,
+        expenses: (fresh.expenses || []).map(e => ({
+          ...e,
+          desc: e.description, payer: e.payer_name, date: e.expense_date,
+          baseAmt: e.amount_base, cat: e.category,
+          involved: e.splits ? e.splits.map(s => s.member_name) : []
+        }))
+      };
+    }
+  } catch(_) {}
+
+  updateBalances();
   renderAll();
   renderFriendPicker();
   
-  switchPage('page-detalle',null);
+  switchPage('page-detalle', null);
   document.querySelectorAll('.nav-btn').forEach(b=>{if(b.dataset.page==='page-grupos')b.classList.add('active');});
 }
 
