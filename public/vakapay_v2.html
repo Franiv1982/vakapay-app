@@ -1374,7 +1374,9 @@ try {
     localStorage.setItem('vaka_groups', JSON.stringify(groups));
 
     friends = await vakaData.getFriends() || [];
-    
+    activity = (await vakaData.getActivity() || []).map(a => ({...a,
+  groupName: a.groupName || a.group_name || null
+}));
     try {
       const me = await fetch(`${window.location.origin}/api/v1/users/me`, {
         headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
@@ -3346,7 +3348,7 @@ function renderActivity() {
 
   const byDate = {};
   filtered.forEach(a => {
-    const d = new Date(a.time);
+    const d = new Date(a.time || a.created_at);
     const hoy = new Date();
     const ayer = new Date(); ayer.setDate(hoy.getDate() - 1);
     let fecha;
@@ -3367,8 +3369,8 @@ function renderActivity() {
       ${items.map(a => `
         <div class="act-item">
           <div class="act-dot"></div>
-          <div class="act-txt">${a.msg}
-            <div class="act-time">${formatRelTime(new Date(a.time))}${a.groupName && !filterGroup ? ' · ' + a.groupName : ''}</div>
+          <div class="act-txt">${a.msg || a.message}
+            <div class="act-time">${formatRelTime(new Date(a.time || a.created_at))}${a.groupName && !filterGroup ? ' · ' + a.groupName : ''}</div>
           </div>
         </div>`).join('')}
     </div>`).join('');
