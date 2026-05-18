@@ -1233,14 +1233,32 @@ class VakaDataService {
   async getProfile() { return this.#read(this.#KEYS.profile)??{}; }
   async saveProfile(data) { const cur=await this.getProfile(); const upd={...cur,...data}; this.#write(this.#KEYS.profile,upd); return upd; }
 
-  async getActivity() { return this.#read(this.#KEYS.activity)??[]; }
-  async logActivity(msg, groupName = null) {
-    const act = await this.getActivity();
-    act.unshift({msg, time: new Date().toISOString(), groupName});
-    if(act.length > 40) act.pop();
-    this.#write(this.#KEYS.activity, act);
-    return act[0];
-  }
+  async getActivity() {
+  try {
+    const data = await this.#req('GET', '/activity');
+    if (Array.isArray(data)) {
+      const normalized = data.map(a => ({
+        ...a,
+        msg: a.message,
+        time: a.created_at,
+        groupName: a.group_name ?? null,
+      }));
+      this.#write(this.#KEYS.activity, normalized);
+      return normalized;
+    }
+  } catch(_) {}
+  return this.#read(this.#KEYS.activity) ?? [];
+}
+async logActivity(msg, groupName = null) {
+  try {
+    await this.#req('POST', '/activity', { message: msg, type: 'other', group_name: groupName });
+  } catch(_) {}
+  const act = this.#read(this.#KEYS.activity) ?? [];
+  act.unshift({msg, message: msg, time: new Date().toISOString(), groupName});
+  if(act.length > 40) act.pop();
+  this.#write(this.#KEYS.activity, act);
+  return act[0];
+}
   
   async updateGroupName(idx, newName) {
     const gs = groups;
@@ -1459,7 +1477,7 @@ async function saveFriends() {
 }
 
 async function saveActivity() {
-  // Solo si tu servicio necesita persistencia manual aquí
+  // logActivity ya persiste en backend y localStorage. Solo actualizamos la vista.
 }
 
 // ═══ PAGE NAVIGATION ═════════════════════════════════════════════════

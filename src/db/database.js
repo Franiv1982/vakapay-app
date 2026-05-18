@@ -77,12 +77,13 @@ const initSchema = async () => {
     );
 
     CREATE TABLE IF NOT EXISTS activity_log (
-      id         SERIAL PRIMARY KEY,
-      user_id    INTEGER REFERENCES users(id) ON DELETE CASCADE,
-      type       TEXT    NOT NULL DEFAULT 'other',
-      message    TEXT    NOT NULL,
-      created_at TIMESTAMP NOT NULL DEFAULT NOW()
-    );
+  id         SERIAL PRIMARY KEY,
+  user_id    INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  type       TEXT    NOT NULL DEFAULT 'other',
+  message    TEXT    NOT NULL,
+  group_name TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
 
     CREATE TABLE IF NOT EXISTS share_tokens (
       id         SERIAL PRIMARY KEY,
@@ -96,6 +97,8 @@ const initSchema = async () => {
     CREATE INDEX IF NOT EXISTS idx_expense_splits_exp  ON expense_splits(expense_id);
     CREATE INDEX IF NOT EXISTS idx_activity_user       ON activity_log(user_id);
     CREATE INDEX IF NOT EXISTS idx_friends_owner       ON friends(owner_id);
+
+    ALTER TABLE activity_log ADD COLUMN IF NOT EXISTS group_name TEXT;
   `);
   console.log('✅ Schema PostgreSQL inicializado');
 };
