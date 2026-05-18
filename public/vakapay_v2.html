@@ -1374,9 +1374,7 @@ try {
     localStorage.setItem('vaka_groups', JSON.stringify(groups));
 
     friends = await vakaData.getFriends() || [];
-    activity = (await vakaData.getActivity() || []).map(a => ({...a,
-  groupName: a.groupName || null
-}));
+    
     try {
       const me = await fetch(`${window.location.origin}/api/v1/users/me`, {
         headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
