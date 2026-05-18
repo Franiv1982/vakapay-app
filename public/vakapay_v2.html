@@ -2198,10 +2198,34 @@ async function addExpense() {
     document.querySelectorAll('#involvedChips .chip, #involvedChips .modal-chip')
             .forEach(c => c.classList.remove('sel'));
 
+    // Recargar grupo fresco del backend para tener orden correcto
+    try {
+      const res = await fetch(`${window.location.origin}/api/v1/groups/${g.id}`, {
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+      });
+      const fresh = await res.json();
+      if (fresh && !fresh.error) {
+        groups[currentGroupIdx] = {
+          ...groups[currentGroupIdx],
+          members: Array.isArray(fresh.members)
+            ? Object.fromEntries(fresh.members.map(m => [m.display_name, m.balance || 0]))
+            : fresh.members || groups[currentGroupIdx].members,
+          expenses: (fresh.expenses || []).sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(e => ({
+            ...e,
+            desc: e.description || e.desc,
+            payer: e.payer_name || e.payer,
+            date: e.expense_date || e.date,
+            baseAmt: e.amount_base || e.baseAmt,
+            cat: e.category || e.cat,
+            involved: e.splits ? e.splits.map(s => s.member_name) : (e.involved || [])
+          }))
+        };
+      }
+    } catch(_) {}
     renderAll();
     renderGroups();
-	await logActivity(`${payer} registró "${desc}" · ${amount} ${currency} en "${g.name}"`);
-	clearOCR();
+    await logActivity(`${payer} registró "${desc}" · ${amount} ${currency} en "${g.name}"`);
+    clearOCR();
     toast('Gasto registrado ✓', 's');
   } catch (err) {
     toast('Error al guardar', 'e');
