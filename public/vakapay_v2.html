@@ -2713,8 +2713,12 @@ function renderMembers() {
   const ps = document.getElementById('expPayer');
   if (ps) {
     const prev = ps.value;
-    ps.innerHTML = mbs.map(m => `<option value="${m}">${m}</option>`).join('') || '<option value="">--</option>';
-    if (mbs.includes(prev)) ps.value = prev;
+    const myName = (profile.nombre || '').trim();
+const sorted = myName && mbs.includes(myName)
+  ? [myName, ...mbs.filter(m => m !== myName)]
+  : mbs;
+ps.innerHTML = sorted.map(m => `<option value="${m}">${m}</option>`).join('') || '<option value="">--</option>';
+if (mbs.includes(prev)) ps.value = prev;
   }
 
   const ic = document.getElementById('involvedChips');
