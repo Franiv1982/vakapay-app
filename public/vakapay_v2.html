@@ -1229,6 +1229,7 @@ class VakaDataService {
     return this.#read(this.#KEYS.friends) ?? [];
   }
   async saveFriends(fs) { this.#write(this.#KEYS.friends,fs); return true; }
+  async updateFriend(id, data) { return await this.#req('PATCH', `/friends/${id}`, data); }
   
   async getProfile() { return this.#read(this.#KEYS.profile)??{}; }
   async saveProfile(data) { const cur=await this.getProfile(); const upd={...cur,...data}; this.#write(this.#KEYS.profile,upd); try { await this.#req('PATCH', '/users/me', { nombre: data.nombre, apellido: data.apellido, email: data.email, tel: data.tel, bio: data.bio }); } catch(_) {} return upd; }
@@ -3208,7 +3209,8 @@ function saveEditFriend(){
   }
   friends[editingFriendIdx]={...f,name:newName,email,phone,notes,contact:email||phone||'',avatar:f._tmpAvatar||f.avatar||null};
   delete friends[editingFriendIdx]._tmpAvatar;
-  saveFriends();logActivity(`Amigo "${newName}" actualizado`);saveActivity();renderActivity();
+  if (f.id) { try { await vakaData.updateFriend(f.id, { name: newName, email, phone, notes }); } catch(_) {} }
+saveFriends();logActivity(`Amigo "${newName}" actualizado`);saveActivity();renderActivity();
   closeFriendModal();renderFriends();renderFriendPicker();updateStats();
   toast('Amigo actualizado ✓','s');
 }
