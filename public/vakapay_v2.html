@@ -1059,18 +1059,19 @@ class VakaDataService {
       involved: e.involved || (e.splits ? e.splits.map(s => s.member_name) : []),
     });
     return {
-      id:        g.id,
-      name:      g.name,
-      type:      g.type        || 'viaje',
-      start:     g.date_start  || g.start || '',
-      end:       g.date_end    || g.end   || '',
-      members: Array.isArray(g.members)
-        ? Object.fromEntries(g.members.map(m => [m.display_name, m.balance || 0]))
-        : g.members || {},
-      expenses: (g.expenses || []).map(normalizeExpense),
-      createdAt: g.created_at || g.createdAt || new Date().toISOString(),
-      currency:  g.currency || 'EUR',
-    };
+  id:        g.id,
+  owner_id:  g.owner_id || null,
+  name:      g.name,
+  type:      g.type        || 'viaje',
+  start:     g.date_start  || g.start || '',
+  end:       g.date_end    || g.end   || '',
+  members: Array.isArray(g.members)
+    ? Object.fromEntries(g.members.map(m => [m.display_name, m.balance || 0]))
+    : g.members || {},
+  expenses: (g.expenses || []).map(normalizeExpense),
+  createdAt: g.created_at || g.createdAt || new Date().toISOString(),
+  currency:  g.currency || 'EUR',
+};
   }
 
   async login({ email, password }) {
@@ -1385,12 +1386,13 @@ try {
       console.log('📋 Perfil del backend:', me);
       if (me && !me.error) {
         profile = {
-          nombre: me.nombre || me.name || '',
-          email: me.email || '',
-          tel: me.tel || '',
-          bio: me.bio || '',
-          avatar: me.avatar_url ? `${window.location.origin}${me.avatar_url}` : null
-        };
+  id: me.id || null,
+  nombre: me.nombre || me.name || '',
+  email: me.email || '',
+  tel: me.tel || '',
+  bio: me.bio || '',
+  avatar: me.avatar_url ? `${window.location.origin}${me.avatar_url}` : null
+};
         await vakaData.saveProfile(profile);
       }
     } catch(_) {
