@@ -2110,24 +2110,26 @@ async function ejecutarBorradoMiembro() {
   const n = window._miembroABorrar;
   if (!n) return;
   const g = groups[currentGroupIdx];
+  // 1. Limpiar gastos del participante en memoria
+  g.expenses = g.expenses.filter(e => {
+    if ((e.payer || e.payer_name) === n && e.involved.length === 1) return false;
+    if (e.involved.includes(n)) e.involved = e.involved.filter(p => p !== n);
+    return true;
+  });
+  delete g.members[n];
+  updateBalances();
+  // 2. Llamar al backend
   try {
     const res = await fetch(`${window.location.origin}/api/v1/groups/${g.id}/members/${encodeURIComponent(n)}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
     });
-    if (res.status === 422) {
-      const data = await res.json();
+    if (!res.ok) {
+      toast('Error al eliminar el participante', 'e');
       cerrarModalBorrarMiembro();
-      toast(data.error, 'e');
       return;
     }
   } catch(err) { console.error('Error eliminando miembro:', err); return; }
-  g.expenses = g.expenses.filter(e => {
-    if (e.payer === n && e.involved.length === 1) return false;
-    if (e.involved.includes(n)) e.involved = e.involved.filter(p => p !== n);
-    return true;
-  });
-  delete g.members[n];
   save();
   renderAll();
   cerrarModalBorrarMiembro();
