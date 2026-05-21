@@ -305,4 +305,35 @@ router.get('/shared/:token', async (req, res, next) => {
     res.json({ group: gRes.rows[0], members: mRes.rows, expenses: eRes.rows, debts: computeDebts(mRes.rows) });
   } catch (err) { next(err); }
 });
+
+router.patch('/:id/members/:name/rename', requireAuth, async (req, res, next) => {
+  try {
+    if (!await ownsGroup(req.params.id, req.user.id)) {
+      return res.status(404).json({ error: 'Grupo no encontrado' });
+    }
+    const { display_name } = req.body;
+    if (!display_name) return res.status(400).json({ error: 'display_name es obligatorio' });
+
+    const existing = await db.query(
+      'SELECT id FROM group_members WHERE group_id = $1 AND display_name = $2',
+      [req.params.id, display_name]
+    );
+    if (existing.rows.length > 0) return res.status(409).json({ error: 'Ya existe un participante con ese nombre' });
+
+    await db.query(
+      'UPDATE group_members SET display_name = $1 WHERE group_id = $2 AND display_name = $3',
+      [display_name, req.params.id, req.params.name]
+    );
+    await db.query(
+      'UPDATE expenses SET payer_name = $1 WHERE group_id = $2 AND payer_name = $3',
+      [display_name, req.params.id, req.params.name]
+    );
+    await db.query(
+      'UPDATE expense_splits SET member_name = $1 WHERE member_name = $2 AND expense_id IN (SELECT id FROM expenses WHERE group_id = $3)',
+      [display_name, req.params.name, req.params.id]
+    );
+    res.json({ ok: true });
+  } catch (err) { next(err); }
+});
+
 module.exports = router;
