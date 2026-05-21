@@ -2025,33 +2025,19 @@ async function removeMember(n) {
   const g = groups[currentGroupIdx];
   const getInvolved = e => e.involved || (e.splits ? e.splits.map(s => s.member_name) : []);
   const hasExpenses = g.expenses.some(e => (e.payer || e.payer_name) === n || getInvolved(e).includes(n));
+  const count = hasExpenses ? g.expenses.filter(e => (e.payer || e.payer_name) === n || getInvolved(e).includes(n)).length : 0;
 
-  if (hasExpenses) {
-    const count = g.expenses.filter(e => (e.payer || e.payer_name) === n || getInvolved(e).includes(n)).length;
-    document.getElementById('del-miembro-avatar').textContent = n[0].toUpperCase();
-    document.getElementById('del-miembro-name').textContent = n;
-    document.getElementById('del-miembro-gastos').textContent = count + ' gasto' + (count !== 1 ? 's' : '') + ' registrado' + (count !== 1 ? 's' : '');
-    document.getElementById('modal-borrar-miembro').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    window._miembroABorrar = n;
-  } else {
-    const groupId = g.id;
-    try {
-      const res = await fetch(`${window.location.origin}/api/v1/groups/${groupId}/members/${encodeURIComponent(n)}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
-      });
-      if (res.status === 422) {
-        const data = await res.json();
-        toast(data.error, 'e');
-        return;
-      }
-    } catch(err) { console.error('Error eliminando miembro:', err); return; }
-    delete g.members[n];
-    save();
-    renderAll();
-    toast(`${n} eliminado del grupo`, 'i');
-  }
+  document.getElementById('del-miembro-avatar').textContent = n[0].toUpperCase();
+  document.getElementById('del-miembro-name').textContent = n;
+  document.getElementById('del-miembro-msg').textContent = hasExpenses
+    ? 'Este participante tiene gastos registrados. Al eliminarlo sus gastos serán actualizados.'
+    : 'Esta acción no se puede deshacer.';
+  document.getElementById('del-miembro-info').innerHTML = hasExpenses
+    ? `<span>🧾 ${count} gasto${count !== 1 ? 's' : ''} registrado${count !== 1 ? 's' : ''}</span><span>⚠️ Sus gastos serán reasignados</span>`
+    : `<span>⚠️ El participante será eliminado del grupo</span>`;
+  document.getElementById('modal-borrar-miembro').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  window._miembroABorrar = n;
 }
 
 function cerrarModalBorrarMiembro() {
@@ -4308,17 +4294,14 @@ function openDeleteFromEdit() {
   <div style="background:#1e1e1e; width:90%; max-width:340px; padding:25px; border-radius:24px; border:1px solid #333; text-align:center;">
     
     <div style="color:#F2F2F2; font-size:1.5rem; font-weight:bold; margin-bottom:10px;">¿Eliminar participante?</div>
-    <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:20px; opacity:0.8;">Este participante tiene gastos registrados. Al eliminarlo sus gastos serán actualizados.</p>
+    <p id="del-miembro-msg" style="color:#F2F2F2; font-size:0.8rem; margin-bottom:20px; opacity:0.8;"></p>
 
     <div style="background:#2a2a2a; border-radius:16px; padding:15px; margin-bottom:25px; text-align:left;">
       <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
         <div id="del-miembro-avatar" style="width:38px;height:38px;border-radius:50%;background:var(--gold-dark);color:var(--dark);font-size:1.1rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
         <div id="del-miembro-name" style="color:white; font-weight:800; font-size:1rem;"></div>
       </div>
-      <div style="color:#aaa; font-size:0.8rem; display:flex; flex-direction:column; gap:4px;">
-        <span>🧾 <span id="del-miembro-gastos"></span></span>
-        <span>⚠️ Sus gastos serán reasignados</span>
-      </div>
+      <div id="del-miembro-info" style="color:#aaa; font-size:0.8rem; display:flex; flex-direction:column; gap:4px;"></div>
     </div>
 
     <div style="display:flex; gap:12px; width:100%;">
