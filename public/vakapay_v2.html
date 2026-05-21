@@ -2543,6 +2543,7 @@ function calcDebts(){
         <div style="display:flex;gap:6px;width:100%;justify-content:flex-end;align-items:center;">
           ${(() => {
             const g = groups[currentGroupIdx];
+            console.log('memberIds:', JSON.stringify(g?.memberIds), 'profile.id:', profile.id);
             const myName = g && g.memberIds ? Object.entries(g.memberIds).find(([,uid]) => uid === profile.id)?.[0] : null;
             const isDebtor = myName === t.from;
             const isCreditor = myName === t.to;
