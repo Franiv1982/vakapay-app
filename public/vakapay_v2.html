@@ -1496,6 +1496,7 @@ function switchPage(id, btn) {
   if (btn) btn.classList.add('active');
   
   window.scrollTo(0, 0);
+  resetMemberAccordions();
 
   // 2. LÓGICA DE SALIDA DE GRUPO (Al volver a la lista general)
   if (id === 'page-grupos') {
@@ -1715,6 +1716,7 @@ const renderGroups = renderGroupsList;
 
 async function openGroup(idx){
   currentGroupIdx = idx;
+  resetMemberAccordions();
   const g = groups[idx];
 
   document.getElementById('detTitle').textContent = TYPE_ICONS[g.type]+' '+g.name;
@@ -2645,6 +2647,17 @@ function renderAll() {
   renderExpenses();
   renderBalances();
   if (typeof renderGroupsList === 'function') renderGroupsList();
+}
+
+function resetMemberAccordions() {
+  const memberWrap = document.getElementById('memberListWrap');
+  const memberChevron = document.getElementById('memberChevron');
+  const friendWrap = document.getElementById('friendPickerWrap');
+  const manualWrap = document.getElementById('manualAddWrap');
+  if (memberWrap) memberWrap.style.display = 'none';
+  if (memberChevron) memberChevron.style.transform = '';
+  if (friendWrap) friendWrap.style.display = 'none';
+  if (manualWrap) manualWrap.style.display = 'none';
 }
 function toggleMemberList() {
   const wrap = document.getElementById('memberListWrap');
