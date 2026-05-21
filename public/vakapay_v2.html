@@ -2936,6 +2936,13 @@ function loadFromHash(){
     setTimeout(()=>{openGroup(idx);toast('¡Grupo cargado desde el link!','s');},400);
   }catch(err){toast('Link inválido','e');}
 }
+function buildInviteText(){
+  if(currentGroupIdx===null) return '';
+  const g = groups[currentGroupIdx];
+  const link = document.getElementById('linkInput')?.value || '';
+  const sender = (profile.nombre || '').trim() || 'Alguien';
+  return `¡Hola! ${sender} te invita al grupo "${g.name}" en VakaPay.${link ? '\n\nAccede aquí: ' + link : ''}`;
+}
 
 // ═══ SHARE ══════════════════════════════════════════════════════════
 function buildText(){
@@ -3097,8 +3104,9 @@ function exportarPDF(){
 }
 function shareWhatsApp(){
   const phone=document.getElementById('contactPhone').value.replace(/\s+/g,'');
-  const text=encodeURIComponent(buildText());
+  const text=encodeURIComponent(buildInviteText());
   window.open(phone?`https://wa.me/${phone.replace('+','')}?text=${text}`:`https://wa.me/?text=${text}`,'_blank');
+  document.getElementById('contactPhone').value='';
 }
 function shareEmail(){
   const email=document.getElementById('contactEmail').value;
@@ -3109,11 +3117,9 @@ function shareEmail(){
 function sharePhone(){
   const phone=document.getElementById('contactPhone').value.replace(/\s+/g,'');
   if(!phone){toast('Introduce un número de teléfono','e');return;}
-  const link=document.getElementById('linkInput')?.value||'';
-  const g=groups[currentGroupIdx];
-  const name=g?g.name:'el grupo';
-  const body=encodeURIComponent(`¡Hola! Te comparto el acceso al grupo "${name}" en VakaPay:\n${link}`);
+  const body=encodeURIComponent(buildInviteText());
   window.location.href=`sms:${phone}?body=${body}`;
+  document.getElementById('contactPhone').value='';
 }
 
 async function pickContactForShare() {
