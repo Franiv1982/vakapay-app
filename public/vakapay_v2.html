@@ -4272,12 +4272,12 @@ function openDeleteFromEdit() {
 </script>
 
 <!-- ═══ PAY MODAL ═══ -->
-<div class="pay-modal-overlay" id="payModal" onclick="if(event.target===this)closePayModal()">
-  <div class="pay-modal-sheet">
+<div class="modal-overlay" id="payModal" onclick="if(event.target===this)closePayModal()">
+  <div class="modal-sheet" style="max-width:380px;">
     <div class="modal-handle"></div>
     <button class="modal-close" onclick="closePayModal()">✕ Cerrar</button>
     <div class="modal-title" id="pmTitle">Pagar deuda</div>
-    <div style="text-align:center;margin-bottom:8px">
+    <div style="text-align:center;margin-bottom:10px">
       <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px">Importe</div>
       <div style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:var(--gold)" id="pmAmount">€0</div>
     </div>
@@ -4295,9 +4295,9 @@ function openDeleteFromEdit() {
       <div style="font-size:.72rem;color:var(--muted);font-weight:700">Subir captura de pago</div>
       <img id="pmProofThumb" class="proof-thumb" style="max-height:32px;margin-left:auto">
     </div>
-    <div style="display:flex;gap:9px;margin-top:14px">
-      <button class="btn btn-outline" onclick="closePayModal()" style="flex:1">Cancelar</button>
-      <button class="btn btn-outline btn-green" onclick="confirmPayment(true)" style="flex:1">✅ Marcar saldado</button>
+    <div style="display:flex;gap:9px;margin-top:12px">
+      <button class="btn btn-outline" onclick="closePayModal()" style="flex:1;font-size:.75rem">Cancelar</button>
+      <button class="btn btn-outline btn-green" onclick="confirmPayment(true)" style="flex:1;font-size:.75rem">✅ Marcar saldado</button>
     </div>
   </div>
 </div>
