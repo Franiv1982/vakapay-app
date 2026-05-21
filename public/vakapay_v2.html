@@ -625,7 +625,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     <div class="dvd"></div>
     <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Contacto</div>
     <div class="g2">
-      <div class="field"><label><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.73a16 16 0 0 0 6.29 6.29l1.1-1.1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Teléfono</label><input type="tel" id="contactPhone" placeholder="+34 600 000 000"></div>
+      <div class="field"><label><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.73a16 16 0 0 0 6.29 6.29l1.1-1.1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Teléfono</label><div style="display:flex;gap:6px;align-items:center"><input type="tel" id="contactPhone" placeholder="+34 600 000 000" style="flex:1"><button onclick="pickContactForShare()" style="background:var(--dark3);border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;cursor:pointer;color:var(--muted);display:flex;align-items:center" title="Seleccionar contacto"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button></div></div>
 <div class="field"><label><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</label><input type="email" id="contactEmail" placeholder="amigo@email.com"></div>
     </div>
     <div style="display:flex;gap:24px;margin-top:13px;align-items:center;justify-content:center;">
@@ -636,7 +636,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
         <svg width="50" height="50" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#EA4335"/><path d="M8 11.5V21.5C8 22.3 8.7 23 9.5 23H22.5C23.3 23 24 22.3 24 21.5V11.5L16 17L8 11.5Z" fill="white"/><path d="M24 10H8L16 15.5L24 10Z" fill="white"/></svg>
       </button>
       <button onclick="sharePhone()" style="background:none;border:none;cursor:pointer;padding:0;transition:transform .13s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">
-        <svg width="50" height="50" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#34C759"/><path d="M21.5 19.5C21.5 19.8 21.4 20.1 21.2 20.4C21 20.7 20.8 21 20.5 21.2C20 21.7 19.4 21.9 18.8 21.9C17.9 21.9 17 21.6 16 21C15.1 20.5 14.2 19.8 13.4 19C12.6 18.2 11.9 17.3 11.4 16.4C10.9 15.4 10.6 14.5 10.6 13.6C10.6 13 10.8 12.5 11.2 12C11.6 11.5 12.1 11.2 12.7 11.2C12.9 11.2 13.1 11.3 13.3 11.4C13.5 11.5 13.7 11.7 13.8 12L14.9 13.6C15 13.8 15.1 13.9 15.1 14.1C15.1 14.3 15 14.4 14.9 14.6L14.5 15C14.4 15.1 14.4 15.2 14.4 15.3C14.4 15.4 14.5 15.5 14.5 15.6C14.7 15.9 15 16.3 15.3 16.7C15.7 17.1 16.1 17.4 16.4 17.6C16.5 17.7 16.6 17.7 16.7 17.7C16.8 17.7 16.9 17.7 17 17.6L17.4 17.2C17.6 17 17.8 16.9 18 16.9C18.2 16.9 18.3 17 18.5 17.1L20.1 18.2C20.3 18.3 20.5 18.5 20.6 18.7C20.5 18.9 20.5 19.2 21.5 19.5Z" fill="white"/></svg>
+        <svg width="50" height="50" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#34C759"/><path d="M8 10C8 9.45 8.45 9 9 9H23C23.55 9 24 9.45 24 10V20C24 20.55 23.55 21 23 21H17L13 24V21H9C8.45 21 8 20.55 8 20V10Z" fill="white"/></svg>
       </button>
     </div>
     <div class="dvd"></div>
@@ -3109,7 +3109,27 @@ function shareEmail(){
 function sharePhone(){
   const phone=document.getElementById('contactPhone').value.replace(/\s+/g,'');
   if(!phone){toast('Introduce un número de teléfono','e');return;}
-  window.location.href=`tel:${phone}`;
+  const link=document.getElementById('linkInput')?.value||'';
+  const g=groups[currentGroupIdx];
+  const name=g?g.name:'el grupo';
+  const body=encodeURIComponent(`¡Hola! Te comparto el acceso al grupo "${name}" en VakaPay:\n${link}`);
+  window.location.href=`sms:${phone}?body=${body}`;
+}
+
+async function pickContactForShare() {
+  if (!('contacts' in navigator && 'ContactsManager' in window)) {
+    toast('Tu navegador no soporta acceso a contactos', 'e'); return;
+  }
+  try {
+    const contacts = await navigator.contacts.select(['name','tel'], { multiple: false });
+    if (!contacts || contacts.length === 0) return;
+    const tel = contacts[0].tel?.[0] || '';
+    if (!tel) { toast('El contacto no tiene número de teléfono', 'e'); return; }
+    document.getElementById('contactPhone').value = tel;
+    toast(`Contacto cargado ✓`, 's');
+  } catch(err) {
+    toast('No se pudo acceder a los contactos', 'e');
+  }
 }
 
 // ═══ FRIENDS ════════════════════════════════════════════════════════
