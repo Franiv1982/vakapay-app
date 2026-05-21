@@ -646,7 +646,14 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 </div>
 
   <!-- Share -->
-  <div class="sec-title" id="sec6" style="opacity:.3"><div class="num">6</div><h2>Enviar Resumen</h2></div>
+  <div class="sec-title" id="sec6" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleResumenSection()">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="num">6</div>
+    <h2>Enviar Resumen</h2>
+  </div>
+  <svg id="resumenChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+</div>
+  <div id="resumenSectionWrap" style="display:none">
   <div class="card">
     <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Link del grupo</div>
     <p style="font-size:.76rem;color:var(--muted);margin-bottom:9px">Genera un link cliqueable para que tus contactos accedan al grupo directamente.</p>
@@ -677,6 +684,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     <p style="font-size:.76rem;color:var(--muted);margin-bottom:9px">Descarga un resumen completo del grupo con participantes, gastos y estadísticas.</p>
     <button class="btn btn-gold btn-full" onclick="exportarPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
   </div>
+</div>
 </main>
 </div>
 <!-- ═══ PAGE: DETALLE GASTO ═══ -->
@@ -2709,6 +2717,10 @@ function resetMemberAccordions() {
   const gastosListChevron = document.getElementById('gastosListChevron');
   const cuentasWrap = document.getElementById('cuentasSectionWrap');
   const cuentasChevron = document.getElementById('cuentasChevron');
+  const resumenWrap = document.getElementById('resumenSectionWrap');
+  const resumenChevron = document.getElementById('resumenChevron');
+  if (resumenWrap) resumenWrap.style.display = 'none';
+  if (resumenChevron) resumenChevron.style.transform = '';
   if (cuentasWrap) cuentasWrap.style.display = 'none';
   if (cuentasChevron) cuentasChevron.style.transform = '';
   if (gastosListWrap) gastosListWrap.style.display = 'none';
@@ -2752,6 +2764,14 @@ function toggleCuentasSection() {
 function toggleParticipantesSection() {
   const wrap = document.getElementById('participantesSectionWrap');
   const chevron = document.getElementById('participantesChevron');
+  if (!wrap) return;
+  const open = wrap.style.display === 'block';
+  wrap.style.display = open ? 'none' : 'block';
+  chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+function toggleResumenSection() {
+  const wrap = document.getElementById('resumenSectionWrap');
+  const chevron = document.getElementById('resumenChevron');
   if (!wrap) return;
   const open = wrap.style.display === 'block';
   wrap.style.display = open ? 'none' : 'block';
