@@ -1497,6 +1497,7 @@ function switchPage(id, btn) {
   
   window.scrollTo(0, 0);
   resetMemberAccordions();
+  if (typeof hideNewGroupForm === 'function') hideNewGroupForm();
 
   // 2. LÓGICA DE SALIDA DE GRUPO (Al volver a la lista general)
   if (id === 'page-grupos') {
