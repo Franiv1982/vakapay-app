@@ -2743,27 +2743,45 @@ if (mbs.includes(prev)) ps.value = prev;
 }
 
 function openRenameMember(oldName) {
-  const newName = prompt(`Renombrar "${oldName}":`, oldName);
-  if (!newName || newName.trim() === '' || newName.trim() === oldName) return;
-  const trimmed = newName.trim();
+  window._miembroARenombrar = oldName;
+  document.getElementById('rename-miembro-avatar').textContent = oldName[0].toUpperCase();
+  document.getElementById('rename-miembro-name').textContent = oldName;
+  document.getElementById('rename-miembro-input').value = oldName;
+  document.getElementById('modal-renombrar-miembro').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('rename-miembro-input').focus(), 100);
+}
+
+function cerrarModalRenombrarMiembro() {
+  document.getElementById('modal-renombrar-miembro').style.display = 'none';
+  document.body.style.overflow = '';
+  window._miembroARenombrar = null;
+}
+
+async function ejecutarRenombrarMiembro() {
+  const oldName = window._miembroARenombrar;
+  if (!oldName) return;
+  const trimmed = document.getElementById('rename-miembro-input').value.trim();
+  if (!trimmed || trimmed === oldName) { cerrarModalRenombrarMiembro(); return; }
   const g = groups[currentGroupIdx];
   if (Object.keys(g.members).includes(trimmed)) {
     toast('Ya existe un participante con ese nombre', 'e'); return;
   }
-  // Actualizar en memoria
   g.members[trimmed] = g.members[oldName];
   delete g.members[oldName];
   g.expenses.forEach(ex => {
     if (ex.payer === oldName) ex.payer = trimmed;
     ex.involved = ex.involved.map(p => p === oldName ? trimmed : p);
   });
-  // Persistir en backend
-  fetch(`${window.location.origin}/api/v1/groups/${g.id}/members/${encodeURIComponent(oldName)}/rename`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
-    body: JSON.stringify({ display_name: trimmed })
-  }).catch(() => {});
+  try {
+    await fetch(`${window.location.origin}/api/v1/groups/${g.id}/members/${encodeURIComponent(oldName)}/rename`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: JSON.stringify({ display_name: trimmed })
+    });
+  } catch(_) {}
   save();
+  cerrarModalRenombrarMiembro();
   renderMembers();
   renderExpenses();
   toast(`"${oldName}" renombrado a "${trimmed}" ✓`, 's');
@@ -4350,6 +4368,30 @@ function openDeleteFromEdit() {
       <button onclick="ejecutarEliminarCuenta()"
         style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#990000;">
         Sí, eliminar
+      </button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-renombrar-miembro" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalRenombrarMiembro()">
+  <div style="background:#1e1e1e; width:90%; max-width:340px; padding:25px; border-radius:24px; border:1px solid #333; text-align:center;">
+    <div style="color:#F2F2F2; font-size:1.5rem; font-weight:bold; margin-bottom:10px;">Renombrar participante</div>
+    <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:20px; opacity:0.8;">Introduce el nuevo nombre para este participante.</p>
+    <div style="background:#2a2a2a; border-radius:16px; padding:15px; margin-bottom:20px; text-align:left;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+        <div id="rename-miembro-avatar" style="width:38px;height:38px;border-radius:50%;background:var(--gold-dark);color:var(--dark);font-size:1.1rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
+        <div id="rename-miembro-name" style="color:white; font-weight:800; font-size:1rem;"></div>
+      </div>
+      <input id="rename-miembro-input" type="text" placeholder="Nuevo nombre..."
+        style="width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid #444; background:#1a1a1a; color:white; font-size:0.9rem; box-sizing:border-box; outline:none;"/>
+    </div>
+    <div style="display:flex; gap:12px; width:100%;">
+      <button onclick="cerrarModalRenombrarMiembro()"
+        style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#444;">
+        Cancelar
+      </button>
+      <button onclick="ejecutarRenombrarMiembro()"
+        style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:var(--dark); background:var(--gold);">
+        Guardar
       </button>
     </div>
   </div>
