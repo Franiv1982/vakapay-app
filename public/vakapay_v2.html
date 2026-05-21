@@ -1111,6 +1111,9 @@ class VakaDataService {
   members: Array.isArray(g.members)
     ? Object.fromEntries(g.members.map(m => [m.display_name, m.balance || 0]))
     : g.members || {},
+  memberIds: Array.isArray(g.members)
+    ? Object.fromEntries(g.members.filter(m => m.user_id).map(m => [m.display_name, m.user_id]))
+    : g.memberIds || {},
   expenses: (g.expenses || []).map(normalizeExpense),
   createdAt: g.created_at || g.createdAt || new Date().toISOString(),
   currency:  g.currency || 'EUR',
