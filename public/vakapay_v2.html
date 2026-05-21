@@ -3569,17 +3569,35 @@ function renderActivity() {
     byDate[fecha].push(a);
   });
 
-  el.innerHTML = Object.entries(byDate).map(([fecha, items]) => `
-    <div style="font-size:.7rem;color:var(--gold);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin:14px 0 6px 0;">${fecha}</div>
-    <div class="card" style="margin-bottom:4px;">
-      ${items.map(a => `
-        <div class="act-item">
-          <div class="act-dot"></div>
-          <div class="act-txt">${a.msg || a.message}
-            <div class="act-time">${formatRelTime(new Date(a.time || a.created_at))}${a.groupName && !filterGroup ? ' · ' + a.groupName : ''}</div>
-          </div>
-        </div>`).join('')}
-    </div>`).join('');
+  el.innerHTML = Object.entries(byDate).map(([fecha, items], idx) => {
+    const id = 'actDay_' + idx;
+    const isHoy = fecha === 'Hoy';
+    return `
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin:14px 0 6px 0;" onclick="toggleActDay('${id}')">
+      <div style="font-size:.7rem;color:var(--gold);text-transform:uppercase;letter-spacing:.8px;font-weight:700;">${fecha} <span style="color:var(--muted);font-weight:400">(${items.length})</span></div>
+      <svg id="${id}_chv" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;transform:${isHoy ? 'rotate(180deg)' : ''}"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div id="${id}" style="display:${isHoy ? 'block' : 'none'}">
+      <div class="card" style="margin-bottom:4px;">
+        ${items.map(a => `
+          <div class="act-item">
+            <div class="act-dot"></div>
+            <div class="act-txt">${a.msg || a.message}
+              <div class="act-time">${formatRelTime(new Date(a.time || a.created_at))}${a.groupName && !filterGroup ? ' · ' + a.groupName : ''}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleActDay(id) {
+  const wrap = document.getElementById(id);
+  const chv = document.getElementById(id + '_chv');
+  if (!wrap) return;
+  const open = wrap.style.display === 'block';
+  wrap.style.display = open ? 'none' : 'block';
+  if (chv) chv.style.transform = open ? '' : 'rotate(180deg)';
 }
 
 function formatRelTime(d){
