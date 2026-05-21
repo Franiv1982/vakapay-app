@@ -323,12 +323,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 .debt-actions{display:flex;gap:6px;flex-shrink:0;margin-left:auto}
 .pay-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:600;align-items:flex-end;justify-content:center}
 .pay-modal-overlay.open{display:flex;animation:fadeIn .2s ease}
-.pay-modal-sheet{background:var(--card);border:1px solid var(--border);border-radius:22px 22px 0 0;padding:22px 18px 40px;width:100%;max-width:660px;animation:slideUp .25s ease}
-.pay-method-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
-.pay-method-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:13px;border:2px solid rgba(255,255,255,.07);background:var(--dark3);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text);transition:border-color .2s,background .2s,transform .13s}
+.pay-modal-sheet{background:var(--card);border:1px solid var(--border);border-radius:22px 22px 0 0;padding:16px 16px 24px;width:100%;max-width:660px;animation:slideUp .25s ease}
+.pay-method-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:10px 0}
+.pay-method-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:10px;border:2px solid rgba(255,255,255,.07);background:var(--dark3);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:.62rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text);transition:border-color .2s,background .2s,transform .13s}
 .pay-method-btn:active{transform:scale(.93)}
 .pay-method-btn.selected{border-color:var(--gold);background:rgba(245,200,0,.09);color:var(--gold)}
-.pay-method-btn .pm-icon{font-size:1.6rem}
+.pay-method-btn .pm-icon{font-size:1.2rem}
 .proof-area{background:var(--dark3);border:2px dashed rgba(245,200,0,.25);border-radius:11px;padding:14px;text-align:center;cursor:pointer;margin-top:10px;transition:border-color .2s}
 .proof-area:hover{border-color:var(--gold)}
 .proof-area input{display:none}
@@ -4277,11 +4277,11 @@ function openDeleteFromEdit() {
     <div class="modal-handle"></div>
     <button class="modal-close" onclick="closePayModal()">✕ Cerrar</button>
     <div class="modal-title" id="pmTitle">Pagar deuda</div>
-    <div style="text-align:center;margin-bottom:14px">
-      <div style="font-size:.75rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px">Importe</div>
-      <div style="font-family:'Bebas Neue',cursive;font-size:2rem;color:var(--gold)" id="pmAmount">€0</div>
+    <div style="text-align:center;margin-bottom:8px">
+      <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px">Importe</div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:var(--gold)" id="pmAmount">€0</div>
     </div>
-    <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:10px">Elige método de pago</div>
+    <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:6px">Elige método de pago</div>
     <div class="pay-method-grid">
       <button class="pay-method-btn" onclick="selectPayMethod(this,'bizum')"><span class="pm-icon">📱</span>Bizum</button>
       <button class="pay-method-btn" onclick="selectPayMethod(this,'revolut')"><span class="pm-icon">💜</span>Revolut</button>
