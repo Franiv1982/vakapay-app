@@ -5,8 +5,17 @@ if (!process.env.DATABASE_URL) {
   console.error("❌ Error: La variable de entorno DATABASE_URL no está configurada.");
 }
 
+// Forzar la lectura de variables de entorno si existiera un archivo .env
+require('dotenv').config();
+
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  console.error("❌ Error grave: DATABASE_URL no está definida en el entorno.");
+}
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: connectionString,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
