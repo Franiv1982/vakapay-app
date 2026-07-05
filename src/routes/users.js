@@ -8,8 +8,15 @@ const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Almacenamiento de avatares
 const UPLOADS_DIR = process.env.UPLOADS_DIR || path.join(__dirname, '../../uploads/avatars');
-if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+try {
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+  }
+} catch (error) {
+  console.log("Ignorando la creación del directorio local de subidas en entorno Serverless.");
+}
 
 const storage = multer.diskStorage({
   destination: UPLOADS_DIR,
