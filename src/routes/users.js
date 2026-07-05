@@ -35,7 +35,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+
 
 // ── GET /users/me ────────────────────────────────────────────────
 router.get('/me', requireAuth, async (req, res, next) => {
