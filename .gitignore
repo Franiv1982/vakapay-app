@@ -31,3 +31,4 @@ Thumbs.db
 
 # Build
 dist/
+.env
