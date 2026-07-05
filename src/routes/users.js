@@ -10,21 +10,31 @@ const router = express.Router();
 
 // Almacenamiento de avatares
 const UPLOADS_DIR = process.env.UPLOADS_DIR || path.join(__dirname, '../../uploads/avatars');
-try {
-  if (!fs.existsSync(UPLOADS_DIR)) {
-    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+let storage;
+
+if (process.env.NODE_ENV === 'production') {
+  // En Vercel (Producción), guardamos temporalmente el archivo en memoria
+  storage = multer.memoryStorage();
+} else {
+  // En local (Desarrollo), seguimos creando la carpeta y guardando en disco
+  try {
+    if (!fs.existsSync(UPLOADS_DIR)) {
+      fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+    }
+  } catch (error) {
+    console.log("Ignorando la creación del directorio local de subidas.");
   }
-} catch (error) {
-  console.log("Ignorando la creación del directorio local de subidas en entorno Serverless.");
+
+  storage = multer.diskStorage({
+    destination: UPLOADS_DIR,
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
+      cb(null, `user_${req.user.id}${ext}`);
+    },
+  });
 }
 
-const storage = multer.diskStorage({
-  destination: UPLOADS_DIR,
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase() || '.jpg';
-    cb(null, `user_${req.user.id}${ext}`);
-  },
-});
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 // ── GET /users/me ────────────────────────────────────────────────
