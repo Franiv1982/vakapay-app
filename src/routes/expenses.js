@@ -91,9 +91,9 @@ router.post('/', requireAuth, async (req, res, next) => {
     const shareBase   = +(amount_base / involved.length).toFixed(2);
 
     const expRes = await db.query(`
-      INSERT INTO expenses (group_id, description, amount, currency, amount_base, category, payer_name, expense_date)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *
-    `, [req.params.id, description, amount, currency, amount_base, category, payer_name, expense_date]);
+      INSERT INTO expenses (group_id, description, amount, currency, amount_base, category, payer_name, expense_date, member_id)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *
+    `, [req.params.id, description, amount, currency, amount_base, category, payer_name, expense_date, req.user.id]);
 
     const expense = expRes.rows[0];
 
@@ -151,9 +151,10 @@ router.put('/:expId', requireAuth, async (req, res, next) => {
     const shareBase   = +(amount_base / involved.length).toFixed(2);
 
     await db.query(`
-      UPDATE expenses SET description=$1, amount=$2, currency=$3, amount_base=$4, category=$5, payer_name=$6, expense_date=$7
-      WHERE id=$8
-    `, [description, amount, currency, amount_base, category, payer_name, expense_date, req.params.expId]);
+      UPDATE expenses 
+      SET description=$1, amount=$2, currency=$3, amount_base=$4, category=$5, payer_name=$6, expense_date=$7, member_id=$8
+      WHERE id=$9 AND member_id=$8
+    `, [description, amount, currency, amount_base, category, payer_name, expense_date, req.user.id, req.params.expId]);
 
     await db.query('DELETE FROM expense_splits WHERE expense_id = $1', [req.params.expId]);
     for (const name of involved) {
