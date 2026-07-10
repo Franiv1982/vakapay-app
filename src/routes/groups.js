@@ -38,22 +38,13 @@ router.get('/', requireAuth, async (req, res, next) => {
   try {
     const result = await db.query(`
       SELECT g.*,
-        COALESCE(m_counts.member_count, 0) AS member_count,
-        COALESCE(e_counts.expense_count, 0) AS expense_count,
-        COALESCE(e_counts.total, 0) AS total
+        (SELECT COUNT(*)::int FROM group_members WHERE group_id = g.id) AS member_count,
+        (SELECT COUNT(*)::int FROM expenses WHERE group_id = g.id) AS expense_count,
+        COALESCE((SELECT SUM(amount) FROM expenses WHERE group_id = g.id), 0)::float AS total
       FROM groups g
-      LEFT JOIN (
-        SELECT group_id, COUNT(id) AS member_count 
-        FROM group_members 
-        GROUP BY group_id
-      ) m_counts ON m_counts.group_id = g.id
-      LEFT JOIN (
-        SELECT group_id, COUNT(id) AS expense_count, SUM(amount_base) AS total 
-        FROM expenses 
-        GROUP BY group_id
-      ) e_counts ON e_counts.group_id = g.id
-      WHERE g.owner_id = $1 
-         OR g.id IN (SELECT group_id FROM group_members WHERE user_id = $1)
+      LEFT JOIN group_members gm ON gm.group_id = g.id
+      WHERE g.owner_id = $1 OR gm.user_id = $1
+      GROUP BY g.id
       ORDER BY g.created_at DESC
     `, [req.user.id]);
     res.json(result.rows);
