@@ -9,7 +9,7 @@
 class VakaDataService {
 
   // ─── CONFIG ──────────────────────────────────────────────────
-  #baseUrl = 'http://192.168.1.131:3000/api/v1';
+  #baseUrl = 'http://10.0.2.2:3000/api/v1';
   #token   = null;
   #queue   = [];   // operaciones pendientes offline
   #KEYS    = {
