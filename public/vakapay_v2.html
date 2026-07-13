@@ -2241,7 +2241,9 @@ async function addExpense() {
   // Ahora involucrados ya no debería dar 0 si has seleccionado chips
   if (involved.length === 0) { toast('Selecciona al menos un consumidor', 'e'); return; }
   
-  if (date < g.start || date > g.end) { toast('Fecha fuera del rango del grupo', 'e'); return; }
+  const gStart = (g.start || '').slice(0, 10);
+  const gEnd = (g.end || '').slice(0, 10);
+  if (date < gStart || date > gEnd) { toast('Fecha fuera del rango del grupo', 'e'); return; }
 
   // 3. Lógica de Conversión
   const rateToUse = (currency === getBase()) ? 1 : (manualRate || RATES[currency] || 1);
