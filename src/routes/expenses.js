@@ -34,7 +34,8 @@ async function recalcBalances(groupId) {
   for (const ex of expensesRes.rows) {
     const splitsRes = await db.query('SELECT * FROM expense_splits WHERE expense_id = $1', [ex.id]);
     if (balances[ex.payer_name] !== undefined) {
-      balances[ex.payer_name] = +(balances[ex.payer_name] + ex.amount_base).toFixed(2);
+      // Línea corregida:
+    balances[ex.payer_name] = +(balances[ex.payer_name] + Number(ex.amount_base || 0)).toFixed(2);
     }
     splitsRes.rows.forEach(s => {
       if (balances[s.member_name] !== undefined) {
