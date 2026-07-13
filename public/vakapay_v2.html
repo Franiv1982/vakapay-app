@@ -1484,21 +1484,27 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ display_name: displayName })
         });
-        const data = await res.json();
-        console.log('📨 Respuesta invitación:', data);
-        if (data.joined || data.already_member) {
+        
+        if (!res.ok) {
           localStorage.removeItem('vp_pending_invite');
-          groups = await vakaData.getGroups() || [];
-          friends = await vakaData.getFriends() || [];
-          renderGroupsList();
-          renderFriends();
-          const msg = data.already_member ? `Ya eres miembro de "${data.group.name}"` : `Te has unido al grupo "${data.group.name}" ✓`;
-          toast(msg, 's');
         } else {
-          console.error('No se pudo unir al grupo:', data);
+          const data = await res.json();
+          console.log('📨 Respuesta invitación:', data);
+          if (data.joined || data.already_member) {
+            localStorage.removeItem('vp_pending_invite');
+            groups = await vakaData.getGroups() || [];
+            friends = await vakaData.getFriends() || [];
+            renderGroupsList();
+            renderFriends();
+            const msg = data.already_member ? `Ya eres miembro de "${data.group.name}"` : `Te has unido al grupo "${data.group.name}" ✓`;
+            toast(msg, 's');
+          } else {
+            localStorage.removeItem('vp_pending_invite');
+          }
         }
       } catch(err) {
         console.error('Error al unirse al grupo:', err);
+        localStorage.removeItem('vp_pending_invite');
       }
     }
 	loadFromHash();
