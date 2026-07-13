@@ -265,7 +265,7 @@
             <button onclick="switchPage('page-login-formulario')" class="btn-outline">Iniciar sesión</button>
             <div class="separator">o bien</div>
             <button class="btn-google" onclick="alert('Conectando con Google...')">
-                <img src="logoGoogle.png" alt="Google"> Seguir con Google
+                <img src="logo_google.png" alt="Google"> Seguir con Google
             </button>
         </div></div>
     </div>
@@ -713,10 +713,17 @@ async function iniciarSesion() {
         });
         
         console.log("✅ Acceso concedido:", response);
-        
-        if (response && response.token) {
-            localStorage.setItem('token', response.token);
-        }
+        console.log("🔍 Estructura de response:", JSON.stringify(response));
+
+    if (response && response.token) {
+    localStorage.setItem('token', response.token);
+    
+    // GUARDAMOS LOS DATOS DEL USUARIO
+    if (response.user) {
+        localStorage.setItem('user_id', response.user.id);
+        localStorage.setItem('user_name', response.user.nombre); 
+    }
+}
 
         window.location.href = 'vakapay_v2.html';
         
