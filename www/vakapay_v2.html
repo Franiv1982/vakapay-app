@@ -1413,44 +1413,27 @@ async logActivity(msg, groupName = null) {
       
       return true;
     } catch (err) {
-      // Si el servidor falla, el error se propaga y no tocamos el localStorage
       throw err;
     }
-    try {
-      const gs = await this.#req('GET', '/groups');
-      if (Array.isArray(gs)) {
-        for (const g of gs) await this.#req('DELETE', `/groups/${g.id}`);
-      }
-    } catch(_) {}
-    try {
-      const fs = await this.#req('GET', '/friends');
-      if (Array.isArray(fs)) {
-        for (const f of fs) await this.#req('DELETE', `/friends/${f.id}`);
-      }
-    } catch(_) {}
-    try { await this.#req('DELETE', '/activity'); } catch(_) {}
-    Object.values(this.#KEYS).forEach(k => localStorage.removeItem(k));
-    localStorage.clear();
   }
-async deleteAllData() {
+
+  async deleteAllData() {
     try {
-      // Borrado de grupos
       const gs = await this.#req('GET', '/groups');
       if (Array.isArray(gs)) {
         for (const g of gs) await this.#req('DELETE', `/groups/${g.id}`);
       }
-      // Borrado de amigos
       const fs = await this.#req('GET', '/friends');
       if (Array.isArray(fs)) {
         for (const f of fs) await this.#req('DELETE', `/friends/${f.id}`);
       }
-      // Borrado de actividad
       try { await this.#req('DELETE', '/activity'); } catch(_) {}
     } catch(err) {
       console.error('Error durante el borrado de datos:', err);
     }
   }
-async deleteAccount() {
+
+  async deleteAccount() {
     await this.deleteAllData();
     try {
       await this.#req('DELETE', '/users/me');
