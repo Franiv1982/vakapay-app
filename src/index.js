@@ -20,8 +20,22 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 
 // ── Middleware global ─────────────────────────────────────────────
+const allowedOrigins = [
+  'https://vakapay-app.vercel.app',   // la propia web
+  'https://localhost',                 // WebView de Capacitor en Android (tu APK)
+  'capacitor://localhost',             // variante usada en algunas versiones/plataformas
+  'http://localhost',                  // por si pruebas en local
+];
+
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN || '*',
+  origin: function (origin, callback) {
+    // Permite peticiones sin "origin" (apps nativas, curl, Postman) y las de la lista
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS: ' + origin));
+    }
+  },
   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type','Authorization'],
 }));
@@ -32,7 +46,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use(express.static(path.join(__dirname, '../public')));
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/Login.html'));
+  res.sendFile(path.join(__dirname, '../public/login.html'));
 });
 
 // ── Health check ──────────────────────────────────────────────────
