@@ -1230,7 +1230,14 @@ class VakaDataService {
       });
       
       console.log("☁️ Sincronizado correctamente con el servidor");
-      if (typeof renderAll === 'function') renderAll();
+      const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+      });
+      if (resFresh.ok) {
+        const freshData = await resFresh.json();
+        groups[currentGroupIdx] = { ...groups[currentGroupIdx], ...freshData };
+        renderAll();
+      }
     } catch (e) {
       console.warn("⚠️ Sincro fallida (guardado solo en LocalStorage):", e.message);
     }
@@ -1265,6 +1272,18 @@ class VakaDataService {
     } catch (e) { 
       console.warn("Borrado solo local (Servidor offline)"); 
     }
+    // Sincronización post-borrado
+    try {
+      const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+      });
+      if (resFresh.ok) {
+        const freshData = await resFresh.json();
+        groups[currentGroupIdx] = { ...groups[currentGroupIdx], ...freshData };
+        updateBalances();
+        renderAll();
+      }
+    } catch (e) { console.error("Error sincronizando tras borrar:", e); }
     return true;
   }
 
@@ -1382,21 +1401,21 @@ async logActivity(msg, groupName = null) {
   }
   async deleteGroup(id) {
     try {
-      // Enviamos la petición DELETE al servidor
+      // 1. Enviamos petición al servidor
       await this.#req('DELETE', `/groups/${id}`);
       
-      // Actualizamos también el almacenamiento local interno de la clase
+      // 2. Solo si no hubo error, filtramos localmente
       const gs = this.#read(this.#KEYS.groups) ?? [];
       const filtered = gs.filter(g => (g.id || g._id) !== id);
+      
+      // 3. Persistimos el nuevo estado
       this.#write(this.#KEYS.groups, filtered);
       
       return true;
     } catch (err) {
-      // Si el servidor falla, lanzamos el error para que la interfaz avise
+      // Si el servidor falla, el error se propaga y no tocamos el localStorage
       throw err;
     }
-  }
-async deleteAllData() {
     try {
       const gs = await this.#req('GET', '/groups');
       if (Array.isArray(gs)) {
@@ -1413,7 +1432,24 @@ async deleteAllData() {
     Object.values(this.#KEYS).forEach(k => localStorage.removeItem(k));
     localStorage.clear();
   }
-
+async deleteAllData() {
+    try {
+      // Borrado de grupos
+      const gs = await this.#req('GET', '/groups');
+      if (Array.isArray(gs)) {
+        for (const g of gs) await this.#req('DELETE', `/groups/${g.id}`);
+      }
+      // Borrado de amigos
+      const fs = await this.#req('GET', '/friends');
+      if (Array.isArray(fs)) {
+        for (const f of fs) await this.#req('DELETE', `/friends/${f.id}`);
+      }
+      // Borrado de actividad
+      try { await this.#req('DELETE', '/activity'); } catch(_) {}
+    } catch(err) {
+      console.error('Error durante el borrado de datos:', err);
+    }
+  }
 async deleteAccount() {
     await this.deleteAllData();
     try {
@@ -2626,6 +2662,10 @@ function toggleEditSelectAll(){
 async function saveEditExpense() {
   if (currentGroupIdx === null || editingExpenseIdx === null) return;
   
+  // 1. Bloqueo de UI para evitar múltiples clics
+  const saveBtn = document.querySelector('button[onclick="saveEditExpense()"]');
+  if (saveBtn) saveBtn.disabled = true;
+
   const g = groups[currentGroupIdx];
   const old = g.expenses[editingExpenseIdx];
 
@@ -2635,106 +2675,44 @@ async function saveEditExpense() {
   const cat = document.getElementById('editCat').value;
   const payer = document.getElementById('editPayer').value;
   const date = document.getElementById('editDate').value;
-  const manualRate = parseFloat(document.getElementById('editExchangeRate').value);
   const involved = [...document.querySelectorAll('#editInvolvedChips .modal-chip.sel')].map(c => c.dataset.name);
 
-  // Refuerzo: si algún participante seleccionado ya no está en g.members
-  // (por ejemplo, se perdió por el bug de sincronización), lo recreamos aquí
-  // para que el cálculo de saldos no lo ignore.
-  involved.forEach(name => {
-    if (!g.members.hasOwnProperty(name)) g.members[name] = 0;
-  });
+  if (!desc) { toast('Añade una descripción', 'e'); if (saveBtn) saveBtn.disabled = false; return; }
+  if (!amount || amount <= 0) { toast('Monto inválido', 'e'); if (saveBtn) saveBtn.disabled = false; return; }
+  if (involved.length === 0) { toast('Selecciona al menos un consumidor', 'e'); if (saveBtn) saveBtn.disabled = false; return; }
 
-  if (!desc) { toast('Añade una descripción', 'e'); return; }
-  if (!amount || amount <= 0) { toast('Monto inválido', 'e'); return; }
-  if (involved.length === 0) { toast('Selecciona al menos un consumidor', 'e'); return; }
-
-  const rateToUse = (currency === getBase()) ? 1 : (manualRate || RATES[currency] || 1);
-  const newBaseAmt = +(amount / rateToUse).toFixed(2);
-
-  // --- BLOQUE DE SINCRONIZACIÓN CORREGIDO ---
   try {
     const expId = old.id || old._id;
-    const url = expId 
-        ? `${API_BASE}/api/v1/groups/${g.id}/expenses/${expId}` 
-        : `${API_BASE}/api/v1/groups/${g.id}/expenses`;
-    const method = expId ? 'PUT' : 'POST';
-
-    const response = await fetch(url, {
-        method: method,
-        headers: { 
-          'Content-Type': 'application/json', 
-          'Authorization': `Bearer ${vakaData.getToken()}` 
-        },
-        body: JSON.stringify({
-            description: desc,
-            amount: amount,
-            currency: currency,
-            category: cat,
-            payer_name: payer,
-            expense_date: date,
-            involved: involved
-        })
+    const response = await fetch(`${API_BASE}/api/v1/groups/${g.id}/expenses/${expId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+        body: JSON.stringify({ description: desc, amount, currency, category: cat, payer_name: payer, expense_date: date, involved })
     });
 
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error al sincronizar con el servidor");
-    }
+    if (!response.ok) throw new Error("Error al sincronizar");
+
+    // Sincronización final: Recargamos el estado completo del grupo desde el servidor
+    const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
     
-    console.log("☁️ Gasto sincronizado correctamente");
-  } catch(err) { 
-    console.error('Error al sincronizar gasto:', err); 
-    toast('Error: No se pudo guardar en la base de datos', 'e');
+    if (resFresh.ok) {
+        const freshData = await resFresh.json();
+        groups[currentGroupIdx] = { ...groups[currentGroupIdx], ...freshData };
+    }
+
+    renderAll();
+    renderGroups();
+    document.getElementById('editModal').classList.remove('open');
+    document.body.style.overflow = '';
+    toast('Gasto actualizado ✓', 's');
+  } catch (err) {
+    console.error(err);
+    toast('Error: No se pudo guardar', 'e');
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
   }
-
-  // Actualizar localmente
-  const oldInvolved = old.involved || (old.splits ? old.splits.map(s => s.member_name) : []);
-  const oldBaseAmt = old.baseAmt || old.amount_base || old.amount || 0;
-  const oldQuota = oldBaseAmt / (oldInvolved.length || 1);
-  const oldPayer = old.payer || old.payer_name;
-
-  if (g.members[oldPayer] !== undefined) g.members[oldPayer] = +(g.members[oldPayer] - oldBaseAmt).toFixed(2);
-  oldInvolved.forEach(p => {
-    if (g.members[p] !== undefined) g.members[p] = +(g.members[p] + oldQuota).toFixed(2);
-  });
-
-  const newQuota = newBaseAmt / involved.length;
-  if (g.members[payer] !== undefined) g.members[payer] = +(g.members[payer] + newBaseAmt).toFixed(2);
-  involved.forEach(p => {
-    if (g.members[p] !== undefined) g.members[p] = +(g.members[p] - newQuota).toFixed(2);
-  });
-
-  g.expenses[editingExpenseIdx] = {
-    ...old,
-    desc, description: desc,
-    amount,
-    cat, category: cat,
-    payer, payer_name: payer,
-    date, expense_date: date,
-    involved,
-    currency,
-    baseAmt: newBaseAmt,
-    amount_base: newBaseAmt,
-  };
-
-  g.total = g.expenses.reduce((sum, e) => sum + (e.baseAmt || e.amount_base || 0), 0);
-
-  await save();
-  logActivity(`Gasto "${desc}" editado en "${g.name}"`);
-  await saveActivity();
-  renderActivity();
-  
-  document.getElementById('editModal').classList.remove('open');
-  document.body.style.overflow='';
-  clearEditOCR();
-  editingExpenseIdx = null;
-  if (currentExpenseIdx !== null) openGasto(currentExpenseIdx);
-  renderAll();
-  renderGroups();
-  toast('Gasto actualizado ✓', 's');
 }
-
 // ═══ DELETE EXPENSE ════════════════════════════════════════════════════
 function calcDebts(){
   if(currentGroupIdx===null)return;
