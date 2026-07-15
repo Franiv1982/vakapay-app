@@ -1,0 +1,34 @@
+# Dependencias
+node_modules/
+.env
+data/*.db-shm
+data/*.db-wal
+uploads/avatars/*
+
+# Base de datos (no subir datos reales)
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Entorno
+.env
+
+# Uploads de usuarios
+uploads/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Build
+dist/
+.env

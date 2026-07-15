@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vakapay - Acceso</title>
+    <style>
+        :root { --accent: #FFD700; }
+        
+        body { 
+			background: #121212; 
+			color: #F2F2F2; 
+			font-family: 'Segoe UI', sans-serif; 
+			margin: 0; 
+			display: flex; 
+			justify-content: center; 
+			align-items: center; 
+			min-height: 100vh; 
+			padding: 15px;
+			box-sizing: border-box;
+		}
+
+        /* --- SISTEMA DE PÁGINAS --- */
+        .page { display: none; width: 100%; margin: 0 auto; }
+        .page.active { display: block; animation: fadeIn 0.3s ease; }
+		
+		@keyframes fadeIn {
+			from { opacity: 0; }
+			to { opacity: 1; }
+}
+
+        .auth-box {
+			text-align: center;
+			background: #121212;
+			padding: 40px 25px;
+			border-radius: 0;
+			width: 100%;
+			max-width: 100%;
+			box-shadow: none;
+			box-sizing: border-box;
+			min-height: 100vh;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+		}
+
+        /* --- ELEMENTOS COMUNES --- */
+        .logo { 
+			width: 120px; 
+			height: 120px; 
+			object-fit: cover; 
+			border-radius: 50%; 
+			display: block;
+			margin: 10px auto 15px auto;
+			border: 2px solid var(--accent); 
+		}
+        h1 { letter-spacing: 2px; margin: 10px 0; font-weight: bold; font-size: 2rem; }
+		.auth-subtitle { 
+			color: #F2F2F2 !important; 
+			font-size: 0.9rem; 
+			letter-spacing: 1.3px; 
+			text-transform: uppercase; 
+			font-weight: 700; 
+			margin-bottom: 25px;
+			display: block; 
+		}
+        
+        
+        /* --- BOTONES --- */
+        .btn-primary { 
+            background: var(--accent); color: black; border: none; padding: 14px; width: 100%; 
+            border-radius: 8px; font-weight: bold; margin-bottom: 12px; cursor: pointer; 
+            transition: 0.3s; font-size: 1.1rem; 
+        }
+        .btn-primary:hover { background: #e6c200; transform: translateY(-1px); }
+        .btn-primary:disabled { background: #3a3000; color: #6b5800; border: 1px solid #4a4000; cursor: not-allowed; transform: none; }
+
+        .btn-primary.btn-activo { background: var(--accent) !important; color: black !important; border: none !important; cursor: pointer !important; }
+        .btn-outline { 
+            background: transparent; color: var(--accent); border: 1px solid var(--accent); 
+            padding: 14px; width: 100%; border-radius: 8px; margin-bottom: 5px; 
+            cursor: pointer; transition: 0.3s; font-size: 1rem; 
+        }
+        .btn-outline:hover { background: rgba(255, 215, 0, 0.1); }
+        
+        .separator { margin: 25px 0; color: #F2F2F2; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; }
+        .separator::before, .separator::after { content: ""; flex: 1; height: 1px; background: #333; margin: 0 10px; }
+
+        .btn-google { 
+            background: white; color: #444; border: none; padding: 14px; width: 100%; 
+            border-radius: 8px; display: flex; align-items: center; justify-content: center; 
+            gap: 10px; font-weight: bold; cursor: pointer; margin-top: 5px; transition: 0.3s; 
+        }
+        .btn-google:hover { background: #f1f1f1; }
+        .btn-google img { width: 20px; height: 20px; object-fit: contain; }
+
+        /* --- FORMULARIOS E INPUTS --- */
+		.auth-input { 
+			width: 100%; 
+			background: #121212; 
+			border: 1px solid #333; 
+			padding: 14px; 
+			border-radius: 8px; 
+			color: #fff; 			
+			margin-bottom: 0 !important; 
+			box-sizing: border-box; 
+			font-size: 1rem; 
+			transition: 0.3s; 
+		}
+		.auth-pass { -webkit-text-security: disc; text-security: disc; }
+		
+		/* --- CONTENEDOR DE CAMPO (EL QUE DA EL ESPACIO) --- */
+		.input-group {
+			position: relative;
+			width: 100%;
+			margin-bottom: 25px !important; /* Volvemos a un margen amplio */
+		}
+        
+		/* --- SISTEMA DE ERRORES --- */
+        .error-message {
+			position: absolute;
+			top: 45px;
+			color: #ff4d4d !important;
+			font-size: 0.65rem !important;
+			font-weight: bold;
+			text-align: left;
+			margin-top: 2px; 
+			display: none; 
+			white-space: normal;
+			pointer-events: none;
+		}
+		
+		/* Cuando el error esté activo */
+		.error-message.active {
+			visibility: visible;
+		}
+        .auth-input.input-error { border-color: #ff4d4d !important; }
+
+        /* --- PASSWORD WRAPPER & TOGGLE --- */
+		.password-wrapper {
+			position: relative !important;
+			width: 100%;
+			margin-bottom: 15px;
+			display: block;
+		}
+
+		.password-wrapper .auth-input { 
+			padding-right: 45px; 
+		}
+
+		.toggle-password {
+			position: absolute;
+			right: 15px;            
+			top: 0;
+			height: 46px; 
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			cursor: pointer;
+			color: #888;
+			z-index: 5;
+		}
+		
+		/* --- ENCABEZADO --- */
+		.auth-header {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			position: relative;
+			width: 100%;
+			min-height: 50px;
+			margin-bottom: 20px;
+		}
+		
+		
+		/* Ajuste de precisión para la flecha de navegación */
+		.back-btn {
+			position: absolute;
+			left: 20px;
+			top: 50%;
+			transform: translateY(-50%);
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 44px;
+			height: 44px;
+			padding: 0;
+			background: none;
+			border: none;
+			cursor: pointer;
+			margin-right: 0px;
+			margin-top: 0px;    
+			margin-bottom: 0px;
+		}
+
+		.back-circle {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 34px;
+			height: 34px;
+			border: 1.5px solid rgba(255, 255, 255, 0.2); /* Borde más visible */
+			border-radius: 50%;
+			color: #fff;
+			font-size: 1.2rem;
+			transition: all 0.3s ease;
+			line-height: 0; /* Evita que el navegador empuje el texto hacia arriba */
+			padding-bottom: 2px; /* Ajuste óptico fino para centrar la flecha ← */
+		}
+
+		.back-btn:hover .back-circle {
+			border-color: var(--accent);
+			color: var(--accent);
+			transform: translateX(-4px);
+			background: rgba(255, 215, 0, 0.1);
+			box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+		}
+
+		.back-btn:hover .back-circle {
+			border-color: var(--accent);
+			color: var(--accent);
+			transform: translateX(-4px);
+			background: rgba(255, 215, 0, 0.05);
+		}
+
+		/* Estilo para el fondo oscuro del modal */
+		.modal-overlay {
+			display: none;
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.8); 
+			z-index: 1000; 
+			justify-content: center;
+			align-items: center;
+			backdrop-filter: blur(5px);
+		}
+
+		/* Estilo para la caja del mensaje */
+		.modal-content {
+			background: #1e1e1e; /* Fondo oscuro acorde a VakaPay */
+			padding: 30px;
+			border-radius: 20px;
+			text-align: center;
+			max-width: 400px;
+			width: 90%;
+			border: 1px solid #333;
+			box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+			color: white;
+		}
+    .phone-row { display:flex; gap:8px; width:100%; }
+    .prefix-btn { display:flex; align-items:center; gap:6px; background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:0 12px; cursor:pointer; white-space:nowrap; color:#F2F2F2; font-size:.9rem; min-width:90px; height:50px; }
+    .prefix-btn:hover { border-color:#FFD700; }
+    .phone-input { flex:1; }
+    .country-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:9999; align-items:flex-end; justify-content:center; }
+    .country-modal.open { display:flex; }
+    .country-sheet { background:#1a1a1a; width:100%; max-width:460px; border-radius:20px 20px 0 0; max-height:75vh; display:flex; flex-direction:column; }
+    .country-search { padding:14px 16px; border-bottom:1px solid #333; }
+    .country-search input { width:100%; background:#121212; border:1px solid #444; border-radius:8px; padding:10px 14px; color:#F2F2F2; font-size:.9rem; box-sizing:border-box; }
+    .country-list { overflow-y:auto; flex:1; }
+    .country-item { display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; border-bottom:1px solid #1e1e1e; }
+    .country-item:hover { background:#222; }
+    .country-flag { font-size:1.4rem; }
+    .country-name { flex:1; color:#F2F2F2; font-size:.9rem; }
+    .country-code { color:#FFD700; font-size:.85rem; font-weight:bold; }
+    </style>
+</head>
+<body>
+
+    <!-- ═══ PÁGINA: INICIO DE ACCESO ═══ -->
+    <div class="page active" id="page-login-inicio">
+        <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
+            <img src="logo_vakapay.png" class="logo" alt="Vakapay Logo">
+            <h1>VAKAPAY</h1>
+            <p class="auth-subtitle">Divide gastos, no amistades</p>
+            <button onclick="switchPage('page-registro')" class="btn-primary">Regístrate</button>
+            <button onclick="switchPage('page-login-formulario')" class="btn-outline">Iniciar sesión</button>
+            <div class="separator">o bien</div>
+            <button class="btn-google" onclick="alert('Conectando con Google...')">
+                <img src="logoGoogle.png" alt="Google"> Seguir con Google
+            </button>
+        </div></div>
+    </div>
+	
+	<!-- ═══ PÁGINA: FORMULARIO DE LOGIN ═══ -->
+<div class="page" id="page-login-formulario">
+    <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
+        <h2 style="margin:0 0 8px 0; color:#fff; font-size:1.5rem; text-align:center;">Inicia sesión</h2>
+        <p class="auth-sub">Introduce tus credenciales para entrar.</p>
+        <div class="auth-form" style="display:flex; flex-direction:column;">
+            <div style="margin-bottom: 15px;">
+                <input type="email" id="login-email" placeholder="Correo electrónico" class="auth-input" style="margin-bottom:0;" oninput="checkLoginFields()">
+            </div>
+            <div class="password-wrapper" style="position: relative; width: 100%; margin-bottom: 15px;">
+                <input type="password" id="login-pass" placeholder="Contraseña" class="auth-input" style="width: 100%; margin-bottom:0;" oninput="checkLoginFields()">
+                <span class="toggle-password" onclick="togglePass('login-pass', this)" 
+                      style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; height: 100%;">
+                    👁️
+                </span>
+            </div>
+        </div>
+        <button id="btnEntrar" onclick="iniciarSesion()" class="btn-primary" style="margin-top:10px;background:#3a3000;color:#6b5800;border:1px solid #4a4000;cursor:not-allowed;" disabled>Entrar</button>
+        <button onclick="switchPage('page-login-inicio')" style="background:none;border:1px solid #FFD700;color:#FFD700;font-size:.85rem;margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:8px;display:block;margin-left:auto;margin-right:auto;">Volver al inicio</button>
+    </div></div>
+</div>
+
+    <!-- ═══ PÁGINA: REGISTRO ═══ -->
+<div class="page" id="page-registro">
+    <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
+        <h2 style="margin:0 0 8px 0; color:#fff; font-size:1.5rem; text-align:center;">Crea tu cuenta</h2>
+        <p class="auth-sub">Únete a Vakapay y empieza a dividir gastos.</p>
+        <div class="auth-form" style="display:flex; flex-direction:column;">
+            <div class="input-group">
+                <input type="text" id="reg-nombre" placeholder="Nombre completo" class="auth-input" autocomplete="off" oninput="checkRegistroFields()">
+                <span id="err-nombre" class="error-message"></span>
+            </div>
+            <div class="input-group">
+                <input type="email" id="reg-email" placeholder="Correo electrónico" class="auth-input" autocomplete="off" oninput="checkRegistroFields()">
+                <span id="err-email" class="error-message"></span>
+            </div>
+            <div class="input-group" style="margin-bottom:25px;">
+                <div class="phone-row">
+                    <button type="button" class="prefix-btn" onclick="abrirSelectorPais()" id="prefixBtn">
+                        <span id="prefixFlag">🌍</span>
+                        <span id="prefixCode">+--</span>
+                    </button>
+                    <input type="tel" id="reg-tel" placeholder="Número de teléfono" class="auth-input phone-input" autocomplete="off">
+                </div>
+            </div>
+            <div class="input-group">
+                <input type="text" id="reg-pass" placeholder="Contraseña" class="auth-input auth-pass" oninput="checkRegistroFields()" autocomplete="off">
+                <span class="toggle-password" onclick="togglePass('reg-pass', this)">👁️</span>
+                <span id="err-pass" class="error-message"></span>
+                <div id="pass-rules" style="margin-top:8px;text-align:left;display:none;">
+                    <div id="rule-len"  style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Mínimo 8 caracteres</div>
+                    <div id="rule-upper" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Una mayúscula</div>
+                    <div id="rule-lower" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Una minúscula</div>
+                    <div id="rule-num"  style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Un número</div>
+                    <div id="rule-sym"  style="font-size:.72rem;color:#ff4d4d;">✗ Un símbolo (!@#$...)</div>
+                </div>
+            </div>
+            <div class="input-group">
+                <input type="text" id="reg-pass-confirm" placeholder="Repite tu contraseña" class="auth-input auth-pass" oninput="checkRegistroFields()" autocomplete="off">
+                <span class="toggle-password" onclick="togglePass('reg-pass-confirm', this)">👁️</span>
+                <span id="err-pass-confirm" class="error-message"></span>
+            </div>
+            <button id="btnRegistrarse" class="btn-primary" onclick="handleRegistro()" style="margin-top:10px;background:#3a3000;color:#6b5800;border:1px solid #4a4000;cursor:not-allowed;" disabled>Registrarse</button>
+            <button onclick="safeBack()" style="background:none;border:1px solid #FFD700;color:#FFD700;font-size:.85rem;margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:8px;display:block;margin-left:auto;margin-right:auto;">Volver al inicio</button>
+        </div>
+    </div></div>
+</div>
+
+<script>
+function checkRegistroFields() {
+    const ok = document.getElementById('reg-nombre').value.trim().length > 0 &&
+               document.getElementById('reg-email').value.trim().length > 0 &&
+               document.getElementById('reg-pass').value.length > 0 &&
+               document.getElementById('reg-pass-confirm').value.length > 0;
+    const btn = document.getElementById('btnRegistrarse');
+    if (!btn) return;
+    btn.disabled = !ok;
+    btn.classList.toggle('btn-activo', ok);
+}
+        // --- 1. UTILIDADES DE NAVEGACIÓN Y VISTA ---
+function switchPage(id) {
+    clearErrors();
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const target = document.getElementById(id);
+    if(target) target.classList.add('active');
+}
+
+function togglePass(id, el) {
+    const input = document.getElementById(id);
+    if (input.type === 'password') {
+        input.type = 'text';
+        el.textContent = "🙈";
+    } else if (input.type === 'text' && !input.classList.contains('auth-pass')) {
+        input.type = 'password';
+        el.textContent = "👁️";
+    } else if (input.classList.contains('auth-pass')) {
+        input.classList.remove('auth-pass');
+        el.textContent = "🙈";
+    } else {
+        input.classList.add('auth-pass');
+        el.textContent = "👁️";
+    }
+}
+	// --- FUNCIÓN DE NAVEGACIÓN SEGURA ---
+function safeBack() {
+    const nombre = document.getElementById('reg-nombre').value.trim();
+    const tieneDatos = nombre.length > 0 || 
+                       document.getElementById('reg-email').value.trim().length > 0 ||
+                       document.getElementById('reg-pass').value.length > 0;
+
+    if (tieneDatos) {
+        const saludo = nombre ? `${nombre}, ¿confirmas` : "¿Confirmas";
+        if (confirm(`${saludo} que quieres volver? Se perderán los datos introducidos.`)) {
+            limpiarRegistro();
+            switchPage('page-login-inicio');
+        }
+    } else {
+        limpiarRegistro();
+        switchPage('page-login-inicio');
+    }
+}
+
+function limpiarRegistro() {
+    document.getElementById('reg-nombre').value = '';
+    document.getElementById('reg-email').value = '';
+    document.getElementById('reg-pass').value = '';
+    document.getElementById('reg-pass-confirm').value = '';
+    checkRegistroFields();
+}
+
+// --- 2. GESTIÓN DE ERRORES (LIMPIEZA Y MUESTRA) ---
+function clearErrors() {
+    document.querySelectorAll('.error-message').forEach(el => {
+        el.innerText = '';
+        el.style.display = 'none';
+    });
+    document.querySelectorAll('.auth-input').forEach(el => {
+        el.classList.remove('input-error');
+    });
+}
+
+function showError(inputId, errorId, message) {
+    const input = document.getElementById(inputId);
+    const errorSpan = document.getElementById(errorId);
+    if (input) input.classList.add('input-error');
+    if (errorSpan) {
+        errorSpan.innerText = message;
+        errorSpan.style.display = 'block';
+    }
+}
+
+// --- 3. LÓGICA DE REGISTRO ---
+async function handleRegistro() {
+    clearErrors();
+
+    const nombre = document.getElementById('reg-nombre').value.trim();
+    const email = document.getElementById('reg-email').value.trim().toLowerCase();
+    const pass = document.getElementById('reg-pass').value;
+    const passConfirm = document.getElementById('reg-pass-confirm').value;
+
+    let hasError = false;
+
+    if (nombre.length < 3) {
+        showError('reg-nombre', 'err-nombre', "⚠️ El nombre debe tener al menos 3 letras.");
+        hasError = true;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showError('reg-email', 'err-email', "⚠️ Introduce un email válido.");
+        hasError = true;
+    }
+    
+    const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    if (!passRegex.test(pass)) {
+        showError('reg-pass', 'err-pass', "⚠️ Mínimo 8 caracteres, mayúscula, minúscula, número y símbolo.");
+        hasError = true;
+    }
+
+    if (pass !== passConfirm) {
+        showError('reg-pass-confirm', 'err-pass-confirm', "⚠️ Las contraseñas no coinciden.");
+        hasError = true;
+    }
+
+    if (hasError) return;
+
+    const prefijo = document.getElementById('prefixCode').textContent;
+    const tel = document.getElementById('reg-tel').value.trim();
+    const telefonoCompleto = tel ? `${prefijo} ${tel}` : '';
+    const datosUsuario = {
+        nombre: nombre,
+        apellido: '',
+        email: email,
+        password: pass,
+        tel: telefonoCompleto
+    };
+
+    try {
+        await vakaData.register(datosUsuario);
+        console.log("✅ Usuario registrado correctamente");
+        try {
+          await fetch(`${window.location.origin}/api/v1/auth/send-confirmation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, nombre: nombre })
+          });
+        } catch(_) {}
+        const welcomeSpan = document.getElementById('user-name-welcome');
+        if(welcomeSpan) welcomeSpan.innerText = nombre;
+        const modal = document.getElementById('modal-exito');
+        if(modal) modal.style.display = 'flex';
+    } catch (error) {
+            console.error("❌ Error al registrar en el servidor:", error);
+            if (error.status === 409 || (error.message && (error.message.includes('409') || error.message.includes('Ya existe')))) {
+                document.getElementById('modal-cuenta-existente').style.display = 'flex';
+            } else {
+                alert("No se pudo crear la cuenta: " + error.message);
+            }
+        }
+}
+
+function cerrarModalYEntrar() {
+    // 1. Ocultamos el modal
+    const modal = document.getElementById('modal-exito');
+    if(modal) modal.style.display = 'none';
+
+    // 2. Limpiamos los campos del registro por seguridad
+    const campos = ['reg-nombre', 'reg-email', 'reg-pass', 'reg-pass-confirm'];
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.value = '';
+    });
+
+    // 3. Redirigimos a la pantalla de inicio de sesión
+    switchPage('page-login-formulario'); 
+
+    console.log("Flujo completado: Campos limpios y usuario redirigido al Login.");
+}
+
+function cerrarModalLoginError() {
+    document.getElementById('modal-login-error').style.display = 'none';
+}
+
+// --- 4. VALIDACIÓN Y FILTROS EN TIEMPO REAL (ESPERA AL DOM) ---
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // Filtro Nombre
+    const regNombre = document.getElementById('reg-nombre');
+    if(regNombre) {
+        regNombre.addEventListener('input', function() {
+            this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
+        });
+    }
+
+    // Validación Pass en tiempo real
+    const regPass = document.getElementById('reg-pass');
+    if(regPass) {
+        regPass.addEventListener('input', function() {
+            const v = this.value.replace(/\s/g, '');
+            this.value = v;
+            const rules = document.getElementById('pass-rules');
+            if(v.length > 0) rules.style.display = 'block';
+
+            const check = (id, ok) => {
+                const el = document.getElementById(id);
+                el.style.color = ok ? '#28a745' : '#ff4d4d';
+                el.textContent = (ok ? '✓ ' : '✗ ') + el.textContent.slice(2);
+            };
+            check('rule-len',   v.length >= 8);
+            check('rule-upper', /[A-Z]/.test(v));
+            check('rule-lower', /[a-z]/.test(v));
+            check('rule-num',   /\d/.test(v));
+            check('rule-sym',   /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(v));
+
+            const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+            if (passRegex.test(v)) {
+                this.classList.remove('input-error');
+                const err = document.getElementById('err-pass');
+                if(err) { err.innerText = ''; err.style.display = 'none'; }
+                rules.style.display = 'none';
+            }
+        });
+    }
+
+    // Validación Confirmación en tiempo real
+    const regConfirm = document.getElementById('reg-pass-confirm');
+    if(regConfirm) {
+        regConfirm.addEventListener('input', function() {
+            const originalPass = document.getElementById('reg-pass').value;
+            if (this.value === originalPass && this.value !== "") {
+                this.classList.remove('input-error');
+                const err = document.getElementById('err-pass-confirm');
+                if(err) { err.innerText = ''; err.style.display = 'none'; }
+            }
+            this.value = this.value.replace(/\s/g, '');
+        });
+    }
+
+    // Filtro Email (quitar espacios)
+    const regEmail = document.getElementById('reg-email');
+    if(regEmail) {
+        regEmail.addEventListener('input', function() {
+            this.value = this.value.replace(/\s/g, '');
+        });
+    }
+	
+// --- 5. LÓGICA DE INICIO DE SESIÓN ---
+function handleLogin() {
+    clearErrors();
+    const email = document.getElementById('login-email').value.trim();
+    const pass = document.getElementById('login-pass').value;
+
+    if (!email || !pass) {
+        alert("Por favor, completa todos los campos para entrar.");
+        return;
+    }
+
+    // Aquí iría la validación real con base de datos
+    console.log("Intentando iniciar sesión con:", email);
+    alert("Próximamente: Conexión con el servidor de VakaPay.");
+	}
+});
+
+</script>
+		<!-- Modal de Éxito Vakapay -->
+<div id="modal-exito" class="modal-overlay">
+    <div class="modal-content">
+        <div class="success-icon">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+        </div>
+        <h2>¡Registro completado!</h2>
+        <p>¡Te damos la bienvenida a Vakapay, <span id="user-name-welcome" style="color: #FFD700; font-weight: bold;"></span>. Tu cuenta ha sido creada con éxito.</p>
+        <button class="btn-primary" onclick="cerrarModalYEntrar()">Comenzar</button>
+    </div>
+</div>
+
+<!-- Modal de Confirmación para Salir (LOGIN/REGISTRO) -->
+<div id="modal-confirm-exit" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center;">
+    <div class="modal-content" style="background: #1e1e1e; width: 90%; max-width: 340px; padding: 25px; border-radius: 24px; border: 1px solid #333; text-align: center;">
+        
+        <h2 style="color: #F2F2F2; margin-bottom: 10px; font-size: 1.5rem;">¿Abandonar registro?</h2>
+        <p style="color: #F2F2F2; margin-bottom: 25px; font-size: 0.85rem; opacity: 0.8;">Si vuelves atrás ahora, se borrarán todos los datos que has escrito.</p>
+        
+        <div style="display: flex; gap: 12px; width: 100%; margin-top: 10px;">
+            <!-- BOTÓN CANCELAR (VERDE SÓLIDO - LA OPCIÓN SEGURA PARA QUEDARSE) -->
+            <button onclick="cerrarModalAbandono()" 
+                style="flex: 1; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; border: none; color: white; background: #28a745; outline: none;">
+                Cancelar
+            </button>
+            
+            <!-- BOTÓN SÍ, SALIR (ROJO SÓLIDO - LA OPCIÓN QUE BORRA DATOS) -->
+            <button onclick="confirmarSalida()" 
+                style="flex: 1; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; border: none; color: white; background: #dc3545; outline: none;">
+                Sí, salir
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Error de Inicio de Sesión -->
+<div id="modal-login-error" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: #1e1e1e; width: 90%; max-width: 340px; padding: 25px; border-radius: 24px; border: 1px solid #333; text-align: center;">
+        
+        <div style="font-size: 2.5rem; margin-bottom: 15px;">🔐</div>
+        <h2 style="color: #F2F2F2; margin-bottom: 10px; font-size: 1.4rem;">Acceso denegado</h2>
+        <p style="color: #F2F2F2; margin-bottom: 25px; font-size: 0.85rem; opacity: 0.8;">El correo electrónico o la contraseña son incorrectos. Por favor, verifica tus datos e inténtalo de nuevo.</p>
+        
+        <!-- BOTÓN ACEPTAR (VERDE SÓLIDO - CONTINUIDAD) -->
+        <button onclick="cerrarModalLoginError()" 
+            style="width: 100%; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; border: none; color: white; background: #28a745; outline: none;">
+            Aceptar
+        </button>
+    </div>
+</div>
+
+<script>
+// --- 6. GESTIÓN DE SALIDA SEGURA Y LIMPIEZA ---
+function safeBack() {
+    const nombre = document.getElementById('reg-nombre').value.trim();
+    const tieneDatos = nombre.length > 0 || 
+                       document.getElementById('reg-email').value.trim().length > 0 ||
+                       document.getElementById('reg-pass').value.length > 0;
+
+    if (tieneDatos) {
+        document.getElementById('modal-confirm-exit').style.display = 'flex';
+    } else {
+        switchPage('page-login-inicio');
+    }
+}
+
+// Función para el botón verde: Cierra ESTE modal específico
+function cerrarModalAbandono() {
+    const modal = document.getElementById('modal-confirm-exit');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = ''; // Habilitamos el scroll de nuevo
+    }
+}
+
+// Función para el botón rojo: Cierra y sale
+function confirmarSalida() {
+    // Limpiamos los campos del registro por seguridad
+    const campos = ['reg-nombre', 'reg-email', 'reg-pass', 'reg-pass-confirm'];
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+
+    if (typeof clearErrors === "function") clearErrors(); 
+
+    cerrarModalAbandono();
+    
+    if (typeof switchPage === "function") {
+        switchPage('page-login-inicio');
+    } else {
+        window.history.back();
+    }
+}
+
+// Limpieza extra al cargar la página por historial
+window.addEventListener('pageshow', function(event) {
+    const campos = ['reg-nombre', 'reg-email', 'reg-pass', 'reg-pass-confirm'];
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+
+    const errorMessages = document.querySelectorAll('.error-message');
+    errorMessages.forEach(msg => {
+        msg.textContent = '';
+        msg.style.display = 'none';
+    });
+
+    const inputs = document.querySelectorAll('.auth-input');
+    inputs.forEach(input => {
+        input.classList.remove('input-error');
+    });
+});
+</script>
+
+<script src="vakapay_data_service_v2.js"></script>
+	
+<script>
+
+// --- 7. FLUJO DE AUTENTICACIÓN ---
+
+function checkLoginFields() {
+    const email = document.getElementById('login-email').value.trim();
+    const pass = document.getElementById('login-pass').value;
+    const btn = document.getElementById('btnEntrar');
+    if (!btn) return;
+    const ok = email.length > 0 && pass.length > 0;
+    btn.disabled = !ok;
+    btn.style.background = ok ? '' : '#3a3000';
+    btn.style.color = ok ? '' : '#6b5800';
+    btn.style.border = ok ? '' : '1px solid #4a4000';
+    btn.style.cursor = ok ? 'pointer' : 'not-allowed';
+}
+function checkRegistroFields() {
+    const nombre = document.getElementById('reg-nombre').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const pass = document.getElementById('reg-pass').value;
+    const confirm = document.getElementById('reg-pass-confirm').value;
+    const btn = document.getElementById('btnRegistrarse');
+    if (!btn) return;
+    const ok = nombre.length > 0 && email.length > 0 && pass.length > 0 && confirm.length > 0;
+    btn.style.background = ok ? '' : '#3a3000';
+    btn.style.color = ok ? '' : '#6b5800';
+    btn.style.border = ok ? '' : '1px solid #4a4000';
+    btn.style.cursor = ok ? 'pointer' : 'not-allowed';
+    btn.disabled = !ok;
+}
+async function iniciarSesion() {
+    const emailInput = document.getElementById('login-email');
+    const passInput = document.getElementById('login-pass');
+
+    const email = emailInput.value.trim();
+    const pass = passInput.value;
+
+    console.log("Intentando conectar con:", email);
+
+    try {
+        const response = await vakaData.login({ 
+            email: email, 
+            password: pass 
+        });
+        
+        console.log("✅ Acceso concedido:", response);
+        
+        if (response && response.token) {
+            localStorage.setItem('token', response.token);
+        }
+
+        window.location.href = 'vakapay_v2.html';
+        
+    } catch (error) {
+        console.error("❌ Detalle del fallo:", error);
+        
+        // CORRECCIÓN: Quitamos el alert feo y ponemos nuestro modal
+        document.getElementById('modal-login-error').style.display = 'flex';
+    }
+}
+</script>
+
+<div id="modal-cuenta-existente" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:#1e1e1e;border-radius:14px;padding:28px 24px;max-width:320px;width:90%;text-align:center;border:1px solid #333;">
+    <div style="font-size:2rem;margin-bottom:12px;">⚠️</div>
+    <div style="font-size:1.1rem;font-weight:bold;color:#F5C800;letter-spacing:1px;margin-bottom:10px;">CUENTA EXISTENTE</div>
+    <p style="color:#F2F2F2;font-size:.88rem;margin-bottom:20px;">Ya existe una cuenta registrada con ese email. Intenta iniciar sesión.</p>
+    <button onclick="document.getElementById('modal-cuenta-existente').style.display='none';switchPage('page-login-formulario')" style="background:#F5C800;color:black;border:none;padding:12px 24px;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;margin-bottom:8px;">Ir a iniciar sesión</button>
+    <button onclick="document.getElementById('modal-cuenta-existente').style.display='none'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:.85rem;">Volver al registro</button>
+  </div>
+</div>
+
+<!-- Modal selector de país -->
+<div class="country-modal" id="countryModal" onclick="if(event.target===this)cerrarSelectorPais()">
+  <div class="country-sheet">
+    <div class="country-search">
+      <input type="text" id="countrySearch" placeholder="🔍 Buscar país..." oninput="filtrarPaises(this.value)">
+    </div>
+    <div class="country-list" id="countryList"></div>
+  </div>
+</div>
+
+<script>
+const PAISES = [
+  {flag:'🇪🇸',name:'España',code:'+34'},
+  {flag:'🇦🇷',name:'Argentina',code:'+54'},
+  {flag:'🇲🇽',name:'México',code:'+52'},
+  {flag:'🇺🇸',name:'Estados Unidos',code:'+1'},
+  {flag:'🇨🇴',name:'Colombia',code:'+57'},
+  {flag:'🇨🇱',name:'Chile',code:'+56'},
+  {flag:'🇵🇪',name:'Perú',code:'+51'},
+  {flag:'🇻🇪',name:'Venezuela',code:'+58'},
+  {flag:'🇺🇾',name:'Uruguay',code:'+598'},
+  {flag:'🇵🇾',name:'Paraguay',code:'+595'},
+  {flag:'🇧🇴',name:'Bolivia',code:'+591'},
+  {flag:'🇪🇨',name:'Ecuador',code:'+593'},
+  {flag:'🇧🇷',name:'Brasil',code:'+55'},
+  {flag:'🇵🇹',name:'Portugal',code:'+351'},
+  {flag:'🇫🇷',name:'Francia',code:'+33'},
+  {flag:'🇩🇪',name:'Alemania',code:'+49'},
+  {flag:'🇮🇹',name:'Italia',code:'+39'},
+  {flag:'🇬🇧',name:'Reino Unido',code:'+44'},
+  {flag:'🇳🇱',name:'Países Bajos',code:'+31'},
+  {flag:'🇧🇪',name:'Bélgica',code:'+32'},
+  {flag:'🇨🇭',name:'Suiza',code:'+41'},
+  {flag:'🇦🇹',name:'Austria',code:'+43'},
+  {flag:'🇸🇪',name:'Suecia',code:'+46'},
+  {flag:'🇳🇴',name:'Noruega',code:'+47'},
+  {flag:'🇩🇰',name:'Dinamarca',code:'+45'},
+  {flag:'🇫🇮',name:'Finlandia',code:'+358'},
+  {flag:'🇵🇱',name:'Polonia',code:'+48'},
+  {flag:'🇷🇺',name:'Rusia',code:'+7'},
+  {flag:'🇨🇳',name:'China',code:'+86'},
+  {flag:'🇯🇵',name:'Japón',code:'+81'},
+  {flag:'🇰🇷',name:'Corea del Sur',code:'+82'},
+  {flag:'🇮🇳',name:'India',code:'+91'},
+  {flag:'🇦🇺',name:'Australia',code:'+61'},
+  {flag:'🇨🇦',name:'Canadá',code:'+1'},
+  {flag:'🇿🇦',name:'Sudáfrica',code:'+27'},
+  {flag:'🇳🇬',name:'Nigeria',code:'+234'},
+  {flag:'🇲🇦',name:'Marruecos',code:'+212'},
+  {flag:'🇹🇷',name:'Turquía',code:'+90'},
+  {flag:'🇸🇦',name:'Arabia Saudí',code:'+966'},
+  {flag:'🇦🇪',name:'Emiratos Árabes',code:'+971'},
+  {flag:'🇮🇱',name:'Israel',code:'+972'},
+  {flag:'🇬🇷',name:'Grecia',code:'+30'},
+  {flag:'🇷🇴',name:'Rumanía',code:'+40'},
+  {flag:'🇭🇺',name:'Hungría',code:'+36'},
+  {flag:'🇨🇿',name:'República Checa',code:'+420'},
+  {flag:'🇸🇰',name:'Eslovaquia',code:'+421'},
+  {flag:'🇭🇷',name:'Croacia',code:'+385'},
+  {flag:'🇷🇸',name:'Serbia',code:'+381'},
+  {flag:'🇺🇦',name:'Ucrania',code:'+380'},
+];
+
+function renderPaises(lista) {
+  const el = document.getElementById('countryList');
+  el.innerHTML = lista.map(p => `
+    <div class="country-item" onclick="seleccionarPais('${p.flag}','${p.code}')">
+      <span class="country-flag">${p.flag}</span>
+      <span class="country-name">${p.name}</span>
+      <span class="country-code">${p.code}</span>
+    </div>
+  `).join('');
+}
+
+function abrirSelectorPais() {
+  document.getElementById('countryModal').classList.add('open');
+  document.getElementById('countrySearch').value = '';
+  renderPaises(PAISES);
+  setTimeout(() => document.getElementById('countrySearch').focus(), 100);
+}
+
+function cerrarSelectorPais() {
+  document.getElementById('countryModal').classList.remove('open');
+}
+
+function filtrarPaises(q) {
+  const filtered = PAISES.filter(p =>
+    p.name.toLowerCase().includes(q.toLowerCase()) ||
+    p.code.includes(q)
+  );
+  renderPaises(filtered);
+}
+
+function seleccionarPais(flag, code) {
+  document.getElementById('prefixFlag').textContent = flag;
+  document.getElementById('prefixCode').textContent = code;
+  cerrarSelectorPais();
+  document.getElementById('reg-tel').focus();
+}
+</script>
+<script>
+// Detectar token de invitación en la URL
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const invite = params.get('invite');
+  if (invite) {
+    localStorage.setItem('vp_pending_invite', invite);
+  }
+})();
+</script>
+</body>
+</html>
