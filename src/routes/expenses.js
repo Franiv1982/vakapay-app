@@ -153,9 +153,9 @@ router.put('/:expId', requireAuth, async (req, res, next) => {
 
     await db.query(`
       UPDATE expenses 
-      SET description=$1, amount=$2, currency=$3, amount_base=$4, category=$5, payer_name=$6, expense_date=$7, member_id=$8
-      WHERE id=$9 AND member_id=$8
-    `, [description, amount, currency, amount_base, category, payer_name, expense_date, req.user.id, req.params.expId]);
+      SET description=$1, amount=$2, currency=$3, amount_base=$4, category=$5, payer_name=$6, expense_date=$7
+      WHERE id=$8 AND group_id=$9
+    `, [description, amount, currency, amount_base, category, payer_name, expense_date, req.params.expId, req.params.id]);
 
     await db.query('DELETE FROM expense_splits WHERE expense_id = $1', [req.params.expId]);
     for (const name of involved) {
