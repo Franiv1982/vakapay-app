@@ -8,12 +8,16 @@
     "dev": "nodemon src/index.js",
     "seed": "node src/db/seed.js",
     "test": "node --test tests/",
-    "build": "npm rebuild better-sqlite3"
+    "build": "npm rebuild better-sqlite3",
+    "sync:app": "node scripts/sync-www.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/share": "^8.0.1",
+    "@capawesome-team/capacitor-file-opener": "^8.0.1",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^12.9.0",
     "cors": "^2.8.6",

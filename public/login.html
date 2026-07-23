@@ -108,7 +108,7 @@
 			font-size: 1rem; 
 			transition: 0.3s; 
 		}
-		.auth-pass { -webkit-text-security: disc; text-security: disc; }
+		.auth-pass { -webkit-text-security: disc; }
 		
 		/* --- CONTENEDOR DE CAMPO (EL QUE DA EL ESPACIO) --- */
 		.input-group {
@@ -280,7 +280,7 @@
             <button onclick="switchPage('page-login-formulario')" class="btn-outline">Iniciar sesión</button>
             <div class="separator">o bien</div>
             <button class="btn-google" onclick="alert('Conectando con Google...')">
-                <img src="logoGoogle.png" alt="Google"> Seguir con Google
+                <img src="logo_google.png" alt="Google"> Seguir con Google
             </button>
         </div></div>
     </div>
@@ -314,11 +314,11 @@
         <p class="auth-sub">Únete a Vakapay y empieza a dividir gastos.</p>
         <div class="auth-form" style="display:flex; flex-direction:column;">
             <div class="input-group">
-                <input type="text" id="reg-nombre" placeholder="Nombre completo" class="auth-input" autocomplete="off" oninput="checkRegistroFields()">
+                <input type="text" id="reg-nombre" placeholder="Nombre completo" class="auth-input" autocomplete="name" inputmode="text" oninput="checkRegistroFields()">
                 <span id="err-nombre" class="error-message"></span>
             </div>
             <div class="input-group">
-                <input type="email" id="reg-email" placeholder="Correo electrónico" class="auth-input" autocomplete="off" oninput="checkRegistroFields()">
+                <input type="email" id="reg-email" placeholder="Correo electrónico" class="auth-input" autocomplete="email" inputmode="email" oninput="checkRegistroFields()">
                 <span id="err-email" class="error-message"></span>
             </div>
             <div class="input-group" style="margin-bottom:25px;">
@@ -327,11 +327,11 @@
                         <span id="prefixFlag">🌍</span>
                         <span id="prefixCode">+--</span>
                     </button>
-                    <input type="tel" id="reg-tel" placeholder="Número de teléfono" class="auth-input phone-input" autocomplete="off">
+                    <input type="tel" id="reg-tel" placeholder="Número de teléfono" class="auth-input phone-input" autocomplete="tel" inputmode="tel">
                 </div>
             </div>
             <div class="input-group">
-                <input type="text" id="reg-pass" placeholder="Contraseña" class="auth-input auth-pass" oninput="checkRegistroFields()" autocomplete="off">
+                <input type="password" id="reg-pass" placeholder="Contraseña" class="auth-input" autocomplete="new-password" oninput="checkRegistroFields()">
                 <span class="toggle-password" onclick="togglePass('reg-pass', this)">👁️</span>
                 <span id="err-pass" class="error-message"></span>
                 <div id="pass-rules" style="margin-top:8px;text-align:left;display:none;">
@@ -343,7 +343,7 @@
                 </div>
             </div>
             <div class="input-group">
-                <input type="text" id="reg-pass-confirm" placeholder="Repite tu contraseña" class="auth-input auth-pass" oninput="checkRegistroFields()" autocomplete="off">
+                <input type="password" id="reg-pass-confirm" placeholder="Repite tu contraseña" class="auth-input" autocomplete="new-password" oninput="checkRegistroFields()">
                 <span class="toggle-password" onclick="togglePass('reg-pass-confirm', this)">👁️</span>
                 <span id="err-pass-confirm" class="error-message"></span>
             </div>
@@ -486,7 +486,7 @@ async function handleRegistro() {
         await vakaData.register(datosUsuario);
         console.log("✅ Usuario registrado correctamente");
         try {
-          await fetch(`${window.location.origin}/api/v1/auth/send-confirmation`, {
+          await fetch(`https://vakapay-app.vercel.app/api/v1/auth/send-confirmation`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: email, nombre: nombre })
@@ -781,7 +781,7 @@ async function iniciarSesion() {
             localStorage.setItem('token', response.token);
         }
 
-        window.location.href = 'vakapay_v2.html';
+        window.location.href = 'index.html';
         
     } catch (error) {
         console.error("❌ Detalle del fallo:", error);

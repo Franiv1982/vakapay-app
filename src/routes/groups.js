@@ -43,7 +43,7 @@ router.get('/', requireAuth, async (req, res, next) => {
         COALESCE((SELECT SUM(amount) FROM expenses WHERE group_id = g.id), 0)::float AS total
       FROM groups g
       LEFT JOIN group_members gm ON gm.group_id = g.id
-      WHERE g.owner_id = $1 OR gm.user_id = $1
+      WHERE gm.user_id = $1
       GROUP BY g.id
       ORDER BY g.created_at DESC
     `, [req.user.id]);
@@ -84,7 +84,7 @@ router.get('/:id', requireAuth, async (req, res, next) => {
     const gRes = await db.query(`
       SELECT g.* FROM groups g
       LEFT JOIN group_members gm ON gm.group_id = g.id
-      WHERE g.id = $1 AND (g.owner_id = $2 OR gm.user_id = $2)
+      WHERE g.id = $1 AND gm.user_id = $2
       LIMIT 1
     `, [req.params.id, req.user.id]);
     const group = gRes.rows[0];

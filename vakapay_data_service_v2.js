@@ -147,10 +147,30 @@ class VakaDataService {
 
   async getGroups() {
     try {
-      const data = await this.#fetch('GET', '/groups');
-      this.#write(this.#KEYS.groups, data);
-      return data;
-    } catch (_) {
+      const data = await this.#req('GET', '/groups');
+      if (!Array.isArray(data)) return this.#read(this.#KEYS.groups) ?? [];
+      
+      const detailed = await Promise.all(data.map(g => this.#req('GET', `/groups/${g.id}`).catch(() => g)));
+      
+      // Transformación directa:
+      const normalized = detailed.map(g => {
+        const item = { ...g };
+        if (Array.isArray(item.members)) {
+          const obj = {};
+          item.members.forEach(m => {
+            // Ajusta según la estructura exacta que viene de tu servidor
+            obj[m.display_name || m.name || m] = m.balance || 0;
+          });
+          item.members = obj;
+        } else if (!item.members) {
+          item.members = {};
+        }
+        return item;
+      });
+
+      this.#write(this.#KEYS.groups, normalized);
+      return normalized;
+    } catch(_) {
       return this.#read(this.#KEYS.groups) ?? [];
     }
   }

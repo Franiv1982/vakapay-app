@@ -24,13 +24,13 @@ header{position:sticky;top:0;z-index:200;background:rgba(14,14,14,.96);backdrop-
 .logo-wrap{width:46px;height:46px;border-radius:50%;overflow:hidden;border:2.5px solid var(--gold);box-shadow:0 0 16px rgba(245,200,0,.35);flex-shrink:0}
 .logo-wrap img{width:100%;height:100%;object-fit:cover}
 .header-text h1{font-family:'Bebas Neue',Impact,'Arial Narrow',Arial,sans-serif;font-size:1.7rem;letter-spacing:3px;color:var(--gold);line-height:1}
-.header-text p{font-family:'Nunito', sans-serif;font-style:normal;font-size:.14.4px;color:#F2F2F2;letter-spacing:.9px;text-transform:uppercase;font-weight:800;font-display: swap}
-.hbadge{display:none;position:fixed;top:116px;right:12px;z-index:900;background:rgba(245,200,0,.1);color:var(--gold);border:1px solid rgba(245,200,0,.22);border-radius:20px;padding:5px 12px;font-size:.68rem;font-weight:800;letter-spacing:.4px;white-space:nowrap;width:110px;overflow:hidden;text-overflow:ellipsis;text-align:center;cursor:pointer;}
+.header-text p{font-family:'Nunito', sans-serif;font-style:normal;font-size:14.4px;color:#F2F2F2;letter-spacing:.9px;text-transform:uppercase;font-weight:800;font-display: swap}
+.hbadge{display:none;position:fixed;top:64px;right:12px;z-index:900;background:rgba(245,200,0,.1);color:var(--gold);border:1px solid rgba(245,200,0,.22);border-radius:20px;padding:5px 12px;font-size:.68rem;font-weight:800;letter-spacing:.4px;white-space:nowrap;width:110px;overflow:hidden;text-overflow:ellipsis;text-align:center;cursor:pointer;}
 .hbadge:after{content:' ▾';font-size:.6rem;opacity:.7;}
 #ocrPopover{animation:fadeIn .15s ease;}
 #ocrBtn.has-file{background:rgba(61,186,111,.15);border-color:rgba(61,186,111,.4);color:var(--success);}
 
-.det-bar{position:sticky;top:64px;z-index:500;background:rgba(14,14,14,.96);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:8px 0;width:100%;box-sizing:border-box;}
+.det-bar{position:sticky;top:var(--header-h, 64px);z-index:500;background:rgba(14,14,14,.96);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:8px 0;width:100%;box-sizing:border-box;}
 #groupDropdown{display:none;position:fixed;top:70px;right:12px;background:var(--dark3);border:1px solid var(--border);border-radius:14px;min-width:180px;max-width:240px;z-index:8000;box-shadow:var(--shadow);overflow:hidden;}
 #groupDropdown{display:none;position:fixed;top:70px;right:12px;background:var(--dark3);border:1px solid var(--border);border-radius:14px;min-width:180px;max-width:240px;z-index:8000;box-shadow:var(--shadow);overflow:hidden;}
 #groupDropdown.open{display:block;animation:fadeIn .15s ease;}
@@ -51,11 +51,11 @@ header{position:sticky;top:0;z-index:200;background:rgba(14,14,14,.96);backdrop-
 .nav-btn.active::after{transform:scaleX(1)}
 
 /* ── PAGES ── */
-.page{display:none;animation:fadeUp .35s ease both}
+.page{display:none}
 .page.active{display:flex;flex-direction:column;min-height:100vh;}
 @keyframes fadeUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
 
-main{flex:1;max-width:660px;margin:0 auto;padding:18px 14px 90px 14px;position:relative;z-index:1;width:100%;}
+main{flex:1;max-width:660px;margin:0 auto;padding:18px 14px 90px 14px;position:relative;z-index:1;width:100%;animation:fadeUp .35s ease both}
 
 /* ── SECTION TITLES ── */
 .sec-title{display:flex;align-items:center;gap:9px;margin:24px 0 12px;transition:opacity .3s}
@@ -119,6 +119,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 .chip .av{width:19px;height:19px;border-radius:50%;background:var(--gold-dark);color:var(--dark);font-size:.62rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .chip-x{color:var(--muted);font-size:.82rem;transition:color .2s;margin-left:1px}
 .chip-x:hover{color:var(--danger)}
+.chip-edit{color:var(--muted);display:inline-flex;align-items:center;transition:color .2s;margin-left:2px;cursor:pointer}
+.chip-edit:hover{color:var(--gold)}
 
 /* ── EXPENSE ITEMS ── */
 .exp-item{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.046)}
@@ -321,12 +323,12 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 .debt-actions{display:flex;gap:6px;flex-shrink:0;margin-left:auto}
 .pay-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:600;align-items:flex-end;justify-content:center}
 .pay-modal-overlay.open{display:flex;animation:fadeIn .2s ease}
-.pay-modal-sheet{background:var(--card);border:1px solid var(--border);border-radius:22px 22px 0 0;padding:22px 18px 40px;width:100%;max-width:660px;animation:slideUp .25s ease}
-.pay-method-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
-.pay-method-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 8px;border-radius:13px;border:2px solid rgba(255,255,255,.07);background:var(--dark3);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text);transition:border-color .2s,background .2s,transform .13s}
+.pay-modal-sheet{background:var(--card);border:1px solid var(--border);border-radius:22px 22px 0 0;padding:16px 16px 24px;width:100%;max-width:660px;animation:slideUp .25s ease;max-height:85vh;overflow-y:auto}
+.pay-method-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:10px 0}
+.pay-method-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:10px;border:2px solid rgba(255,255,255,.07);background:var(--dark3);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:.62rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text);transition:border-color .2s,background .2s,transform .13s}
 .pay-method-btn:active{transform:scale(.93)}
 .pay-method-btn.selected{border-color:var(--gold);background:rgba(245,200,0,.09);color:var(--gold)}
-.pay-method-btn .pm-icon{font-size:1.6rem}
+.pay-method-btn .pm-icon{font-size:1.2rem}
 .proof-area{background:var(--dark3);border:2px dashed rgba(245,200,0,.25);border-radius:11px;padding:14px;text-align:center;cursor:pointer;margin-top:10px;transition:border-color .2s}
 .proof-area:hover{border-color:var(--gold)}
 .proof-area input{display:none}
@@ -381,17 +383,22 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     </div>
   </div>
 <main>
-  <div class="sec-title">
+  <div class="sec-title" onclick="toggleGroupsList()" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between">
+  <div style="display:flex;align-items:center;gap:8px">
     <div class="num">1</div>
     <h2>TUS GRUPOS ACTIVOS Y PASADOS</h2>
-      </div>
+    <span id="groupsCounter" style="color:var(--gold);font-size:.9rem;font-weight:700;margin-left:4px">(0)</span>
+  </div>
+  <svg id="groupsChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+</div>
 
-  <!-- Saved groups list -->
+<!-- Saved groups list -->
+<div id="groupsListWrap" style="display:none">
   <div id="groupsList">
     <div class="no-items"><div class="ni">📂</div><div>No tienes grupos creados aún</div></div>
   </div>
-
-  <button class="btn btn-gold btn-full" style="margin:14px 0 26px" onclick="showNewGroupForm()">＋ Crear Nuevo Grupo</button>
+</div>
+<button class="btn btn-gold btn-full" style="margin:14px 0 26px" onclick="showNewGroupForm()">＋ Crear Nuevo Grupo</button>
 
   <!-- New group form (hidden initially) -->
   <div id="newGroupForm" style="display:none">
@@ -436,32 +443,80 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 <main>
 
   <!-- Participants -->
-  <div class="sec-title" id="sec2" style="opacity:.3"><div class="num">2</div><h2>Participantes</h2></div>
-  <div class="card">
-    <!-- Friends from list -->
-    <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Seleccionar de mis amigos</div>
-    <div id="friendPickerChips" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px">
-      <span style="color:var(--muted);font-size:.78rem">Ve a Amigos y añade contactos primero</span>
-    </div>
-    <div class="dvd" style="margin:10px 0"></div>
-    <!-- Add new manually -->
-    <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Añadir nuevo participante</div>
-    <div class="add-row">
-      <div class="field" style="margin-bottom:0"><input type="text" id="memberName" maxlength="20" placeholder="Nombre del participante" onkeydown="if(event.key==='Enter')addMember()"></div>
-      <button class="btn btn-gold" style="flex-shrink:0" onclick="addMember()">+ Añadir</button>
-    </div>
-    <div class="dvd" style="margin:12px 0"></div>
-    <!-- Current members -->
-    <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg> En este grupo</div>
-    <div class="chips" id="memberChips"><span style="color:var(--muted);font-size:.78rem">Sin participantes aún...</span></div>
+  <div class="sec-title" id="sec2" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleParticipantesSection()">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="num">2</div>
+    <h2>Participantes</h2>
+    <span id="participantesCounter" style="color:var(--gold);font-size:.9rem;font-weight:700;margin-left:4px"></span>
   </div>
+  <svg id="participantesChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+</div>
+  <div id="participantesSectionWrap" style="display:none">
+  <div class="card">
 
-  <!-- Registrar Gasto -->
-<div class="sec-title" id="sec3" style="opacity:.3">
-  <div class="num">3</div>
-  <h2>Registrar Gasto</h2>
+    <!-- En este grupo - desplegable -->
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:8px;" onclick="toggleMemberList()">
+      <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+        En este grupo <span id="memberCount" style="color:var(--gold);margin-left:4px;"></span>
+      </div>
+      <svg id="memberChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div id="memberListWrap" style="display:none;margin-bottom:12px;">
+      <div class="chips" id="memberChips"><span style="color:var(--muted);font-size:.78rem">Sin participantes aún...</span></div>
+    </div>
+
+    <div class="dvd" style="margin:10px 0"></div>
+
+    <!-- Añadir participantes -->
+    <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:10px;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+      Añadir participante
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <button onclick="toggleFriendPicker()" style="flex:1;background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:10px;color:#F2F2F2;font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Mis amigos
+      </button>
+      <button onclick="addFromContacts()" id="btnContacts" style="flex:1;background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:10px;color:#F2F2F2;font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Contactos
+      </button>
+      <button onclick="toggleManualAdd()" style="flex:1;background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:10px;color:#F2F2F2;font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Manual
+      </button>
+    </div>
+
+    <!-- Panel amigos -->
+    <div id="friendPickerWrap" style="display:none;margin-bottom:10px;">
+      <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px;">Seleccionar de mis amigos</div>
+      <div id="friendPickerChips" style="display:flex;flex-wrap:wrap;gap:7px;">
+        <span style="color:var(--muted);font-size:.78rem">Ve a Amigos y añade contactos primero</span>
+      </div>
+    </div>
+
+    <!-- Panel manual -->
+    <div id="manualAddWrap" style="display:none;">
+      <div class="add-row">
+        <div class="field" style="margin-bottom:0"><input type="text" id="memberName" maxlength="20" placeholder="Nombre del participante" oninput="this.value=this.value.slice(0,20)" onkeydown="if(event.key==='Enter')addMember()"></div>
+        <button class="btn btn-gold" style="flex-shrink:0" onclick="addMember()">+ Añadir</button>
+      </div>
+    </div>
+
+  </div>
 </div>
 
+  <!-- Registrar Gasto -->
+<div class="sec-title" id="sec3" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleGastoSection()">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="num">3</div>
+    <h2>Registrar Gasto</h2>
+  </div>
+  <svg id="gastoChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+</div>
+
+  <div id="gastoSectionWrap" style="display:none">
   <div class="card">
   <div class="g2">
     <div class="field span2">
@@ -549,9 +604,18 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
   <div style="height:8px"></div>
   <button class="btn btn-gold btn-full" onclick="addExpense()">Guardar Gasto</button>
 </div>
+</div>
 
   <!-- Expense list -->
-  <div class="sec-title" id="sec4" style="opacity:.3"><div class="num">4</div><h2>Lista de Gastos</h2></div>
+  <div class="sec-title" id="sec4" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleGastosListSection()">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="num">4</div>
+    <h2>Lista de Gastos</h2>
+    <span id="gastosCounter" style="color:var(--gold);font-size:.9rem;font-weight:700;margin-left:4px"></span>
+  </div>
+  <svg id="gastosListChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+</div>
+  <div id="gastosListSectionWrap" style="display:none">
   <div class="card">
     <div class="stat-row" id="summaryGrid" style="display:none">
       <div class="stat-box"><div class="stat-v" id="statTotal">$0</div><div class="stat-l">Total</div></div>
@@ -559,9 +623,17 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     </div>
     <div id="expenseList"><div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div>Sin gastos registrados</div></div></div>
   </div>
+</div>
 
   <!-- Settlement -->
-  <div class="sec-title" id="sec5" style="opacity:.3"><div class="num">5</div><h2>Cuentas Finales</h2></div>
+  <div class="sec-title" id="sec5" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleCuentasSection()">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="num">5</div>
+    <h2>Cuentas Finales</h2>
+  </div>
+  <svg id="cuentasChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+</div>
+  <div id="cuentasSectionWrap" style="display:none">
   <div class="card">
     <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px">Balance</div>
     <div id="balanceList"><div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div>Sin datos</div></div></div>
@@ -571,9 +643,17 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     <div style="height:10px"></div>
     <button class="btn btn-gold btn-full" onclick="calcDebts()">Calcular Deudas</button>
   </div>
+</div>
 
   <!-- Share -->
-  <div class="sec-title" id="sec6" style="opacity:.3"><div class="num">6</div><h2>Enviar Resumen</h2></div>
+  <div class="sec-title" id="sec6" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleResumenSection()">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="num">6</div>
+    <h2>Enviar Resumen</h2>
+  </div>
+  <svg id="resumenChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+</div>
+  <div id="resumenSectionWrap" style="display:none">
   <div class="card">
     <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Link del grupo</div>
     <p style="font-size:.76rem;color:var(--muted);margin-bottom:9px">Genera un link cliqueable para que tus contactos accedan al grupo directamente.</p>
@@ -583,10 +663,19 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
       <button class="link-copy" onclick="copyLink()">Copiar</button>
     </div>
     <div class="dvd"></div>
-    <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Contacto</div>
-    <div class="g2">
-      <div class="field"><label><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.73a16 16 0 0 0 6.29 6.29l1.1-1.1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Teléfono</label><input type="tel" id="contactPhone" placeholder="+34 600 000 000"></div>
-<div class="field"><label><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</label><input type="email" id="contactEmail" placeholder="amigo@email.com"></div>
+    
+    <div class="field" style="margin-bottom:12px">
+      <label><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.73a16 16 0 0 0 6.29 6.29l1.1-1.1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Teléfono</label>
+      <div style="position:relative;width:100%">
+        <input type="tel" id="contactPhone" placeholder="+34 600 000 000" style="width:100%;box-sizing:border-box;padding-right:44px">
+        <button onclick="pickContactForShare()" style="position:absolute;right:5px;top:50%;transform:translateY(-50%);background:var(--dark3);border:1.5px solid var(--border);border-radius:8px;padding:6px 8px;cursor:pointer;color:var(--gold, #FFD700);display:flex;align-items:center" title="Seleccionar contacto">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="field">
+      <label><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</label>
+      <input type="email" id="contactEmail" placeholder="amigo@email.com" style="width:100%;box-sizing:border-box">
     </div>
     <div style="display:flex;gap:24px;margin-top:13px;align-items:center;justify-content:center;">
       <button onclick="shareWhatsApp()" style="background:none;border:none;cursor:pointer;padding:0;transition:transform .13s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">
@@ -596,7 +685,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
         <svg width="50" height="50" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#EA4335"/><path d="M8 11.5V21.5C8 22.3 8.7 23 9.5 23H22.5C23.3 23 24 22.3 24 21.5V11.5L16 17L8 11.5Z" fill="white"/><path d="M24 10H8L16 15.5L24 10Z" fill="white"/></svg>
       </button>
       <button onclick="sharePhone()" style="background:none;border:none;cursor:pointer;padding:0;transition:transform .13s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">
-        <svg width="50" height="50" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#34C759"/><path d="M21.5 19.5C21.5 19.8 21.4 20.1 21.2 20.4C21 20.7 20.8 21 20.5 21.2C20 21.7 19.4 21.9 18.8 21.9C17.9 21.9 17 21.6 16 21C15.1 20.5 14.2 19.8 13.4 19C12.6 18.2 11.9 17.3 11.4 16.4C10.9 15.4 10.6 14.5 10.6 13.6C10.6 13 10.8 12.5 11.2 12C11.6 11.5 12.1 11.2 12.7 11.2C12.9 11.2 13.1 11.3 13.3 11.4C13.5 11.5 13.7 11.7 13.8 12L14.9 13.6C15 13.8 15.1 13.9 15.1 14.1C15.1 14.3 15 14.4 14.9 14.6L14.5 15C14.4 15.1 14.4 15.2 14.4 15.3C14.4 15.4 14.5 15.5 14.5 15.6C14.7 15.9 15 16.3 15.3 16.7C15.7 17.1 16.1 17.4 16.4 17.6C16.5 17.7 16.6 17.7 16.7 17.7C16.8 17.7 16.9 17.7 17 17.6L17.4 17.2C17.6 17 17.8 16.9 18 16.9C18.2 16.9 18.3 17 18.5 17.1L20.1 18.2C20.3 18.3 20.5 18.5 20.6 18.7C20.5 18.9 20.5 19.2 21.5 19.5Z" fill="white"/></svg>
+        <svg width="50" height="50" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#34C759"/><path d="M8 10C8 9.45 8.45 9 9 9H23C23.55 9 24 9.45 24 10V20C24 20.55 23.55 21 23 21H17L13 24V21H9C8.45 21 8 20.55 8 20V10Z" fill="white"/></svg>
       </button>
     </div>
     <div class="dvd"></div>
@@ -604,6 +693,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     <p style="font-size:.76rem;color:var(--muted);margin-bottom:9px">Descarga un resumen completo del grupo con participantes, gastos y estadísticas.</p>
     <button class="btn btn-gold btn-full" onclick="exportarPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
   </div>
+</div>
 </main>
 </div>
 <!-- ═══ PAGE: DETALLE GASTO ═══ -->
@@ -644,7 +734,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
         <input type="text" id="friendLastName" maxlength="20" placeholder="Apellido" oninput="this.value=this.value.slice(0,20)">
       </div>
     </div>
-    <div class="field"><label>Email / Teléfono (opcional)</label><input type="text" id="friendContact" placeholder="email o +34 600..."></div>
+    <div class="field"><label>Email (opcional)</label><input type="email" id="friendEmail" placeholder="amigo@email.com"></div>
+    <div class="field"><label>Teléfono (opcional)</label><input type="tel" id="friendPhone" placeholder="+34 600 000 000"></div>
     <div class="field">
       <label>Vincular a un grupo (opcional)</label>
       <select id="friendGroupLink">
@@ -653,7 +744,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     </div>
     <button class="btn btn-gold btn-full" onclick="addFriend()">+ Añadir Amigo</button>
   </div>
-  <div id="friendsList"><div class="no-items"><div class="ni">👥</div><div>Sin amigos añadidos aún</div></div></div>
+  <div id="friendsList"><div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div>Sin amigos añadidos aún</div></div></div>
 </main>
 </div>
 
@@ -666,7 +757,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     </div>
   </div>
 <main>
-  <div id="activityList"><div class="no-items"><div class="ni">🕐</div><div>Sin actividad reciente</div></div></div>
+  <div id="activityList"><div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div>Sin actividad reciente</div></div></div>
 </main>
 </div>
 
@@ -697,8 +788,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
           <span id="readNombre" style="font-weight:700;color:var(--text)">—</span>
         </div>
         <div style="display:flex;justify-content:space-between;font-size:.85rem;">
-          <span style="color:var(--muted)">Apellido</span>
-          <span id="readApellido" style="font-weight:700;color:var(--text)">—</span>
+          
         </div>
         <div style="display:flex;justify-content:space-between;font-size:.85rem;">
           <span style="color:var(--muted)">Email</span>
@@ -718,8 +808,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     <!-- MODO EDICIÓN (oculto por defecto) -->
     <div id="profileEditMode" style="display:none;">
       <div class="g2">
-        <div class="field"><label>Nombre</label><input type="text" id="profNombre" minlength="3" maxlength="20" placeholder="Tu nombre" oninput="updateProfilePreview()"></div>
-        <div class="field"><label>Apellido</label><input type="text" id="profApellido" minlength="3" maxlength="20" placeholder="Tu apellido" oninput="updateProfilePreview()"></div>
+        <div class="field"><label>Nombre</label><input type="text" id="profNombre" minlength="2" maxlength="40" placeholder="Tu nombre completo" oninput="updateProfilePreview()"></div>
+        
       </div>
       <div class="field"><label>Email</label><input type="email" id="profEmail" placeholder="tu@email.com" oninput="updateProfilePreview()"></div>
       <div class="field"><label>Teléfono</label><input type="tel" id="profTel" placeholder="+34 600 000 000"></div>
@@ -745,6 +835,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Opciones</div>
     <button class="btn btn-danger btn-full" onclick="document.getElementById('modal-borrar-datos').style.display='flex';document.body.style.overflow='hidden'" style="margin-bottom:10px;">Borrar todos mis datos</button>
     <button class="btn btn-full" onclick="handleLogout()" style="background:none;border:1px solid #ff4d4d;color:#ff4d4d;border-radius:10px;padding:12px;font-weight:bold;font-size:.8rem;cursor:pointer;">Cerrar Sesión</button>
+    <button class="btn btn-full" onclick="document.getElementById('modal-eliminar-cuenta').style.display='flex';document.body.style.overflow='hidden'" style="background:none;border:1px solid #990000;color:#990000;border-radius:10px;padding:12px;font-weight:bold;font-size:.8rem;cursor:pointer;margin-top:8px;">Eliminar mi cuenta</button>
   </div>
 </main>
 </div>
@@ -834,9 +925,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     </div>
 
     <div style="display:flex;gap:9px;margin-top:6px">
-      <button class="btn btn-danger" onclick="openDeleteFromEdit()" style="flex:1">Eliminar</button>
-      <button class="btn btn-gold" onclick="saveEditExpense()" style="flex:1">Guardar Cambios</button>
-    </div>
+  <!-- Se asegura la llamada a la función de confirmación -->
+  <button type="button" class="btn btn-danger" onclick="openDeleteFromEdit()" style="flex:1">Eliminar</button>
+  <!-- Se añade type="button" para evitar comportamiento de formulario accidental -->
+  <button type="button" class="btn btn-gold" onclick="saveEditExpense()" style="flex:1">Guardar Cambios</button>
+</div>
   </div>
 </div>
 
@@ -956,7 +1049,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
   <button class="nav-btn" data-page="page-cuenta" onclick="switchPage('page-cuenta',this)">
     <!-- Contenedor circular para la foto o inicial -->
     <div id="user-nav-wrapper" style="width: 28px; height: 28px; border-radius: 50%; overflow: hidden; border: 1.5px solid currentColor; margin: 0 auto 4px auto; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1);">
-        <img id="user-nav-photo" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+        <img id="user-nav-photo" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;" onerror="this.style.display='none';document.getElementById('user-nav-initials').style.display='block';">
         <span id="user-nav-initials" style="font-size: 0.8rem; font-weight: bold; line-height: 1;">
             👤
         </span>
@@ -977,9 +1070,20 @@ document.getElementById('logoImg').src = "logo_vakapay.png";
 // ================================================================
 // VakaDataService — Capa de abstracción de datos
 // ================================================================
+// Convierte el array de miembros que devuelve la API (fila por fila de Postgres)
+// en el objeto {nombre: balance} que usa todo el frontend. Sin esto, cualquier
+// merge con "..." vuelca los indices numericos del array como si fueran
+// participantes reales (bug de "miembros fantasma 0,1,2...").
+function normalizeMembersField(rawMembers, fallback) {
+  if (Array.isArray(rawMembers)) {
+    return Object.fromEntries(rawMembers.map(m => [m.display_name, Number(m.balance) || 0]));
+  }
+  return rawMembers || fallback || {};
+}
+
 class VakaDataService {
   #KEYS    = { groups:'vp_groups', friends:'vp_friends', activity:'vp_activity', profile:'vp_profile', token:'vp_token' };
-  #API_URL = 'http://192.168.1.131:3000/api/v1';
+  #API_URL = 'https://vakapay-app.vercel.app/api/v1';
   #token   = null;
 
   constructor() {
@@ -1010,16 +1114,32 @@ class VakaDataService {
   }
 
   #normalize(g) {
+    const normalizeExpense = e => ({
+      ...e,
+      desc:    e.desc    || e.description  || '',
+      payer:   e.payer   || e.payer_name   || '',
+      date:    e.date    || e.expense_date || '',
+      baseAmt: Number(e.baseAmt || e.amount_base || e.amount) || 0,
+      cat:     e.cat     || e.category     || 'other',
+      involved: e.involved || (e.splits ? e.splits.map(s => s.member_name) : []),
+    });
     return {
-      id:        g.id,
-      name:      g.name,
-      type:      g.type        || 'viaje',
-      start:     g.date_start  || g.start || '',
-      end:       g.date_end    || g.end   || '',
-      members:   g.members     || {},
-      expenses:  g.expenses    || [],
-      createdAt: g.created_at  || g.createdAt || new Date().toISOString(),
-    };
+  id:        g.id,
+  owner_id:  g.owner_id || null,
+  name:      g.name,
+  type:      g.type        || 'viaje',
+  start:     g.date_start  || g.start || '',
+  end:       g.date_end    || g.end   || '',
+  members: Array.isArray(g.members)
+    ? Object.fromEntries(g.members.map(m => [m.display_name, m.balance || 0]))
+    : g.members || {},
+  memberIds: Array.isArray(g.members)
+    ? Object.fromEntries(g.members.filter(m => m.user_id).map(m => [m.display_name, m.user_id]))
+    : g.memberIds || {},
+  expenses: (g.expenses || []).map(normalizeExpense),
+  createdAt: g.created_at || g.createdAt || new Date().toISOString(),
+  currency:  g.currency || 'EUR',
+};
   }
 
   async login({ email, password }) {
@@ -1038,7 +1158,9 @@ class VakaDataService {
   async getGroups() {
     try {
       const data = await this.#req('GET', '/groups');
-      const normalized = Array.isArray(data) ? data.map(g => this.#normalize(g)) : [];
+      if (!Array.isArray(data)) return this.#read(this.#KEYS.groups) ?? [];
+      const detailed = await Promise.all(data.map(g => this.#req('GET', `/groups/${g.id}`).catch(() => g)));
+      const normalized = detailed.map(g => this.#normalize(g));
       this.#write(this.#KEYS.groups, normalized);
       return normalized;
     } catch(_) {
@@ -1093,15 +1215,24 @@ class VakaDataService {
     const gs = groups;
     const g = gs[idx];
     
-    // 1. Aseguramos que existan gastos y el ID del grupo (id o _id)
+    // ══ REFUERZO: Asegurar que los miembros existan en el grupo ══
+    if (Array.isArray(involved)) {
+        involved.forEach(name => {
+            if (!g.members.hasOwnProperty(name)) {
+                g.members[name] = 0; // Crea el miembro localmente si falta
+            }
+        });
+    }
+
+    // 1. Aseguramos que existan gastos y el ID del grupo
     if (!g.expenses) g.expenses = [];
     const groupId = g.id || g._id; 
     
     const ba = Number(baseAmt || amount);
-	const newExp = {desc, amount: Number(amount), cat, payer, date, involved, currency: currency || 'EUR', baseAmt: ba};
+    const newExp = {desc, amount: Number(amount), cat, payer, date, involved, currency: currency || 'EUR', baseAmt: ba};
     
     // 2. Actualización local inmediata
-    g.expenses.push(newExp);
+    g.expenses.unshift(newExp);
     
     if (typeof updateBalances === 'function') updateBalances();
     await this.saveGroups(gs);
@@ -1121,10 +1252,20 @@ class VakaDataService {
       });
       
       console.log("☁️ Sincronizado correctamente con el servidor");
-      if (typeof renderAll === 'function') renderAll();
+      const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+      });
+      if (resFresh.ok) {
+        const freshData = await resFresh.json();
+        groups[currentGroupIdx] = {
+          ...groups[currentGroupIdx],
+          ...freshData,
+          members: normalizeMembersField(freshData.members, groups[currentGroupIdx].members)
+        };
+        renderAll();
+      }
     } catch (e) {
       console.warn("⚠️ Sincro fallida (guardado solo en LocalStorage):", e.message);
-      // No hacemos push aquí porque ya lo hicimos en el paso 2
     }
 
     return newExp;
@@ -1157,28 +1298,112 @@ class VakaDataService {
     } catch (e) { 
       console.warn("Borrado solo local (Servidor offline)"); 
     }
+    // Sincronización post-borrado
+    try {
+      const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+      });
+      if (resFresh.ok) {
+        const freshData = await resFresh.json();
+        groups[currentGroupIdx] = {
+          ...groups[currentGroupIdx],
+          ...freshData,
+          members: normalizeMembersField(freshData.members, groups[currentGroupIdx].members)
+        };
+        updateBalances();
+        renderAll();
+      }
+    } catch (e) { console.error("Error sincronizando tras borrar:", e); }
     return true;
   }
 
   async updateExpense(idx, eidx, data) {
-    await this.deleteExpense(idx, eidx);
-    return this.addExpense(idx, data);
-  }
+    const g = groups[idx];
+    
+    // 1. Validación preventiva: Aseguramos que los miembros existan
+    if (data.involved && Array.isArray(data.involved)) {
+        data.involved.forEach(name => {
+            if (!g.members.hasOwnProperty(name)) {
+                g.members[name] = 0; 
+            }
+        });
+    }
 
-  async getFriends() { return this.#read(this.#KEYS.friends)??[]; }
+    // 2. Actualización Local Directa (evitamos delete + add)
+    const oldExpense = g.expenses[eidx];
+    g.expenses[eidx] = { ...oldExpense, ...data }; 
+    
+    updateBalances();
+    await this.saveGroups(groups);
+
+    // 3. Preparación de datos para el Backend (Mapeo de nombres)
+    const payload = {
+        description: data.desc || data.description,
+        amount: data.amount,
+        currency: data.currency || 'EUR',
+        category: data.cat || data.category || 'other',
+        payer_name: data.payer || data.payer_name,
+        expense_date: data.date || data.expense_date,
+        involved: data.involved
+    };
+
+    // 4. Sincronización (PUT)
+    try {
+        if (g.id && oldExpense.id) {
+            await this.#req('PUT', `/groups/${g.id}/expenses/${oldExpense.id}`, payload);
+        }
+    } catch (e) {
+        console.error("Error al actualizar gasto en servidor:", e);
+    }
+
+    return g.expenses[eidx];
+}
+
+  async getFriends() {
+    try {
+      const data = await this.#req('GET', '/friends');
+      if (Array.isArray(data)) {
+        this.#write(this.#KEYS.friends, data);
+        return data;
+      }
+    } catch(_) {}
+    return this.#read(this.#KEYS.friends) ?? [];
+  }
   async saveFriends(fs) { this.#write(this.#KEYS.friends,fs); return true; }
-  
-  async getProfile() { return this.#read(this.#KEYS.profile)??{}; }
-  async saveProfile(data) { const cur=await this.getProfile(); const upd={...cur,...data}; this.#write(this.#KEYS.profile,upd); return upd; }
-
-  async getActivity() { return this.#read(this.#KEYS.activity)??[]; }
-  async logActivity(msg, groupName = null) {
-    const act = await this.getActivity();
-    act.unshift({msg, time: new Date().toISOString(), groupName});
-    if(act.length > 40) act.pop();
-    this.#write(this.#KEYS.activity, act);
-    return act[0];
+  async updateFriend(id, data) { return await this.#req('PATCH', `/friends/${id}`, data); }
+  async addFriend(friendData) {
+    const friend = await this.#req('POST', '/friends', friendData);
+    return friend;
   }
+  async getProfile() { return this.#read(this.#KEYS.profile)??{}; }
+  async saveProfile(data) { const cur=await this.getProfile(); const upd={...cur,...data}; this.#write(this.#KEYS.profile,upd); try { await this.#req('PATCH', '/users/me', { nombre: data.nombre, apellido: data.apellido, email: data.email, tel: data.tel, bio: data.bio }); } catch(_) {} return upd; }
+
+  async getActivity() {
+  try {
+    const data = await this.#req('GET', '/activity');
+    if (Array.isArray(data)) {
+      const normalized = data.map(a => ({
+        ...a,
+        msg: a.message,
+        time: a.created_at,
+        groupName: a.group_name ?? null,
+      }));
+      this.#write(this.#KEYS.activity, normalized);
+      return normalized;
+    }
+  } catch(_) {}
+  return this.#read(this.#KEYS.activity) ?? [];
+}
+async logActivity(msg, groupName = null) {
+  try {
+    await this.#req('POST', '/activity', { message: msg, type: 'other', group_name: groupName });
+  } catch(_) {}
+  const act = this.#read(this.#KEYS.activity) ?? [];
+  act.unshift({msg, message: msg, time: new Date().toISOString(), groupName});
+  if(act.length > 40) act.pop();
+  this.#write(this.#KEYS.activity, act);
+  return act[0];
+}
   
   async updateGroupName(idx, newName) {
     const gs = groups;
@@ -1206,19 +1431,48 @@ class VakaDataService {
   }
   async deleteGroup(id) {
     try {
-      // Enviamos la petición DELETE al servidor
+      // 1. Enviamos petición al servidor
       await this.#req('DELETE', `/groups/${id}`);
       
-      // Actualizamos también el almacenamiento local interno de la clase
+      // 2. Solo si no hubo error, filtramos localmente
       const gs = this.#read(this.#KEYS.groups) ?? [];
       const filtered = gs.filter(g => (g.id || g._id) !== id);
+      
+      // 3. Persistimos el nuevo estado
       this.#write(this.#KEYS.groups, filtered);
       
       return true;
     } catch (err) {
-      // Si el servidor falla, lanzamos el error para que la interfaz avise
       throw err;
     }
+  }
+
+  async deleteAllData() {
+    try {
+      const gs = await this.#req('GET', '/groups');
+      if (Array.isArray(gs)) {
+        for (const g of gs) await this.#req('DELETE', `/groups/${g.id}`);
+      }
+      const fs = await this.#req('GET', '/friends');
+      if (Array.isArray(fs)) {
+        for (const f of fs) await this.#req('DELETE', `/friends/${f.id}`);
+      }
+      try { await this.#req('DELETE', '/activity'); } catch(_) {}
+    } catch(err) {
+      console.error('Error durante el borrado de datos:', err);
+    }
+  }
+
+  async deleteAccount() {
+    await this.deleteAllData();
+    try {
+      await this.#req('DELETE', '/users/me');
+    } catch(err) {
+      console.error('❌ Error al eliminar usuario:', err);
+      throw err;
+    }
+    this.setToken(null);
+    localStorage.clear();
   }
 }
 
@@ -1226,6 +1480,7 @@ const vakaData = new VakaDataService();
 
 // ═══ STATE ═══════════════════════════════════════════════════════════
 // Datos cargados por async init() a través de VakaDataService
+const API_BASE = 'https://vakapay-app.vercel.app';
 let groups   = [];
 let friends  = [];
 let grupoAEditar = null;
@@ -1233,46 +1488,81 @@ let activity = [];
 let profile  = {};
 let currentGroupIdx = null;
 let selectedType = 'viaje';
+let editingExpenseIdx = null;
 
-const CAT_ICONS={food:'🍔',transport:'🚗',hotel:'🏨',activity:'🎭',other:'💡'};
-const CAT_CSS  ={food:'c-food',transport:'c-transport',hotel:'c-hotel',activity:'c-activity',other:'c-other'};
+const CAT_ICONS = {
+  food: '🍔', 'Comida': '🍔',
+  transport: '🚗', 'Transporte': '🚗',
+  hotel: '🏨', 'Alojamiento': '🏨',
+  activity: '🎭', 'Actividad': '🎭',
+  other: '💡', 'Otro': '💡'
+};
+const CAT_CSS = {
+  food: 'c-food', 'Comida': 'c-food',
+  transport: 'c-transport', 'Transporte': 'c-transport',
+  hotel: 'c-hotel', 'Alojamiento': 'c-hotel',
+  activity: 'c-activity', 'Actividad': 'c-activity',
+  other: 'c-other', 'Otro': 'c-other'
+};
 const TYPE_ICONS={viaje:'✈️',casa:'🏠',pareja:'💑',otros:'🎯'};
 
 // ═══ INIT ═════════════════════════════════════════════════════════════
 (async function init(){
   try {
-    // 1. Fechas por defecto
-    const t=new Date(), e=new Date(t); e.setDate(t.getDate()+7);
-    const fmt=d=>d.toISOString().split('T')[0];
-    if(document.getElementById('dateStart')) document.getElementById('dateStart').value=fmt(t);
-    if(document.getElementById('dateEnd')) document.getElementById('dateEnd').value=fmt(e);
-    if(document.getElementById('expDate')) document.getElementById('expDate').value=fmt(t);
-    
-    // 2. Login - Ahora dentro de async
-    if (!vakaData.getToken()) {
-	  window.location.href = 'login.html';
-	  return;
-	}
+    // 1. Verificación robusta del Token
+    const token = vakaData.getToken();
+    if (!token) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    // 2. Validación flexible de sesión con el backend (Soporte Offline / APK)
+    try {
+        const response = await fetch(`${API_BASE}/api/v1/users/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
         
-	
+        // Si el servidor rechaza explícitamente el token por unauthorized, sí redirigimos al login
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                throw new Error("Sesión no autorizada");
+            }
+        }
+    } catch(err) {
+        console.warn("Aviso de red o sesión inválida. Continuando con caché local:", err);
+        // Si es un error crítico de autenticación real, puedes forzar el logout aquí si lo deseas.
+        // Si es solo falta de red, dejamos que pase para que la app no se quede en blanco.
+    }
+   
 	// 3. CARGA DE DATOS
 try {
-    const localRaw = localStorage.getItem('vaka_groups');
-    const localGroups = localRaw ? JSON.parse(localRaw) : null;
-
-    if (localGroups && Array.isArray(localGroups) && localGroups.length > 0) {
-        groups = localGroups;
-    } else {
-        const remote = await vakaData.getGroups();
-        groups = Array.isArray(remote) ? remote : [];
-        localStorage.setItem('vaka_groups', JSON.stringify(groups));
-    }
+    const remote = await vakaData.getGroups();
+    groups = Array.isArray(remote) ? remote : [];
+    localStorage.setItem('vaka_groups', JSON.stringify(groups));
 
     friends = await vakaData.getFriends() || [];
     activity = (await vakaData.getActivity() || []).map(a => ({...a,
-  groupName: a.groupName || null
+  groupName: a.groupName || a.group_name || null
 }));
-    profile = await vakaData.getProfile() || {};
+    try {
+      const me = await fetch(`${API_BASE}/api/v1/users/me`, {
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+      }).then(r => r.json());
+      console.log('📋 Perfil del backend:', me);
+      if (me && !me.error) {
+        profile = {
+  id: me.id || null,
+  nombre: me.nombre || me.name || '',
+  email: me.email || '',
+  tel: me.tel || '',
+  bio: me.bio || '',
+  avatar: me.avatar_url ? `${window.location.origin}${me.avatar_url}` : null
+};
+        await vakaData.saveProfile(profile);
+      }
+    } catch(_) {
+      profile = await vakaData.getProfile() || {};
+    }
 
 } catch (err) {
     console.error("Error en carga:", err);
@@ -1297,6 +1587,45 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
   }
 	// Render inicial
 	loadProfile();renderGroupsList();renderFriends();renderActivity();updateStats();populateFriendGroupSelect();
+  // Detectar invite en URL o localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlInvite = urlParams.get('invite');
+    if (urlInvite) localStorage.setItem('vp_pending_invite', urlInvite);
+    const pendingInvite = localStorage.getItem('vp_pending_invite');
+    console.log('🔑 Invite pendiente:', pendingInvite);
+    console.log('🔑 Token usuario:', vakaData.getToken() ? 'existe' : 'no existe');
+    if (pendingInvite) {
+      try {
+        const token = vakaData.getToken();
+        const displayName = profile.nombre || document.getElementById('profileDisplayName')?.textContent || '';
+        const res = await fetch(`${API_BASE}/api/v1/invite/${pendingInvite}/join`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ display_name: displayName })
+        });
+        
+        if (!res.ok) {
+          localStorage.removeItem('vp_pending_invite');
+        } else {
+          const data = await res.json();
+          console.log('📨 Respuesta invitación:', data);
+          if (data.joined || data.already_member) {
+            localStorage.removeItem('vp_pending_invite');
+            groups = await vakaData.getGroups() || [];
+            friends = await vakaData.getFriends() || [];
+            renderGroupsList();
+            renderFriends();
+            const msg = data.already_member ? `Ya eres miembro de "${data.group.name}"` : `Te has unido al grupo "${data.group.name}" ✓`;
+            toast(msg, 's');
+          } else {
+            localStorage.removeItem('vp_pending_invite');
+          }
+        }
+      } catch(err) {
+        console.error('Error al unirse al grupo:', err);
+        localStorage.removeItem('vp_pending_invite');
+      }
+    }
 	loadFromHash();
 })();
 
@@ -1322,7 +1651,7 @@ async function saveFriends() {
 }
 
 async function saveActivity() {
-  // Solo si tu servicio necesita persistencia manual aquí
+  // logActivity ya persiste en backend y localStorage. Solo actualizamos la vista.
 }
 
 // ═══ PAGE NAVIGATION ═════════════════════════════════════════════════
@@ -1336,6 +1665,12 @@ function switchPage(id, btn) {
   if (btn) btn.classList.add('active');
   
   window.scrollTo(0, 0);
+resetMemberAccordions();
+if (typeof hideNewGroupForm === 'function') hideNewGroupForm();
+const groupsWrap = document.getElementById('groupsListWrap');
+const groupsChevron = document.getElementById('groupsChevron');
+if (groupsWrap) groupsWrap.style.display = 'none';
+if (groupsChevron) groupsChevron.style.transform = '';
 
   // 2. LÓGICA DE SALIDA DE GRUPO (Al volver a la lista general)
   if (id === 'page-grupos') {
@@ -1374,7 +1709,7 @@ function switchPage(id, btn) {
       const g = groups[currentGroupIdx];
       badge.textContent = (TYPE_ICONS[g.type] || '📂') + ' ' + g.name;
       badge.style.display = 'block';
-      if (sub) sub.textContent = g.expenses?.length + ' gastos · ' + g.start + ' → ' + g.end;
+      if (sub) sub.textContent = g.expenses?.length + ' gastos · ' + fmtDate(g.start) + ' → ' + fmtDate(g.end);
     }
   }
 
@@ -1394,8 +1729,21 @@ function switchPage(id, btn) {
   }
 }
 
-function goBack(){
-  switchPage('page-grupos',document.querySelector('[data-page="page-grupos"]'));
+function goBack() {
+  const currentPage = document.querySelector('.page.active').id;
+
+  // Si estamos en detalle de gasto, volver a detalle de grupo
+  if (currentPage === 'page-gasto') {
+    switchPage('page-detalle', null);
+  } 
+  // Si estamos en detalle de grupo, volver a grupos
+  else if (currentPage === 'page-detalle') {
+    switchPage('page-grupos', document.querySelector('[data-page="page-grupos"]'));
+  }
+  // En cualquier otro caso, ir a grupos
+  else {
+    switchPage('page-grupos', document.querySelector('[data-page="page-grupos"]'));
+  }
 }
 
 // ─── GROUP DROPDOWN ──────────────────────────────────────────────
@@ -1441,13 +1789,13 @@ function switchGroupFromDropdown(idx) {
   const g = groups[idx];
   updateBalances();
 
-  // Actualizar badge
+  // Actualizar badge (texto y visibilidad ahora; la posición se ajusta al final)
   document.getElementById('hbadge').textContent = TYPE_ICONS[g.type] + ' ' + g.name;
   document.getElementById('hbadge').style.display = 'block';
 
   // Actualizar título y meta del detalle
   document.getElementById('detTitle').textContent = TYPE_ICONS[g.type] + ' ' + g.name;
-  document.getElementById('detMeta').textContent = g.start + ' → ' + g.end;
+  document.getElementById('detMeta').textContent = fmtDate(g.start) + ' → ' + fmtDate(g.end);
 
   if (currentPage === 'page-stats') {
     const sub = document.getElementById('statsSubtitle');
@@ -1458,6 +1806,11 @@ function switchGroupFromDropdown(idx) {
   } else {
     openGroup(idx);
   }
+
+  // Recalcular la posición del badge DESPUÉS de que el contenido nuevo
+  // ya se haya pintado — requestAnimationFrame espera al próximo repintado
+  // del navegador, así el .det-bar que mide ya tiene su tamaño final.
+  requestAnimationFrame(posicionarBadge);
 }
 
 // ═══ TYPE SELECTOR
@@ -1478,14 +1831,16 @@ async function createGroup(){
   if(!nameInput) return;
 
   const name = nameInput.value.trim() || 'Mi Grupo';
-  
+  // Nombre del usuario logueado, que debe quedar como primer participante
+  const myName = (profile && profile.nombre ? profile.nombre.trim() : '') || 'Yo';
+
   try {
     const datosNuevo = { 
         name: name, 
         start: document.getElementById('dateStart')?.value || '', 
         end: document.getElementById('dateEnd')?.value || '', 
         type: typeof selectedType !== 'undefined' ? selectedType : 'trip', 
-        members: {}, 
+        members: { [myName]: 0 },   // ← el creador entra desde el inicio
         expenses: [] 
     };
 
@@ -1496,10 +1851,30 @@ async function createGroup(){
     // Si falla, usamos el local (pero ya sabemos que no tendrá ID).
     const grupoFinal = grupoServidor || datosNuevo;
 
-    // 3. Actualizamos la lista global con el grupo que YA tiene ID
+    // 3. FIX: nos aseguramos de que el creador quede como participante,
+    // aunque el backend no lo haya incluido en la respuesta del POST /groups
+    if (!grupoFinal.members || Object.keys(grupoFinal.members).length === 0) {
+      grupoFinal.members = { [myName]: 0 };
+    }
+
+    // 4. Si el grupo ya tiene ID (se creó bien en el servidor), damos de alta
+    // al creador como miembro real vía la API, igual que con cualquier otro participante
+    if (grupoFinal.id) {
+      try {
+        await fetch(`${API_BASE}/api/v1/groups/${grupoFinal.id}/members`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+          body: JSON.stringify({ display_name: myName })
+        });
+      } catch(err) {
+        console.warn('No se pudo registrar al creador como miembro en el servidor:', err);
+      }
+    }
+
+    // 5. Actualizamos la lista global con el grupo que YA tiene ID y participante
     groups.unshift(grupoFinal);
 
-    // 4. Guardamos en el PC
+    // 6. Guardamos en el PC
     localStorage.setItem('vaka_groups', JSON.stringify(groups));
 
     hideNewGroupForm();
@@ -1508,27 +1883,46 @@ async function createGroup(){
     
   } catch(e) {
     console.error("Error al crear:", e);
-    // Como QA: Si falla la creación inicial en el servidor, 
-    // es mejor avisar que el grupo solo será local.
     toast("Creado solo en local (Sin conexión)", 'w');
   }
 }
 
 // ═══ GROUPS LIST ══════════════════════════════════════════════════════
+
+function toggleGroupsList() {
+  const wrap = document.getElementById('groupsListWrap');
+  const chevron = document.getElementById('groupsChevron');
+  const open = wrap.style.display === 'block';
+  wrap.style.display = open ? 'none' : 'block';
+  chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+// Formatea una fecha ISO (2026-07-13T00:00:00.000Z) o YYYY-MM-DD a DD/MM/AAAA legible.
+// Si la fecha viene vacía o inválida, devuelve el valor original tal cual.
+function fmtDate(raw) {
+  if (!raw) return '';
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) return raw;
+  return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
+}
 function renderGroupsList() {
   const sym0 = (vakaData && vakaData.settings) ? getCurrencySymbol(vakaData.settings.baseCurrency) : '€';
   const el = document.getElementById('groupsList');
   
   if (!el) return; // Validación de QA para evitar errores si el elemento no existe
-
+  const counter = document.getElementById('groupsCounter');
+  if (counter) counter.textContent = `(${groups.length})`;
   if (groups.length === 0) {
     el.innerHTML = '<div class="no-items"><div class="ni">📂</div><div>No tienes grupos creados aún</div></div>';
     return;
   }
 
   el.innerHTML = groups.map((g, i) => {
-    // Sumamos los montos base (siempre en la moneda del grupo, ej: Euros)
-    const total = (g.expenses || []).reduce((s, e) => s + (e.baseAmt || 0), 0);
+    // Cálculo seguro del total: forzamos a número y manejamos valores nulos
+    const total = (g.expenses || []).reduce((s, e) => {
+      const val = Number(e.baseAmt) || 0;
+      return s + val;
+    }, 0);
+    
     const nm = Object.keys(g.members || {}).length;
 
     return `
@@ -1536,9 +1930,9 @@ function renderGroupsList() {
         <div class="gc-icon">${TYPE_ICONS[g.type] || '📂'}</div>
         <div class="gc-info">
           <div class="gc-name">${g.name}</div>
-          <div class="gc-meta">${nm} participante${nm !== 1 ? 's' : ''} · ${g.start} → ${g.end}</div>
+          <div class="gc-meta">${nm} participante${nm !== 1 ? 's' : ''} · ${fmtDate(g.start)} → ${fmtDate(g.end)}</div>
         </div>
-        <div class="gc-total">${sym0}${total.toFixed(2)}</div>
+        <div class="gc-total">${sym0}${Number(total || 0).toFixed(2)}</div>
         <div class="gc-actions">
           <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); openEditGroupModal(${i})" title="Editar">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -1553,25 +1947,51 @@ function renderGroupsList() {
 
 const renderGroups = renderGroupsList;
 
-function openGroup(idx){
-  currentGroupIdx=idx;
-  const g=groups[idx];
-  
-  // === PASO 1: RECALCULAR SALDOS ===  
-  updateBalances(); 
+async function openGroup(idx){
+  currentGroupIdx = idx;
+  resetMemberAccordions();
+  const g = groups[idx];
 
-  document.getElementById('detTitle').textContent=TYPE_ICONS[g.type]+' '+g.name;
-  document.getElementById('detMeta').textContent=g.start+' → '+g.end;
-  document.getElementById('hbadge').textContent=TYPE_ICONS[g.type]+' '+g.name;
-  document.getElementById('hbadge').style.display='block';
+  document.getElementById('detTitle').textContent = TYPE_ICONS[g.type]+' '+g.name;
+  document.getElementById('detMeta').textContent = fmtDate(g.start)+' → '+fmtDate(g.end);
+  document.getElementById('hbadge').textContent = TYPE_ICONS[g.type]+' '+g.name;
+  document.getElementById('hbadge').style.display = 'block';
+  posicionarBadge();
   ['sec2','sec3','sec4','sec5','sec6'].forEach(id=>document.getElementById(id).style.opacity='1');
-  document.getElementById('linkBox').style.display='none';
+  document.getElementById('linkBox').style.display = 'none';
 
-  // === PASO 2: DIBUJAR (Ahora con datos calculados) ===
+  // Cargar datos frescos del backend
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
+      headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    const fresh = await res.json();
+    if (fresh && !fresh.error) {
+      groups[idx] = {
+          ...groups[idx],
+          // Aquí fusionamos lo local con lo que llega del servidor:
+          members: (Array.isArray(fresh.members))
+            ? { ...groups[idx].members, ...Object.fromEntries(fresh.members.map(m => [m.display_name, m.balance || 0])) }
+            : groups[idx].members,
+          expenses: (fresh.expenses || []).sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(e => ({
+            ...e,
+            desc: e.description || e.desc || 'Sin descripción',
+            payer: e.payer_name || e.payer || 'Desconocido',
+            date: e.expense_date || e.date || 'Sin fecha',
+            baseAmt: Number(e.amount_base || e.baseAmt) || 0,
+            cat: e.category || e.cat || 'other',
+            involved: e.splits ? e.splits.map(s => s.member_name) : (e.involved || [])
+          }))
+        };
+    }
+  } catch(_) {}
+
+  // Recalculamos tras la actualización
+  updateBalances();
   renderAll();
   renderFriendPicker();
   
-  switchPage('page-detalle',null);
+  switchPage('page-detalle', null);
   document.querySelectorAll('.nav-btn').forEach(b=>{if(b.dataset.page==='page-grupos')b.classList.add('active');});
 }
 
@@ -1581,12 +2001,14 @@ function openGasto(idx) {
   currentExpenseIdx = idx;
   const g = groups[currentGroupIdx];
   const e = g.expenses[idx];
+  console.log("Datos recibidos del gasto:", e);
+  if (!e) return;
   const base = getBase();
   const sym = SYMBOLS[base] || '€';
   const displaySym = SYMBOLS[e.currency || base] || '€';
 
   document.getElementById('gastoTitle').textContent = CAT_ICONS[e.cat] + ' ' + e.desc;
-  document.getElementById('gastoMeta').textContent = e.date + ' · Pagó ' + e.payer;
+  document.getElementById('gastoMeta').textContent = fmtDate(e.date) + ' · Pagó ' + e.payer;
 
   const ticketHTML = e.ticket ? `
     <div style="margin-top:12px;">
@@ -1601,7 +2023,7 @@ function openGasto(idx) {
       <div class="exp-ico ${CAT_CSS[e.cat]}" style="width:52px;height:52px;font-size:1.6rem;">${CAT_ICONS[e.cat]}</div>
       <div>
         <div style="font-size:1.2rem;font-weight:800;color:var(--text);">${e.desc}</div>
-        <div style="font-size:.75rem;color:var(--muted);">${e.date}</div>
+        <div style="font-size:.75rem;color:var(--muted);">${fmtDate(e.date)}</div>
       </div>
     </div>
 
@@ -1664,49 +2086,56 @@ function goBackToGroup() {
   document.querySelectorAll('.nav-btn').forEach(b => {
     if (b.dataset.page === 'page-grupos') b.classList.add('active');
   });
+
+  // Al volver del detalle de un gasto, reabrir "Lista de gastos" en vez de dejar el acordeón cerrado
+  const wrap = document.getElementById('gastosListSectionWrap');
+  const chevron = document.getElementById('gastosListChevron');
+  if (wrap && wrap.style.display !== 'block') {
+    wrap.style.display = 'block';
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+  }
 }
 
 async function deleteGroup(idx) {
   const g = groups[idx];
-  if (!g) return; // Seguridad: si el índice no existe, no hace nada
+  if (!g) return;
 
   const groupId = g.id || g._id;
 
   try {
-    // 1. Borrado en servidor (si existe ID)
     if (groupId) {
-      try {
-        await vakaData.deleteGroup(groupId);
-      } catch (serverError) {
-        // Si el servidor falla (ej. 404), avisamos en consola pero permitimos el borrado local
-        console.warn("El grupo no existe en el servidor, procediendo a borrado local.");
+      const res = await fetch(`${API_BASE}/api/v1/groups/${groupId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+      });
+      if (res.status === 422) {
+        const data = await res.json();
+        toast(data.error, 'e');
+        return;
+      }
+      if (!res.ok && res.status !== 404) {
+        toast('Error al salir del grupo', 'e');
+        return;
       }
     }
 
-    // 2. Borrado local
     groups.splice(idx, 1);
-    save(); 
-    
-    // 3. Actualización de interfaz
+    save();
+
     renderGroupsList();
     updateStats();
-    
-    if (typeof toast === "function") {
-      await logActivity(`Grupo "${g.name}" eliminado`);
-	  toast('Grupo eliminado permanentemente', 'i');
-    }
 
-    // 4. Gestión de navegación
+    await logActivity(`Saliste del grupo "${g.name}"`);
+    toast('Has salido del grupo', 'i');
+
     if (currentGroupIdx === idx) {
       goBack();
       const badge = document.getElementById('hbadge');
       if (badge) badge.style.display = 'none';
     }
   } catch (e) {
-    console.error("Error al borrar:", e);
-    if (typeof toast === "function") {
-      toast('Error: No se pudo borrar del servidor', 'e');
-    }
+    console.error("Error al salir del grupo:", e);
+    toast('Error al salir del grupo', 'e');
   }
 }
 
@@ -1772,7 +2201,7 @@ function openDeleteExpenseModal(idx) {
       ? `${sym}${Number(e.amount).toFixed(2)} ≈ ${symBase}${Number(e.baseAmt).toFixed(2)}`
       : `${sym}${Number(e.amount).toFixed(2)}`;
   document.getElementById('del-gasto-payer').textContent = e.payer;
-  document.getElementById('del-gasto-date').textContent = e.date;
+  document.getElementById('del-gasto-date').textContent = fmtDate(e.date);
 
   document.getElementById('modal-borrar-gasto').style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -1793,14 +2222,43 @@ function ejecutarBorradoGasto() {
 }
 
 // ═══ MEMBERS ══════════════════════════════════════════════════════════
-function addMemberFromFriend(friendName){
-  if(currentGroupIdx===null){toast('Abre un grupo primero','e');return;}
-  const g=groups[currentGroupIdx];
-  if(g.members.hasOwnProperty(friendName)){toast(`${friendName} ya está en el grupo`,'i');return;}
-  g.members[friendName]=0;save();renderAll();
-  logActivity(`${friendName} añadido al grupo "${g.name}"`);saveActivity();renderActivity();
-  toast(`${friendName} añadido ✓`,'s');
+async function addMemberFromFriend(friendName) { 
+  if (currentGroupIdx === null) { toast('Abre un grupo primero', 'e'); return; }
+  
+  const g = groups[currentGroupIdx];
+  if (g.members.hasOwnProperty(friendName)) { 
+    toast(`${friendName} ya está en el grupo`, 'i'); 
+    return; 
+  }
+  
+  g.members[friendName] = 0;
+  await save();
+  renderAll();
+  
+  logActivity(`${friendName} añadido al grupo "${g.name}"`);
+  saveActivity();
+  renderActivity();
+
+  // Sincronización backend — SIN esto el miembro se pierde al refrescar
+  try {
+    await fetch(`${API_BASE}/api/v1/groups/${g.id}/members`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: JSON.stringify({ display_name: friendName })
+    });
+  } catch(err) { console.error('Error añadiendo miembro desde amigos:', err); }
+
+  try {
+    groups = await vakaData.getGroups(); 
+    renderGroupsList();
+    renderAll(); 
+  } catch (err) {
+    console.error("Error refrescando tras añadir:", err);
+  }
+  
+  toast(`${friendName} añadido ✓`, 's');
 }
+
 async function addMember() {
   if (currentGroupIdx === null) { toast('Abre un grupo primero', 'e'); return; }
   const inp = document.getElementById('memberName');
@@ -1810,44 +2268,58 @@ async function addMember() {
   const g = groups[currentGroupIdx];
   if (g.members.hasOwnProperty(n)) { toast('Ya existe ese participante', 'e'); return; }
 
-  // Añadir al grupo
-  g.members[n] = 0;
-  save();
-  inp.value = '';
+  // 1. Añadimos al grupo
+  g.members[n] = 0; 
+  await save(); 
 
-  // Si no existe en amigos, añadirlo automáticamente
+  // 2. Sincronización backend
+  try {
+    await fetch(`${API_BASE}/api/v1/groups/${g.id}/members`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: JSON.stringify({ display_name: n })
+    });
+  } catch(err) { console.error('Error añadiendo miembro:', err); }
+
+  // 3. Añadir a lista global de amigos
   if (!friends.some(f => f.name === n)) {
-    friends.push({ name: n, email: '', phone: '', notes: 'Añadido desde grupo' });
-    await saveFriends();
+    try {
+      const friend = await vakaData.addFriend({ name: n, email: '', phone: '', notes: 'Añadido desde grupo' });
+      friends.push(friend);
+      await saveFriends();
+    } catch(e) { console.error(e); }
     toast(`${n} añadido al grupo y a tus amigos ✓`, 's');
   } else {
     toast(`${n} añadido ✓`, 's');
   }
 
+  // 4. Refresco final
+  inp.value = '';
+  groups = await vakaData.getGroups() || [];
   renderAll();
-  renderFriends();
-  renderFriendPicker();n
-  logActivity(`${n} añadido al grupo "${g.name}"`); saveActivity(); renderActivity();
+  renderFriendPicker();
+  logActivity(`${n} añadido al grupo "${g.name}"`); 
+  saveActivity(); 
+  renderActivity();
 }
 
-function removeMember(n) {
+async function removeMember(n) {
   const g = groups[currentGroupIdx];
-  const hasExpenses = g.expenses.some(e => e.payer === n || e.involved.includes(n));
+  const getInvolved = e => e.involved || (e.splits ? e.splits.map(s => s.member_name) : []);
+  const hasExpenses = g.expenses.some(e => (e.payer || e.payer_name) === n || getInvolved(e).includes(n));
+  const count = hasExpenses ? g.expenses.filter(e => (e.payer || e.payer_name) === n || getInvolved(e).includes(n)).length : 0;
 
-  if (hasExpenses) {
-    const count = g.expenses.filter(e => e.payer === n || e.involved.includes(n)).length;
-    document.getElementById('del-miembro-avatar').textContent = n[0].toUpperCase();
-    document.getElementById('del-miembro-name').textContent = n;
-    document.getElementById('del-miembro-gastos').textContent = count + ' gasto' + (count !== 1 ? 's' : '') + ' registrado' + (count !== 1 ? 's' : '');
-    document.getElementById('modal-borrar-miembro').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    window._miembroABorrar = n;
-  } else {
-    delete g.members[n];
-    save();
-    renderAll();
-    toast(`${n} eliminado del grupo`, 'i');
-  }
+  document.getElementById('del-miembro-avatar').textContent = n[0].toUpperCase();
+  document.getElementById('del-miembro-name').textContent = n;
+  document.getElementById('del-miembro-msg').textContent = hasExpenses
+    ? 'Este participante tiene gastos registrados. Al eliminarlo sus gastos serán actualizados.'
+    : 'Esta acción no se puede deshacer.';
+  document.getElementById('del-miembro-info').innerHTML = hasExpenses
+    ? `<span>🧾 ${count} gasto${count !== 1 ? 's' : ''} registrado${count !== 1 ? 's' : ''}</span><span>⚠️ Sus gastos serán reasignados</span>`
+    : `<span>⚠️ El participante será eliminado del grupo</span>`;
+  document.getElementById('modal-borrar-miembro').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  window._miembroABorrar = n;
 }
 
 function cerrarModalBorrarMiembro() {
@@ -1856,16 +2328,30 @@ function cerrarModalBorrarMiembro() {
   window._miembroABorrar = null;
 }
 
-function ejecutarBorradoMiembro() {
+async function ejecutarBorradoMiembro() {
   const n = window._miembroABorrar;
   if (!n) return;
   const g = groups[currentGroupIdx];
+  // 1. Limpiar gastos del participante en memoria
   g.expenses = g.expenses.filter(e => {
-    if (e.payer === n && e.involved.length === 1) return false;
+    if ((e.payer || e.payer_name) === n && e.involved.length === 1) return false;
     if (e.involved.includes(n)) e.involved = e.involved.filter(p => p !== n);
     return true;
   });
   delete g.members[n];
+  updateBalances();
+  // 2. Llamar al backend
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/members/${encodeURIComponent(n)}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    if (!res.ok) {
+      toast('Error al eliminar el participante', 'e');
+      cerrarModalBorrarMiembro();
+      return;
+    }
+  } catch(err) { console.error('Error eliminando miembro:', err); return; }
   save();
   renderAll();
   cerrarModalBorrarMiembro();
@@ -1883,33 +2369,86 @@ function toggleSelectAll(){
   chips.forEach(c=>c.classList.toggle('sel',!allSel));
   document.getElementById('btnSelectAll').textContent=allSel?'☑ Todos':'☐ Ninguno';
 }
-function renderFriendPicker(){
-  const el=document.getElementById('friendPickerChips');
-  if(!el)return;
-  if(friends.length===0){
-    el.innerHTML='<span style="color:var(--muted);font-size:.78rem">Ve a Amigos y añade contactos primero</span>';
+function renderFriendPicker() {
+  const el = document.getElementById('friendPickerChips');
+  if (!el) return;
+
+  const g = currentGroupIdx !== null ? groups[currentGroupIdx] : null;
+  const myName = (profile && profile.nombre) ? profile.nombre.trim() : null;
+
+  // 1. Amigos (Excluyéndote a ti mismo)
+  const friendNames = friends
+    .map(f => f.name)
+    .filter(name => name !== myName);
+
+  // 2. Otros miembros del grupo (los que no son tus amigos "registrados" o tú mismo)
+  const groupMembers = g ? Object.keys(g.members).filter(m => m !== myName && !friendNames.includes(m)) : [];
+  
+  const allPossibleParticipants = [...friendNames, ...groupMembers];
+
+  if (allPossibleParticipants.length === 0) {
+    el.innerHTML = '<span style="color:var(--muted);font-size:.78rem">No hay contactos disponibles</span>';
     return;
   }
-  const g=currentGroupIdx!==null?groups[currentGroupIdx]:null;
-  el.innerHTML=friends.map(f=>{
-    const inGroup=g&&g.members.hasOwnProperty(f.name);
-    return`<div class="chip friend-pick ${inGroup?'sel':''}" data-name="${f.name}" onclick="toggleFriendInGroup('${f.name}',this)">
-      <div class="av">${f.name[0].toUpperCase()}</div>${f.name}
-      ${inGroup?'<span style="color:var(--gold);font-size:.75rem">✓</span>':'<span style="color:var(--muted);font-size:.75rem">+</span>'}
+
+  el.innerHTML = allPossibleParticipants.map(name => {
+    const inGroup = g && g.members.hasOwnProperty(name);
+    
+    return `<div class="chip friend-pick ${inGroup ? 'sel' : ''}" data-name="${name}" onclick="toggleFriendInGroup('${name}',this)">
+      <div class="av">${name[0].toUpperCase()}</div>${name}
+      ${inGroup ? '<span style="color:var(--gold);font-size:.75rem">✓</span>' : '<span style="color:var(--muted);font-size:.75rem">+</span>'}
     </div>`;
   }).join('');
 }
-function toggleFriendInGroup(name,el){
-  if(currentGroupIdx===null)return;
-  const g=groups[currentGroupIdx];
-  if(g.members.hasOwnProperty(name)){
-    if(g.expenses.some(e=>e.payer===name||e.involved.includes(name))){toast('Tiene gastos, no se puede quitar','e');return;}
-    delete g.members[name];save();toast(`${name} quitado del grupo`,'i');
-  }else{
-    g.members[name]=0;save();toast(`${name} añadido ✓`,'s');
-    logActivity(`${name} añadido al grupo "${g.name}"`);saveActivity();renderActivity();
+async function toggleFriendInGroup(name, el) {
+  if (currentGroupIdx === null) return;
+  const g = groups[currentGroupIdx];
+  const token = vakaData.getToken();
+
+  if (g.members.hasOwnProperty(name)) {
+    // 1. Lógica para QUITAR
+    if (g.expenses.some(e => e.payer === name || e.involved.includes(name))) {
+      toast('Tiene gastos, no se puede quitar', 'e');
+      return;
+    }
+    
+    // Petición al backend para borrar de group_members
+    try {
+      await fetch(`${API_BASE}/api/v1/groups/${g.id}/members/${encodeURIComponent(name)}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      delete g.members[name];
+      save();
+      toast(`${name} quitado del grupo`, 'i');
+    } catch (e) {
+      toast('Error al quitar del grupo', 'e');
+    }
+  } else {
+    // 2. Lógica para AÑADIR
+    g.members[name] = 0;
+    save();
+    
+    // Petición al backend para insertar en group_members
+    try {
+      await fetch(`${API_BASE}/api/v1/groups/${g.id}/members`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ display_name: name })
+      });
+      toast(`${name} añadido ✓`, 's');
+      logActivity(`${name} añadido al grupo "${g.name}"`);
+      saveActivity();
+    } catch (e) {
+      console.error("Error sincronizando miembro:", e);
+      toast('Añadido solo localmente (sin conexión)', 'w');
+    }
   }
-  renderAll();renderFriendPicker();
+  renderAll();
+  renderFriendPicker();
 }
 
 // ═══ EXPENSES ═════════════════════════════════════════════════════════
@@ -1971,7 +2510,9 @@ async function addExpense() {
   // Ahora involucrados ya no debería dar 0 si has seleccionado chips
   if (involved.length === 0) { toast('Selecciona al menos un consumidor', 'e'); return; }
   
-  if (date < g.start || date > g.end) { toast('Fecha fuera del rango del grupo', 'e'); return; }
+  const gStart = (g.start || '').slice(0, 10);
+  const gEnd = (g.end || '').slice(0, 10);
+  if (date < gStart || date > gEnd) { toast('Fecha fuera del rango del grupo', 'e'); return; }
 
   // 3. Lógica de Conversión
   const rateToUse = (currency === getBase()) ? 1 : (manualRate || RATES[currency] || 1);
@@ -1994,7 +2535,7 @@ async function addExpense() {
     await vakaData.addExpense(currentGroupIdx, nuevoGasto);
     
     // Sincronización de totales
-    g.total = g.expenses.reduce((sum, e) => sum + (e.baseAmt || 0), 0);
+    g.total = g.expenses.reduce((sum, e) => sum + (Number(e.baseAmt) || 0), 0);
 
     // 4. Limpieza y refresco
     document.getElementById('expDesc').value = '';
@@ -2005,10 +2546,36 @@ async function addExpense() {
     document.querySelectorAll('#involvedChips .chip, #involvedChips .modal-chip')
             .forEach(c => c.classList.remove('sel'));
 
+    // Recargar grupo fresco del backend para tener orden correcto
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+      });
+      const fresh = await res.json();
+      if (fresh && !fresh.error) {
+        const freshMembers = Array.isArray(fresh.members)
+          ? Object.fromEntries(fresh.members.map(m => [m.display_name, m.balance || 0]))
+          : (fresh.members || {});        
+        const mergedMembers = { ...groups[currentGroupIdx].members, ...freshMembers };
+        groups[currentGroupIdx] = {
+          ...groups[currentGroupIdx],
+          members: mergedMembers,
+          expenses: (fresh.expenses || []).sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(e => ({
+            ...e,
+            desc: e.description || e.desc,
+            payer: e.payer_name || e.payer,
+            date: e.expense_date || e.date,
+            baseAmt: Number(e.amount_base || e.baseAmt) || 0,
+            cat: e.category || e.cat,
+            involved: e.splits ? e.splits.map(s => s.member_name) : (e.involved || [])
+          }))
+        };
+      }
+    } catch(_) {}
     renderAll();
     renderGroups();
-	await logActivity(`${payer} registró "${desc}" · ${amount} ${currency} en "${g.name}"`);
-	clearOCR();
+    await logActivity(`${payer} registró "${desc}" · ${amount} ${currency} en "${g.name}"`);
+    clearOCR();
     toast('Gasto registrado ✓', 's');
   } catch (err) {
     toast('Error al guardar', 'e');
@@ -2023,7 +2590,7 @@ async function deleteExpense(idx) {
 
   try {
     await vakaData.deleteExpense(currentGroupIdx, idx);
-    g.total = g.expenses.reduce((sum, exp) => sum + (exp.baseAmt || 0), 0);
+    g.total = g.expenses.reduce((sum, exp) => sum + (Number(exp.baseAmt) || 0), 0);
     await logActivity(`Gasto "${e.desc}" eliminado en "${g.name}"`);
     renderAll();
     if (typeof renderGroups === 'function') renderGroups();
@@ -2059,16 +2626,34 @@ async function renameGroup(idx) {
 }
 
 // ═══ EDIT EXPENSE ═════════════════════════════════════════════════════
-let editingExpenseIdx = null;
+editingExpenseIdx = null;
 
 function openEditModal(idx) {
-  if (currentGroupIdx === null) return;
   editingExpenseIdx = idx;
+  console.log("DEBUG: Modal abierto con editingExpenseIdx =", editingExpenseIdx);
+  if (currentGroupIdx === null) return;
   const g = groups[currentGroupIdx];
   const e = g.expenses[idx];
+  
+  // PROTECCIÓN DE QA:
+  if (!e) {
+    console.error("Gasto no encontrado en el índice:", idx);
+    toast("Error: El gasto no existe", "e");
+    return;
+  }
+
   const mbs = Object.keys(g.members);
+  
+  // ASEGURAR INVOLUCRADOS: Si no existe, usamos array vacío [] en lugar de undefined
+  const involved = e.involved || [];
+
   // 1. Carga de datos básicos
-  document.getElementById('editDesc').value = e.desc;
+  document.getElementById('editDesc').value = e.desc || '';
+  document.getElementById('editAmount').value = e.amount || '';
+  document.getElementById('editDate').value = e.date || '';
+  document.getElementById('editCat').value = e.cat || 'other';
+
+  // ... (el resto de tu lógica original sigue aquí) ...
   document.getElementById('editAmount').value = e.amount;
   document.getElementById('editDate').value = e.date;
   document.getElementById('editCat').value = e.cat;
@@ -2092,10 +2677,14 @@ function openEditModal(idx) {
   ps.value = e.payer;
   // 5. Chips de involucrados
   const ic = document.getElementById('editInvolvedChips');
+  const invList = e.involved || [];
+  
   ic.innerHTML = mbs.map(m => `
-    <div class="modal-chip ${e.involved.includes(m) ? 'sel' : ''}" data-name="${m}" onclick="this.classList.toggle('sel');updateEditSelectAllBtn()">
-      <div class="av">${m[0].toUpperCase()}</div>${m}
-    </div>`).join('');
+  <div class="modal-chip ${invList.includes(m) ? 'sel' : ''}" 
+       data-name="${m}" 
+       onclick="this.classList.toggle('sel');updateEditSelectAllBtn()">
+    <div class="av">${m[0].toUpperCase()}</div>${m}
+  </div>`).join('');
   // 6. Cargar ticket si existe
   clearEditOCR();
   window._editTicketDeleted = false;
@@ -2141,88 +2730,83 @@ function toggleEditSelectAll(){
 }
 
 async function saveEditExpense() {
+  console.log("Guardando gasto...");
   if (currentGroupIdx === null || editingExpenseIdx === null) return;
   
+  // 1. Bloqueo de UI para evitar múltiples clics
+  const saveBtn = document.querySelector('button[onclick="saveEditExpense()"]');
+  if (saveBtn) saveBtn.disabled = true;
+
   const g = groups[currentGroupIdx];
   const old = g.expenses[editingExpenseIdx];
 
-  // Captura de valores desde el modal
   const desc = document.getElementById('editDesc').value.trim();
   const amount = parseFloat(document.getElementById('editAmount').value);
   const currency = document.getElementById('editCurrency').value;
   const cat = document.getElementById('editCat').value;
   const payer = document.getElementById('editPayer').value;
   const date = document.getElementById('editDate').value;
-  const manualRate = parseFloat(document.getElementById('editExchangeRate').value);
-  
-  // Captura de participantes seleccionados (chips)
   const involved = [...document.querySelectorAll('#editInvolvedChips .modal-chip.sel')].map(c => c.dataset.name);
 
-  // Validaciones de QA
-  if (!desc) { toast('Añade una descripción', 'e'); return; }
-  if (!amount || amount <= 0) { toast('Monto inválido', 'e'); return; }
-  if (involved.length === 0) { toast('Selecciona al menos un consumidor', 'e'); return; }
-  if (date < g.start || date > g.end) { toast('Fecha fuera del rango del grupo', 'e'); return; }
+  if (!desc) { toast('Añade una descripción', 'e'); if (saveBtn) saveBtn.disabled = false; return; }
+  if (!amount || amount <= 0) { toast('Monto inválido', 'e'); if (saveBtn) saveBtn.disabled = false; return; }
+  if (involved.length === 0) { toast('Selecciona al menos un consumidor', 'e'); if (saveBtn) saveBtn.disabled = false; return; }
 
-  // 1. Revertir el efecto del balance antiguo
-  const oldBaseAmt = old.baseAmt || old.amount;
-  const oldQuota = oldBaseAmt / old.involved.length;
-  
-  g.members[old.payer] = +(g.members[old.payer] - oldBaseAmt).toFixed(2);
-  old.involved.forEach(p => {
-    if (g.members.hasOwnProperty(p)) {
-      g.members[p] = +(g.members[p] + oldQuota).toFixed(2);
+  try {
+    const expId = old.id || old._id;
+    const response = await fetch(`${API_BASE}/api/v1/groups/${g.id}/expenses/${expId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+        body: JSON.stringify({ description: desc, amount, currency, category: cat, payer_name: payer, expense_date: date, involved })
+    });
+
+    // Actualización local inmediata
+    g.expenses[editingExpenseIdx] = { 
+        ...g.expenses[editingExpenseIdx], 
+        desc, amount, currency, cat, payer, date, involved 
+    };
+
+    if (!response.ok) {
+      let msg = `Error del servidor (${response.status})`;
+      try { const errData = await response.json(); if (errData.error) msg = errData.error; } catch(_) {}
+      throw new Error(msg);
     }
-  });
 
-  // 2. Calcular el nuevo monto base usando la tasa manual o la tabla de tasas
-  // Si es la moneda base (EUR), la tasa es 1. Si no, usamos la manual o la fija.
-  const rateToUse = (currency === getBase()) ? 1 : (manualRate || RATES[currency] || 1);
-  const newBaseAmt = +(amount / rateToUse).toFixed(2);
-  const newQuota = newBaseAmt / involved.length;
-
-  // 3. Aplicar el nuevo efecto al balance
-  g.members[payer] = +(g.members[payer] + newBaseAmt).toFixed(2);
-  involved.forEach(p => {
-    if (g.members.hasOwnProperty(p)) {
-      g.members[p] = +(g.members[p] - newQuota).toFixed(2);
-    }
-  });
-
-  // 4. Actualizar el objeto del gasto con los nuevos datos
-  g.expenses[editingExpenseIdx] = {
-    desc,
-    amount,
-    cat,
-    payer,
-    date,
-    involved,
-    currency,
-    baseAmt: newBaseAmt,
-    exchangeRate: rateToUse // Guardamos la tasa para consistencia
-  };
-
-  // 5. Recalcular el total del grupo (esto arregla el monto en la pantalla principal)
-  g.total = g.expenses.reduce((sum, exp) => sum + (exp.baseAmt || 0), 0);
-
-  // 6. Guardar cambios y actualizar interfaz
-  await save();
-  logActivity(`Gasto "${desc}" editado en "${g.name}"`);
-  await saveActivity();
-  renderActivity();
-  
-  document.getElementById('editModal').classList.remove('open');
-  document.body.style.overflow='';
-  clearEditOCR();
-  editingExpenseIdx = null;
-  if (currentExpenseIdx !== null) openGasto(currentExpenseIdx);
-  renderAll();       // Refresca la vista del grupo actual
-  renderGroups();    // Refresca la lista de grupos en la Home (tarjetas)
-  
-  await logActivity(`Gasto "${desc}" editado en "${g.name}"`);
-  toast('Gasto actualizado ✓', 's');
+    // Sincronización final: Recargamos el estado completo del grupo desde el servidor
+    const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    
+    if (resFresh.ok) {
+    const freshData = await resFresh.json();
+    groups[currentGroupIdx] = { 
+      ...groups[currentGroupIdx], 
+      ...freshData,
+      members: normalizeMembersField(freshData.members, groups[currentGroupIdx].members),
+      expenses: (freshData.expenses || []).sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(e => ({
+        ...e,
+        desc: e.description || e.desc || 'Sin descripción',
+        payer: e.payer_name || e.payer || 'Desconocido',
+        date: e.expense_date || e.date || 'Sin fecha',
+        baseAmt: Number(e.amount_base || e.baseAmt) || 0,
+        cat: e.category || e.cat || 'other',
+        involved: e.splits ? e.splits.map(s => s.member_name) : (e.involved || [])
+      }))
+    };
 }
 
+    renderAll();
+    renderGroups();
+    document.getElementById('editModal').classList.remove('open');
+    document.body.style.overflow = '';
+    toast('Gasto actualizado ✓', 's');
+  } catch (err) {
+    console.error(err);
+    toast('Error: ' + (err.message || 'No se pudo guardar'), 'e');
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
+  }
+}
 // ═══ DELETE EXPENSE ════════════════════════════════════════════════════
 function calcDebts(){
   if(currentGroupIdx===null)return;
@@ -2249,9 +2833,20 @@ function calcDebts(){
           <div class="debt-txt"><em>${t.from}</em> debe pagar a <em>${t.to}</em></div>
           <div class="debt-amt">${formatAmountBase(t.amount,base)}</div>
         </div>
-        <div style="display:flex;gap:6px;width:100%;justify-content:flex-end;">
-          <button class="btn btn-gold btn-sm" onclick="openPayModal(${i},'${t.from}','${t.to}',${t.amount})">💳 Pagar</button>
-          <button class="btn btn-outline btn-sm" onclick="openProofModal(${i},'${t.from}','${t.to}',${t.amount})">🧾 Comprobante</button>
+        <div style="display:flex;gap:6px;width:100%;justify-content:flex-end;align-items:center;">
+          ${(() => {
+            const g = groups[currentGroupIdx];
+            const myName = g && g.memberIds ? Object.entries(g.memberIds).find(([,uid]) => Number(uid) === Number(profile.id))?.[0] : null;
+            const isDebtor = myName === t.from;
+            const isCreditor = myName === t.to;
+            if (isDebtor) return `<button class="btn btn-gold btn-sm" onclick="openPayModal(${i},'${t.from}','${t.to}',${t.amount})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Pagar</button>`;
+            if (isCreditor) return `<span style="display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--muted);font-weight:700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Pendiente de cobro</span>`;
+            return myName === null ? `<button class="btn btn-gold btn-sm" onclick="openPayModal(${i},'${t.from}','${t.to}',${t.amount})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Pagar</button>` : '';
+          })()}
+          <button class="btn btn-outline btn-sm" onclick="openProofModal(${i},'${t.from}','${t.to}',${t.amount})">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Comprobante
+          </button>
         </div>
       </div>`).join(''); 
   toast('Cálculo completado 🧮','i');
@@ -2416,21 +3011,169 @@ function renderAll() {
   if (typeof renderGroupsList === 'function') renderGroupsList();
 }
 
+function resetMemberAccordions() {
+  const memberWrap = document.getElementById('memberListWrap');
+  const memberChevron = document.getElementById('memberChevron');
+  const friendWrap = document.getElementById('friendPickerWrap');
+  const manualWrap = document.getElementById('manualAddWrap');
+  const participantesWrap = document.getElementById('participantesSectionWrap');
+  const participantesChevron = document.getElementById('participantesChevron');
+  const gastoWrap = document.getElementById('gastoSectionWrap');
+  const gastoChevron = document.getElementById('gastoChevron');
+  const gastosListWrap = document.getElementById('gastosListSectionWrap');
+  const gastosListChevron = document.getElementById('gastosListChevron');
+  const cuentasWrap = document.getElementById('cuentasSectionWrap');
+  const cuentasChevron = document.getElementById('cuentasChevron');
+  const resumenWrap = document.getElementById('resumenSectionWrap');
+  const resumenChevron = document.getElementById('resumenChevron');
+  if (resumenWrap) resumenWrap.style.display = 'none';
+  if (resumenChevron) resumenChevron.style.transform = '';
+  if (cuentasWrap) cuentasWrap.style.display = 'none';
+  if (cuentasChevron) cuentasChevron.style.transform = '';
+  if (gastosListWrap) gastosListWrap.style.display = 'none';
+  if (gastosListChevron) gastosListChevron.style.transform = '';
+  if (gastoWrap) gastoWrap.style.display = 'none';
+  if (gastoChevron) gastoChevron.style.transform = '';
+  if (participantesWrap) participantesWrap.style.display = 'none';
+  if (participantesChevron) participantesChevron.style.transform = '';
+  if (memberWrap) memberWrap.style.display = 'none';
+  if (memberChevron) memberChevron.style.transform = '';
+  if (friendWrap) friendWrap.style.display = 'none';
+  if (manualWrap) manualWrap.style.display = 'none';
+}
+
+function toggleGastoSection() {
+  const wrap = document.getElementById('gastoSectionWrap');
+  const chevron = document.getElementById('gastoChevron');
+  if (!wrap) return;
+  const open = wrap.style.display === 'block';
+  wrap.style.display = open ? 'none' : 'block';
+  chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+function toggleGastosListSection() {
+  const wrap = document.getElementById('gastosListSectionWrap');
+  const chevron = document.getElementById('gastosListChevron');
+  if (!wrap) return;
+  const open = wrap.style.display === 'block';
+  wrap.style.display = open ? 'none' : 'block';
+  chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+function toggleCuentasSection() {
+  const wrap = document.getElementById('cuentasSectionWrap');
+  const chevron = document.getElementById('cuentasChevron');
+  if (!wrap) return;
+  const open = wrap.style.display === 'block';
+  wrap.style.display = open ? 'none' : 'block';
+  chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+function toggleParticipantesSection() {
+  const wrap = document.getElementById('participantesSectionWrap');
+  const chevron = document.getElementById('participantesChevron');
+  if (!wrap) return;
+  const open = wrap.style.display === 'block';
+  wrap.style.display = open ? 'none' : 'block';
+  chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+function toggleResumenSection() {
+  const wrap = document.getElementById('resumenSectionWrap');
+  const chevron = document.getElementById('resumenChevron');
+  if (!wrap) return;
+  const open = wrap.style.display === 'block';
+  wrap.style.display = open ? 'none' : 'block';
+  chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+function toggleMemberList() {
+  const wrap = document.getElementById('memberListWrap');
+  const chevron = document.getElementById('memberChevron');
+  const open = wrap.style.display === 'block';
+  wrap.style.display = open ? 'none' : 'block';
+  chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+function toggleFriendPicker() {
+  const wrap = document.getElementById('friendPickerWrap');
+  wrap.style.display = wrap.style.display === 'block' ? 'none' : 'block';
+  document.getElementById('manualAddWrap').style.display = 'none';
+}
+
+function toggleManualAdd() {
+  const wrap = document.getElementById('manualAddWrap');
+  wrap.style.display = wrap.style.display === 'block' ? 'none' : 'block';
+  document.getElementById('friendPickerWrap').style.display = 'none';
+}
+
+async function addFromContacts() {
+  if (!window.Capacitor || !Capacitor.isNativePlatform() || !Capacitor.Plugins.Contacts) {
+    toast('Tu navegador no soporta acceso a contactos. Usa la opción manual.', 'e');
+    return;
+  }
+  try {
+    const { Contacts } = Capacitor.Plugins;
+    const permission = await Contacts.requestPermissions();
+    if (permission.contacts !== 'granted') {
+      toast('Necesitas dar permiso de contactos', 'e');
+      return;
+    }
+    const result = await Contacts.pickContact({
+      projection: { name: true, phones: true, emails: true }
+    });
+    const c = result.contact;
+    const name = c.name?.display || '';
+    const tel = c.phones?.[0]?.number || '';
+    const email = c.emails?.[0]?.address || '';
+    if (!name) { toast('El contacto no tiene nombre', 'e'); return; }
+    document.getElementById('memberName').value = name.slice(0, 20);
+    document.getElementById('manualAddWrap').style.display = 'block';
+    document.getElementById('friendPickerWrap').style.display = 'none';
+    toast(`Contacto "${name}" cargado. Pulsa Añadir para confirmar.`, 's');
+  } catch(err) {
+    console.error('Error accediendo a contactos:', err);
+    toast('No se pudo acceder a los contactos', 'e');
+  }
+}
+
 function renderMembers() {
   const g = groups[currentGroupIdx];
   const mbs = Object.keys(g.members || {});
+  const countEl = document.getElementById('memberCount');
+  if (countEl) countEl.textContent = `(${mbs.length})`;
+  const pc = document.getElementById('participantesCounter');
+  if (pc) pc.textContent = `(${mbs.length})`;
   const el = document.getElementById('memberChips');
   if (!el) return;
 
   el.innerHTML = mbs.length === 0
-    ? '<span style="color:var(--muted);font-size:.78rem">Sin participantes aún...</span>'
-    : mbs.map(m => `<div class="chip" data-name="${m}"><div class="av">${m[0].toUpperCase()}</div>${m}<span class="chip-x" onclick="event.stopPropagation();removeMember('${m}')">✕</span></div>`).join('');
+  ? '<span style="color:var(--muted);font-size:.78rem">Sin participantes aún...</span>'
+  : mbs.map(m => {
+    const isOwner = profile.id && g.owner_id && profile.id === g.owner_id;
+    const editBtn = isOwner ? `<span class="chip-edit" onclick="event.stopPropagation();openRenameMember('${m}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>` : '';
+    
+    // Obtenemos el saldo calculado para este miembro
+    const balance = g.members[m] || 0;
+    const balanceColor = balance < 0 ? 'var(--danger)' : (balance > 0 ? 'var(--success)' : 'var(--muted)');
+
+    return `<div class="chip" data-name="${m}">
+              <div class="av">${m[0].toUpperCase()}</div>
+              ${m}
+              <span style="margin-left:6px; font-size:0.7rem; font-weight:800; color:${balanceColor}">
+                ${Number(balance || 0).toFixed(2)}
+              </span>
+              ${editBtn}
+              <span class="chip-x" onclick="event.stopPropagation();removeMember('${m}')">✕</span>
+            </div>`;
+  }).join('');
   
   const ps = document.getElementById('expPayer');
   if (ps) {
     const prev = ps.value;
-    ps.innerHTML = mbs.map(m => `<option value="${m}">${m}</option>`).join('') || '<option value="">--</option>';
-    if (mbs.includes(prev)) ps.value = prev;
+    const myName = (profile.nombre || '').trim();
+const sorted = myName && mbs.includes(myName)
+  ? [myName, ...mbs.filter(m => m !== myName)]
+  : mbs;
+ps.innerHTML = sorted.map(m => `<option value="${m}">${m}</option>`).join('') || '<option value="">--</option>';
+if (mbs.includes(prev)) ps.value = prev;
   }
 
   const ic = document.getElementById('involvedChips');
@@ -2445,11 +3188,58 @@ function renderMembers() {
   }
 }
 
+function openRenameMember(oldName) {
+  window._miembroARenombrar = oldName;
+  document.getElementById('rename-miembro-avatar').textContent = oldName[0].toUpperCase();
+  document.getElementById('rename-miembro-name').textContent = oldName;
+  document.getElementById('rename-miembro-input').value = oldName;
+  document.getElementById('modal-renombrar-miembro').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('rename-miembro-input').focus(), 100);
+}
+
+function cerrarModalRenombrarMiembro() {
+  document.getElementById('modal-renombrar-miembro').style.display = 'none';
+  document.body.style.overflow = '';
+  window._miembroARenombrar = null;
+}
+
+async function ejecutarRenombrarMiembro() {
+  const oldName = window._miembroARenombrar;
+  if (!oldName) return;
+  const trimmed = document.getElementById('rename-miembro-input').value.trim();
+  if (!trimmed || trimmed === oldName) { cerrarModalRenombrarMiembro(); return; }
+  const g = groups[currentGroupIdx];
+  if (Object.keys(g.members).includes(trimmed)) {
+    toast('Ya existe un participante con ese nombre', 'e'); return;
+  }
+  g.members[trimmed] = g.members[oldName];
+  delete g.members[oldName];
+  g.expenses.forEach(ex => {
+    if (ex.payer === oldName) ex.payer = trimmed;
+    ex.involved = ex.involved.map(p => p === oldName ? trimmed : p);
+  });
+  try {
+    await fetch(`${API_BASE}/api/v1/groups/${g.id}/members/${encodeURIComponent(oldName)}/rename`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: JSON.stringify({ display_name: trimmed })
+    });
+  } catch(_) {}
+  save();
+  cerrarModalRenombrarMiembro();
+  renderMembers();
+  renderExpenses();
+  toast(`"${oldName}" renombrado a "${trimmed}" ✓`, 's');
+}
+
 function renderExpenses() {
   const g = groups[currentGroupIdx];
   const el = document.getElementById('expenseList');
   const sg = document.getElementById('summaryGrid');
   if (!g || !el) return;
+  const gc = document.getElementById('gastosCounter');
+  if (gc) gc.textContent = g.expenses.length > 0 ? `(${g.expenses.length})` : '';
 
   if (g.expenses.length === 0) {
     el.innerHTML = '<div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div>Sin gastos registrados</div></div>';
@@ -2459,26 +3249,37 @@ function renderExpenses() {
 
   const base = getBase();
   const sym = SYMBOLS[base] || '€';
-  const total = g.expenses.reduce((s, e) => s + (Number(e.baseAmt) || 0), 0);
-  const nm = Math.max(1, Object.keys(g.members || {}).length);
+  const total = g.expenses.reduce((s, e) => s + (Number(e.baseAmt || e.amount_base) || 0), 0);
+
+  const porPersona = g.expenses.reduce((s, e) => {
+    const nParticipants = e.splits?.length || e.involved?.length || 1;
+    const amt = Number(e.baseAmt || e.amount_base) || 0;
+    return s + (amt / nParticipants);
+  }, 0);
 
   if (sg) {
     sg.style.display = 'grid';
     document.getElementById('statTotal').textContent = sym + total.toFixed(2);
-    document.getElementById('statPP').textContent = sym + (total / nm).toFixed(2);
+    document.getElementById('statPP').textContent = sym + porPersona.toFixed(2);
   }
 
   el.innerHTML = g.expenses.map((e, i) => {
     const displayCurrency = e.currency || base;
     const displaySym = SYMBOLS[displayCurrency] || '€';
+    // Normalización de seguridad para evitar "undefined"
+    const desc = e.desc || e.description || 'Sin descripción';
+    const payer = e.payer || e.payer_name || 'Desconocido';
+    const date = e.date || e.expense_date || 'Sin fecha';
+    const amount = Number(e.amount || e.amount_base || 0);
+
     return `<div class="group-card" onclick="openGasto(${i})" style="cursor:pointer;">
-      <div class="exp-ico ${CAT_CSS[e.cat]}">${CAT_ICONS[e.cat]}</div>
+      <div class="exp-ico ${CAT_CSS[e.cat] || 'c-other'}">${CAT_ICONS[e.cat] || '💡'}</div>
       <div class="gc-info">
-        <div class="gc-name">${e.desc}</div>
-        <div class="gc-meta">Pagó <strong>${e.payer}</strong> · ${e.date}</div>
+        <div class="gc-name">${desc}</div>
+        <div class="gc-meta">Pagó <strong>${payer}</strong> · ${fmtDate(date)}</div>
       </div>
       <div style="text-align:right;">
-        <div class="exp-amt">${displaySym}${Number(e.amount).toFixed(2)}</div>
+        <div class="exp-amt">${displaySym}${amount.toFixed(2)}</div>
         ${displayCurrency !== base ? `<div style="font-size:.65rem;color:var(--muted);">≈ ${sym}${(Number(e.baseAmt)||0).toFixed(2)}</div>` : ''}
         ${e.ticket ? '<div style="font-size:.65rem;color:var(--gold);">🧾</div>' : ''}
       </div>
@@ -2490,26 +3291,52 @@ function updateBalances() {
   const g = groups[currentGroupIdx];
   if (!g || !g.members) return;
 
-  // Resetear saldos
-  for (let m in g.members) g.members[m] = 0;
-
+  // 1. Resetear saldos a 0
+  const initialBalances = {};
+  Object.keys(g.members).forEach(member => {
+      initialBalances[member] = 0;
+  });
+  g.members = initialBalances;
+  console.log("Estructura de miembros tras el reset:", g.members);
   if (g.expenses) {
     g.expenses.forEach(e => {
-      // QA: Usamos baseAmt (Euros) para el balance, no el monto nominal (ARS/USD)
-      const amt = Number(e.baseAmt || e.amount) || 0;
-      const share = amt / (e.involved.length || 1);
+      const amt = Number(e.baseAmt || e.amount_base || e.amount) || 0;
+      const involved = [...new Set(e.involved || (e.splits ? e.splits.map(s => s.member_name) : []))];
       
-      const pagador = e.payer || e.payer_name;
-
-      if (g.members.hasOwnProperty(pagador)) {
-        g.members[pagador] = +(g.members[pagador] + amt).toFixed(2);
-      }
-
-      e.involved.forEach(n => {
-        if (g.members.hasOwnProperty(n)) {
-          g.members[n] = +(g.members[n] - share).toFixed(2);
+      if (involved.length > 0) {
+        const uniqueInvolved = [...new Set(involved)];
+        const share = amt / (uniqueInvolved.length || 1);
+        const pagador = (e.payer || e.payer_name || "").trim();
+        
+        // --- BÚSQUEDA FLEXIBLE PARA EL PAGADOR ---
+        // En tu función updateBalances() dentro de VakaDataService
+        const pagadorKey = Object.keys(g.members).find(
+          m => m.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 
+              pagador.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        );
+        
+        if (pagadorKey) {
+          g.members[pagadorKey] = +(g.members[pagadorKey] + amt).toFixed(2);
+        } else {
+          console.warn(`Pagador no encontrado: '${pagador}'`);
         }
-      });
+        
+        // --- BÚSQUEDA FLEXIBLE PARA LOS INVOLUCRADOS ---
+        uniqueInvolved.forEach(n => {
+          const name = n.trim();
+          const memberKey = Object.keys(g.members).find(
+            m => m.trim().toLowerCase() === name.toLowerCase()
+          );
+          
+          if (memberKey) {
+            g.members[memberKey] = +(g.members[memberKey] - share).toFixed(2);
+          } else {
+            console.warn(`Participante no encontrado: '${name}'`);
+          }
+        });
+      } else {
+        console.warn("Gasto detectado sin participantes (ignorado en balance):", e.desc);
+      }
     });
   }
 }
@@ -2535,8 +3362,8 @@ function renderBalances(){
         <div class="av-s">${n[0].toUpperCase()}</div>
         <span style="font-weight:700">${n}</span>
       </div>
-      <span class="${v > 0.01 ? 'bal-pos' : v < -0.01 ? 'bal-neg' : 'bal-zer'}">
-        ${v > 0.01 ? '+' : ''}${sym2}${v.toFixed(2)}
+      <span class="${Number(v) > 0.01 ? 'bal-pos' : Number(v) < -0.01 ? 'bal-neg' : 'bal-zer'}">
+        ${Number(v) > 0.01 ? '+' : ''}${sym2}${Number(v || 0).toFixed(2)}
       </span>
     </div>`).join('');
     
@@ -2544,18 +3371,25 @@ function renderBalances(){
 }
 
 // ═══ LINK GENERATION ════════════════════════════════════════════════
-function generateLink(){
+async function generateLink(){
   if(currentGroupIdx===null){toast('Abre un grupo primero','e');return;}
   const g=groups[currentGroupIdx];
-  const payload=JSON.stringify({n:g.name,t:g.type,s:g.start,e:g.end,m:g.members,ex:g.expenses});
-  const encoded=btoa(unescape(encodeURIComponent(payload)));
-  // Build a fully clickable URL that auto-opens and loads the group
-  const base=window.location.href.split('?')[0].split('#')[0];
-  const url=base+'?vp='+encoded;
-  const inp=document.getElementById('linkInput');
-  inp.value=url;
-  document.getElementById('linkBox').style.display='flex';
-  toast('¡Link generado! Tócalo para abrir o cópialo 🔗','i');
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/share-link`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    const data = await res.json();
+    if (!data.token) throw new Error('Sin token');
+    const url = `${API_BASE}/login.html?invite=${data.token}`;
+    const inp = document.getElementById('linkInput');
+    inp.value = url;
+    document.getElementById('linkBox').style.display='flex';
+    toast('¡Link de invitación generado! 🔗','s');
+  } catch(err) {
+    console.error('Error generando link:', err);
+    toast('Error al generar el link','e');
+  }
 }
 function copyLink(){
   const inp=document.getElementById('linkInput');
@@ -2586,17 +3420,24 @@ function loadFromHash(){
     setTimeout(()=>{openGroup(idx);toast('¡Grupo cargado desde el link!','s');},400);
   }catch(err){toast('Link inválido','e');}
 }
+function buildInviteText(){
+  if(currentGroupIdx===null) return '';
+  const g = groups[currentGroupIdx];
+  const link = document.getElementById('linkInput')?.value || '';
+  const sender = (profile.nombre || '').trim() || 'Alguien';
+  return `¡Hola! ${sender} te invita al grupo "${g.name}" en VakaPay.${link ? '\n\nAccede aquí: ' + link : ''}`;
+}
 
 // ═══ SHARE ══════════════════════════════════════════════════════════
 function buildText(){
   if(currentGroupIdx===null)return'';
   const g=groups[currentGroupIdx];
-  const total=g.expenses.reduce((s,e)=>s+e.amount,0);
+  const total=g.expenses.reduce((s,e)=>s+(Number(e.amount)||0),0);
   const nm=Math.max(1,Object.keys(g.members).length);
-  let t=`💳 *VakaPay – ${g.name}* ${TYPE_ICONS[g.type]||''}\n📅 ${g.start} → ${g.end}\n\n`;
+  let t=`💳 *VakaPay – ${g.name}* ${TYPE_ICONS[g.type]||''}\n📅 ${fmtDate(g.start)} → ${fmtDate(g.end)}\n\n`;
   t+=`💰 Total: $${total.toFixed(2)}  |  Por persona: $${(total/nm).toFixed(2)}\n`;
   t+=`👥 ${Object.keys(g.members).join(', ')}\n\n`;
-  if(g.expenses.length>0){t+=`📋 Gastos:\n`;g.expenses.forEach(e=>{t+=`  • ${e.desc}: $${e.amount.toFixed(2)} (pagó ${e.payer})\n`;});}
+  if(g.expenses.length>0){t+=`📋 Gastos:\n`;g.expenses.forEach(e=>{t+=`  • ${e.desc}: $${(Number(e.amount)||0).toFixed(2)} (pagó ${e.payer})\n`;});}
   const link=document.getElementById('linkInput').value;
   if(link){t+=`\n🔗 Únete al grupo:\n${link}\n`;}
   t+='\n_Generado con VakaPay_';return t;
@@ -2640,7 +3481,7 @@ function exportarPDF(){
   doc.text('PARTICIPANTES', pad, y);
   y += 5;
   const mbs = Object.keys(g.members);
-  const totalGastos = g.expenses.reduce((s,e)=>s+e.baseAmt,0);
+  const totalGastos = g.expenses.reduce((s,e)=>s+(Number(e.baseAmt)||0),0);
   const porPersona = mbs.length ? totalGastos/mbs.length : 0;
   mbs.forEach(m => {
     const bal = g.members[m];
@@ -2683,7 +3524,7 @@ function exportarPDF(){
     doc.setFontSize(8); sc(20,60,160);
     doc.text(`${i+1}. ${e.desc||'Sin descripcion'}`, pad+3, y);
     sc(0,0,0);
-    doc.text(`${g.currency||'EUR'} ${(e.baseAmt||0).toFixed(2)}`, W-pad, y, {align:'right'});
+    doc.text(`${g.currency||'EUR'} ${(Number(e.baseAmt)||0).toFixed(2)}`, W-pad, y, {align:'right'});
     y += 5;
     doc.setFont('helvetica','normal');
     doc.setFontSize(7); sc(80,80,80);
@@ -2702,31 +3543,30 @@ function exportarPDF(){
   doc.setFontSize(9); sc(0,0,0);
   doc.text('QUIEN PAGA A QUIEN', pad, y);
   y += 5;
-  const balances = {};
-  mbs.forEach(m => balances[m] = +(g.members[m]||0));
-  const deudores = mbs.filter(m=>balances[m]<0).sort((a,b)=>balances[a]-balances[b]);
-  const acreedores = mbs.filter(m=>balances[m]>0).sort((a,b)=>balances[b]-balances[a]);
-  if(!deudores.length){
+  const d = Object.entries(g.members).filter(([,v])=>v<-0.01).map(([k,v])=>[k,+(v)]);
+  const c = Object.entries(g.members).filter(([,v])=>v>0.01).map(([k,v])=>[k,+(v)]);
+  const txsPDF = [];
+  while(d.length&&c.length){
+    d.sort((a,b)=>a[1]-b[1]); c.sort((a,b)=>b[1]-a[1]);
+    const amt = Math.min(Math.abs(d[0][1]), c[0][1]);
+    txsPDF.push({from:d[0][0], to:c[0][0], amount:amt});
+    d[0][1] = +(d[0][1]+amt).toFixed(2); c[0][1] = +(c[0][1]-amt).toFixed(2);
+    if(Math.abs(d[0][1])<0.01) d.shift(); if(Math.abs(c[0][1])<0.01) c.shift();
+  }
+  if(!txsPDF.length){
     doc.setFont('helvetica','normal');
     doc.setFontSize(8); sc(80,80,80);
     doc.text('Sin deudas pendientes', pad+3, y);
     y += lh;
   } else {
-    const acrs = acreedores.map(a=>({name:a,bal:balances[a]}));
-    deudores.forEach(d => {
-      let debe = Math.abs(balances[d]);
-      acrs.forEach(a => {
-        if(debe<=0||a.bal<=0) return;
-        const pago = Math.min(debe, a.bal);
-        doc.setFont('helvetica','normal');
-        doc.setFontSize(8); sc(0,0,0);
-        doc.text(`• ${d}  paga a  ${a.name}`, pad+3, y);
-        sc(20,60,160);
-        doc.text(`${g.currency||'EUR'} ${pago.toFixed(2)}`, W-pad, y, {align:'right'});
-        y += lh;
-        debe -= pago;
-        a.bal -= pago;
-      });
+    txsPDF.forEach(t => {
+      if(y > 265){ doc.addPage(); y=20; }
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(8); sc(0,0,0);
+      doc.text(`• ${t.from}  paga a  ${t.to}`, pad+3, y);
+      sc(20,60,160);
+      doc.text(`${g.currency||'EUR'} ${t.amount.toFixed(2)}`, W-pad, y, {align:'right'});
+      y += lh;
     });
   }
 
@@ -2739,28 +3579,106 @@ function exportarPDF(){
   doc.setFontSize(7); sc(0,0,0);
   doc.text('Generado por VakaPay · Divide gastos, no amistades', W/2, piePos+7, {align:'center'});
 
-  try {
-    doc.save(`VakaPay_${g.name.replace(/\s+/g,'_')}.pdf`);
-  } catch(e) {
-    doc.output('dataurlnewwindow');
-  }
-  toast('PDF generado con exito','s');
+  const fileName = `VakaPay_${g.name.replace(/\s+/g,'_')}.pdf`;
+  savePdfCrossPlatform(doc, fileName);
 }
+
+// En el navegador (web), doc.save() simula un click en un <a download> con un
+// blob URL y funciona bien. Pero dentro del WebView de una APK generada con
+// Capacitor, ese <a download> NO dispara ningun guardado real: el click se
+// ejecuta pero no hay gestor de descargas que lo intercepte, así que el PDF
+// "se genera" (no salta ningún error) pero nunca llega al dispositivo.
+// Esta función detecta si estamos en una app nativa de Capacitor y, en ese
+// caso, usa Filesystem + Share (si los plugins están instalados) o
+// navigator.share como alternativa; si no hay ninguna disponible, cae de
+// vuelta al doc.save() clásico (comportamiento web sin cambios).
+async function savePdfCrossPlatform(doc, fileName) {
+  const isNative = !!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
+
+  if (isNative && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem && window.Capacitor.Plugins.Share) {
+    try {
+      const base64 = doc.output('datauristring').split(',')[1];
+      const { Filesystem, Share } = window.Capacitor.Plugins;
+
+      // 1. Guardamos el archivo en la caché de la aplicación
+      await Filesystem.writeFile({
+        path: fileName,
+        data: base64,
+        directory: 'CACHE',
+        recursive: true
+      });
+
+      // 2. Solicitamos la URI nativa correcta que Android e iOS pueden procesar
+      const uriResult = await Filesystem.getUri({
+        directory: 'CACHE',
+        path: fileName
+      });
+
+      // 3. Compartimos utilizando la URI traducida
+      await Share.share({
+        title: fileName,
+        url: uriResult.uri,
+        dialogTitle: 'Abrir o guardar extracto VakaPay',
+      });
+
+      toast('PDF preparado para compartir/guardar', 's');
+      return;
+    } catch (err) {
+      console.warn('Error al procesar el PDF de forma nativa:', err);
+    }
+  }
+
+  try {
+    doc.save(fileName);
+    toast('PDF generado con éxito', 's');
+  } catch (e) {
+    doc.output('dataurlnewwindow');
+    toast('PDF generado con éxito', 's');
+  }
+}
+
 function shareWhatsApp(){
-  const phone=document.getElementById('contactPhone').value.replace(/\s+/g,'');
-  const text=encodeURIComponent(buildText());
-  window.open(phone?`https://wa.me/${phone.replace('+','')}?text=${text}`:`https://wa.me/?text=${text}`,'_blank');
+  const phone = document.getElementById('contactPhone').value.replace(/\s+/g,'');
+  const text = encodeURIComponent(buildInviteText());
+  window.open(phone ? `https://wa.me/${phone.replace('+','')}?text=${text}` : `https://wa.me/?text=${text}`, '_blank');
+  document.getElementById('contactPhone').value = '';
+
 }
 function shareEmail(){
-  const email=document.getElementById('contactEmail').value;
+  const email=document.getElementById('contactEmail').value.trim();
+  if(!email){toast('Introduce un email','e');return;}
   const subj=encodeURIComponent(`VakaPay – ${currentGroupIdx!==null?groups[currentGroupIdx].name:'Grupo'}`);
   const body=encodeURIComponent(buildText().replace(/\*/g,''));
   window.location.href=`mailto:${email}?subject=${subj}&body=${body}`;
+  document.getElementById('contactEmail').value='';
 }
 function sharePhone(){
   const phone=document.getElementById('contactPhone').value.replace(/\s+/g,'');
   if(!phone){toast('Introduce un número de teléfono','e');return;}
-  window.location.href=`tel:${phone}`;
+  const body=encodeURIComponent(buildInviteText());
+  window.location.href=`sms:${phone}?body=${body}`;
+  document.getElementById('contactPhone').value='';
+}
+
+async function pickContactForShare() {
+  if (!window.Capacitor || !Capacitor.isNativePlatform() || !Capacitor.Plugins.Contacts) {
+    toast('Tu navegador no soporta acceso a contactos', 'e'); return;
+  }
+  try {
+    const { Contacts } = Capacitor.Plugins;
+    const permission = await Contacts.requestPermissions();
+    if (permission.contacts !== 'granted') {
+      toast('Necesitas dar permiso de contactos', 'e');
+      return;
+    }
+    const result = await Contacts.pickContact({ projection: { phones: true } });
+    const tel = result.contact?.phones?.[0]?.number || '';
+    if (!tel) { toast('El contacto no tiene número de teléfono', 'e'); return; }
+    document.getElementById('contactPhone').value = tel;
+    toast(`Contacto cargado ✓`, 's');
+  } catch(err) {
+    toast('No se pudo acceder a los contactos', 'e');
+  }
 }
 
 // ═══ FRIENDS ════════════════════════════════════════════════════════
@@ -2775,31 +3693,31 @@ function populateFriendGroupSelect(){
 async function addFriend(){
   const n=document.getElementById('friendName').value.trim();
   const last=document.getElementById('friendLastName').value.trim();
-  const c=document.getElementById('friendContact').value.trim();
-  const gid=document.getElementById('friendGroupLink').value;
+  const email=document.getElementById('friendEmail')?.value.trim()||'';
+  const phone=document.getElementById('friendPhone')?.value.trim()||'';
   if(!n){toast('Escribe un nombre','e');return;}
   if(n.length>20){toast('El nombre no puede superar 20 caracteres','e');return;}
   if(last.length>20){toast('El apellido no puede superar 20 caracteres','e');return;}
   const fullName=last?n+' '+last:n;
   if(friends.some(f=>f.name===fullName)){toast('Ya existe ese amigo','e');return;}
-  friends.push({name:fullName,contact:c,addedAt:new Date().toISOString()});
-  await saveFriends();
-  renderFriends();renderFriendPicker();updateStats();
-  document.getElementById('friendName').value='';
-  document.getElementById('friendLastName').value='';
-  document.getElementById('friendContact').value='';
-  document.getElementById('friendGroupLink').value='';
-  // Link to group if selected
-  if(gid){
-    const gIdx=groups.findIndex(g=>String(g.id)===String(gid));
-    if(gIdx>=0&&!groups[gIdx].members.hasOwnProperty(fullName)){
-      groups[gIdx].members[fullName]=0;save();
-      toast(`${fullName} añadido como amigo y al grupo "${groups[gIdx].name}" ✓`,'s');
-      logActivity(`${fullName} vinculado al grupo "${groups[gIdx].name}"`);
-    }else{toast(`${fullName} añadido como amigo ✓`,'s');}
-  }else{toast(`${fullName} añadido como amigo ✓`,'s');}
-  saveActivity();renderActivity();
+  try {
+    const friend = await vakaData.addFriend({name:fullName, email, phone, notes:''});
+    friends.push({...friend, name:fullName, email, phone, contact:email||phone, addedAt:new Date().toISOString()});
+    await saveFriends();
+    renderFriends();renderFriendPicker();updateStats();
+    document.getElementById('friendName').value='';
+    document.getElementById('friendLastName').value='';
+    if(document.getElementById('friendEmail')) document.getElementById('friendEmail').value='';
+    if(document.getElementById('friendPhone')) document.getElementById('friendPhone').value='';
+    document.getElementById('friendGroupLink').value='';
+    toast(`${fullName} añadido como amigo ✓`,'s');
+    saveActivity();renderActivity();
+  } catch(err) {
+    toast('Error al añadir amigo','e');
+    console.error(err);
+  }
 }
+
 function removeFriend(idx){
   const name=friends[idx].name;
   groups.forEach(g=>{if(g.members.hasOwnProperty(name)&&!g.expenses.some(e=>e.payer===name||e.involved.includes(name))){delete g.members[name];}});
@@ -2809,7 +3727,7 @@ function removeFriend(idx){
 function renderFriends(){
   populateFriendGroupSelect();
   const el=document.getElementById('friendsList');
-  if(friends.length===0){el.innerHTML='<div class="no-items"><div class="ni">👥</div><div>Sin amigos añadidos aún</div></div>';return;}
+  if(friends.length===0){el.innerHTML='<div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div>Sin amigos añadidos aún</div></div>';return;}
   el.innerHTML=friends.map((f,i)=>{
     const inGroups=groups.filter(g=>g.members.hasOwnProperty(f.name)).map(g=>TYPE_ICONS[g.type]+' '+g.name);
     const avatarContent=f.avatar
@@ -2884,7 +3802,7 @@ function handleFriendAvatarChange(ev){
   };
   reader.readAsDataURL(file);
 }
-function saveEditFriend(){
+async function saveEditFriend(){
   if(editingFriendIdx===null)return;
   const f=friends[editingFriendIdx];
   const firstName=document.getElementById('editFriendName').value.trim();
@@ -2912,7 +3830,8 @@ function saveEditFriend(){
   }
   friends[editingFriendIdx]={...f,name:newName,email,phone,notes,contact:email||phone||'',avatar:f._tmpAvatar||f.avatar||null};
   delete friends[editingFriendIdx]._tmpAvatar;
-  saveFriends();logActivity(`Amigo "${newName}" actualizado`);saveActivity();renderActivity();
+  if (f.id) { try { await vakaData.updateFriend(f.id, { name: newName, email, phone, notes }); } catch(_) {} }
+saveFriends();logActivity(`Amigo "${newName}" actualizado`);saveActivity();renderActivity();
   closeFriendModal();renderFriends();renderFriendPicker();updateStats();
   toast('Amigo actualizado ✓','s');
 }
@@ -2942,16 +3861,32 @@ function cerrarModalBorrarAmigo() {
   amigoABorrarIdx = null;
 }
 
-function ejecutarBorradoAmigo() {
+async function ejecutarBorradoAmigo() {
   const idx = amigoABorrarIdx;
   if (idx === null) return;
-  const name = friends[idx].name;
-  groups.forEach(g => {
-    if (g.members.hasOwnProperty(name) && !g.expenses.some(e => e.payer === name || e.involved.includes(name))) {
-      delete g.members[name];
+  const friend = friends[idx];
+  const name = friend.name;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/friends/${friend.id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    if (!res.ok && res.status !== 404) {
+      toast('Error al eliminar el amigo', 'e');
+      return;
     }
-  });
-  save(); friends.splice(idx, 1); saveFriends(); renderFriends(); renderFriendPicker(); updateStats();
+  } catch(err) {
+    console.error('Error borrando amigo:', err);
+    toast('Error al eliminar el amigo', 'e');
+    return;
+  }
+
+  friends.splice(idx, 1);
+  await saveFriends();
+  renderFriends();
+  renderFriendPicker();
+  updateStats();
   cerrarModalBorrarAmigo();
   closeFriendModal();
   toast(`${name} eliminado`, 'i');
@@ -3034,13 +3969,13 @@ function renderActivity() {
     : '<span style="color:#F2F2F2;">Todas las acciones</span>';
 
   if (filtered.length === 0) {
-    el.innerHTML = '<div class="no-items"><div class="ni">🕐</div><div style="color:#F2F2F2;">Sin actividad' + (filterGroup ? ' en este grupo' : ' reciente') + '</div></div>';
+    el.innerHTML = '<div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div style="color:#F2F2F2;">Sin actividad' + (filterGroup ? ' en este grupo' : ' reciente') + '</div></div>';
     return;
   }
 
   const byDate = {};
   filtered.forEach(a => {
-    const d = new Date(a.time);
+    const d = new Date(a.time || a.created_at);
     const hoy = new Date();
     const ayer = new Date(); ayer.setDate(hoy.getDate() - 1);
     let fecha;
@@ -3055,17 +3990,35 @@ function renderActivity() {
     byDate[fecha].push(a);
   });
 
-  el.innerHTML = Object.entries(byDate).map(([fecha, items]) => `
-    <div style="font-size:.7rem;color:var(--gold);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin:14px 0 6px 0;">${fecha}</div>
-    <div class="card" style="margin-bottom:4px;">
-      ${items.map(a => `
-        <div class="act-item">
-          <div class="act-dot"></div>
-          <div class="act-txt">${a.msg}
-            <div class="act-time">${formatRelTime(new Date(a.time))}${a.groupName && !filterGroup ? ' · ' + a.groupName : ''}</div>
-          </div>
-        </div>`).join('')}
-    </div>`).join('');
+  el.innerHTML = Object.entries(byDate).map(([fecha, items], idx) => {
+    const id = 'actDay_' + idx;
+    const isHoy = fecha === 'Hoy';
+    return `
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin:14px 0 6px 0;" onclick="toggleActDay('${id}')">
+      <div style="font-size:.7rem;color:var(--gold);text-transform:uppercase;letter-spacing:.8px;font-weight:700;">${fecha} <span style="color:var(--muted);font-weight:400">(${items.length})</span></div>
+      <svg id="${id}_chv" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;transform:${isHoy ? 'rotate(180deg)' : ''}"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+    <div id="${id}" style="display:${isHoy ? 'block' : 'none'}">
+      <div class="card" style="margin-bottom:4px;">
+        ${items.map(a => `
+          <div class="act-item">
+            <div class="act-dot"></div>
+            <div class="act-txt">${a.msg || a.message}
+              <div class="act-time">${formatRelTime(new Date(a.time || a.created_at))}${a.groupName && !filterGroup ? ' · ' + a.groupName : ''}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleActDay(id) {
+  const wrap = document.getElementById(id);
+  const chv = document.getElementById(id + '_chv');
+  if (!wrap) return;
+  const open = wrap.style.display === 'block';
+  wrap.style.display = open ? 'none' : 'block';
+  if (chv) chv.style.transform = open ? '' : 'rotate(180deg)';
 }
 
 function formatRelTime(d){
@@ -3078,16 +4031,52 @@ function formatRelTime(d){
 
 // ═══ PROFILE ═════════════════════════════════════════════════════════
 function loadProfile(){
-  if(!profile)return;
-  if(profile.nombre)document.getElementById('profNombre').value=profile.nombre;
-  if(profile.apellido)document.getElementById('profApellido').value=profile.apellido;
-  if(profile.email)document.getElementById('profEmail').value=profile.email;
-  if(profile.tel)document.getElementById('profTel').value=profile.tel;
-  if(profile.bio)document.getElementById('profBio').value=profile.bio;
-  if(profile.avatar){
-    const wrap=document.getElementById('avatarDisplay');
-    wrap.outerHTML=`<img id="avatarDisplay" class="avatar-img" src="${profile.avatar}" alt="Avatar">`;
+  if(!profile) return;
+  const set = (id, val) => { const el = document.getElementById(id); if(el && val) el.value = val; };
+  set('profNombre', profile.nombre);
+  set('profEmail',  profile.email);
+  set('profTel',    profile.tel);
+  set('profBio',    profile.bio);
+
+  // Avatar
+  const wrap = document.getElementById('avatarDisplay');
+  if (wrap) {
+    const inicial = profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤';
+    if (profile.avatar) {
+      const img = document.createElement('img');
+      img.id = 'avatarDisplay'; img.className = 'avatar-img';
+      img.src = profile.avatar; img.alt = 'Avatar';
+      img.onerror = function() {
+        profile.avatar = null;
+        const ph = document.createElement('div');
+        ph.id = 'avatarDisplay'; ph.className = 'avatar-placeholder';
+        ph.textContent = inicial;
+        if (this.parentNode) this.parentNode.replaceChild(ph, this);
+      };
+      if (wrap.parentNode) wrap.parentNode.replaceChild(img, wrap);
+    } else {
+      const ph = document.createElement('div');
+      ph.id = 'avatarDisplay'; ph.className = 'avatar-placeholder';
+      ph.textContent = inicial;
+      if (wrap.parentNode) wrap.parentNode.replaceChild(ph, wrap);
+    }
   }
+
+  // Nav inicial
+  const navImg = document.getElementById('user-nav-photo');
+  const navInitials = document.getElementById('user-nav-initials');
+  if (navImg && navInitials) {
+    if (profile.avatar) {
+      navImg.src = profile.avatar;
+      navImg.style.display = 'block';
+      navInitials.style.display = 'none';
+    } else {
+      navImg.style.display = 'none';
+      navInitials.style.display = 'block';
+      navInitials.textContent = profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤';
+    }
+  }
+
   updateProfilePreview();
   updateReadMode();
 }
@@ -3115,8 +4104,7 @@ function updateReadMode() {
   const p = profile;
   if (!p) return;
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
-  set('readNombre', p.nombre);
-  set('readApellido', p.apellido);
+  set('readNombre', p.nombre || p.name || '—');
   set('readEmail', p.email);
   set('readTel', p.tel);
   set('readBio', p.bio);
@@ -3125,7 +4113,6 @@ function updateReadMode() {
 async function saveProfile() {
   const data = {
     nombre: document.getElementById('profNombre').value.trim(),
-    apellido: document.getElementById('profApellido').value.trim(),
     email: document.getElementById('profEmail').value.trim(),
     tel: document.getElementById('profTel').value.trim(),
     bio: document.getElementById('profBio').value.trim(),
@@ -3147,14 +4134,14 @@ async function saveProfile() {
 }
 
 function updateProfilePreview() {
-  const n = document.getElementById('profNombre').value.trim();
-  const a = document.getElementById('profApellido').value.trim();
-  const e = document.getElementById('profEmail').value.trim();
+  const n = document.getElementById('profNombre')?.value.trim() || profile.nombre || '';
+  const e = document.getElementById('profEmail')?.value.trim() || profile.email || '';
   
-  document.getElementById('profileDisplayName').textContent = (n || 'Tu') + ' ' + (a || 'Nombre');
-  document.getElementById('profileDisplayEmail').textContent = e || 'tu@email.com';
+  const displayName = document.getElementById('profileDisplayName');
+  const displayEmail = document.getElementById('profileDisplayEmail');
+  if (displayName) displayName.textContent = n || 'Tu Nombre';
+  if (displayEmail) displayEmail.textContent = e || 'tu@email.com';
 
-  // ACTUALIZACIÓN DEL ICONO DE NAVEGACIÓN (INFERIOR)
   const navImg = document.getElementById('user-nav-photo');
   const navInitials = document.getElementById('user-nav-initials');
   
@@ -3166,23 +4153,19 @@ function updateProfilePreview() {
     } else {
       navImg.style.display = 'none';
       navInitials.style.display = 'block';
-      // Ponemos la inicial del nombre en el circulito si no hay foto
       navInitials.textContent = n ? n.charAt(0).toUpperCase() : '👤';
     }
   }
 }
 
-function handleAvatarChange(ev) {
+async function handleAvatarChange(ev) {
   const file = ev.target.files[0];
   if (!file) return;
-  
+
+  // Mostrar preview inmediato
   const reader = new FileReader();
   reader.onload = function(e) {
     const data = e.target.result;
-    profile.avatar = data;
-    vakaData.saveProfile(profile); //
-    
-    // 1. Actualiza la foto grande en la página de Cuenta
     const wrap = document.getElementById('avatarDisplay');
     if (wrap.tagName === 'DIV') {
       const img = document.createElement('img');
@@ -3194,8 +4177,6 @@ function handleAvatarChange(ev) {
     } else {
       wrap.src = data;
     }
-    
-    // 2. ¡NUEVO! Actualiza el circulito pequeño de la barra de navegación
     const navImg = document.getElementById('user-nav-photo');
     const navInitials = document.getElementById('user-nav-initials');
     if (navImg && navInitials) {
@@ -3203,10 +4184,28 @@ function handleAvatarChange(ev) {
       navImg.style.display = 'block';
       navInitials.style.display = 'none';
     }
-    
-    toast('Foto actualizada ✓', 's');
   };
   reader.readAsDataURL(file);
+
+  // Subir al backend
+  try {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    const res = await fetch(`${API_BASE}/api/v1/users/me/avatar`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: formData
+    });
+    const data = await res.json();
+    if (data.avatar_url) {
+      profile.avatar = data.avatar_url;
+      await vakaData.saveProfile(profile);
+      toast('Foto actualizada ✓', 's');
+    }
+  } catch(err) {
+    console.error('Error subiendo avatar:', err);
+    toast('Error al subir la foto', 'e');
+  }
 }
 
 // ═══ STATS ═══════════════════════════════════════════════════════════
@@ -3228,9 +4227,27 @@ function cerrarModalBorrarDatos() {
   document.body.style.overflow = '';
 }
 
-function ejecutarBorradoDatos() {
+async function ejecutarBorradoDatos() {
+  try {
+    await vakaData.deleteAllData();
+  } catch(_) {}
   clearAll();
   cerrarModalBorrarDatos();
+  toast('Datos borrados correctamente','s');
+}
+
+async function ejecutarEliminarCuenta() {
+  try {
+    await vakaData.deleteAccount();
+    console.log('✅ Cuenta eliminada del backend');
+  } catch(err) {
+    console.error('❌ Error al eliminar cuenta:', err);
+  }
+  clearAll();
+  localStorage.clear();
+  document.getElementById('modal-eliminar-cuenta').style.display='none';
+  document.body.style.overflow='';
+  window.location.href = 'login.html';
 }
 
 // ═══ MULTI-CURRENCY ══════════════════════════════════════════════════
@@ -3238,8 +4255,14 @@ const RATES = { EUR:1, USD:1.09, GBP:0.86, ARS:1050 };
 const SYMBOLS = { EUR:'€', USD:'$', GBP:'£', ARS:'$' };
 
 function convertToBase(amount, fromCurrency) {
-  if(!fromCurrency || fromCurrency===getBase()) return amount;
-  const inEUR = amount / (RATES[fromCurrency] || 1);
+  // Postgres devuelve las columnas NUMERIC/DECIMAL como STRING (ej. "45.50"),
+  // no como number. Si no se fuerza aquí, sumas como total += e.baseAmt
+  // hacen concatenación de texto en vez de suma ("0" + "45.50" = "045.50"),
+  // y el resultado final ya no es un number, por lo que total.toFixed()
+  // revienta con "total.toFixed is not a function" (bug de Estadísticas).
+  const n = Number(amount) || 0;
+  if(!fromCurrency || fromCurrency===getBase()) return n;
+  const inEUR = n / (RATES[fromCurrency] || 1);
   return +(inEUR * (RATES[getBase()] || 1)).toFixed(2);
 }
 function getBase() {
@@ -3550,10 +4573,10 @@ function renderStats() {
     });
   }
 
-  const total = allExp.reduce((s, e) => s + e.baseAmt, 0);
+  const total = allExp.reduce((s, e) => s + (Number(e.baseAmt) || 0), 0);
   const count = allExp.length;
   const avg = count ? total / count : 0;
-  const maxE = allExp.reduce((m, e) => e.baseAmt > m ? e.baseAmt : m, 0);
+  const maxE = allExp.reduce((m, e) => (Number(e.baseAmt) || 0) > m ? (Number(e.baseAmt) || 0) : m, 0);
 
   // 4. ACTUALIZACIÓN DE TEXTOS Y KPIs
   // Usamos comprobaciones para no romper el código si el usuario cambia de página rápido
@@ -3569,18 +4592,18 @@ function renderStats() {
 
   // 5. LLAMADA A TUS FUNCIONES DE DIBUJO
   const catMap = {};
-  allExp.forEach(e => { catMap[e.cat] = (catMap[e.cat] || 0) + e.baseAmt; });
+  allExp.forEach(e => { catMap[e.cat] = (catMap[e.cat] || 0) + (Number(e.baseAmt) || 0); });
   renderDonut(catMap, total, sym);
 
   const payerMap = {};
-  allExp.forEach(e => { payerMap[e.payer] = (payerMap[e.payer] || 0) + e.baseAmt; });
+  allExp.forEach(e => { payerMap[e.payer] = (payerMap[e.payer] || 0) + (Number(e.baseAmt) || 0); });
   renderPayerBars(payerMap, total, sym);
 }
 
 function renderDonut(catMap, total, sym) {
   const svg = document.getElementById('donutSvg');
   const legend = document.getElementById('catLegend');
-  document.getElementById('donutCenter').textContent = sym + total.toFixed(0);
+  document.getElementById('donutCenter').textContent = sym + total.toFixed(2);
   const cx=80, cy=80, r=58, strokeW=22;
   const circumference = 2 * Math.PI * r;
   const cats = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
@@ -3673,35 +4696,65 @@ function openDeleteFromEdit() {
   openDeleteExpenseModal(editingExpenseIdx);
 }
 
+// Captura el botón atrás nativo de Android (API correcta de Capacitor)
+if (window.Capacitor && Capacitor.isNativePlatform() && Capacitor.Plugins.App) {
+  Capacitor.Plugins.App.addListener('backButton', () => {
+    // Si hay algún modal visible, ciérralo primero en vez de navegar
+    const openModal = [...document.querySelectorAll('.modal-overlay')]
+      .find(m => getComputedStyle(m).display !== 'none');
+    if (openModal) {
+      openModal.style.display = 'none';
+      document.body.style.overflow = '';
+      return;
+    }
+
+    const currentPage = document.querySelector('.page.active').id;
+    if (currentPage === 'page-gasto') {
+      // Mismo comportamiento que el botón "← Volver" del detalle de gasto
+      goBackToGroup();
+    } else if (currentPage === 'page-grupos') {
+      document.getElementById('modal-salir-app').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    } else {
+      goBack();
+    }
+  });
+}
+
+function cerrarModalSalir() {
+  document.getElementById('modal-salir-app').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
 </script>
 
 <!-- ═══ PAY MODAL ═══ -->
-<div class="pay-modal-overlay" id="payModal" onclick="if(event.target===this)closePayModal()">
-  <div class="pay-modal-sheet">
+<div class="modal-overlay" id="payModal" onclick="if(event.target===this)closePayModal()">
+  <div class="modal-sheet" style="max-width:380px;">
     <div class="modal-handle"></div>
     <button class="modal-close" onclick="closePayModal()">✕ Cerrar</button>
     <div class="modal-title" id="pmTitle">Pagar deuda</div>
-    <div style="text-align:center;margin-bottom:14px">
-      <div style="font-size:.75rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px">Importe</div>
-      <div style="font-family:'Bebas Neue',cursive;font-size:2rem;color:var(--gold)" id="pmAmount">€0</div>
+    <div style="text-align:center;margin-bottom:10px">
+      <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px">Importe</div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:var(--gold)" id="pmAmount">€0</div>
     </div>
-    <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:10px">Elige método de pago</div>
+    <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:6px">Elige método de pago</div>
     <div class="pay-method-grid">
       <button class="pay-method-btn" onclick="selectPayMethod(this,'bizum')"><span class="pm-icon">📱</span>Bizum</button>
       <button class="pay-method-btn" onclick="selectPayMethod(this,'revolut')"><span class="pm-icon">💜</span>Revolut</button>
       <button class="pay-method-btn" onclick="selectPayMethod(this,'paypal')"><span class="pm-icon">🅿️</span>PayPal</button>
       <button class="pay-method-btn" onclick="selectPayMethod(this,'bank')"><span class="pm-icon">🏦</span>Banco</button>
     </div>
-    <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:8px">Adjuntar comprobante (opcional)</div>
-    <div class="proof-area" onclick="document.getElementById('pmProofFile').click()">
+    <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:6px;margin-top:8px">Adjuntar comprobante (opcional)</div>
+    <div class="proof-area" onclick="document.getElementById('pmProofFile').click()" style="padding:8px;margin-top:0;display:flex;align-items:center;gap:10px;text-align:left">
       <input type="file" id="pmProofFile" accept="image/*" onchange="handleProofUpload(event)">
-      <span style="font-size:1.4rem">📎</span>
-      <div style="font-size:.75rem;color:var(--muted);margin-top:4px;font-weight:700">Subir captura de Bizum / transferencia</div>
-      <img id="pmProofThumb" class="proof-thumb">
+      <span style="font-size:1.2rem;flex-shrink:0">📎</span>
+      <div style="font-size:.72rem;color:var(--muted);font-weight:700">Subir captura de pago</div>
+      <img id="pmProofThumb" class="proof-thumb" style="max-height:32px;margin-left:auto">
     </div>
-    <div style="display:flex;gap:9px;margin-top:14px">
-      <button class="btn btn-outline" onclick="closePayModal()" style="flex:1">Cancelar</button>
-      <button class="btn btn-outline btn-green" onclick="confirmPayment(true)" style="flex:1">✅ Marcar saldado</button>
+    <div style="display:flex;gap:9px;margin-top:12px">
+      <button class="btn btn-outline" onclick="closePayModal()" style="flex:1;font-size:.75rem">Cancelar</button>
+      <button class="btn btn-outline btn-green" onclick="confirmPayment(true)" style="flex:1;font-size:.75rem">✅ Marcar saldado</button>
     </div>
   </div>
 </div>
@@ -3877,17 +4930,14 @@ function openDeleteFromEdit() {
   <div style="background:#1e1e1e; width:90%; max-width:340px; padding:25px; border-radius:24px; border:1px solid #333; text-align:center;">
     
     <div style="color:#F2F2F2; font-size:1.5rem; font-weight:bold; margin-bottom:10px;">¿Eliminar participante?</div>
-    <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:20px; opacity:0.8;">Este participante tiene gastos registrados. Al eliminarlo sus gastos serán actualizados.</p>
+    <p id="del-miembro-msg" style="color:#F2F2F2; font-size:0.8rem; margin-bottom:20px; opacity:0.8;"></p>
 
     <div style="background:#2a2a2a; border-radius:16px; padding:15px; margin-bottom:25px; text-align:left;">
       <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
         <div id="del-miembro-avatar" style="width:38px;height:38px;border-radius:50%;background:var(--gold-dark);color:var(--dark);font-size:1.1rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
         <div id="del-miembro-name" style="color:white; font-weight:800; font-size:1rem;"></div>
       </div>
-      <div style="color:#aaa; font-size:0.8rem; display:flex; flex-direction:column; gap:4px;">
-        <span>🧾 <span id="del-miembro-gastos"></span></span>
-        <span>⚠️ Sus gastos serán reasignados</span>
-      </div>
+      <div id="del-miembro-info" style="color:#aaa; font-size:0.8rem; display:flex; flex-direction:column; gap:4px;"></div>
     </div>
 
     <div style="display:flex; gap:12px; width:100%;">
@@ -3923,6 +4973,126 @@ function openDeleteFromEdit() {
     </div>
   </div>
 </div>
+
+<div class="modal-overlay" id="modal-eliminar-cuenta" style="display:none; z-index:9999;" onclick="if(event.target===this)document.getElementById('modal-eliminar-cuenta').style.display='none'">
+  <div style="background:#1e1e1e; width:90%; max-width:340px; padding:25px; border-radius:24px; border:1px solid #990000; text-align:center;">
+    <div style="font-size:2.5rem; margin-bottom:10px;">🚨</div>
+    <div style="color:#ff4d4d; font-size:1.5rem; font-weight:bold; margin-bottom:10px;">Eliminar cuenta</div>
+    <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:20px; opacity:0.8;">Se eliminarán permanentemente tu cuenta, grupos, gastos, amigos y toda tu actividad. Esta acción <strong>no se puede deshacer</strong>.</p>
+    <div style="display:flex; gap:12px; width:100%;">
+      <button onclick="document.getElementById('modal-eliminar-cuenta').style.display='none';document.body.style.overflow=''"
+        style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#28a745;">
+        No, volver
+      </button>
+      <button onclick="ejecutarEliminarCuenta()"
+        style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#990000;">
+        Sí, eliminar
+      </button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-renombrar-miembro" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalRenombrarMiembro()">
+  <div style="background:#1e1e1e; width:90%; max-width:340px; padding:25px; border-radius:24px; border:1px solid #333; text-align:center;">
+    <div style="color:#F2F2F2; font-size:1.5rem; font-weight:bold; margin-bottom:10px;">Renombrar participante</div>
+    <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:20px; opacity:0.8;">Introduce el nuevo nombre para este participante.</p>
+    <div style="background:#2a2a2a; border-radius:16px; padding:15px; margin-bottom:20px; text-align:left;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+        <div id="rename-miembro-avatar" style="width:38px;height:38px;border-radius:50%;background:var(--gold-dark);color:var(--dark);font-size:1.1rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
+        <div id="rename-miembro-name" style="color:white; font-weight:800; font-size:1rem;"></div>
+      </div>
+      <input id="rename-miembro-input" type="text" placeholder="Nuevo nombre..."
+        style="width:100%; padding:10px 12px; border-radius:10px; border:1.5px solid #444; background:#1a1a1a; color:white; font-size:0.9rem; box-sizing:border-box; outline:none;"/>
+    </div>
+    <div style="display:flex; gap:12px; width:100%;">
+      <button onclick="cerrarModalRenombrarMiembro()"
+        style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#444;">
+        Cancelar
+      </button>
+      <button onclick="ejecutarRenombrarMiembro()"
+        style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#28a745;">
+        Guardar
+      </button>
+    </div>
+  </div>
+</div>
+<!-- Modal Confirmar Salida de App -->
+<div class="modal-overlay" id="modal-salir-app" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalSalir()">
+  <div style="background:#1e1e1e; width:90%; max-width:300px; padding:25px; border-radius:24px; border:1px solid #333; text-align:center;">
+    <div style="font-size:2.5rem; margin-bottom:10px;">👋</div>
+    <div style="color:#F2F2F2; font-size:1.3rem; font-weight:bold; margin-bottom:20px;">¿Deseas salir?</div>
+    
+    <div style="display:flex; gap:12px; width:100%;">
+      <button onclick="cerrarModalSalir()" style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#444;">
+        No
+      </button>
+      <button onclick="if(window.Capacitor && Capacitor.Plugins.App) Capacitor.Plugins.App.exitApp()" style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#dc3545;">
+        Sí, salir
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function ajustarAlturaHeader() {
+  const header = document.querySelector('header');
+  if (header) {
+    document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
+  }
+  posicionarBadge();
+}
+window.addEventListener('load', ajustarAlturaHeader);
+window.addEventListener('resize', ajustarAlturaHeader);
+
+function posicionarBadge() {
+  const detBar = document.querySelector('.page.active .det-bar');
+  const badge = document.getElementById('hbadge');
+  if (!detBar || !badge) return;
+  const rect = detBar.getBoundingClientRect();
+  const centerY = rect.top + rect.height / 2;
+  badge.style.top = (centerY - badge.offsetHeight / 2) + 'px';
+}
+
+// ═══ NAVEGACIÓN POR DESLIZAMIENTO (SWIPE) ══════════════════════════
+// Adicional al tap en los botones de abajo — no lo reemplaza.
+const MAIN_PAGES = ['page-grupos', 'page-amigos', 'page-stats', 'page-actividad', 'page-cuenta'];
+
+(function setupSwipeNav() {
+  let touchStartX = 0, touchStartY = 0;
+  const THRESHOLD = 70; // píxeles mínimos para considerarlo un swipe intencional
+
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    const touchEndX = e.changedTouches[0].screenX;
+    const touchEndY = e.changedTouches[0].screenY;
+    handleSwipeGesture(touchEndX - touchStartX, touchEndY - touchStartY);
+  }, { passive: true });
+
+  function handleSwipeGesture(deltaX, deltaY) {
+    // Solo si el movimiento es claramente horizontal (evita pelear con el scroll vertical)
+    if (Math.abs(deltaX) < THRESHOLD || Math.abs(deltaX) < Math.abs(deltaY) * 1.5) return;
+
+    const activePage = document.querySelector('.page.active');
+    if (!activePage) return;
+    const currentIdx = MAIN_PAGES.indexOf(activePage.id);
+    if (currentIdx === -1) return; // estamos en una pantalla que no es una de las 5 pestañas (ej: detalle de grupo)
+
+    let nextIdx = currentIdx;
+    if (deltaX < 0 && currentIdx < MAIN_PAGES.length - 1) nextIdx = currentIdx + 1; // swipe a la izquierda → siguiente
+    if (deltaX > 0 && currentIdx > 0) nextIdx = currentIdx - 1;                     // swipe a la derecha → anterior
+    if (nextIdx === currentIdx) return;
+
+    const nextPageId = MAIN_PAGES[nextIdx];
+    const nextBtn = document.querySelector(`.nav-btn[data-page="${nextPageId}"]`);
+    switchPage(nextPageId, nextBtn);
+    if (nextPageId === 'page-stats' && typeof renderStats === 'function') renderStats();
+  }
+})();
+
+</script>
 
 </body>
 </html>

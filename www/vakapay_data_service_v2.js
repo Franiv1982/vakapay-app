@@ -98,8 +98,8 @@ class VakaDataService {
   //  AUTH
   // ================================================================
 
-  async register({ nombre, apellido, email, password }) {
-    const data = await this.#fetch('POST', '/auth/register', { nombre, apellido, email, password });
+  async register({ nombre, apellido, email, password, tel = '' }) {
+    const data = await this.#fetch('POST', '/auth/register', { nombre, apellido, email, password, tel });
     this.setToken(data.token);
     this.#write(this.#KEYS.profile, data.user);
     return data;
@@ -116,6 +116,26 @@ class VakaDataService {
     try { await this.#fetch('POST', '/auth/logout'); } catch (_) {}
     this.setToken(null);
     this.clearAll();
+  }
+
+  async deleteAllData() {
+    try {
+      const g = await this.#fetch('GET', '/groups');
+      for (const gr of g) await this.#fetch('DELETE', `/groups/${gr.id}`);
+    } catch(_) {}
+    try {
+      const f = await this.#fetch('GET', '/friends');
+      for (const fr of f) await this.#fetch('DELETE', `/friends/${fr.id}`);
+    } catch(_) {}
+    try { await this.#fetch('DELETE', '/activity'); } catch(_) {}
+    Object.values(this.#KEYS).forEach(k => localStorage.removeItem(k));
+  }
+
+  async deleteAccount() {
+    await this.deleteAllData();
+    try { await this.#fetch('DELETE', '/users/me'); } catch(_) {}
+    this.setToken(null);
+    localStorage.clear();
   }
 
   // ================================================================

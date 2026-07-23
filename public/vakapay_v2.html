@@ -24,13 +24,13 @@ header{position:sticky;top:0;z-index:200;background:rgba(14,14,14,.96);backdrop-
 .logo-wrap{width:46px;height:46px;border-radius:50%;overflow:hidden;border:2.5px solid var(--gold);box-shadow:0 0 16px rgba(245,200,0,.35);flex-shrink:0}
 .logo-wrap img{width:100%;height:100%;object-fit:cover}
 .header-text h1{font-family:'Bebas Neue',Impact,'Arial Narrow',Arial,sans-serif;font-size:1.7rem;letter-spacing:3px;color:var(--gold);line-height:1}
-.header-text p{font-family:'Nunito', sans-serif;font-style:normal;font-size:.14.4px;color:#F2F2F2;letter-spacing:.9px;text-transform:uppercase;font-weight:800;font-display: swap}
-.hbadge{display:none;position:fixed;top:116px;right:12px;z-index:900;background:rgba(245,200,0,.1);color:var(--gold);border:1px solid rgba(245,200,0,.22);border-radius:20px;padding:5px 12px;font-size:.68rem;font-weight:800;letter-spacing:.4px;white-space:nowrap;width:110px;overflow:hidden;text-overflow:ellipsis;text-align:center;cursor:pointer;}
+.header-text p{font-family:'Nunito', sans-serif;font-style:normal;font-size:14.4px;color:#F2F2F2;letter-spacing:.9px;text-transform:uppercase;font-weight:800;font-display: swap}
+.hbadge{display:none;position:fixed;top:64px;right:12px;z-index:900;background:rgba(245,200,0,.1);color:var(--gold);border:1px solid rgba(245,200,0,.22);border-radius:20px;padding:5px 12px;font-size:.68rem;font-weight:800;letter-spacing:.4px;white-space:nowrap;width:110px;overflow:hidden;text-overflow:ellipsis;text-align:center;cursor:pointer;}
 .hbadge:after{content:' ▾';font-size:.6rem;opacity:.7;}
 #ocrPopover{animation:fadeIn .15s ease;}
 #ocrBtn.has-file{background:rgba(61,186,111,.15);border-color:rgba(61,186,111,.4);color:var(--success);}
 
-.det-bar{position:sticky;top:64px;z-index:500;background:rgba(14,14,14,.96);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:8px 0;width:100%;box-sizing:border-box;}
+.det-bar{position:sticky;top:var(--header-h, 64px);z-index:500;background:rgba(14,14,14,.96);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:8px 0;width:100%;box-sizing:border-box;}
 #groupDropdown{display:none;position:fixed;top:70px;right:12px;background:var(--dark3);border:1px solid var(--border);border-radius:14px;min-width:180px;max-width:240px;z-index:8000;box-shadow:var(--shadow);overflow:hidden;}
 #groupDropdown{display:none;position:fixed;top:70px;right:12px;background:var(--dark3);border:1px solid var(--border);border-radius:14px;min-width:180px;max-width:240px;z-index:8000;box-shadow:var(--shadow);overflow:hidden;}
 #groupDropdown.open{display:block;animation:fadeIn .15s ease;}
@@ -51,11 +51,11 @@ header{position:sticky;top:0;z-index:200;background:rgba(14,14,14,.96);backdrop-
 .nav-btn.active::after{transform:scaleX(1)}
 
 /* ── PAGES ── */
-.page{display:none;animation:fadeUp .35s ease both}
+.page{display:none}
 .page.active{display:flex;flex-direction:column;min-height:100vh;}
 @keyframes fadeUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
 
-main{flex:1;max-width:660px;margin:0 auto;padding:18px 14px 90px 14px;position:relative;z-index:1;width:100%;}
+main{flex:1;max-width:660px;margin:0 auto;padding:18px 14px 90px 14px;position:relative;z-index:1;width:100%;animation:fadeUp .35s ease both}
 
 /* ── SECTION TITLES ── */
 .sec-title{display:flex;align-items:center;gap:9px;margin:24px 0 12px;transition:opacity .3s}
@@ -663,10 +663,19 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
       <button class="link-copy" onclick="copyLink()">Copiar</button>
     </div>
     <div class="dvd"></div>
-    <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Contacto</div>
-    <div class="g2">
-      <div class="field"><label><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.73a16 16 0 0 0 6.29 6.29l1.1-1.1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Teléfono</label><div style="display:flex;gap:6px;align-items:center"><input type="tel" id="contactPhone" placeholder="+34 600 000 000" style="flex:1"><button onclick="pickContactForShare()" style="background:var(--dark3);border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;cursor:pointer;color:var(--muted);display:flex;align-items:center" title="Seleccionar contacto"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></button></div></div>
-<div class="field"><label><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</label><input type="email" id="contactEmail" placeholder="amigo@email.com"></div>
+    
+    <div class="field" style="margin-bottom:12px">
+      <label><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.73a16 16 0 0 0 6.29 6.29l1.1-1.1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Teléfono</label>
+      <div style="position:relative;width:100%">
+        <input type="tel" id="contactPhone" placeholder="+34 600 000 000" style="width:100%;box-sizing:border-box;padding-right:44px">
+        <button onclick="pickContactForShare()" style="position:absolute;right:5px;top:50%;transform:translateY(-50%);background:var(--dark3);border:1.5px solid var(--border);border-radius:8px;padding:6px 8px;cursor:pointer;color:var(--gold, #FFD700);display:flex;align-items:center" title="Seleccionar contacto">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="field">
+      <label><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</label>
+      <input type="email" id="contactEmail" placeholder="amigo@email.com" style="width:100%;box-sizing:border-box">
     </div>
     <div style="display:flex;gap:24px;margin-top:13px;align-items:center;justify-content:center;">
       <button onclick="shareWhatsApp()" style="background:none;border:none;cursor:pointer;padding:0;transition:transform .13s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">
@@ -916,9 +925,11 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     </div>
 
     <div style="display:flex;gap:9px;margin-top:6px">
-      <button class="btn btn-danger" onclick="openDeleteFromEdit()" style="flex:1">Eliminar</button>
-      <button class="btn btn-gold" onclick="saveEditExpense()" style="flex:1">Guardar Cambios</button>
-    </div>
+  <!-- Se asegura la llamada a la función de confirmación -->
+  <button type="button" class="btn btn-danger" onclick="openDeleteFromEdit()" style="flex:1">Eliminar</button>
+  <!-- Se añade type="button" para evitar comportamiento de formulario accidental -->
+  <button type="button" class="btn btn-gold" onclick="saveEditExpense()" style="flex:1">Guardar Cambios</button>
+</div>
   </div>
 </div>
 
@@ -1059,9 +1070,20 @@ document.getElementById('logoImg').src = "logo_vakapay.png";
 // ================================================================
 // VakaDataService — Capa de abstracción de datos
 // ================================================================
+// Convierte el array de miembros que devuelve la API (fila por fila de Postgres)
+// en el objeto {nombre: balance} que usa todo el frontend. Sin esto, cualquier
+// merge con "..." vuelca los indices numericos del array como si fueran
+// participantes reales (bug de "miembros fantasma 0,1,2...").
+function normalizeMembersField(rawMembers, fallback) {
+  if (Array.isArray(rawMembers)) {
+    return Object.fromEntries(rawMembers.map(m => [m.display_name, Number(m.balance) || 0]));
+  }
+  return rawMembers || fallback || {};
+}
+
 class VakaDataService {
   #KEYS    = { groups:'vp_groups', friends:'vp_friends', activity:'vp_activity', profile:'vp_profile', token:'vp_token' };
-  #API_URL = `${window.location.origin}/api/v1`;
+  #API_URL = 'https://vakapay-app.vercel.app/api/v1';
   #token   = null;
 
   constructor() {
@@ -1097,7 +1119,7 @@ class VakaDataService {
       desc:    e.desc    || e.description  || '',
       payer:   e.payer   || e.payer_name   || '',
       date:    e.date    || e.expense_date || '',
-      baseAmt: e.baseAmt || e.amount_base  || e.amount || 0,
+      baseAmt: Number(e.baseAmt || e.amount_base || e.amount) || 0,
       cat:     e.cat     || e.category     || 'other',
       involved: e.involved || (e.splits ? e.splits.map(s => s.member_name) : []),
     });
@@ -1193,12 +1215,21 @@ class VakaDataService {
     const gs = groups;
     const g = gs[idx];
     
-    // 1. Aseguramos que existan gastos y el ID del grupo (id o _id)
+    // ══ REFUERZO: Asegurar que los miembros existan en el grupo ══
+    if (Array.isArray(involved)) {
+        involved.forEach(name => {
+            if (!g.members.hasOwnProperty(name)) {
+                g.members[name] = 0; // Crea el miembro localmente si falta
+            }
+        });
+    }
+
+    // 1. Aseguramos que existan gastos y el ID del grupo
     if (!g.expenses) g.expenses = [];
     const groupId = g.id || g._id; 
     
     const ba = Number(baseAmt || amount);
-	const newExp = {desc, amount: Number(amount), cat, payer, date, involved, currency: currency || 'EUR', baseAmt: ba};
+    const newExp = {desc, amount: Number(amount), cat, payer, date, involved, currency: currency || 'EUR', baseAmt: ba};
     
     // 2. Actualización local inmediata
     g.expenses.unshift(newExp);
@@ -1221,10 +1252,20 @@ class VakaDataService {
       });
       
       console.log("☁️ Sincronizado correctamente con el servidor");
-      if (typeof renderAll === 'function') renderAll();
+      const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+      });
+      if (resFresh.ok) {
+        const freshData = await resFresh.json();
+        groups[currentGroupIdx] = {
+          ...groups[currentGroupIdx],
+          ...freshData,
+          members: normalizeMembersField(freshData.members, groups[currentGroupIdx].members)
+        };
+        renderAll();
+      }
     } catch (e) {
       console.warn("⚠️ Sincro fallida (guardado solo en LocalStorage):", e.message);
-      // No hacemos push aquí porque ya lo hicimos en el paso 2
     }
 
     return newExp;
@@ -1257,13 +1298,66 @@ class VakaDataService {
     } catch (e) { 
       console.warn("Borrado solo local (Servidor offline)"); 
     }
+    // Sincronización post-borrado
+    try {
+      const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+      });
+      if (resFresh.ok) {
+        const freshData = await resFresh.json();
+        groups[currentGroupIdx] = {
+          ...groups[currentGroupIdx],
+          ...freshData,
+          members: normalizeMembersField(freshData.members, groups[currentGroupIdx].members)
+        };
+        updateBalances();
+        renderAll();
+      }
+    } catch (e) { console.error("Error sincronizando tras borrar:", e); }
     return true;
   }
 
   async updateExpense(idx, eidx, data) {
-    await this.deleteExpense(idx, eidx);
-    return this.addExpense(idx, data);
-  }
+    const g = groups[idx];
+    
+    // 1. Validación preventiva: Aseguramos que los miembros existan
+    if (data.involved && Array.isArray(data.involved)) {
+        data.involved.forEach(name => {
+            if (!g.members.hasOwnProperty(name)) {
+                g.members[name] = 0; 
+            }
+        });
+    }
+
+    // 2. Actualización Local Directa (evitamos delete + add)
+    const oldExpense = g.expenses[eidx];
+    g.expenses[eidx] = { ...oldExpense, ...data }; 
+    
+    updateBalances();
+    await this.saveGroups(groups);
+
+    // 3. Preparación de datos para el Backend (Mapeo de nombres)
+    const payload = {
+        description: data.desc || data.description,
+        amount: data.amount,
+        currency: data.currency || 'EUR',
+        category: data.cat || data.category || 'other',
+        payer_name: data.payer || data.payer_name,
+        expense_date: data.date || data.expense_date,
+        involved: data.involved
+    };
+
+    // 4. Sincronización (PUT)
+    try {
+        if (g.id && oldExpense.id) {
+            await this.#req('PUT', `/groups/${g.id}/expenses/${oldExpense.id}`, payload);
+        }
+    } catch (e) {
+        console.error("Error al actualizar gasto en servidor:", e);
+    }
+
+    return g.expenses[eidx];
+}
 
   async getFriends() {
     try {
@@ -1277,7 +1371,10 @@ class VakaDataService {
   }
   async saveFriends(fs) { this.#write(this.#KEYS.friends,fs); return true; }
   async updateFriend(id, data) { return await this.#req('PATCH', `/friends/${id}`, data); }
-  
+  async addFriend(friendData) {
+    const friend = await this.#req('POST', '/friends', friendData);
+    return friend;
+  }
   async getProfile() { return this.#read(this.#KEYS.profile)??{}; }
   async saveProfile(data) { const cur=await this.getProfile(); const upd={...cur,...data}; this.#write(this.#KEYS.profile,upd); try { await this.#req('PATCH', '/users/me', { nombre: data.nombre, apellido: data.apellido, email: data.email, tel: data.tel, bio: data.bio }); } catch(_) {} return upd; }
 
@@ -1334,39 +1431,39 @@ async logActivity(msg, groupName = null) {
   }
   async deleteGroup(id) {
     try {
-      // Enviamos la petición DELETE al servidor
+      // 1. Enviamos petición al servidor
       await this.#req('DELETE', `/groups/${id}`);
       
-      // Actualizamos también el almacenamiento local interno de la clase
+      // 2. Solo si no hubo error, filtramos localmente
       const gs = this.#read(this.#KEYS.groups) ?? [];
       const filtered = gs.filter(g => (g.id || g._id) !== id);
+      
+      // 3. Persistimos el nuevo estado
       this.#write(this.#KEYS.groups, filtered);
       
       return true;
     } catch (err) {
-      // Si el servidor falla, lanzamos el error para que la interfaz avise
       throw err;
     }
   }
-async deleteAllData() {
+
+  async deleteAllData() {
     try {
       const gs = await this.#req('GET', '/groups');
       if (Array.isArray(gs)) {
         for (const g of gs) await this.#req('DELETE', `/groups/${g.id}`);
       }
-    } catch(_) {}
-    try {
       const fs = await this.#req('GET', '/friends');
       if (Array.isArray(fs)) {
         for (const f of fs) await this.#req('DELETE', `/friends/${f.id}`);
       }
-    } catch(_) {}
-    try { await this.#req('DELETE', '/activity'); } catch(_) {}
-    Object.values(this.#KEYS).forEach(k => localStorage.removeItem(k));
-    localStorage.clear();
+      try { await this.#req('DELETE', '/activity'); } catch(_) {}
+    } catch(err) {
+      console.error('Error durante el borrado de datos:', err);
+    }
   }
 
-async deleteAccount() {
+  async deleteAccount() {
     await this.deleteAllData();
     try {
       await this.#req('DELETE', '/users/me');
@@ -1383,6 +1480,7 @@ const vakaData = new VakaDataService();
 
 // ═══ STATE ═══════════════════════════════════════════════════════════
 // Datos cargados por async init() a través de VakaDataService
+const API_BASE = 'https://vakapay-app.vercel.app';
 let groups   = [];
 let friends  = [];
 let grupoAEditar = null;
@@ -1390,31 +1488,52 @@ let activity = [];
 let profile  = {};
 let currentGroupIdx = null;
 let selectedType = 'viaje';
+let editingExpenseIdx = null;
 
-const CAT_ICONS={food:'🍔',transport:'🚗',hotel:'🏨',activity:'🎭',other:'💡'};
-const CAT_CSS  ={food:'c-food',transport:'c-transport',hotel:'c-hotel',activity:'c-activity',other:'c-other'};
+const CAT_ICONS = {
+  food: '🍔', 'Comida': '🍔',
+  transport: '🚗', 'Transporte': '🚗',
+  hotel: '🏨', 'Alojamiento': '🏨',
+  activity: '🎭', 'Actividad': '🎭',
+  other: '💡', 'Otro': '💡'
+};
+const CAT_CSS = {
+  food: 'c-food', 'Comida': 'c-food',
+  transport: 'c-transport', 'Transporte': 'c-transport',
+  hotel: 'c-hotel', 'Alojamiento': 'c-hotel',
+  activity: 'c-activity', 'Actividad': 'c-activity',
+  other: 'c-other', 'Otro': 'c-other'
+};
 const TYPE_ICONS={viaje:'✈️',casa:'🏠',pareja:'💑',otros:'🎯'};
 
 // ═══ INIT ═════════════════════════════════════════════════════════════
 (async function init(){
   try {
-    // 1. Fechas por defecto
-    const t=new Date(), e=new Date(t); e.setDate(t.getDate()+7);
-    const fmt=d=>d.toISOString().split('T')[0];
-    if(document.getElementById('dateStart')) document.getElementById('dateStart').value=fmt(t);
-    if(document.getElementById('dateEnd')) document.getElementById('dateEnd').value=fmt(e);
-    if(document.getElementById('expDate')) document.getElementById('expDate').value=fmt(t);
-    
-    // 2. Login - Ahora dentro de async
-    if (!vakaData.getToken()) {
-      const params = new URLSearchParams(window.location.search);
-      const invite = params.get('invite');
-      if (invite) localStorage.setItem('vp_pending_invite', invite);
-      window.location.href = 'Login.html';
-      return;
+    // 1. Verificación robusta del Token
+    const token = vakaData.getToken();
+    if (!token) {
+        window.location.href = 'login.html';
+        return;
     }
+
+    // 2. Validación flexible de sesión con el backend (Soporte Offline / APK)
+    try {
+        const response = await fetch(`${API_BASE}/api/v1/users/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
         
-	
+        // Si el servidor rechaza explícitamente el token por unauthorized, sí redirigimos al login
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                throw new Error("Sesión no autorizada");
+            }
+        }
+    } catch(err) {
+        console.warn("Aviso de red o sesión inválida. Continuando con caché local:", err);
+        // Si es un error crítico de autenticación real, puedes forzar el logout aquí si lo deseas.
+        // Si es solo falta de red, dejamos que pase para que la app no se quede en blanco.
+    }
+   
 	// 3. CARGA DE DATOS
 try {
     const remote = await vakaData.getGroups();
@@ -1426,7 +1545,7 @@ try {
   groupName: a.groupName || a.group_name || null
 }));
     try {
-      const me = await fetch(`${window.location.origin}/api/v1/users/me`, {
+      const me = await fetch(`${API_BASE}/api/v1/users/me`, {
         headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
       }).then(r => r.json());
       console.log('📋 Perfil del backend:', me);
@@ -1479,7 +1598,7 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
       try {
         const token = vakaData.getToken();
         const displayName = profile.nombre || document.getElementById('profileDisplayName')?.textContent || '';
-        const res = await fetch(`${window.location.origin}/api/v1/invite/${pendingInvite}/join`, {
+        const res = await fetch(`${API_BASE}/api/v1/invite/${pendingInvite}/join`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({ display_name: displayName })
@@ -1590,7 +1709,7 @@ if (groupsChevron) groupsChevron.style.transform = '';
       const g = groups[currentGroupIdx];
       badge.textContent = (TYPE_ICONS[g.type] || '📂') + ' ' + g.name;
       badge.style.display = 'block';
-      if (sub) sub.textContent = g.expenses?.length + ' gastos · ' + g.start + ' → ' + g.end;
+      if (sub) sub.textContent = g.expenses?.length + ' gastos · ' + fmtDate(g.start) + ' → ' + fmtDate(g.end);
     }
   }
 
@@ -1610,8 +1729,21 @@ if (groupsChevron) groupsChevron.style.transform = '';
   }
 }
 
-function goBack(){
-  switchPage('page-grupos',document.querySelector('[data-page="page-grupos"]'));
+function goBack() {
+  const currentPage = document.querySelector('.page.active').id;
+
+  // Si estamos en detalle de gasto, volver a detalle de grupo
+  if (currentPage === 'page-gasto') {
+    switchPage('page-detalle', null);
+  } 
+  // Si estamos en detalle de grupo, volver a grupos
+  else if (currentPage === 'page-detalle') {
+    switchPage('page-grupos', document.querySelector('[data-page="page-grupos"]'));
+  }
+  // En cualquier otro caso, ir a grupos
+  else {
+    switchPage('page-grupos', document.querySelector('[data-page="page-grupos"]'));
+  }
 }
 
 // ─── GROUP DROPDOWN ──────────────────────────────────────────────
@@ -1657,13 +1789,13 @@ function switchGroupFromDropdown(idx) {
   const g = groups[idx];
   updateBalances();
 
-  // Actualizar badge
+  // Actualizar badge (texto y visibilidad ahora; la posición se ajusta al final)
   document.getElementById('hbadge').textContent = TYPE_ICONS[g.type] + ' ' + g.name;
   document.getElementById('hbadge').style.display = 'block';
 
   // Actualizar título y meta del detalle
   document.getElementById('detTitle').textContent = TYPE_ICONS[g.type] + ' ' + g.name;
-  document.getElementById('detMeta').textContent = g.start + ' → ' + g.end;
+  document.getElementById('detMeta').textContent = fmtDate(g.start) + ' → ' + fmtDate(g.end);
 
   if (currentPage === 'page-stats') {
     const sub = document.getElementById('statsSubtitle');
@@ -1674,6 +1806,11 @@ function switchGroupFromDropdown(idx) {
   } else {
     openGroup(idx);
   }
+
+  // Recalcular la posición del badge DESPUÉS de que el contenido nuevo
+  // ya se haya pintado — requestAnimationFrame espera al próximo repintado
+  // del navegador, así el .det-bar que mide ya tiene su tamaño final.
+  requestAnimationFrame(posicionarBadge);
 }
 
 // ═══ TYPE SELECTOR
@@ -1694,14 +1831,16 @@ async function createGroup(){
   if(!nameInput) return;
 
   const name = nameInput.value.trim() || 'Mi Grupo';
-  
+  // Nombre del usuario logueado, que debe quedar como primer participante
+  const myName = (profile && profile.nombre ? profile.nombre.trim() : '') || 'Yo';
+
   try {
     const datosNuevo = { 
         name: name, 
         start: document.getElementById('dateStart')?.value || '', 
         end: document.getElementById('dateEnd')?.value || '', 
         type: typeof selectedType !== 'undefined' ? selectedType : 'trip', 
-        members: {}, 
+        members: { [myName]: 0 },   // ← el creador entra desde el inicio
         expenses: [] 
     };
 
@@ -1712,10 +1851,30 @@ async function createGroup(){
     // Si falla, usamos el local (pero ya sabemos que no tendrá ID).
     const grupoFinal = grupoServidor || datosNuevo;
 
-    // 3. Actualizamos la lista global con el grupo que YA tiene ID
+    // 3. FIX: nos aseguramos de que el creador quede como participante,
+    // aunque el backend no lo haya incluido en la respuesta del POST /groups
+    if (!grupoFinal.members || Object.keys(grupoFinal.members).length === 0) {
+      grupoFinal.members = { [myName]: 0 };
+    }
+
+    // 4. Si el grupo ya tiene ID (se creó bien en el servidor), damos de alta
+    // al creador como miembro real vía la API, igual que con cualquier otro participante
+    if (grupoFinal.id) {
+      try {
+        await fetch(`${API_BASE}/api/v1/groups/${grupoFinal.id}/members`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+          body: JSON.stringify({ display_name: myName })
+        });
+      } catch(err) {
+        console.warn('No se pudo registrar al creador como miembro en el servidor:', err);
+      }
+    }
+
+    // 5. Actualizamos la lista global con el grupo que YA tiene ID y participante
     groups.unshift(grupoFinal);
 
-    // 4. Guardamos en el PC
+    // 6. Guardamos en el PC
     localStorage.setItem('vaka_groups', JSON.stringify(groups));
 
     hideNewGroupForm();
@@ -1724,8 +1883,6 @@ async function createGroup(){
     
   } catch(e) {
     console.error("Error al crear:", e);
-    // Como QA: Si falla la creación inicial en el servidor, 
-    // es mejor avisar que el grupo solo será local.
     toast("Creado solo en local (Sin conexión)", 'w');
   }
 }
@@ -1738,6 +1895,14 @@ function toggleGroupsList() {
   const open = wrap.style.display === 'block';
   wrap.style.display = open ? 'none' : 'block';
   chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+// Formatea una fecha ISO (2026-07-13T00:00:00.000Z) o YYYY-MM-DD a DD/MM/AAAA legible.
+// Si la fecha viene vacía o inválida, devuelve el valor original tal cual.
+function fmtDate(raw) {
+  if (!raw) return '';
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) return raw;
+  return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
 }
 function renderGroupsList() {
   const sym0 = (vakaData && vakaData.settings) ? getCurrencySymbol(vakaData.settings.baseCurrency) : '€';
@@ -1752,8 +1917,12 @@ function renderGroupsList() {
   }
 
   el.innerHTML = groups.map((g, i) => {
-    // Sumamos los montos base (siempre en la moneda del grupo, ej: Euros)
-    const total = (g.expenses || []).reduce((s, e) => s + (e.baseAmt || 0), 0);
+    // Cálculo seguro del total: forzamos a número y manejamos valores nulos
+    const total = (g.expenses || []).reduce((s, e) => {
+      const val = Number(e.baseAmt) || 0;
+      return s + val;
+    }, 0);
+    
     const nm = Object.keys(g.members || {}).length;
 
     return `
@@ -1761,7 +1930,7 @@ function renderGroupsList() {
         <div class="gc-icon">${TYPE_ICONS[g.type] || '📂'}</div>
         <div class="gc-info">
           <div class="gc-name">${g.name}</div>
-          <div class="gc-meta">${nm} participante${nm !== 1 ? 's' : ''} · ${g.start} → ${g.end}</div>
+          <div class="gc-meta">${nm} participante${nm !== 1 ? 's' : ''} · ${fmtDate(g.start)} → ${fmtDate(g.end)}</div>
         </div>
         <div class="gc-total">${sym0}${Number(total || 0).toFixed(2)}</div>
         <div class="gc-actions">
@@ -1784,37 +1953,40 @@ async function openGroup(idx){
   const g = groups[idx];
 
   document.getElementById('detTitle').textContent = TYPE_ICONS[g.type]+' '+g.name;
-  document.getElementById('detMeta').textContent = g.start+' → '+g.end;
+  document.getElementById('detMeta').textContent = fmtDate(g.start)+' → '+fmtDate(g.end);
   document.getElementById('hbadge').textContent = TYPE_ICONS[g.type]+' '+g.name;
   document.getElementById('hbadge').style.display = 'block';
+  posicionarBadge();
   ['sec2','sec3','sec4','sec5','sec6'].forEach(id=>document.getElementById(id).style.opacity='1');
   document.getElementById('linkBox').style.display = 'none';
 
   // Cargar datos frescos del backend
   try {
-    const res = await fetch(`${window.location.origin}/api/v1/groups/${g.id}`, {
+    const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
       headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
     });
     const fresh = await res.json();
     if (fresh && !fresh.error) {
       groups[idx] = {
-        ...groups[idx],
-        members: Array.isArray(fresh.members)
-          ? Object.fromEntries(fresh.members.map(m => [m.display_name, m.balance || 0]))
-          : fresh.members || groups[idx].members,
-        expenses: (fresh.expenses || []).sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(e => ({
-          ...e,
-          desc: e.description || e.desc,
-          payer: e.payer_name || e.payer,
-          date: e.expense_date || e.date,
-          baseAmt: e.amount_base || e.baseAmt,
-          cat: e.category || e.cat,
-          involved: e.splits ? e.splits.map(s => s.member_name) : (e.involved || [])
-        }))
-      };
+          ...groups[idx],
+          // Aquí fusionamos lo local con lo que llega del servidor:
+          members: (Array.isArray(fresh.members))
+            ? { ...groups[idx].members, ...Object.fromEntries(fresh.members.map(m => [m.display_name, m.balance || 0])) }
+            : groups[idx].members,
+          expenses: (fresh.expenses || []).sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(e => ({
+            ...e,
+            desc: e.description || e.desc || 'Sin descripción',
+            payer: e.payer_name || e.payer || 'Desconocido',
+            date: e.expense_date || e.date || 'Sin fecha',
+            baseAmt: Number(e.amount_base || e.baseAmt) || 0,
+            cat: e.category || e.cat || 'other',
+            involved: e.splits ? e.splits.map(s => s.member_name) : (e.involved || [])
+          }))
+        };
     }
   } catch(_) {}
 
+  // Recalculamos tras la actualización
   updateBalances();
   renderAll();
   renderFriendPicker();
@@ -1829,12 +2001,14 @@ function openGasto(idx) {
   currentExpenseIdx = idx;
   const g = groups[currentGroupIdx];
   const e = g.expenses[idx];
+  console.log("Datos recibidos del gasto:", e);
+  if (!e) return;
   const base = getBase();
   const sym = SYMBOLS[base] || '€';
   const displaySym = SYMBOLS[e.currency || base] || '€';
 
   document.getElementById('gastoTitle').textContent = CAT_ICONS[e.cat] + ' ' + e.desc;
-  document.getElementById('gastoMeta').textContent = e.date + ' · Pagó ' + e.payer;
+  document.getElementById('gastoMeta').textContent = fmtDate(e.date) + ' · Pagó ' + e.payer;
 
   const ticketHTML = e.ticket ? `
     <div style="margin-top:12px;">
@@ -1849,7 +2023,7 @@ function openGasto(idx) {
       <div class="exp-ico ${CAT_CSS[e.cat]}" style="width:52px;height:52px;font-size:1.6rem;">${CAT_ICONS[e.cat]}</div>
       <div>
         <div style="font-size:1.2rem;font-weight:800;color:var(--text);">${e.desc}</div>
-        <div style="font-size:.75rem;color:var(--muted);">${e.date}</div>
+        <div style="font-size:.75rem;color:var(--muted);">${fmtDate(e.date)}</div>
       </div>
     </div>
 
@@ -1912,6 +2086,14 @@ function goBackToGroup() {
   document.querySelectorAll('.nav-btn').forEach(b => {
     if (b.dataset.page === 'page-grupos') b.classList.add('active');
   });
+
+  // Al volver del detalle de un gasto, reabrir "Lista de gastos" en vez de dejar el acordeón cerrado
+  const wrap = document.getElementById('gastosListSectionWrap');
+  const chevron = document.getElementById('gastosListChevron');
+  if (wrap && wrap.style.display !== 'block') {
+    wrap.style.display = 'block';
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+  }
 }
 
 async function deleteGroup(idx) {
@@ -1922,7 +2104,7 @@ async function deleteGroup(idx) {
 
   try {
     if (groupId) {
-      const res = await fetch(`${window.location.origin}/api/v1/groups/${groupId}`, {
+      const res = await fetch(`${API_BASE}/api/v1/groups/${groupId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
       });
@@ -2019,7 +2201,7 @@ function openDeleteExpenseModal(idx) {
       ? `${sym}${Number(e.amount).toFixed(2)} ≈ ${symBase}${Number(e.baseAmt).toFixed(2)}`
       : `${sym}${Number(e.amount).toFixed(2)}`;
   document.getElementById('del-gasto-payer').textContent = e.payer;
-  document.getElementById('del-gasto-date').textContent = e.date;
+  document.getElementById('del-gasto-date').textContent = fmtDate(e.date);
 
   document.getElementById('modal-borrar-gasto').style.display = 'flex';
   document.body.style.overflow = 'hidden';
@@ -2040,14 +2222,43 @@ function ejecutarBorradoGasto() {
 }
 
 // ═══ MEMBERS ══════════════════════════════════════════════════════════
-function addMemberFromFriend(friendName){
-  if(currentGroupIdx===null){toast('Abre un grupo primero','e');return;}
-  const g=groups[currentGroupIdx];
-  if(g.members.hasOwnProperty(friendName)){toast(`${friendName} ya está en el grupo`,'i');return;}
-  g.members[friendName]=0;save();renderAll();
-  logActivity(`${friendName} añadido al grupo "${g.name}"`);saveActivity();renderActivity();
-  toast(`${friendName} añadido ✓`,'s');
+async function addMemberFromFriend(friendName) { 
+  if (currentGroupIdx === null) { toast('Abre un grupo primero', 'e'); return; }
+  
+  const g = groups[currentGroupIdx];
+  if (g.members.hasOwnProperty(friendName)) { 
+    toast(`${friendName} ya está en el grupo`, 'i'); 
+    return; 
+  }
+  
+  g.members[friendName] = 0;
+  await save();
+  renderAll();
+  
+  logActivity(`${friendName} añadido al grupo "${g.name}"`);
+  saveActivity();
+  renderActivity();
+
+  // Sincronización backend — SIN esto el miembro se pierde al refrescar
+  try {
+    await fetch(`${API_BASE}/api/v1/groups/${g.id}/members`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: JSON.stringify({ display_name: friendName })
+    });
+  } catch(err) { console.error('Error añadiendo miembro desde amigos:', err); }
+
+  try {
+    groups = await vakaData.getGroups(); 
+    renderGroupsList();
+    renderAll(); 
+  } catch (err) {
+    console.error("Error refrescando tras añadir:", err);
+  }
+  
+  toast(`${friendName} añadido ✓`, 's');
 }
+
 async function addMember() {
   if (currentGroupIdx === null) { toast('Abre un grupo primero', 'e'); return; }
   const inp = document.getElementById('memberName');
@@ -2057,34 +2268,39 @@ async function addMember() {
   const g = groups[currentGroupIdx];
   if (g.members.hasOwnProperty(n)) { toast('Ya existe ese participante', 'e'); return; }
 
+  // 1. Añadimos al grupo
+  g.members[n] = 0; 
+  await save(); 
+
+  // 2. Sincronización backend
   try {
-    await fetch(`${window.location.origin}/api/v1/groups/${g.id}/members`, {
+    await fetch(`${API_BASE}/api/v1/groups/${g.id}/members`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
       body: JSON.stringify({ display_name: n })
     });
   } catch(err) { console.error('Error añadiendo miembro:', err); }
 
-  g.members[n] = 0;
-  save();
-  inp.value = '';
-
+  // 3. Añadir a lista global de amigos
   if (!friends.some(f => f.name === n)) {
     try {
       const friend = await vakaData.addFriend({ name: n, email: '', phone: '', notes: 'Añadido desde grupo' });
       friends.push(friend);
       await saveFriends();
-    } catch(_) {}
+    } catch(e) { console.error(e); }
     toast(`${n} añadido al grupo y a tus amigos ✓`, 's');
   } else {
     toast(`${n} añadido ✓`, 's');
   }
 
+  // 4. Refresco final
+  inp.value = '';
   groups = await vakaData.getGroups() || [];
   renderAll();
-  renderFriends();
   renderFriendPicker();
-  logActivity(`${n} añadido al grupo "${g.name}"`); saveActivity(); renderActivity();
+  logActivity(`${n} añadido al grupo "${g.name}"`); 
+  saveActivity(); 
+  renderActivity();
 }
 
 async function removeMember(n) {
@@ -2126,7 +2342,7 @@ async function ejecutarBorradoMiembro() {
   updateBalances();
   // 2. Llamar al backend
   try {
-    const res = await fetch(`${window.location.origin}/api/v1/groups/${g.id}/members/${encodeURIComponent(n)}`, {
+    const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/members/${encodeURIComponent(n)}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
     });
@@ -2153,33 +2369,86 @@ function toggleSelectAll(){
   chips.forEach(c=>c.classList.toggle('sel',!allSel));
   document.getElementById('btnSelectAll').textContent=allSel?'☑ Todos':'☐ Ninguno';
 }
-function renderFriendPicker(){
-  const el=document.getElementById('friendPickerChips');
-  if(!el)return;
-  if(friends.length===0){
-    el.innerHTML='<span style="color:var(--muted);font-size:.78rem">Ve a Amigos y añade contactos primero</span>';
+function renderFriendPicker() {
+  const el = document.getElementById('friendPickerChips');
+  if (!el) return;
+
+  const g = currentGroupIdx !== null ? groups[currentGroupIdx] : null;
+  const myName = (profile && profile.nombre) ? profile.nombre.trim() : null;
+
+  // 1. Amigos (Excluyéndote a ti mismo)
+  const friendNames = friends
+    .map(f => f.name)
+    .filter(name => name !== myName);
+
+  // 2. Otros miembros del grupo (los que no son tus amigos "registrados" o tú mismo)
+  const groupMembers = g ? Object.keys(g.members).filter(m => m !== myName && !friendNames.includes(m)) : [];
+  
+  const allPossibleParticipants = [...friendNames, ...groupMembers];
+
+  if (allPossibleParticipants.length === 0) {
+    el.innerHTML = '<span style="color:var(--muted);font-size:.78rem">No hay contactos disponibles</span>';
     return;
   }
-  const g=currentGroupIdx!==null?groups[currentGroupIdx]:null;
-  el.innerHTML=friends.map(f=>{
-    const inGroup=g&&g.members.hasOwnProperty(f.name);
-    return`<div class="chip friend-pick ${inGroup?'sel':''}" data-name="${f.name}" onclick="toggleFriendInGroup('${f.name}',this)">
-      <div class="av">${f.name[0].toUpperCase()}</div>${f.name}
-      ${inGroup?'<span style="color:var(--gold);font-size:.75rem">✓</span>':'<span style="color:var(--muted);font-size:.75rem">+</span>'}
+
+  el.innerHTML = allPossibleParticipants.map(name => {
+    const inGroup = g && g.members.hasOwnProperty(name);
+    
+    return `<div class="chip friend-pick ${inGroup ? 'sel' : ''}" data-name="${name}" onclick="toggleFriendInGroup('${name}',this)">
+      <div class="av">${name[0].toUpperCase()}</div>${name}
+      ${inGroup ? '<span style="color:var(--gold);font-size:.75rem">✓</span>' : '<span style="color:var(--muted);font-size:.75rem">+</span>'}
     </div>`;
   }).join('');
 }
-function toggleFriendInGroup(name,el){
-  if(currentGroupIdx===null)return;
-  const g=groups[currentGroupIdx];
-  if(g.members.hasOwnProperty(name)){
-    if(g.expenses.some(e=>e.payer===name||e.involved.includes(name))){toast('Tiene gastos, no se puede quitar','e');return;}
-    delete g.members[name];save();toast(`${name} quitado del grupo`,'i');
-  }else{
-    g.members[name]=0;save();toast(`${name} añadido ✓`,'s');
-    logActivity(`${name} añadido al grupo "${g.name}"`);saveActivity();renderActivity();
+async function toggleFriendInGroup(name, el) {
+  if (currentGroupIdx === null) return;
+  const g = groups[currentGroupIdx];
+  const token = vakaData.getToken();
+
+  if (g.members.hasOwnProperty(name)) {
+    // 1. Lógica para QUITAR
+    if (g.expenses.some(e => e.payer === name || e.involved.includes(name))) {
+      toast('Tiene gastos, no se puede quitar', 'e');
+      return;
+    }
+    
+    // Petición al backend para borrar de group_members
+    try {
+      await fetch(`${API_BASE}/api/v1/groups/${g.id}/members/${encodeURIComponent(name)}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      delete g.members[name];
+      save();
+      toast(`${name} quitado del grupo`, 'i');
+    } catch (e) {
+      toast('Error al quitar del grupo', 'e');
+    }
+  } else {
+    // 2. Lógica para AÑADIR
+    g.members[name] = 0;
+    save();
+    
+    // Petición al backend para insertar en group_members
+    try {
+      await fetch(`${API_BASE}/api/v1/groups/${g.id}/members`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json', 
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ display_name: name })
+      });
+      toast(`${name} añadido ✓`, 's');
+      logActivity(`${name} añadido al grupo "${g.name}"`);
+      saveActivity();
+    } catch (e) {
+      console.error("Error sincronizando miembro:", e);
+      toast('Añadido solo localmente (sin conexión)', 'w');
+    }
   }
-  renderAll();renderFriendPicker();
+  renderAll();
+  renderFriendPicker();
 }
 
 // ═══ EXPENSES ═════════════════════════════════════════════════════════
@@ -2266,7 +2535,7 @@ async function addExpense() {
     await vakaData.addExpense(currentGroupIdx, nuevoGasto);
     
     // Sincronización de totales
-    g.total = g.expenses.reduce((sum, e) => sum + (e.baseAmt || 0), 0);
+    g.total = g.expenses.reduce((sum, e) => sum + (Number(e.baseAmt) || 0), 0);
 
     // 4. Limpieza y refresco
     document.getElementById('expDesc').value = '';
@@ -2279,22 +2548,24 @@ async function addExpense() {
 
     // Recargar grupo fresco del backend para tener orden correcto
     try {
-      const res = await fetch(`${window.location.origin}/api/v1/groups/${g.id}`, {
+      const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
         headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
       });
       const fresh = await res.json();
       if (fresh && !fresh.error) {
+        const freshMembers = Array.isArray(fresh.members)
+          ? Object.fromEntries(fresh.members.map(m => [m.display_name, m.balance || 0]))
+          : (fresh.members || {});        
+        const mergedMembers = { ...groups[currentGroupIdx].members, ...freshMembers };
         groups[currentGroupIdx] = {
           ...groups[currentGroupIdx],
-          members: Array.isArray(fresh.members)
-            ? Object.fromEntries(fresh.members.map(m => [m.display_name, m.balance || 0]))
-            : fresh.members || groups[currentGroupIdx].members,
+          members: mergedMembers,
           expenses: (fresh.expenses || []).sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(e => ({
             ...e,
             desc: e.description || e.desc,
             payer: e.payer_name || e.payer,
             date: e.expense_date || e.date,
-            baseAmt: e.amount_base || e.baseAmt,
+            baseAmt: Number(e.amount_base || e.baseAmt) || 0,
             cat: e.category || e.cat,
             involved: e.splits ? e.splits.map(s => s.member_name) : (e.involved || [])
           }))
@@ -2319,7 +2590,7 @@ async function deleteExpense(idx) {
 
   try {
     await vakaData.deleteExpense(currentGroupIdx, idx);
-    g.total = g.expenses.reduce((sum, exp) => sum + (exp.baseAmt || 0), 0);
+    g.total = g.expenses.reduce((sum, exp) => sum + (Number(exp.baseAmt) || 0), 0);
     await logActivity(`Gasto "${e.desc}" eliminado en "${g.name}"`);
     renderAll();
     if (typeof renderGroups === 'function') renderGroups();
@@ -2355,16 +2626,34 @@ async function renameGroup(idx) {
 }
 
 // ═══ EDIT EXPENSE ═════════════════════════════════════════════════════
-let editingExpenseIdx = null;
+editingExpenseIdx = null;
 
 function openEditModal(idx) {
-  if (currentGroupIdx === null) return;
   editingExpenseIdx = idx;
+  console.log("DEBUG: Modal abierto con editingExpenseIdx =", editingExpenseIdx);
+  if (currentGroupIdx === null) return;
   const g = groups[currentGroupIdx];
   const e = g.expenses[idx];
+  
+  // PROTECCIÓN DE QA:
+  if (!e) {
+    console.error("Gasto no encontrado en el índice:", idx);
+    toast("Error: El gasto no existe", "e");
+    return;
+  }
+
   const mbs = Object.keys(g.members);
+  
+  // ASEGURAR INVOLUCRADOS: Si no existe, usamos array vacío [] en lugar de undefined
+  const involved = e.involved || [];
+
   // 1. Carga de datos básicos
-  document.getElementById('editDesc').value = e.desc;
+  document.getElementById('editDesc').value = e.desc || '';
+  document.getElementById('editAmount').value = e.amount || '';
+  document.getElementById('editDate').value = e.date || '';
+  document.getElementById('editCat').value = e.cat || 'other';
+
+  // ... (el resto de tu lógica original sigue aquí) ...
   document.getElementById('editAmount').value = e.amount;
   document.getElementById('editDate').value = e.date;
   document.getElementById('editCat').value = e.cat;
@@ -2388,10 +2677,14 @@ function openEditModal(idx) {
   ps.value = e.payer;
   // 5. Chips de involucrados
   const ic = document.getElementById('editInvolvedChips');
+  const invList = e.involved || [];
+  
   ic.innerHTML = mbs.map(m => `
-    <div class="modal-chip ${e.involved.includes(m) ? 'sel' : ''}" data-name="${m}" onclick="this.classList.toggle('sel');updateEditSelectAllBtn()">
-      <div class="av">${m[0].toUpperCase()}</div>${m}
-    </div>`).join('');
+  <div class="modal-chip ${invList.includes(m) ? 'sel' : ''}" 
+       data-name="${m}" 
+       onclick="this.classList.toggle('sel');updateEditSelectAllBtn()">
+    <div class="av">${m[0].toUpperCase()}</div>${m}
+  </div>`).join('');
   // 6. Cargar ticket si existe
   clearEditOCR();
   window._editTicketDeleted = false;
@@ -2437,8 +2730,13 @@ function toggleEditSelectAll(){
 }
 
 async function saveEditExpense() {
+  console.log("Guardando gasto...");
   if (currentGroupIdx === null || editingExpenseIdx === null) return;
   
+  // 1. Bloqueo de UI para evitar múltiples clics
+  const saveBtn = document.querySelector('button[onclick="saveEditExpense()"]');
+  if (saveBtn) saveBtn.disabled = true;
+
   const g = groups[currentGroupIdx];
   const old = g.expenses[editingExpenseIdx];
 
@@ -2448,82 +2746,67 @@ async function saveEditExpense() {
   const cat = document.getElementById('editCat').value;
   const payer = document.getElementById('editPayer').value;
   const date = document.getElementById('editDate').value;
-  const manualRate = parseFloat(document.getElementById('editExchangeRate').value);
   const involved = [...document.querySelectorAll('#editInvolvedChips .modal-chip.sel')].map(c => c.dataset.name);
 
-  if (!desc) { toast('Añade una descripción', 'e'); return; }
-  if (!amount || amount <= 0) { toast('Monto inválido', 'e'); return; }
-  if (involved.length === 0) { toast('Selecciona al menos un consumidor', 'e'); return; }
-
-  const rateToUse = (currency === getBase()) ? 1 : (manualRate || RATES[currency] || 1);
-  const newBaseAmt = +(amount / rateToUse).toFixed(2);
+  if (!desc) { toast('Añade una descripción', 'e'); if (saveBtn) saveBtn.disabled = false; return; }
+  if (!amount || amount <= 0) { toast('Monto inválido', 'e'); if (saveBtn) saveBtn.disabled = false; return; }
+  if (involved.length === 0) { toast('Selecciona al menos un consumidor', 'e'); if (saveBtn) saveBtn.disabled = false; return; }
 
   try {
     const expId = old.id || old._id;
-    if (expId) {
-      await fetch(`${window.location.origin}/api/v1/groups/${g.id}/expenses/${expId}`, {
+    const response = await fetch(`${API_BASE}/api/v1/groups/${g.id}/expenses/${expId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
-        body: JSON.stringify({
-          description: desc,
-          amount,
-          currency,
-          category: cat,
-          payer_name: payer,
-          expense_date: date,
-          involved
-        })
-      });
+        body: JSON.stringify({ description: desc, amount, currency, category: cat, payer_name: payer, expense_date: date, involved })
+    });
+
+    // Actualización local inmediata
+    g.expenses[editingExpenseIdx] = { 
+        ...g.expenses[editingExpenseIdx], 
+        desc, amount, currency, cat, payer, date, involved 
+    };
+
+    if (!response.ok) {
+      let msg = `Error del servidor (${response.status})`;
+      try { const errData = await response.json(); if (errData.error) msg = errData.error; } catch(_) {}
+      throw new Error(msg);
     }
-  } catch(err) { console.error('Error guardando gasto:', err); }
 
-  // Actualizar localmente
-  const oldInvolved = old.involved || (old.splits ? old.splits.map(s => s.member_name) : []);
-  const oldBaseAmt = old.baseAmt || old.amount_base || old.amount || 0;
-  const oldQuota = oldBaseAmt / (oldInvolved.length || 1);
-  const oldPayer = old.payer || old.payer_name;
-
-  if (g.members[oldPayer] !== undefined) g.members[oldPayer] = +(g.members[oldPayer] - oldBaseAmt).toFixed(2);
-  oldInvolved.forEach(p => {
-    if (g.members[p] !== undefined) g.members[p] = +(g.members[p] + oldQuota).toFixed(2);
-  });
-
-  const newQuota = newBaseAmt / involved.length;
-  if (g.members[payer] !== undefined) g.members[payer] = +(g.members[payer] + newBaseAmt).toFixed(2);
-  involved.forEach(p => {
-    if (g.members[p] !== undefined) g.members[p] = +(g.members[p] - newQuota).toFixed(2);
-  });
-
-  g.expenses[editingExpenseIdx] = {
-    ...old,
-    desc, description: desc,
-    amount,
-    cat, category: cat,
-    payer, payer_name: payer,
-    date, expense_date: date,
-    involved,
-    currency,
-    baseAmt: newBaseAmt,
-    amount_base: newBaseAmt,
-  };
-
-  g.total = g.expenses.reduce((sum, e) => sum + (e.baseAmt || e.amount_base || 0), 0);
-
-  await save();
-  logActivity(`Gasto "${desc}" editado en "${g.name}"`);
-  await saveActivity();
-  renderActivity();
-  
-  document.getElementById('editModal').classList.remove('open');
-  document.body.style.overflow='';
-  clearEditOCR();
-  editingExpenseIdx = null;
-  if (currentExpenseIdx !== null) openGasto(currentExpenseIdx);
-  renderAll();
-  renderGroups();
-  toast('Gasto actualizado ✓', 's');
+    // Sincronización final: Recargamos el estado completo del grupo desde el servidor
+    const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
+        headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    
+    if (resFresh.ok) {
+    const freshData = await resFresh.json();
+    groups[currentGroupIdx] = { 
+      ...groups[currentGroupIdx], 
+      ...freshData,
+      members: normalizeMembersField(freshData.members, groups[currentGroupIdx].members),
+      expenses: (freshData.expenses || []).sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(e => ({
+        ...e,
+        desc: e.description || e.desc || 'Sin descripción',
+        payer: e.payer_name || e.payer || 'Desconocido',
+        date: e.expense_date || e.date || 'Sin fecha',
+        baseAmt: Number(e.amount_base || e.baseAmt) || 0,
+        cat: e.category || e.cat || 'other',
+        involved: e.splits ? e.splits.map(s => s.member_name) : (e.involved || [])
+      }))
+    };
 }
 
+    renderAll();
+    renderGroups();
+    document.getElementById('editModal').classList.remove('open');
+    document.body.style.overflow = '';
+    toast('Gasto actualizado ✓', 's');
+  } catch (err) {
+    console.error(err);
+    toast('Error: ' + (err.message || 'No se pudo guardar'), 'e');
+  } finally {
+    if (saveBtn) saveBtn.disabled = false;
+  }
+}
 // ═══ DELETE EXPENSE ════════════════════════════════════════════════════
 function calcDebts(){
   if(currentGroupIdx===null)return;
@@ -2822,17 +3105,24 @@ function toggleManualAdd() {
 }
 
 async function addFromContacts() {
-  if (!('contacts' in navigator && 'ContactsManager' in window)) {
+  if (!window.Capacitor || !Capacitor.isNativePlatform() || !Capacitor.Plugins.Contacts) {
     toast('Tu navegador no soporta acceso a contactos. Usa la opción manual.', 'e');
     return;
   }
   try {
-    const contacts = await navigator.contacts.select(['name', 'tel', 'email'], { multiple: false });
-    if (!contacts || contacts.length === 0) return;
-    const contact = contacts[0];
-    const name = contact.name?.[0] || '';
-    const tel = contact.tel?.[0] || '';
-    const email = contact.email?.[0] || '';
+    const { Contacts } = Capacitor.Plugins;
+    const permission = await Contacts.requestPermissions();
+    if (permission.contacts !== 'granted') {
+      toast('Necesitas dar permiso de contactos', 'e');
+      return;
+    }
+    const result = await Contacts.pickContact({
+      projection: { name: true, phones: true, emails: true }
+    });
+    const c = result.contact;
+    const name = c.name?.display || '';
+    const tel = c.phones?.[0]?.number || '';
+    const email = c.emails?.[0]?.address || '';
     if (!name) { toast('El contacto no tiene nombre', 'e'); return; }
     document.getElementById('memberName').value = name.slice(0, 20);
     document.getElementById('manualAddWrap').style.display = 'block';
@@ -2855,11 +3145,24 @@ function renderMembers() {
   if (!el) return;
 
   el.innerHTML = mbs.length === 0
-    ? '<span style="color:var(--muted);font-size:.78rem">Sin participantes aún...</span>'
-    : mbs.map(m => {
+  ? '<span style="color:var(--muted);font-size:.78rem">Sin participantes aún...</span>'
+  : mbs.map(m => {
     const isOwner = profile.id && g.owner_id && profile.id === g.owner_id;
     const editBtn = isOwner ? `<span class="chip-edit" onclick="event.stopPropagation();openRenameMember('${m}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>` : '';
-    return `<div class="chip" data-name="${m}"><div class="av">${m[0].toUpperCase()}</div>${m}${editBtn}<span class="chip-x" onclick="event.stopPropagation();removeMember('${m}')">✕</span></div>`;
+    
+    // Obtenemos el saldo calculado para este miembro
+    const balance = g.members[m] || 0;
+    const balanceColor = balance < 0 ? 'var(--danger)' : (balance > 0 ? 'var(--success)' : 'var(--muted)');
+
+    return `<div class="chip" data-name="${m}">
+              <div class="av">${m[0].toUpperCase()}</div>
+              ${m}
+              <span style="margin-left:6px; font-size:0.7rem; font-weight:800; color:${balanceColor}">
+                ${Number(balance || 0).toFixed(2)}
+              </span>
+              ${editBtn}
+              <span class="chip-x" onclick="event.stopPropagation();removeMember('${m}')">✕</span>
+            </div>`;
   }).join('');
   
   const ps = document.getElementById('expPayer');
@@ -2917,7 +3220,7 @@ async function ejecutarRenombrarMiembro() {
     ex.involved = ex.involved.map(p => p === oldName ? trimmed : p);
   });
   try {
-    await fetch(`${window.location.origin}/api/v1/groups/${g.id}/members/${encodeURIComponent(oldName)}/rename`, {
+    await fetch(`${API_BASE}/api/v1/groups/${g.id}/members/${encodeURIComponent(oldName)}/rename`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
       body: JSON.stringify({ display_name: trimmed })
@@ -2963,14 +3266,20 @@ function renderExpenses() {
   el.innerHTML = g.expenses.map((e, i) => {
     const displayCurrency = e.currency || base;
     const displaySym = SYMBOLS[displayCurrency] || '€';
+    // Normalización de seguridad para evitar "undefined"
+    const desc = e.desc || e.description || 'Sin descripción';
+    const payer = e.payer || e.payer_name || 'Desconocido';
+    const date = e.date || e.expense_date || 'Sin fecha';
+    const amount = Number(e.amount || e.amount_base || 0);
+
     return `<div class="group-card" onclick="openGasto(${i})" style="cursor:pointer;">
-      <div class="exp-ico ${CAT_CSS[e.cat]}">${CAT_ICONS[e.cat]}</div>
+      <div class="exp-ico ${CAT_CSS[e.cat] || 'c-other'}">${CAT_ICONS[e.cat] || '💡'}</div>
       <div class="gc-info">
-        <div class="gc-name">${e.desc || e.description || 'Sin descripción'}</div>
-        <div class="gc-meta">Pagó <strong>${e.payer || e.payer_name}</strong> · ${e.date || e.expense_date || ''}</div>
+        <div class="gc-name">${desc}</div>
+        <div class="gc-meta">Pagó <strong>${payer}</strong> · ${fmtDate(date)}</div>
       </div>
       <div style="text-align:right;">
-        <div class="exp-amt">${displaySym}${Number(e.amount || e.amount_base).toFixed(2)}</div>
+        <div class="exp-amt">${displaySym}${amount.toFixed(2)}</div>
         ${displayCurrency !== base ? `<div style="font-size:.65rem;color:var(--muted);">≈ ${sym}${(Number(e.baseAmt)||0).toFixed(2)}</div>` : ''}
         ${e.ticket ? '<div style="font-size:.65rem;color:var(--gold);">🧾</div>' : ''}
       </div>
@@ -2982,23 +3291,52 @@ function updateBalances() {
   const g = groups[currentGroupIdx];
   if (!g || !g.members) return;
 
-  // Resetear saldos
-  for (let m in g.members) g.members[m] = 0;
-
+  // 1. Resetear saldos a 0
+  const initialBalances = {};
+  Object.keys(g.members).forEach(member => {
+      initialBalances[member] = 0;
+  });
+  g.members = initialBalances;
+  console.log("Estructura de miembros tras el reset:", g.members);
   if (g.expenses) {
     g.expenses.forEach(e => {
       const amt = Number(e.baseAmt || e.amount_base || e.amount) || 0;
-      const involved = e.involved || (e.splits ? e.splits.map(s => s.member_name) : []);
-      const share = amt / (involved.length || 1);
-      const pagador = e.payer || e.payer_name;
-      if (g.members.hasOwnProperty(pagador)) {
-        g.members[pagador] = +(g.members[pagador] + amt).toFixed(2);
-      }
-      involved.forEach(n => {
-        if (g.members.hasOwnProperty(n)) {
-          g.members[n] = +(g.members[n] - share).toFixed(2);
+      const involved = [...new Set(e.involved || (e.splits ? e.splits.map(s => s.member_name) : []))];
+      
+      if (involved.length > 0) {
+        const uniqueInvolved = [...new Set(involved)];
+        const share = amt / (uniqueInvolved.length || 1);
+        const pagador = (e.payer || e.payer_name || "").trim();
+        
+        // --- BÚSQUEDA FLEXIBLE PARA EL PAGADOR ---
+        // En tu función updateBalances() dentro de VakaDataService
+        const pagadorKey = Object.keys(g.members).find(
+          m => m.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 
+              pagador.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+        );
+        
+        if (pagadorKey) {
+          g.members[pagadorKey] = +(g.members[pagadorKey] + amt).toFixed(2);
+        } else {
+          console.warn(`Pagador no encontrado: '${pagador}'`);
         }
-      });
+        
+        // --- BÚSQUEDA FLEXIBLE PARA LOS INVOLUCRADOS ---
+        uniqueInvolved.forEach(n => {
+          const name = n.trim();
+          const memberKey = Object.keys(g.members).find(
+            m => m.trim().toLowerCase() === name.toLowerCase()
+          );
+          
+          if (memberKey) {
+            g.members[memberKey] = +(g.members[memberKey] - share).toFixed(2);
+          } else {
+            console.warn(`Participante no encontrado: '${name}'`);
+          }
+        });
+      } else {
+        console.warn("Gasto detectado sin participantes (ignorado en balance):", e.desc);
+      }
     });
   }
 }
@@ -3024,8 +3362,8 @@ function renderBalances(){
         <div class="av-s">${n[0].toUpperCase()}</div>
         <span style="font-weight:700">${n}</span>
       </div>
-      <span class="${v > 0.01 ? 'bal-pos' : v < -0.01 ? 'bal-neg' : 'bal-zer'}">
-        ${v > 0.01 ? '+' : ''}${sym2}${v.toFixed(2)}
+      <span class="${Number(v) > 0.01 ? 'bal-pos' : Number(v) < -0.01 ? 'bal-neg' : 'bal-zer'}">
+        ${Number(v) > 0.01 ? '+' : ''}${sym2}${Number(v || 0).toFixed(2)}
       </span>
     </div>`).join('');
     
@@ -3037,13 +3375,13 @@ async function generateLink(){
   if(currentGroupIdx===null){toast('Abre un grupo primero','e');return;}
   const g=groups[currentGroupIdx];
   try {
-    const res = await fetch(`${window.location.origin}/api/v1/groups/${g.id}/share-link`, {
+    const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/share-link`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` }
     });
     const data = await res.json();
     if (!data.token) throw new Error('Sin token');
-    const url = `${window.location.origin}/Login.html?invite=${data.token}`;
+    const url = `${API_BASE}/login.html?invite=${data.token}`;
     const inp = document.getElementById('linkInput');
     inp.value = url;
     document.getElementById('linkBox').style.display='flex';
@@ -3094,12 +3432,12 @@ function buildInviteText(){
 function buildText(){
   if(currentGroupIdx===null)return'';
   const g=groups[currentGroupIdx];
-  const total=g.expenses.reduce((s,e)=>s+e.amount,0);
+  const total=g.expenses.reduce((s,e)=>s+(Number(e.amount)||0),0);
   const nm=Math.max(1,Object.keys(g.members).length);
-  let t=`💳 *VakaPay – ${g.name}* ${TYPE_ICONS[g.type]||''}\n📅 ${g.start} → ${g.end}\n\n`;
+  let t=`💳 *VakaPay – ${g.name}* ${TYPE_ICONS[g.type]||''}\n📅 ${fmtDate(g.start)} → ${fmtDate(g.end)}\n\n`;
   t+=`💰 Total: $${total.toFixed(2)}  |  Por persona: $${(total/nm).toFixed(2)}\n`;
   t+=`👥 ${Object.keys(g.members).join(', ')}\n\n`;
-  if(g.expenses.length>0){t+=`📋 Gastos:\n`;g.expenses.forEach(e=>{t+=`  • ${e.desc}: $${e.amount.toFixed(2)} (pagó ${e.payer})\n`;});}
+  if(g.expenses.length>0){t+=`📋 Gastos:\n`;g.expenses.forEach(e=>{t+=`  • ${e.desc}: $${(Number(e.amount)||0).toFixed(2)} (pagó ${e.payer})\n`;});}
   const link=document.getElementById('linkInput').value;
   if(link){t+=`\n🔗 Únete al grupo:\n${link}\n`;}
   t+='\n_Generado con VakaPay_';return t;
@@ -3143,7 +3481,7 @@ function exportarPDF(){
   doc.text('PARTICIPANTES', pad, y);
   y += 5;
   const mbs = Object.keys(g.members);
-  const totalGastos = g.expenses.reduce((s,e)=>s+e.baseAmt,0);
+  const totalGastos = g.expenses.reduce((s,e)=>s+(Number(e.baseAmt)||0),0);
   const porPersona = mbs.length ? totalGastos/mbs.length : 0;
   mbs.forEach(m => {
     const bal = g.members[m];
@@ -3186,7 +3524,7 @@ function exportarPDF(){
     doc.setFontSize(8); sc(20,60,160);
     doc.text(`${i+1}. ${e.desc||'Sin descripcion'}`, pad+3, y);
     sc(0,0,0);
-    doc.text(`${g.currency||'EUR'} ${(e.baseAmt||0).toFixed(2)}`, W-pad, y, {align:'right'});
+    doc.text(`${g.currency||'EUR'} ${(Number(e.baseAmt)||0).toFixed(2)}`, W-pad, y, {align:'right'});
     y += 5;
     doc.setFont('helvetica','normal');
     doc.setFontSize(7); sc(80,80,80);
@@ -3241,24 +3579,78 @@ function exportarPDF(){
   doc.setFontSize(7); sc(0,0,0);
   doc.text('Generado por VakaPay · Divide gastos, no amistades', W/2, piePos+7, {align:'center'});
 
-  try {
-    doc.save(`VakaPay_${g.name.replace(/\s+/g,'_')}.pdf`);
-  } catch(e) {
-    doc.output('dataurlnewwindow');
-  }
-  toast('PDF generado con exito','s');
+  const fileName = `VakaPay_${g.name.replace(/\s+/g,'_')}.pdf`;
+  savePdfCrossPlatform(doc, fileName);
 }
+
+// En el navegador (web), doc.save() simula un click en un <a download> con un
+// blob URL y funciona bien. Pero dentro del WebView de una APK generada con
+// Capacitor, ese <a download> NO dispara ningun guardado real: el click se
+// ejecuta pero no hay gestor de descargas que lo intercepte, así que el PDF
+// "se genera" (no salta ningún error) pero nunca llega al dispositivo.
+// Esta función detecta si estamos en una app nativa de Capacitor y, en ese
+// caso, usa Filesystem + Share (si los plugins están instalados) o
+// navigator.share como alternativa; si no hay ninguna disponible, cae de
+// vuelta al doc.save() clásico (comportamiento web sin cambios).
+async function savePdfCrossPlatform(doc, fileName) {
+  const isNative = !!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
+
+  if (isNative && window.Capacitor.Plugins && window.Capacitor.Plugins.Filesystem && window.Capacitor.Plugins.Share) {
+    try {
+      const base64 = doc.output('datauristring').split(',')[1];
+      const { Filesystem, Share } = window.Capacitor.Plugins;
+
+      // 1. Guardamos el archivo en la caché de la aplicación
+      await Filesystem.writeFile({
+        path: fileName,
+        data: base64,
+        directory: 'CACHE',
+        recursive: true
+      });
+
+      // 2. Solicitamos la URI nativa correcta que Android e iOS pueden procesar
+      const uriResult = await Filesystem.getUri({
+        directory: 'CACHE',
+        path: fileName
+      });
+
+      // 3. Compartimos utilizando la URI traducida
+      await Share.share({
+        title: fileName,
+        url: uriResult.uri,
+        dialogTitle: 'Abrir o guardar extracto VakaPay',
+      });
+
+      toast('PDF preparado para compartir/guardar', 's');
+      return;
+    } catch (err) {
+      console.warn('Error al procesar el PDF de forma nativa:', err);
+    }
+  }
+
+  try {
+    doc.save(fileName);
+    toast('PDF generado con éxito', 's');
+  } catch (e) {
+    doc.output('dataurlnewwindow');
+    toast('PDF generado con éxito', 's');
+  }
+}
+
 function shareWhatsApp(){
-  const phone=document.getElementById('contactPhone').value.replace(/\s+/g,'');
-  const text=encodeURIComponent(buildInviteText());
-  window.open(phone?`https://wa.me/${phone.replace('+','')}?text=${text}`:`https://wa.me/?text=${text}`,'_blank');
-  document.getElementById('contactPhone').value='';
+  const phone = document.getElementById('contactPhone').value.replace(/\s+/g,'');
+  const text = encodeURIComponent(buildInviteText());
+  window.open(phone ? `https://wa.me/${phone.replace('+','')}?text=${text}` : `https://wa.me/?text=${text}`, '_blank');
+  document.getElementById('contactPhone').value = '';
+
 }
 function shareEmail(){
-  const email=document.getElementById('contactEmail').value;
+  const email=document.getElementById('contactEmail').value.trim();
+  if(!email){toast('Introduce un email','e');return;}
   const subj=encodeURIComponent(`VakaPay – ${currentGroupIdx!==null?groups[currentGroupIdx].name:'Grupo'}`);
   const body=encodeURIComponent(buildText().replace(/\*/g,''));
   window.location.href=`mailto:${email}?subject=${subj}&body=${body}`;
+  document.getElementById('contactEmail').value='';
 }
 function sharePhone(){
   const phone=document.getElementById('contactPhone').value.replace(/\s+/g,'');
@@ -3269,13 +3661,18 @@ function sharePhone(){
 }
 
 async function pickContactForShare() {
-  if (!('contacts' in navigator && 'ContactsManager' in window)) {
+  if (!window.Capacitor || !Capacitor.isNativePlatform() || !Capacitor.Plugins.Contacts) {
     toast('Tu navegador no soporta acceso a contactos', 'e'); return;
   }
   try {
-    const contacts = await navigator.contacts.select(['name','tel'], { multiple: false });
-    if (!contacts || contacts.length === 0) return;
-    const tel = contacts[0].tel?.[0] || '';
+    const { Contacts } = Capacitor.Plugins;
+    const permission = await Contacts.requestPermissions();
+    if (permission.contacts !== 'granted') {
+      toast('Necesitas dar permiso de contactos', 'e');
+      return;
+    }
+    const result = await Contacts.pickContact({ projection: { phones: true } });
+    const tel = result.contact?.phones?.[0]?.number || '';
     if (!tel) { toast('El contacto no tiene número de teléfono', 'e'); return; }
     document.getElementById('contactPhone').value = tel;
     toast(`Contacto cargado ✓`, 's');
@@ -3471,7 +3868,7 @@ async function ejecutarBorradoAmigo() {
   const name = friend.name;
 
   try {
-    const res = await fetch(`${window.location.origin}/api/v1/friends/${friend.id}`, {
+    const res = await fetch(`${API_BASE}/api/v1/friends/${friend.id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
     });
@@ -3794,7 +4191,7 @@ async function handleAvatarChange(ev) {
   try {
     const formData = new FormData();
     formData.append('avatar', file);
-    const res = await fetch(`${window.location.origin}/api/v1/users/me/avatar`, {
+    const res = await fetch(`${API_BASE}/api/v1/users/me/avatar`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${vakaData.getToken()}` },
       body: formData
@@ -3850,7 +4247,7 @@ async function ejecutarEliminarCuenta() {
   localStorage.clear();
   document.getElementById('modal-eliminar-cuenta').style.display='none';
   document.body.style.overflow='';
-  window.location.href = 'Login.html';
+  window.location.href = 'login.html';
 }
 
 // ═══ MULTI-CURRENCY ══════════════════════════════════════════════════
@@ -3858,8 +4255,14 @@ const RATES = { EUR:1, USD:1.09, GBP:0.86, ARS:1050 };
 const SYMBOLS = { EUR:'€', USD:'$', GBP:'£', ARS:'$' };
 
 function convertToBase(amount, fromCurrency) {
-  if(!fromCurrency || fromCurrency===getBase()) return amount;
-  const inEUR = amount / (RATES[fromCurrency] || 1);
+  // Postgres devuelve las columnas NUMERIC/DECIMAL como STRING (ej. "45.50"),
+  // no como number. Si no se fuerza aquí, sumas como total += e.baseAmt
+  // hacen concatenación de texto en vez de suma ("0" + "45.50" = "045.50"),
+  // y el resultado final ya no es un number, por lo que total.toFixed()
+  // revienta con "total.toFixed is not a function" (bug de Estadísticas).
+  const n = Number(amount) || 0;
+  if(!fromCurrency || fromCurrency===getBase()) return n;
+  const inEUR = n / (RATES[fromCurrency] || 1);
   return +(inEUR * (RATES[getBase()] || 1)).toFixed(2);
 }
 function getBase() {
@@ -4170,10 +4573,10 @@ function renderStats() {
     });
   }
 
-  const total = allExp.reduce((s, e) => s + e.baseAmt, 0);
+  const total = allExp.reduce((s, e) => s + (Number(e.baseAmt) || 0), 0);
   const count = allExp.length;
   const avg = count ? total / count : 0;
-  const maxE = allExp.reduce((m, e) => e.baseAmt > m ? e.baseAmt : m, 0);
+  const maxE = allExp.reduce((m, e) => (Number(e.baseAmt) || 0) > m ? (Number(e.baseAmt) || 0) : m, 0);
 
   // 4. ACTUALIZACIÓN DE TEXTOS Y KPIs
   // Usamos comprobaciones para no romper el código si el usuario cambia de página rápido
@@ -4189,18 +4592,18 @@ function renderStats() {
 
   // 5. LLAMADA A TUS FUNCIONES DE DIBUJO
   const catMap = {};
-  allExp.forEach(e => { catMap[e.cat] = (catMap[e.cat] || 0) + e.baseAmt; });
+  allExp.forEach(e => { catMap[e.cat] = (catMap[e.cat] || 0) + (Number(e.baseAmt) || 0); });
   renderDonut(catMap, total, sym);
 
   const payerMap = {};
-  allExp.forEach(e => { payerMap[e.payer] = (payerMap[e.payer] || 0) + e.baseAmt; });
+  allExp.forEach(e => { payerMap[e.payer] = (payerMap[e.payer] || 0) + (Number(e.baseAmt) || 0); });
   renderPayerBars(payerMap, total, sym);
 }
 
 function renderDonut(catMap, total, sym) {
   const svg = document.getElementById('donutSvg');
   const legend = document.getElementById('catLegend');
-  document.getElementById('donutCenter').textContent = sym + total.toFixed(0);
+  document.getElementById('donutCenter').textContent = sym + total.toFixed(2);
   const cx=80, cy=80, r=58, strokeW=22;
   const circumference = 2 * Math.PI * r;
   const cats = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
@@ -4291,6 +4694,36 @@ function confirmDeleteExpense() {
 function openDeleteFromEdit() {
   if (editingExpenseIdx === null) return;
   openDeleteExpenseModal(editingExpenseIdx);
+}
+
+// Captura el botón atrás nativo de Android (API correcta de Capacitor)
+if (window.Capacitor && Capacitor.isNativePlatform() && Capacitor.Plugins.App) {
+  Capacitor.Plugins.App.addListener('backButton', () => {
+    // Si hay algún modal visible, ciérralo primero en vez de navegar
+    const openModal = [...document.querySelectorAll('.modal-overlay')]
+      .find(m => getComputedStyle(m).display !== 'none');
+    if (openModal) {
+      openModal.style.display = 'none';
+      document.body.style.overflow = '';
+      return;
+    }
+
+    const currentPage = document.querySelector('.page.active').id;
+    if (currentPage === 'page-gasto') {
+      // Mismo comportamiento que el botón "← Volver" del detalle de gasto
+      goBackToGroup();
+    } else if (currentPage === 'page-grupos') {
+      document.getElementById('modal-salir-app').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    } else {
+      goBack();
+    }
+  });
+}
+
+function cerrarModalSalir() {
+  document.getElementById('modal-salir-app').style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 </script>
@@ -4582,6 +5015,84 @@ function openDeleteFromEdit() {
     </div>
   </div>
 </div>
+<!-- Modal Confirmar Salida de App -->
+<div class="modal-overlay" id="modal-salir-app" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalSalir()">
+  <div style="background:#1e1e1e; width:90%; max-width:300px; padding:25px; border-radius:24px; border:1px solid #333; text-align:center;">
+    <div style="font-size:2.5rem; margin-bottom:10px;">👋</div>
+    <div style="color:#F2F2F2; font-size:1.3rem; font-weight:bold; margin-bottom:20px;">¿Deseas salir?</div>
+    
+    <div style="display:flex; gap:12px; width:100%;">
+      <button onclick="cerrarModalSalir()" style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#444;">
+        No
+      </button>
+      <button onclick="if(window.Capacitor && Capacitor.Plugins.App) Capacitor.Plugins.App.exitApp()" style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#dc3545;">
+        Sí, salir
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+function ajustarAlturaHeader() {
+  const header = document.querySelector('header');
+  if (header) {
+    document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
+  }
+  posicionarBadge();
+}
+window.addEventListener('load', ajustarAlturaHeader);
+window.addEventListener('resize', ajustarAlturaHeader);
+
+function posicionarBadge() {
+  const detBar = document.querySelector('.page.active .det-bar');
+  const badge = document.getElementById('hbadge');
+  if (!detBar || !badge) return;
+  const rect = detBar.getBoundingClientRect();
+  const centerY = rect.top + rect.height / 2;
+  badge.style.top = (centerY - badge.offsetHeight / 2) + 'px';
+}
+
+// ═══ NAVEGACIÓN POR DESLIZAMIENTO (SWIPE) ══════════════════════════
+// Adicional al tap en los botones de abajo — no lo reemplaza.
+const MAIN_PAGES = ['page-grupos', 'page-amigos', 'page-stats', 'page-actividad', 'page-cuenta'];
+
+(function setupSwipeNav() {
+  let touchStartX = 0, touchStartY = 0;
+  const THRESHOLD = 70; // píxeles mínimos para considerarlo un swipe intencional
+
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    const touchEndX = e.changedTouches[0].screenX;
+    const touchEndY = e.changedTouches[0].screenY;
+    handleSwipeGesture(touchEndX - touchStartX, touchEndY - touchStartY);
+  }, { passive: true });
+
+  function handleSwipeGesture(deltaX, deltaY) {
+    // Solo si el movimiento es claramente horizontal (evita pelear con el scroll vertical)
+    if (Math.abs(deltaX) < THRESHOLD || Math.abs(deltaX) < Math.abs(deltaY) * 1.5) return;
+
+    const activePage = document.querySelector('.page.active');
+    if (!activePage) return;
+    const currentIdx = MAIN_PAGES.indexOf(activePage.id);
+    if (currentIdx === -1) return; // estamos en una pantalla que no es una de las 5 pestañas (ej: detalle de grupo)
+
+    let nextIdx = currentIdx;
+    if (deltaX < 0 && currentIdx < MAIN_PAGES.length - 1) nextIdx = currentIdx + 1; // swipe a la izquierda → siguiente
+    if (deltaX > 0 && currentIdx > 0) nextIdx = currentIdx - 1;                     // swipe a la derecha → anterior
+    if (nextIdx === currentIdx) return;
+
+    const nextPageId = MAIN_PAGES[nextIdx];
+    const nextBtn = document.querySelector(`.nav-btn[data-page="${nextPageId}"]`);
+    switchPage(nextPageId, nextBtn);
+    if (nextPageId === 'page-stats' && typeof renderStats === 'function') renderStats();
+  }
+})();
+
+</script>
 
 </body>
 </html>

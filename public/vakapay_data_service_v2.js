@@ -9,7 +9,7 @@
 class VakaDataService {
 
   // ─── CONFIG ──────────────────────────────────────────────────
-  #baseUrl = `${window.location.origin}/api/v1`;
+  #baseUrl = 'https://vakapay-app.vercel.app/api/v1';
   #token   = null;
   #queue   = [];   // operaciones pendientes offline
   #KEYS    = {

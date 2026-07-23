@@ -108,7 +108,7 @@
 			font-size: 1rem; 
 			transition: 0.3s; 
 		}
-		.auth-pass { -webkit-text-security: disc; text-security: disc; }
+		.auth-pass { -webkit-text-security: disc; }
 		
 		/* --- CONTENEDOR DE CAMPO (EL QUE DA EL ESPACIO) --- */
 		.input-group {
@@ -251,6 +251,21 @@
 			box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 			color: white;
 		}
+    .phone-row { display:flex; gap:8px; width:100%; }
+    .prefix-btn { display:flex; align-items:center; gap:6px; background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:0 12px; cursor:pointer; white-space:nowrap; color:#F2F2F2; font-size:.9rem; min-width:90px; height:50px; }
+    .prefix-btn:hover { border-color:#FFD700; }
+    .phone-input { flex:1; }
+    .country-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:9999; align-items:flex-end; justify-content:center; }
+    .country-modal.open { display:flex; }
+    .country-sheet { background:#1a1a1a; width:100%; max-width:460px; border-radius:20px 20px 0 0; max-height:75vh; display:flex; flex-direction:column; }
+    .country-search { padding:14px 16px; border-bottom:1px solid #333; }
+    .country-search input { width:100%; background:#121212; border:1px solid #444; border-radius:8px; padding:10px 14px; color:#F2F2F2; font-size:.9rem; box-sizing:border-box; }
+    .country-list { overflow-y:auto; flex:1; }
+    .country-item { display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; border-bottom:1px solid #1e1e1e; }
+    .country-item:hover { background:#222; }
+    .country-flag { font-size:1.4rem; }
+    .country-name { flex:1; color:#F2F2F2; font-size:.9rem; }
+    .country-code { color:#FFD700; font-size:.85rem; font-weight:bold; }
     </style>
 </head>
 <body>
@@ -299,20 +314,36 @@
         <p class="auth-sub">Únete a Vakapay y empieza a dividir gastos.</p>
         <div class="auth-form" style="display:flex; flex-direction:column;">
             <div class="input-group">
-                <input type="text" id="reg-nombre" placeholder="Nombre completo" class="auth-input" autocomplete="off" oninput="checkRegistroFields()">
+                <input type="text" id="reg-nombre" placeholder="Nombre completo" class="auth-input" autocomplete="name" inputmode="text" oninput="checkRegistroFields()">
                 <span id="err-nombre" class="error-message"></span>
             </div>
             <div class="input-group">
-                <input type="email" id="reg-email" placeholder="Correo electrónico" class="auth-input" autocomplete="off" oninput="checkRegistroFields()">
+                <input type="email" id="reg-email" placeholder="Correo electrónico" class="auth-input" autocomplete="email" inputmode="email" oninput="checkRegistroFields()">
                 <span id="err-email" class="error-message"></span>
             </div>
-            <div class="input-group">
-                <input type="text" id="reg-pass" placeholder="Contraseña" class="auth-input auth-pass" oninput="checkRegistroFields()" autocomplete="off">
-                <span class="toggle-password" onclick="togglePass('reg-pass', this)">👁️</span>
-                <span id="err-pass" class="error-message"></span>
+            <div class="input-group" style="margin-bottom:25px;">
+                <div class="phone-row">
+                    <button type="button" class="prefix-btn" onclick="abrirSelectorPais()" id="prefixBtn">
+                        <span id="prefixFlag">🌍</span>
+                        <span id="prefixCode">+--</span>
+                    </button>
+                    <input type="tel" id="reg-tel" placeholder="Número de teléfono" class="auth-input phone-input" autocomplete="tel" inputmode="tel">
+                </div>
             </div>
             <div class="input-group">
-                <input type="text" id="reg-pass-confirm" placeholder="Repite tu contraseña" class="auth-input auth-pass" oninput="checkRegistroFields()" autocomplete="off">
+                <input type="password" id="reg-pass" placeholder="Contraseña" class="auth-input" autocomplete="new-password" oninput="checkRegistroFields()">
+                <span class="toggle-password" onclick="togglePass('reg-pass', this)">👁️</span>
+                <span id="err-pass" class="error-message"></span>
+                <div id="pass-rules" style="margin-top:8px;text-align:left;display:none;">
+                    <div id="rule-len"  style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Mínimo 8 caracteres</div>
+                    <div id="rule-upper" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Una mayúscula</div>
+                    <div id="rule-lower" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Una minúscula</div>
+                    <div id="rule-num"  style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Un número</div>
+                    <div id="rule-sym"  style="font-size:.72rem;color:#ff4d4d;">✗ Un símbolo (!@#$...)</div>
+                </div>
+            </div>
+            <div class="input-group">
+                <input type="password" id="reg-pass-confirm" placeholder="Repite tu contraseña" class="auth-input" autocomplete="new-password" oninput="checkRegistroFields()">
                 <span class="toggle-password" onclick="togglePass('reg-pass-confirm', this)">👁️</span>
                 <span id="err-pass-confirm" class="error-message"></span>
             </div>
@@ -440,23 +471,39 @@ async function handleRegistro() {
 
     if (hasError) return;
 
+    const prefijo = document.getElementById('prefixCode').textContent;
+    const tel = document.getElementById('reg-tel').value.trim();
+    const telefonoCompleto = tel ? `${prefijo} ${tel}` : '';
     const datosUsuario = {
-        name: nombre,
+        nombre: nombre,
+        apellido: '',
         email: email,
-        password: pass
+        password: pass,
+        tel: telefonoCompleto
     };
 
     try {
         await vakaData.register(datosUsuario);
-        console.log("✅ Usuario registrado en SQLite correctamente");
+        console.log("✅ Usuario registrado correctamente");
+        try {
+          await fetch(`https://vakapay-app.vercel.app/api/v1/auth/send-confirmation`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, nombre: nombre })
+          });
+        } catch(_) {}
         const welcomeSpan = document.getElementById('user-name-welcome');
         if(welcomeSpan) welcomeSpan.innerText = nombre;
         const modal = document.getElementById('modal-exito');
         if(modal) modal.style.display = 'flex';
     } catch (error) {
-        console.error("❌ Error al registrar en el servidor:", error);
-        alert("No se pudo crear la cuenta: " + error.message);
-    }
+            console.error("❌ Error al registrar en el servidor:", error);
+            if (error.status === 409 || (error.message && (error.message.includes('409') || error.message.includes('Ya existe')))) {
+                document.getElementById('modal-cuenta-existente').style.display = 'flex';
+            } else {
+                alert("No se pudo crear la cuenta: " + error.message);
+            }
+        }
 }
 
 function cerrarModalYEntrar() {
@@ -496,13 +543,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const regPass = document.getElementById('reg-pass');
     if(regPass) {
         regPass.addEventListener('input', function() {
+            const v = this.value.replace(/\s/g, '');
+            this.value = v;
+            const rules = document.getElementById('pass-rules');
+            if(v.length > 0) rules.style.display = 'block';
+
+            const check = (id, ok) => {
+                const el = document.getElementById(id);
+                el.style.color = ok ? '#28a745' : '#ff4d4d';
+                el.textContent = (ok ? '✓ ' : '✗ ') + el.textContent.slice(2);
+            };
+            check('rule-len',   v.length >= 8);
+            check('rule-upper', /[A-Z]/.test(v));
+            check('rule-lower', /[a-z]/.test(v));
+            check('rule-num',   /\d/.test(v));
+            check('rule-sym',   /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(v));
+
             const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
-            if (passRegex.test(this.value)) {
+            if (passRegex.test(v)) {
                 this.classList.remove('input-error');
                 const err = document.getElementById('err-pass');
                 if(err) { err.innerText = ''; err.style.display = 'none'; }
+                rules.style.display = 'none';
             }
-            this.value = this.value.replace(/\s/g, ''); 
         });
     }
 
@@ -713,19 +776,12 @@ async function iniciarSesion() {
         });
         
         console.log("✅ Acceso concedido:", response);
-        console.log("🔍 Estructura de response:", JSON.stringify(response));
+        
+        if (response && response.token) {
+            localStorage.setItem('token', response.token);
+        }
 
-    if (response && response.token) {
-    localStorage.setItem('token', response.token);
-    
-    // GUARDAMOS LOS DATOS DEL USUARIO
-    if (response.user) {
-        localStorage.setItem('user_id', response.user.id);
-        localStorage.setItem('user_name', response.user.nombre); 
-    }
-}
-
-        window.location.href = 'vakapay_v2.html';
+        window.location.href = 'index.html';
         
     } catch (error) {
         console.error("❌ Detalle del fallo:", error);
@@ -735,3 +791,126 @@ async function iniciarSesion() {
     }
 }
 </script>
+
+<div id="modal-cuenta-existente" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;">
+  <div style="background:#1e1e1e;border-radius:14px;padding:28px 24px;max-width:320px;width:90%;text-align:center;border:1px solid #333;">
+    <div style="font-size:2rem;margin-bottom:12px;">⚠️</div>
+    <div style="font-size:1.1rem;font-weight:bold;color:#F5C800;letter-spacing:1px;margin-bottom:10px;">CUENTA EXISTENTE</div>
+    <p style="color:#F2F2F2;font-size:.88rem;margin-bottom:20px;">Ya existe una cuenta registrada con ese email. Intenta iniciar sesión.</p>
+    <button onclick="document.getElementById('modal-cuenta-existente').style.display='none';switchPage('page-login-formulario')" style="background:#F5C800;color:black;border:none;padding:12px 24px;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;margin-bottom:8px;">Ir a iniciar sesión</button>
+    <button onclick="document.getElementById('modal-cuenta-existente').style.display='none'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:.85rem;">Volver al registro</button>
+  </div>
+</div>
+
+<!-- Modal selector de país -->
+<div class="country-modal" id="countryModal" onclick="if(event.target===this)cerrarSelectorPais()">
+  <div class="country-sheet">
+    <div class="country-search">
+      <input type="text" id="countrySearch" placeholder="🔍 Buscar país..." oninput="filtrarPaises(this.value)">
+    </div>
+    <div class="country-list" id="countryList"></div>
+  </div>
+</div>
+
+<script>
+const PAISES = [
+  {flag:'🇪🇸',name:'España',code:'+34'},
+  {flag:'🇦🇷',name:'Argentina',code:'+54'},
+  {flag:'🇲🇽',name:'México',code:'+52'},
+  {flag:'🇺🇸',name:'Estados Unidos',code:'+1'},
+  {flag:'🇨🇴',name:'Colombia',code:'+57'},
+  {flag:'🇨🇱',name:'Chile',code:'+56'},
+  {flag:'🇵🇪',name:'Perú',code:'+51'},
+  {flag:'🇻🇪',name:'Venezuela',code:'+58'},
+  {flag:'🇺🇾',name:'Uruguay',code:'+598'},
+  {flag:'🇵🇾',name:'Paraguay',code:'+595'},
+  {flag:'🇧🇴',name:'Bolivia',code:'+591'},
+  {flag:'🇪🇨',name:'Ecuador',code:'+593'},
+  {flag:'🇧🇷',name:'Brasil',code:'+55'},
+  {flag:'🇵🇹',name:'Portugal',code:'+351'},
+  {flag:'🇫🇷',name:'Francia',code:'+33'},
+  {flag:'🇩🇪',name:'Alemania',code:'+49'},
+  {flag:'🇮🇹',name:'Italia',code:'+39'},
+  {flag:'🇬🇧',name:'Reino Unido',code:'+44'},
+  {flag:'🇳🇱',name:'Países Bajos',code:'+31'},
+  {flag:'🇧🇪',name:'Bélgica',code:'+32'},
+  {flag:'🇨🇭',name:'Suiza',code:'+41'},
+  {flag:'🇦🇹',name:'Austria',code:'+43'},
+  {flag:'🇸🇪',name:'Suecia',code:'+46'},
+  {flag:'🇳🇴',name:'Noruega',code:'+47'},
+  {flag:'🇩🇰',name:'Dinamarca',code:'+45'},
+  {flag:'🇫🇮',name:'Finlandia',code:'+358'},
+  {flag:'🇵🇱',name:'Polonia',code:'+48'},
+  {flag:'🇷🇺',name:'Rusia',code:'+7'},
+  {flag:'🇨🇳',name:'China',code:'+86'},
+  {flag:'🇯🇵',name:'Japón',code:'+81'},
+  {flag:'🇰🇷',name:'Corea del Sur',code:'+82'},
+  {flag:'🇮🇳',name:'India',code:'+91'},
+  {flag:'🇦🇺',name:'Australia',code:'+61'},
+  {flag:'🇨🇦',name:'Canadá',code:'+1'},
+  {flag:'🇿🇦',name:'Sudáfrica',code:'+27'},
+  {flag:'🇳🇬',name:'Nigeria',code:'+234'},
+  {flag:'🇲🇦',name:'Marruecos',code:'+212'},
+  {flag:'🇹🇷',name:'Turquía',code:'+90'},
+  {flag:'🇸🇦',name:'Arabia Saudí',code:'+966'},
+  {flag:'🇦🇪',name:'Emiratos Árabes',code:'+971'},
+  {flag:'🇮🇱',name:'Israel',code:'+972'},
+  {flag:'🇬🇷',name:'Grecia',code:'+30'},
+  {flag:'🇷🇴',name:'Rumanía',code:'+40'},
+  {flag:'🇭🇺',name:'Hungría',code:'+36'},
+  {flag:'🇨🇿',name:'República Checa',code:'+420'},
+  {flag:'🇸🇰',name:'Eslovaquia',code:'+421'},
+  {flag:'🇭🇷',name:'Croacia',code:'+385'},
+  {flag:'🇷🇸',name:'Serbia',code:'+381'},
+  {flag:'🇺🇦',name:'Ucrania',code:'+380'},
+];
+
+function renderPaises(lista) {
+  const el = document.getElementById('countryList');
+  el.innerHTML = lista.map(p => `
+    <div class="country-item" onclick="seleccionarPais('${p.flag}','${p.code}')">
+      <span class="country-flag">${p.flag}</span>
+      <span class="country-name">${p.name}</span>
+      <span class="country-code">${p.code}</span>
+    </div>
+  `).join('');
+}
+
+function abrirSelectorPais() {
+  document.getElementById('countryModal').classList.add('open');
+  document.getElementById('countrySearch').value = '';
+  renderPaises(PAISES);
+  setTimeout(() => document.getElementById('countrySearch').focus(), 100);
+}
+
+function cerrarSelectorPais() {
+  document.getElementById('countryModal').classList.remove('open');
+}
+
+function filtrarPaises(q) {
+  const filtered = PAISES.filter(p =>
+    p.name.toLowerCase().includes(q.toLowerCase()) ||
+    p.code.includes(q)
+  );
+  renderPaises(filtered);
+}
+
+function seleccionarPais(flag, code) {
+  document.getElementById('prefixFlag').textContent = flag;
+  document.getElementById('prefixCode').textContent = code;
+  cerrarSelectorPais();
+  document.getElementById('reg-tel').focus();
+}
+</script>
+<script>
+// Detectar token de invitación en la URL
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const invite = params.get('invite');
+  if (invite) {
+    localStorage.setItem('vp_pending_invite', invite);
+  }
+})();
+</script>
+</body>
+</html>
