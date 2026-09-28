@@ -147,7 +147,7 @@ router.post('/forgot-password', async (req, res, next) => {
             <div style="background:#1e1e1e;border:1px solid #F5C800;border-radius:8px;padding:20px;margin:24px 0;">
               <span style="color:#F5C800;font-size:2rem;font-weight:bold;letter-spacing:6px;">${otpCode}</span>
             </div>
-            <p style="color:#aaa;font-size:.85rem;">Este código expira en 15 minutos.</p>
+            <p style="color:#aaa;font-size:.85rem;">Este código expira en 3 minutos.</p>
           </div>
           <div style="background:#1a1a1a;padding:16px;text-align:center;border-top:1px solid #333;">
             <p style="color:#555;font-size:.75rem;margin:0;">© 2026 VakaPay · Divide gastos, no amistades</p>
