@@ -121,9 +121,9 @@ router.post('/forgot-password', async (req, res, next) => {
     // 2. Generar un código OTP aleatorio de 6 dígitos
     const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
     
-    // 3. Guardar el código en la base de datos con expiración (ej: 15 minutos)
+    // 3. Guardar el código en la base de datos con expiración
     await db.query(
-      'UPDATE users SET reset_otp = $1, reset_otp_expires = NOW() + INTERVAL \'15 minutes\' WHERE id = $2',
+      'UPDATE users SET reset_otp = $1, reset_otp_expires = NOW() + INTERVAL \'3 minutes\' WHERE id = $2',
       [otpCode, user.id]
     );
 
