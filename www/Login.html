@@ -265,6 +265,8 @@
     .country-item:hover { background:#222; }
     .country-flag { font-size:1.4rem; }
     .country-name { flex:1; color:#F2F2F2; font-size:.9rem; }
+    .otp-input { width: 46px; text-align: center; font-size: 1.3rem; padding: 12px 0; }
+    #enlace-reenviar.deshabilitado { color: #6b5800; pointer-events: none; cursor: not-allowed; opacity: .6; }
     .country-code { color:#FFD700; font-size:.85rem; font-weight:bold; }
     </style>
 </head>
@@ -301,9 +303,55 @@
                     👁️
                 </span>
             </div>
+            <div style="text-align:right; margin-bottom:15px;">
+                <a onclick="switchPage('page-recuperar-password')" 
+                   style="color:#FFD700; font-size:.82rem; cursor:pointer; opacity:.85;">
+                   ¿Olvidaste tu contraseña?
+                </a>
+            </div>
         </div>
         <button id="btnEntrar" onclick="iniciarSesion()" class="btn-primary" style="margin-top:10px;background:#3a3000;color:#6b5800;border:1px solid #4a4000;cursor:not-allowed;" disabled>Entrar</button>
         <button onclick="switchPage('page-login-inicio')" style="background:none;border:1px solid #FFD700;color:#FFD700;font-size:.85rem;margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:8px;display:block;margin-left:auto;margin-right:auto;">Volver al inicio</button>
+    </div></div>
+</div>
+
+<!-- ═══ PÁGINA: RECUPERAR CONTRASEÑA (paso 1: correo) ═══ -->
+<div class="page" id="page-recuperar-password">
+    <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
+        <h2 style="margin:0 0 8px 0; color:#fff; font-size:1.5rem; text-align:center;">Restablece tu contraseña</h2>
+        <p class="auth-sub" style="text-align:center;">Para proteger tu información, necesitamos verificar tu correo electrónico.</p>
+        <div class="auth-form" style="display:flex; flex-direction:column; margin-top:15px;">
+            <div style="margin-bottom: 15px;">
+                <input type="email" id="recuperar-email" placeholder="Ej: sofia.perez@gmail.com" class="auth-input" style="margin-bottom:0;" oninput="checkRecuperarFields()">
+            </div>
+        </div>
+        <button id="btnContinuarRecuperar" onclick="enviarCodigoRecuperacion()" class="btn-primary" style="margin-top:10px;background:#3a3000;color:#6b5800;border:1px solid #4a4000;cursor:not-allowed;" disabled>Continuar</button>
+        <button onclick="switchPage('page-login-formulario')" style="background:none;border:1px solid #FFD700;color:#FFD700;font-size:.85rem;margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:8px;display:block;margin-left:auto;margin-right:auto;">Volver</button>
+    </div></div>
+</div>
+
+<!-- ═══ PÁGINA: RECUPERAR CONTRASEÑA (paso 2: código OTP) ═══ -->
+<div class="page" id="page-verificar-codigo">
+    <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
+        <h2 style="margin:0 0 8px 0; color:#fff; font-size:1.5rem; text-align:center;">Verifica tu código</h2>
+        <p class="auth-sub" style="text-align:center;">Enviamos un código de 6 dígitos a <span id="codigo-email-destino" style="color:#FFD700;font-weight:bold;">tu correo</span></p>
+
+        <div style="display:flex; gap:8px; justify-content:center; margin:25px 0 10px;">
+            <input type="text" maxlength="1" inputmode="numeric" class="auth-input otp-input" id="otp-1" oninput="moverAlSiguiente(this,'otp-2')" onkeydown="moverAlAnterior(event,this,null)">
+            <input type="text" maxlength="1" inputmode="numeric" class="auth-input otp-input" id="otp-2" oninput="moverAlSiguiente(this,'otp-3')" onkeydown="moverAlAnterior(event,this,'otp-1')">
+            <input type="text" maxlength="1" inputmode="numeric" class="auth-input otp-input" id="otp-3" oninput="moverAlSiguiente(this,'otp-4')" onkeydown="moverAlAnterior(event,this,'otp-2')">
+            <input type="text" maxlength="1" inputmode="numeric" class="auth-input otp-input" id="otp-4" oninput="moverAlSiguiente(this,'otp-5')" onkeydown="moverAlAnterior(event,this,'otp-3')">
+            <input type="text" maxlength="1" inputmode="numeric" class="auth-input otp-input" id="otp-5" oninput="moverAlSiguiente(this,'otp-6')" onkeydown="moverAlAnterior(event,this,'otp-4')">
+            <input type="text" maxlength="1" inputmode="numeric" class="auth-input otp-input" id="otp-6" oninput="moverAlSiguiente(this,null)" onkeydown="moverAlAnterior(event,this,'otp-5')">
+        </div>
+
+        <div style="text-align:center; margin-bottom:20px; font-size:.85rem;">
+            <span id="contador-reenvio" style="color:#888;">3:00</span>
+            <a id="enlace-reenviar" onclick="reenviarCodigo()" class="deshabilitado" style="color:#FFD700; cursor:pointer; margin-left:6px;">Reenviar código</a>
+        </div>
+
+        <button id="btnVerificarCodigo" onclick="verificarCodigo()" class="btn-primary" style="margin-top:0;background:#3a3000;color:#6b5800;border:1px solid #4a4000;cursor:not-allowed;" disabled>Verificar</button>
+        <button onclick="switchPage('page-recuperar-password')" style="background:none;border:1px solid #FFD700;color:#FFD700;font-size:.85rem;margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:8px;display:block;margin-left:auto;margin-right:auto;">Volver</button>
     </div></div>
 </div>
 
@@ -386,6 +434,100 @@ function togglePass(id, el) {
     } else {
         input.classList.add('auth-pass');
         el.textContent = "👁️";
+    }
+}
+
+// --- RECUPERACIÓN DE CONTRASEÑA ---
+function checkRecuperarFields() {
+    const email = document.getElementById('recuperar-email').value.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const ok = emailRegex.test(email);
+    const btn = document.getElementById('btnContinuarRecuperar');
+    btn.disabled = !ok;
+    btn.classList.toggle('btn-activo', ok);
+}
+
+async function enviarCodigoRecuperacion() {
+    const email = document.getElementById('recuperar-email').value.trim();
+    const btn = document.getElementById('btnContinuarRecuperar');
+    btn.disabled = true; 
+    btn.textContent = 'Enviando...';
+    try {
+        // Llamada genérica al servicio (aislada de proveedores)
+        await vakaData.forgotPassword({ email });
+
+        console.log('Código OTP enviado con éxito a:', email);
+        document.getElementById('codigo-email-destino').textContent = email;
+        switchPage('page-verificar-codigo');
+        iniciarContadorReenvio();
+        document.getElementById('otp-1')?.focus();
+    } catch (error) {
+        console.error("Error en recuperación:", error);
+        alert(error.message || 'No se pudo enviar el código. Inténtalo de nuevo.');
+    } finally {
+        btn.disabled = false; 
+        btn.textContent = 'Continuar';
+    }
+}
+
+function moverAlSiguiente(actual, siguienteId) {
+    if (actual.value.length === 1 && siguienteId) document.getElementById(siguienteId).focus();
+    checkOtpCompleto();
+}
+function moverAlAnterior(event, actual, anteriorId) {
+    if (event.key === 'Backspace' && actual.value.length === 0 && anteriorId) document.getElementById(anteriorId).focus();
+}
+function checkOtpCompleto() {
+    const digits = ['otp-1','otp-2','otp-3','otp-4','otp-5','otp-6'].map(id => document.getElementById(id).value).join('');
+    const btn = document.getElementById('btnVerificarCodigo');
+    btn.disabled = digits.length !== 6;
+    btn.classList.toggle('btn-activo', digits.length === 6);
+}
+
+let contadorReenvio = null;
+function iniciarContadorReenvio() {
+    let segundos = 180;
+    const display = document.getElementById('contador-reenvio');
+    const enlace = document.getElementById('enlace-reenviar');
+    enlace.classList.add('deshabilitado');
+    clearInterval(contadorReenvio);
+    contadorReenvio = setInterval(() => {
+        segundos--;
+        display.textContent = `${Math.floor(segundos/60)}:${String(segundos%60).padStart(2,'0')}`;
+        if (segundos <= 0) {
+            clearInterval(contadorReenvio);
+            enlace.classList.remove('deshabilitado');
+            display.textContent = '';
+        }
+    }, 1000);
+}
+
+async function reenviarCodigo() {
+    const enlace = document.getElementById('enlace-reenviar');
+    if (enlace.classList.contains('deshabilitado')) return;
+    const email = document.getElementById('recuperar-email').value.trim();
+    // TODO: await vakaData.forgotPassword({ email });
+    console.log('Reenviando código a:', email);
+    ['otp-1','otp-2','otp-3','otp-4','otp-5','otp-6'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('otp-1').focus();
+    checkOtpCompleto();
+    iniciarContadorReenvio();
+}
+
+async function verificarCodigo() {
+    const codigo = ['otp-1','otp-2','otp-3','otp-4','otp-5','otp-6'].map(id => document.getElementById(id).value).join('');
+    const email = document.getElementById('recuperar-email').value.trim();
+    
+    try {
+        // Llamada centralizada al servicio
+        await vakaData.verifyResetCode({ email, codigo });
+        
+        console.log('Código verificado correctamente para:', email);
+        alert('Código verificado con éxito. Próximamente: pantalla de nueva contraseña.');
+        
+    } catch (error) {
+        console.error("Error al verificar código:", error);
+        alert(error.message || 'El código ingresado no es válido o ha expirado.');
     }
 }
 	// --- FUNCIÓN DE NAVEGACIÓN SEGURA ---
@@ -781,7 +923,7 @@ async function iniciarSesion() {
             localStorage.setItem('token', response.token);
         }
 
-        window.location.href = 'index.html';
+        window.location.href = 'vakapay_v2.html';
         
     } catch (error) {
         console.error("❌ Detalle del fallo:", error);

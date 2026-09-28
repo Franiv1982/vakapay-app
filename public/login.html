@@ -450,19 +450,23 @@ function checkRecuperarFields() {
 async function enviarCodigoRecuperacion() {
     const email = document.getElementById('recuperar-email').value.trim();
     const btn = document.getElementById('btnContinuarRecuperar');
-    btn.disabled = true; btn.textContent = 'Enviando...';
+    btn.disabled = true; 
+    btn.textContent = 'Enviando...';
     try {
-        // TODO: reemplazar por la llamada real, ej: await vakaData.forgotPassword({ email });
-        console.log('Enviando código OTP a:', email);
+        // Llamada genérica al servicio (aislada de proveedores)
+        await vakaData.forgotPassword({ email });
+
+        console.log('Código OTP enviado con éxito a:', email);
         document.getElementById('codigo-email-destino').textContent = email;
         switchPage('page-verificar-codigo');
         iniciarContadorReenvio();
         document.getElementById('otp-1')?.focus();
     } catch (error) {
-        console.error(error);
-        alert('No se pudo enviar el código. Inténtalo de nuevo.');
+        console.error("Error en recuperación:", error);
+        alert(error.message || 'No se pudo enviar el código. Inténtalo de nuevo.');
     } finally {
-        btn.disabled = false; btn.textContent = 'Continuar';
+        btn.disabled = false; 
+        btn.textContent = 'Continuar';
     }
 }
 
@@ -513,13 +517,17 @@ async function reenviarCodigo() {
 async function verificarCodigo() {
     const codigo = ['otp-1','otp-2','otp-3','otp-4','otp-5','otp-6'].map(id => document.getElementById(id).value).join('');
     const email = document.getElementById('recuperar-email').value.trim();
+    
     try {
-        // TODO: await vakaData.verifyResetCode({ email, codigo });
-        console.log('Verificando código', codigo, 'para', email);
-        alert('Código verificado. Próximamente: pantalla de nueva contraseña.');
+        // Llamada centralizada al servicio
+        await vakaData.verifyResetCode({ email, codigo });
+        
+        console.log('Código verificado correctamente para:', email);
+        alert('Código verificado con éxito. Próximamente: pantalla de nueva contraseña.');
+        
     } catch (error) {
-        console.error(error);
-        alert('El código ingresado no es válido o ha expirado.');
+        console.error("Error al verificar código:", error);
+        alert(error.message || 'El código ingresado no es válido o ha expirado.');
     }
 }
 	// --- FUNCIÓN DE NAVEGACIÓN SEGURA ---

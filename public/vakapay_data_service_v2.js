@@ -112,6 +112,14 @@ class VakaDataService {
     return data;
   }
 
+  async forgotPassword({ email }) {
+    return this.#fetch('POST', '/auth/forgot-password', { email });
+  }
+
+  async verifyResetCode({ email, codigo }) {
+    return this.#fetch('POST', '/auth/verify-reset-code', { email, codigo });
+  }
+
   async logout() {
     try { await this.#fetch('POST', '/auth/logout'); } catch (_) {}
     this.setToken(null);
