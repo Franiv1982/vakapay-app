@@ -1034,6 +1034,12 @@ function checkRegistroFields() {
     btn.style.cursor = ok ? 'pointer' : 'not-allowed';
     btn.disabled = !ok;
 }
+
+// Si el usuario eliminó su cuenta, limpiamos cualquier residuo de token anterior
+if (!localStorage.getItem('intentional_logout')) {
+    localStorage.clear();
+}
+
 async function iniciarSesion() {
     const emailInput = document.getElementById('login-email');
     const passInput = document.getElementById('login-pass');
