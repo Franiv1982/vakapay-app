@@ -2989,15 +2989,15 @@ function closeLogoutModal() {
     document.getElementById('modalLogout').style.display = 'none';
 }
 
-/**
- * 3. Ejecuta el cierre de sesión definitivo.
- * Elimina los tokens de seguridad y redirige al Login.
- */
 function confirmLogout() {
-  // Clave correcta según tu servicio
-  localStorage.removeItem('vp_token'); 
+  localStorage.setItem('intentional_logout', 'true');
+  vakaData.setToken(null);
+  localStorage.clear();
+  sessionStorage.clear();
   
-  window.location.reload();
+  // Obtiene la ruta base actual y reemplaza el archivo actual por login.html
+  const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+  window.location.href = rutaBase + 'login.html';
 }
 
 // ═══ SECCIÓN DE RENDERIZADO CONSOLIDADA ══════════════════════════════
