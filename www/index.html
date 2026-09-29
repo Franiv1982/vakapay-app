@@ -1102,14 +1102,28 @@ class VakaDataService {
   async #req(method, path, body) {
     const headers = { 'Content-Type': 'application/json' };
     if (this.#token) headers['Authorization'] = `Bearer ${this.#token}`;
+    
     const res = await fetch(`${this.#API_URL}${path}`, {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
     });
+
     if (res.status === 204) return true;
-    const data = await res.json();
-    if (!res.ok) throw Object.assign(new Error(data.error || 'Error del servidor'), { status: res.status });
+
+    // Leemos el texto primero para evitar que res.json() explote con páginas HTML de error
+    const text = await res.text();
+    let data;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = { error: text || 'Error de red o servidor' };
+    }
+
+    if (!res.ok) {
+      throw Object.assign(new Error(data.error || 'Error del servidor'), { status: res.status });
+    }
+    
     return data;
   }
 
@@ -2989,15 +3003,15 @@ function closeLogoutModal() {
     document.getElementById('modalLogout').style.display = 'none';
 }
 
-/**
- * 3. Ejecuta el cierre de sesión definitivo.
- * Elimina los tokens de seguridad y redirige al Login.
- */
 function confirmLogout() {
-  // Clave correcta según tu servicio
-  localStorage.removeItem('vp_token'); 
+  localStorage.setItem('intentional_logout', 'true');
+  vakaData.setToken(null);
+  localStorage.clear();
+  sessionStorage.clear();
   
-  window.location.reload();
+  // Obtiene la ruta base actual y reemplaza el archivo actual por login.html
+  const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+  window.location.href = rutaBase + 'login.html';
 }
 
 // ═══ SECCIÓN DE RENDERIZADO CONSOLIDADA ══════════════════════════════

@@ -28,11 +28,7 @@ function copyRecursive(srcDir, destDir) {
     const srcPath = path.join(srcDir, entry.name);
     let destName = entry.name;
 
-    // El archivo de trabajo del frontend se publica como index.html,
-    // que es el nombre que Capacitor busca como entrypoint.
-    if (destName.toLowerCase() === 'vakapay_v2.html') {
-      destName = 'index.html';
-    }
+    destName = entry.name;
 
     const destPath = path.join(destDir, destName);
 
