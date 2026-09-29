@@ -355,6 +355,35 @@
     </div></div>
 </div>
 
+<!-- ═══ PÁGINA: NUEVA CONTRASEÑA ═══ -->
+<div class="page" id="page-nueva-password">
+    <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
+        <h2 style="margin:0 0 8px 0; color:#fff; font-size:1.5rem; text-align:center;">Restablece tu contraseña</h2>
+        <p class="auth-sub" style="text-align:center;">A continuación crea una contraseña segura.</p>
+        
+        <div class="auth-form" style="display:flex; flex-direction:column; margin-top:15px;">
+            <div class="input-group">
+                <input type="password" id="new-pass" placeholder="Nueva contraseña" class="auth-input" autocomplete="new-password" oninput="checkNewPassFields()">
+                <span class="toggle-password" onclick="togglePass('new-pass', this)">👁️</span>
+                <div id="new-pass-rules" style="margin-top:8px;text-align:left;display:none;">
+                    <div id="new-rule-len" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Mínimo 8 caracteres</div>
+                    <div id="new-rule-upper" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Una mayúscula</div>
+                    <div id="new-rule-lower" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Una minúscula</div>
+                    <div id="new-rule-num" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Un número</div>
+                    <div id="new-rule-sym" style="font-size:.72rem;color:#ff4d4d;">✗ Un símbolo (!@#$...)</div>
+                </div>
+            </div>
+            
+            <div class="input-group" style="margin-bottom:20px;">
+                <input type="password" id="new-pass-confirm" placeholder="Repite tu contraseña" class="auth-input" autocomplete="new-password" oninput="checkNewPassFields()">
+                <span class="toggle-password" onclick="togglePass('new-pass-confirm', this)">👁️</span>
+            </div>
+        </div>
+
+        <button id="btnGuardarPassword" onclick="guardarNuevaPassword()" class="btn-primary" style="margin-top:10px;background:#3a3000;color:#6b5800;border:1px solid #4a4000;cursor:not-allowed;" disabled>Continuar</button>
+        <button onclick="switchPage('page-verificar-codigo')" style="background:none;border:1px solid #FFD700;color:#FFD700;font-size:.85rem;margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:8px;display:block;margin-left:auto;margin-right:auto;">Volver</button>
+    </div></div>
+</div>
     <!-- ═══ PÁGINA: REGISTRO ═══ -->
 <div class="page" id="page-registro">
     <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
@@ -514,23 +543,80 @@ async function reenviarCodigo() {
     iniciarContadorReenvio();
 }
 
+let codigoVerificadoTemp = ''; // Variable auxiliar para guardar el código verificado
+
 async function verificarCodigo() {
     const codigo = ['otp-1','otp-2','otp-3','otp-4','otp-5','otp-6'].map(id => document.getElementById(id).value).join('');
     const email = document.getElementById('recuperar-email').value.trim();
     
     try {
-        // Llamada centralizada al servicio
+        // Llamada centralizada al servicio para validar el OTP
         await vakaData.verifyResetCode({ email, codigo });
         
         console.log('Código verificado correctamente para:', email);
-        alert('Código verificado con éxito. Próximamente: pantalla de nueva contraseña.');
+        codigoVerificadoTemp = codigo; // Guardamos el código para enviarlo en el paso final
+        
+        // Limpiamos los campos de la pantalla de nueva contraseña por seguridad
+        document.getElementById('new-pass').value = '';
+        document.getElementById('new-pass-confirm').value = '';
+        checkNewPassFields();
+
+        // Saltamos a la pantalla de crear nueva contraseña
+        switchPage('page-nueva-password');
         
     } catch (error) {
         console.error("Error al verificar código:", error);
         alert(error.message || 'El código ingresado no es válido o ha expirado.');
     }
 }
-	// --- FUNCIÓN DE NAVEGACIÓN SEGURA ---
+
+function checkNewPassFields() {
+    const pass = document.getElementById('new-pass').value;
+    const confirm = document.getElementById('new-pass-confirm').value;
+    const btn = document.getElementById('btnGuardarPassword');
+    if (!btn) return;
+
+    const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    const esValida = passRegex.test(pass) && (pass === confirm);
+
+    btn.disabled = !esValida;
+    btn.classList.toggle('btn-activo', esValida);
+}
+
+async function guardarNuevaPassword() {
+    const email = document.getElementById('recuperar-email').value.trim();
+    const newPassword = document.getElementById('new-pass').value;
+    const btn = document.getElementById('btnGuardarPassword');
+
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    try {
+        await vakaData.resetPassword({
+            email: email,
+            codigo: codigoVerificadoTemp,
+            newPassword: newPassword
+        });
+        document.getElementById('modal-password-exito').style.display = 'flex';
+    } catch (error) {
+        console.error("❌ Error al actualizar contraseña:", error);
+        alert(error.message || 'No se pudo actualizar la contraseña. Inténtalo de nuevo.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Continuar';
+    }
+}
+
+function irAlLoginDespuesDeCambio() {
+    document.getElementById('modal-password-exito').style.display = 'none';
+    document.getElementById('recuperar-email').value = '';
+    ['otp-1','otp-2','otp-3','otp-4','otp-5','otp-6'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('new-pass').value = '';
+    document.getElementById('new-pass-confirm').value = '';
+    switchPage('page-login-formulario');
+}
+	
+// --- FUNCIÓN DE NAVEGACIÓN SEGURA ---
 function safeBack() {
     const nombre = document.getElementById('reg-nombre').value.trim();
     const tieneDatos = nombre.length > 0 || 
@@ -732,6 +818,30 @@ document.addEventListener('DOMContentLoaded', () => {
             this.value = this.value.replace(/\s/g, '');
         });
     }
+
+    // Validación regla de contraseña en pantalla de recuperación
+    const newPassInput = document.getElementById('new-pass');
+    if(newPassInput) {
+        newPassInput.addEventListener('input', function() {
+            const v = this.value.replace(/\s/g, '');
+            this.value = v;
+            const rules = document.getElementById('new-pass-rules');
+            if(v.length > 0) rules.style.display = 'block';
+
+            const check = (id, ok) => {
+                const el = document.getElementById(id);
+                if(el) {
+                    el.style.color = ok ? '#28a745' : '#ff4d4d';
+                    el.textContent = (ok ? '✓ ' : '✗ ') + el.textContent.slice(2);
+                }
+            };
+            check('new-rule-len',   v.length >= 8);
+            check('new-rule-upper', /[A-Z]/.test(v));
+            check('new-rule-lower', /[a-z]/.test(v));
+            check('new-rule-num',   /\d/.test(v));
+            check('new-rule-sym',   /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(v));
+        });
+    }
 	
 // --- 5. LÓGICA DE INICIO DE SESIÓN ---
 function handleLogin() {
@@ -763,6 +873,16 @@ function handleLogin() {
         <h2>¡Registro completado!</h2>
         <p>¡Te damos la bienvenida a Vakapay, <span id="user-name-welcome" style="color: #FFD700; font-weight: bold;"></span>. Tu cuenta ha sido creada con éxito.</p>
         <button class="btn-primary" onclick="cerrarModalYEntrar()">Comenzar</button>
+    </div>
+</div>
+
+<!-- Modal de Éxito: Contraseña Actualizada -->
+<div id="modal-password-exito" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;">
+    <div class="modal-content" style="background:#1e1e1e;border-radius:20px;padding:30px;max-width:360px;width:90%;text-align:center;border:1px solid #333;">
+        <div style="font-size:3rem; margin-bottom:15px;">🎉</div>
+        <h2 style="color:#FFD700; margin-bottom:10px; font-size:1.4rem;">¡Listo!</h2>
+        <p style="color:#F2F2F2; font-size:.9rem; margin-bottom:25px; line-height:1.4;">Tu contraseña fue actualizada con éxito. Recuerda no compartirla con nadie.</p>
+        <button onclick="irAlLoginDespuesDeCambio()" class="btn-primary btn-activo" style="width:100%;">Entendido</button>
     </div>
 </div>
 
@@ -926,9 +1046,7 @@ async function iniciarSesion() {
         window.location.href = 'vakapay_v2.html';
         
     } catch (error) {
-        console.error("❌ Detalle del fallo:", error);
-        
-        // CORRECCIÓN: Quitamos el alert feo y ponemos nuestro modal
+        console.error("❌ Detalle del fallo:", error);   
         document.getElementById('modal-login-error').style.display = 'flex';
     }
 }
