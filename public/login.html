@@ -937,7 +937,25 @@ function handleLogin() {
     </div>
 </div>
 
+<!-- Modal Confirmar Salida de App (INICIO) -->
+<div class="modal-overlay" id="modal-salir-app" style="display:none; z-index:9999; justify-content:center; align-items:center;" onclick="if(event.target===this)cerrarModalSalirLogin()">
+  <div style="background:#1e1e1e; width:90%; max-width:300px; padding:25px; border-radius:24px; border:1px solid #333; text-align:center;">
+    <div style="font-size:2.5rem; margin-bottom:10px;">👋</div>
+    <div style="color:#F2F2F2; font-size:1.3rem; font-weight:bold; margin-bottom:20px;">¿Deseas salir de VakaPay?</div>
+    <div style="display:flex; gap:12px; width:100%;">
+      <button onclick="cerrarModalSalirLogin()" style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#444;">
+        No
+      </button>
+      <button onclick="if(window.Capacitor && Capacitor.Plugins.App) Capacitor.Plugins.App.exitApp()" style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#dc3545;">
+        Sí, salir
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
+
+
 // --- 6. GESTIÓN DE SALIDA SEGURA Y LIMPIEZA ---
 function safeBack() {
     const nombre = document.getElementById('reg-nombre').value.trim();
@@ -1005,6 +1023,46 @@ window.addEventListener('pageshow', function(event) {
 <script src="vakapay_data_service_v2.js"></script>
 	
 <script>
+
+// --- GESTIÓN DEL BOTÓN FÍSICO DE RETROCESO EN ANDROID (CAPACITOR) ---
+if (window.Capacitor && Capacitor.isNativePlatform() && Capacitor.Plugins.App) {
+  Capacitor.Plugins.App.addListener('backButton', () => {
+    const modalesAbiertos = [...document.querySelectorAll('.modal-overlay')]
+      .find(m => getComputedStyle(m).display !== 'none');
+      
+    if (modalesAbiertos) {
+      modalesAbiertos.style.display = 'none';
+      document.body.style.overflow = '';
+      return;
+    }
+
+    const pageInicio = document.getElementById('page-login-inicio');
+    const pageFormulario = document.getElementById('page-login-formulario');
+    const pageRegistro = document.getElementById('page-registro');
+    const pageRecuperar = document.getElementById('page-recuperar-password');
+    const pageVerificar = document.getElementById('page-verificar-codigo');
+    const pageNuevaPass = document.getElementById('page-nueva-password');
+
+    if (pageFormulario.classList.contains('active') || 
+        pageRecuperar.classList.contains('active') || 
+        pageVerificar.classList.contains('active') ||
+        pageNuevaPass.classList.contains('active')) {
+      switchPage('page-login-inicio');
+    } 
+    else if (pageRegistro.classList.contains('active')) {
+      safeBack();
+    } 
+    else if (pageInicio.classList.contains('active')) {
+      document.getElementById('modal-salir-app').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+  });
+}
+
+function cerrarModalSalirLogin() {
+  document.getElementById('modal-salir-app').style.display = 'none';
+  document.body.style.overflow = '';
+}
 
 // --- 7. FLUJO DE AUTENTICACIÓN ---
 
