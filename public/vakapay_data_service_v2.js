@@ -120,6 +120,11 @@ class VakaDataService {
     return this.#fetch('POST', '/auth/verify-reset-code', { email, codigo });
   }
 
+  // Método para actualizar la nueva contraseña
+  async resetPassword({ email, codigo, newPassword }) {
+    return this.#fetch('POST', '/auth/reset-password', { email, codigo, newPassword });
+  }
+
   async logout() {
     try { await this.#fetch('POST', '/auth/logout'); } catch (_) {}
     this.setToken(null);
