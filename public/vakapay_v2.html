@@ -1102,14 +1102,28 @@ class VakaDataService {
   async #req(method, path, body) {
     const headers = { 'Content-Type': 'application/json' };
     if (this.#token) headers['Authorization'] = `Bearer ${this.#token}`;
+    
     const res = await fetch(`${this.#API_URL}${path}`, {
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
     });
+
     if (res.status === 204) return true;
-    const data = await res.json();
-    if (!res.ok) throw Object.assign(new Error(data.error || 'Error del servidor'), { status: res.status });
+
+    // Leemos el texto primero para evitar que res.json() explote con páginas HTML de error
+    const text = await res.text();
+    let data;
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch {
+      data = { error: text || 'Error de red o servidor' };
+    }
+
+    if (!res.ok) {
+      throw Object.assign(new Error(data.error || 'Error del servidor'), { status: res.status });
+    }
+    
     return data;
   }
 

@@ -476,17 +476,29 @@ function checkRecuperarFields() {
     btn.classList.toggle('btn-activo', ok);
 }
 
+function enmascararEmail(email) {
+    if (!email || !email.includes('@')) return email;
+    const [usuario, dominio] = email.split('@');
+    if (usuario.length <= 2) {
+        return `${usuario[0]}***@${dominio}`;
+    }
+    const visible = usuario.slice(0, 2);
+    return `${visible}***@${dominio}`;
+}
+
 async function enviarCodigoRecuperacion() {
     const email = document.getElementById('recuperar-email').value.trim();
     const btn = document.getElementById('btnContinuarRecuperar');
     btn.disabled = true; 
     btn.textContent = 'Enviando...';
     try {
-        // Llamada genérica al servicio (aislada de proveedores)
         await vakaData.forgotPassword({ email });
 
         console.log('Código OTP enviado con éxito a:', email);
-        document.getElementById('codigo-email-destino').textContent = email;
+        
+        // AQUÍ APLICAMOS EL ENMASCARAMIENTO
+        document.getElementById('codigo-email-destino').textContent = enmascararEmail(email);
+        
         switchPage('page-verificar-codigo');
         iniciarContadorReenvio();
         document.getElementById('otp-1')?.focus();
@@ -1022,6 +1034,12 @@ function checkRegistroFields() {
     btn.style.cursor = ok ? 'pointer' : 'not-allowed';
     btn.disabled = !ok;
 }
+
+// Si el usuario eliminó su cuenta, limpiamos cualquier residuo de token anterior
+if (!localStorage.getItem('intentional_logout')) {
+    localStorage.clear();
+}
+
 async function iniciarSesion() {
     const emailInput = document.getElementById('login-email');
     const passInput = document.getElementById('login-pass');
