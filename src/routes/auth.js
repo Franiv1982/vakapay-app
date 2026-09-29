@@ -180,4 +180,37 @@ router.post('/verify-reset-code', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// ── POST /auth/reset-password ────────────────────────────────────
+router.post('/reset-password', async (req, res, next) => {
+  try {
+    const { email, codigo, newPassword } = req.body;
+    if (!email || !codigo || !newPassword) {
+      return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+    }
+
+    // 1. Verificar nuevamente que el código sea válido y no haya expirado
+    const result = await db.query(
+      'SELECT id FROM users WHERE email = $1 AND reset_otp = $2 AND reset_otp_expires > NOW()',
+      [email, codigo]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(400).json({ error: 'El código no es válido o ha expirado. Solicita uno nuevo.' });
+    }
+
+    const user = result.rows[0];
+
+    // 2. Cifrar la nueva contraseña con bcrypt
+    const hash = bcrypt.hashSync(newPassword, 10);
+
+    // 3. Actualizar la contraseña en la base de datos y limpiar los campos de OTP
+    await db.query(
+      'UPDATE users SET password_hash = $1, reset_otp = NULL, reset_otp_expires = NULL WHERE id = $2',
+      [hash, user.id]
+    );
+
+    res.json({ ok: true, message: 'Contraseña actualizada correctamente' });
+  } catch (err) { next(err); }
+});
+
 module.exports = router;
