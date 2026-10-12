@@ -5157,14 +5157,17 @@ const MAIN_PAGES = ['page-grupos', 'page-amigos', 'page-stats', 'page-actividad'
     handleSwipeGesture(touchEndX - touchStartX, touchEndY - touchStartY);
   }, { passive: true });
 
-  function handleSwipeGesture(deltaX, deltaY) {
+    function handleSwipeGesture(deltaX, deltaY) {
     // Solo si el movimiento es claramente horizontal (evita pelear con el scroll vertical)
     if (Math.abs(deltaX) < THRESHOLD || Math.abs(deltaX) < Math.abs(deltaY) * 1.5) return;
 
     const activePage = document.querySelector('.page.active');
     if (!activePage) return;
-    const currentIdx = MAIN_PAGES.indexOf(activePage.id);
-    if (currentIdx === -1) return; // estamos en una pantalla que no es una de las 5 pestañas (ej: detalle de grupo)
+
+    // El detalle de un grupo cuenta como la pestaña "Grupos"
+    const currentId = activePage.id === 'page-detalle' ? 'page-grupos' : activePage.id;
+    const currentIdx = MAIN_PAGES.indexOf(currentId);
+    if (currentIdx === -1) return; // ej: detalle de un gasto, ahí no hay carrusel
 
     let nextIdx = currentIdx;
     if (deltaX < 0 && currentIdx < MAIN_PAGES.length - 1) nextIdx = currentIdx + 1; // swipe a la izquierda → siguiente
@@ -5172,11 +5175,34 @@ const MAIN_PAGES = ['page-grupos', 'page-amigos', 'page-stats', 'page-actividad'
     if (nextIdx === currentIdx) return;
 
     const nextPageId = MAIN_PAGES[nextIdx];
+
+    // Si vuelve a "Grupos" y había un grupo seleccionado, regresa a ese grupo
+    const hayGrupo = currentGroupIdx !== null && currentGroupIdx >= 0 && groups[currentGroupIdx];
+    if (nextPageId === 'page-grupos' && hayGrupo) {
+      volverAlGrupoActual();
+      return;
+    }
+
     const nextBtn = document.querySelector(`.nav-btn[data-page="${nextPageId}"]`);
     switchPage(nextPageId, nextBtn);
     if (nextPageId === 'page-stats' && typeof renderStats === 'function') renderStats();
   }
 })();
+
+
+// Reabre el grupo seleccionado sin volver a pedirlo al servidor
+function volverAlGrupoActual() {
+  const g = groups[currentGroupIdx];
+  if (!g) return;
+  switchPage('page-detalle', document.querySelector('.nav-btn[data-page="page-grupos"]'));
+  document.getElementById('detTitle').textContent = (TYPE_ICONS[g.type] || '📂') + ' ' + g.name;
+  document.getElementById('detMeta').textContent = fmtDate(g.start) + ' → ' + fmtDate(g.end);
+  const badge = document.getElementById('hbadge');
+  badge.textContent = (TYPE_ICONS[g.type] || '📂') + ' ' + g.name;
+  badge.style.display = 'block';
+  renderAll();
+  requestAnimationFrame(posicionarBadge);
+}
 
 </script>
 
