@@ -76,7 +76,9 @@ router.patch('/me', requireAuth, async (req, res, next) => {
 router.put('/me/avatar', requireAuth, upload.single('avatar'), async (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No se recibió ningún archivo' });
-    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+// Se guarda la imagen como base64 dentro de la columna
+    const buffer = req.file.buffer || fs.readFileSync(req.file.path);
+    const avatarUrl = `data:${req.file.mimetype || 'image/jpeg'};base64,${buffer.toString('base64')}`;
     await db.query('UPDATE users SET avatar_url = $1, updated_at = NOW() WHERE id = $2', [avatarUrl, req.user.id]);
     res.json({ avatar_url: avatarUrl });
   } catch (err) { next(err); }

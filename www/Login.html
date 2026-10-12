@@ -937,22 +937,6 @@ function handleLogin() {
     </div>
 </div>
 
-<!-- Modal Confirmar Salida de App (INICIO) -->
-<div class="modal-overlay" id="modal-salir-app" style="display:none; z-index:9999; justify-content:center; align-items:center;" onclick="if(event.target===this)cerrarModalSalirLogin()">
-  <div style="background:#1e1e1e; width:90%; max-width:300px; padding:25px; border-radius:24px; border:1px solid #333; text-align:center;">
-    <div style="font-size:2.5rem; margin-bottom:10px;">👋</div>
-    <div style="color:#F2F2F2; font-size:1.3rem; font-weight:bold; margin-bottom:20px;">¿Deseas salir de VakaPay?</div>
-    <div style="display:flex; gap:12px; width:100%;">
-      <button onclick="cerrarModalSalirLogin()" style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#444;">
-        No
-      </button>
-      <button onclick="if(window.Capacitor && Capacitor.Plugins.App) Capacitor.Plugins.App.exitApp()" style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#dc3545;">
-        Sí, salir
-      </button>
-    </div>
-  </div>
-</div>
-
 <script>
 
 
@@ -1027,6 +1011,7 @@ window.addEventListener('pageshow', function(event) {
 // --- GESTIÓN DEL BOTÓN FÍSICO DE RETROCESO EN ANDROID (CAPACITOR) ---
 if (window.Capacitor && Capacitor.isNativePlatform() && Capacitor.Plugins.App) {
   Capacitor.Plugins.App.addListener('backButton', () => {
+    // 1. Si hay algún modal abierto, lo cerramos primero
     const modalesAbiertos = [...document.querySelectorAll('.modal-overlay')]
       .find(m => getComputedStyle(m).display !== 'none');
       
@@ -1043,18 +1028,30 @@ if (window.Capacitor && Capacitor.isNativePlatform() && Capacitor.Plugins.App) {
     const pageVerificar = document.getElementById('page-verificar-codigo');
     const pageNuevaPass = document.getElementById('page-nueva-password');
 
-    if (pageFormulario.classList.contains('active') || 
-        pageRecuperar.classList.contains('active') || 
-        pageVerificar.classList.contains('active') ||
-        pageNuevaPass.classList.contains('active')) {
-      switchPage('page-login-inicio');
+    // 2. Comportamientos específicos por pantalla al presionar atrás
+    if (pageFormulario.classList.contains('active') || pageRegistro.classList.contains('active')) {
+      // Desde Login o Registro, si están en la principal de auth, van al inicio o evalúan datos
+      if (pageRegistro.classList.contains('active')) {
+        safeBack();
+      } else {
+        switchPage('page-login-inicio');
+      }
     } 
-    else if (pageRegistro.classList.contains('active')) {
-      safeBack();
-    } 
+    else if (pageRecuperar.classList.contains('active')) {
+      // Desde "Restablece tu contraseña" vuelve correctamente a "Inicia sesión"
+      switchPage('page-login-formulario');
+    }
+    else if (pageVerificar.classList.contains('active')) {
+      // Desde verificación OTP vuelve a recuperar correo
+      switchPage('page-recuperar-password');
+    }
+    else if (pageNuevaPass.classList.contains('active')) {
+      // Desde nueva contraseña vuelve a verificar
+      switchPage('page-verificar-codigo');
+    }
+    // 3. Si ya estamos en la pantalla principal de bienvenida, sale de la app hacia el escritorio del móvil
     else if (pageInicio.classList.contains('active')) {
-      document.getElementById('modal-salir-app').style.display = 'flex';
-      document.body.style.overflow = 'hidden';
+      Capacitor.Plugins.App.exitApp();
     }
   });
 }

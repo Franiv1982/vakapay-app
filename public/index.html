@@ -602,7 +602,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
   </div>
 
   <div style="height:8px"></div>
-  <button class="btn btn-gold btn-full" onclick="addExpense()">Guardar Gasto</button>
+  <button class="btn btn-gold btn-full" id="btnGuardarGasto" onclick="addExpense()">Guardar Gasto</button>
 </div>
 </div>
 
@@ -1495,6 +1495,11 @@ const vakaData = new VakaDataService();
 // ═══ STATE ═══════════════════════════════════════════════════════════
 // Datos cargados por async init() a través de VakaDataService
 const API_BASE = 'https://vakapay-app.vercel.app';
+function resolverAvatar(u) {
+  if (!u) return null;
+  if (u.startsWith('data:') || u.startsWith('http')) return u;
+  return API_BASE + (u.startsWith('/') ? u : '/' + u);
+}
 let groups   = [];
 let friends  = [];
 let grupoAEditar = null;
@@ -1570,7 +1575,7 @@ try {
   email: me.email || '',
   tel: me.tel || '',
   bio: me.bio || '',
-  avatar: me.avatar_url ? `${window.location.origin}${me.avatar_url}` : null
+    avatar: resolverAvatar(me.avatar_url)
 };
         await vakaData.saveProfile(profile);
       }
@@ -2493,7 +2498,9 @@ function selectEditCurrency(el) {
   document.getElementById('editCurrency').value = el.dataset.currency;
 }
 
+let guardandoGasto = false;
 async function addExpense() {
+  if (guardandoGasto) return;
   if (currentGroupIdx === null) return;
   const g = groups[currentGroupIdx];
   const mbs = Object.keys(g.members);
@@ -2530,9 +2537,14 @@ async function addExpense() {
 
   // 3. Lógica de Conversión
   const rateToUse = (currency === getBase()) ? 1 : (manualRate || RATES[currency] || 1);
-  const baseAmt = +(amount / rateToUse).toFixed(2);
+    const baseAmt = +(amount / rateToUse).toFixed(2);
+
+  guardandoGasto = true;
+  const btnGuardar = document.getElementById('btnGuardarGasto');
+  if (btnGuardar) { btnGuardar.disabled = true; btnGuardar.textContent = 'Guardando...'; }
 
   try {
+
     const nuevoGasto = { 
       desc, 
       amount: Number(amount), 
@@ -2591,8 +2603,12 @@ async function addExpense() {
     await logActivity(`${payer} registró "${desc}" · ${amount} ${currency} en "${g.name}"`);
     clearOCR();
     toast('Gasto registrado ✓', 's');
-  } catch (err) {
+    } catch (err) {
     toast('Error al guardar', 'e');
+  } finally {
+    guardandoGasto = false;
+    const btnGuardar = document.getElementById('btnGuardarGasto');
+    if (btnGuardar) { btnGuardar.disabled = false; btnGuardar.textContent = 'Guardar Gasto'; }
   }
 }
 
@@ -4076,10 +4092,11 @@ function loadProfile(){
     }
   }
 
-  // Nav inicial
+    // Nav inicial
   const navImg = document.getElementById('user-nav-photo');
   const navInitials = document.getElementById('user-nav-initials');
   if (navImg && navInitials) {
+    navInitials.textContent = profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤';
     if (profile.avatar) {
       navImg.src = profile.avatar;
       navImg.style.display = 'block';
@@ -4159,7 +4176,8 @@ function updateProfilePreview() {
   const navImg = document.getElementById('user-nav-photo');
   const navInitials = document.getElementById('user-nav-initials');
   
-  if (navImg && navInitials) {
+    if (navImg && navInitials) {
+    navInitials.textContent = n ? n.charAt(0).toUpperCase() : '👤';
     if (profile.avatar) {
       navImg.src = profile.avatar;
       navImg.style.display = 'block';
@@ -4204,7 +4222,21 @@ async function handleAvatarChange(ev) {
   // Subir al backend
   try {
     const formData = new FormData();
-    formData.append('avatar', file);
+        const reducida = await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 256;
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(b => resolve(b || file), 'image/jpeg', 0.8);
+      };
+      img.onerror = () => resolve(file);
+      img.src = URL.createObjectURL(file);
+    });
+    formData.append('avatar', reducida, 'avatar.jpg');
     const res = await fetch(`${API_BASE}/api/v1/users/me/avatar`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${vakaData.getToken()}` },
@@ -5055,6 +5087,12 @@ function ajustarAlturaHeader() {
   posicionarBadge();
 }
 window.addEventListener('load', ajustarAlturaHeader);
+document.addEventListener('click', (e) => {
+  const el = e.target;
+  if (el && el.matches && el.matches('input[type="date"]') && typeof el.showPicker === 'function') {
+    try { el.showPicker(); } catch (_) {}
+  }
+});
 window.addEventListener('resize', ajustarAlturaHeader);
 
 function posicionarBadge() {
