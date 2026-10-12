@@ -81,6 +81,9 @@ main{flex:1;max-width:660px;margin:0 auto;padding:18px 14px 90px 14px;position:r
 .field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23777' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
 .field select option{background:#1E1E1E}
 input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
+input[type="date"]::-webkit-datetime-edit-day-field:focus,
+input[type="date"]::-webkit-datetime-edit-month-field:focus,
+input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparent;color:inherit}
 
 /* ── GRID ── */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
@@ -1081,6 +1084,24 @@ function normalizeMembersField(rawMembers, fallback) {
   return rawMembers || fallback || {};
 }
 
+
+// Traduce los gastos del servidor (description, category, payer_name...)
+// a los nombres que usa el frontend (desc, cat, payer...). Sin esto, los iconos salen como 💡.
+function normalizeExpensesField(rawExpenses) {
+  return (rawExpenses || [])
+    .slice()
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .map(e => ({
+      ...e,
+      desc:     e.description || e.desc || 'Sin descripción',
+      payer:    e.payer_name || e.payer || 'Desconocido',
+      date:     e.expense_date || e.date || '',
+      baseAmt:  Number(e.amount_base || e.baseAmt || e.amount) || 0,
+      cat:      e.category || e.cat || 'other',
+      involved: e.splits ? e.splits.map(s => s.member_name) : (e.involved || [])
+    }));
+}
+
 class VakaDataService {
   #KEYS    = { groups:'vp_groups', friends:'vp_friends', activity:'vp_activity', profile:'vp_profile', token:'vp_token' };
   #API_URL = 'https://vakapay-app.vercel.app/api/v1';
@@ -1274,7 +1295,8 @@ class VakaDataService {
         groups[currentGroupIdx] = {
           ...groups[currentGroupIdx],
           ...freshData,
-          members: normalizeMembersField(freshData.members, groups[currentGroupIdx].members)
+          members: normalizeMembersField(freshData.members, groups[currentGroupIdx].members),
+          expenses: normalizeExpensesField(freshData.expenses)
         };
         renderAll();
       }
@@ -1322,7 +1344,8 @@ class VakaDataService {
         groups[currentGroupIdx] = {
           ...groups[currentGroupIdx],
           ...freshData,
-          members: normalizeMembersField(freshData.members, groups[currentGroupIdx].members)
+                    members: normalizeMembersField(freshData.members, groups[currentGroupIdx].members),
+                    expenses: normalizeExpensesField(freshData.expenses)
         };
         updateBalances();
         renderAll();
@@ -2232,12 +2255,16 @@ function cerrarModalBorrarGasto() {
   gastoABorrarIdx = null;
 }
 
-function ejecutarBorradoGasto() {
-  if (gastoABorrarIdx !== null) {
-    deleteExpense(gastoABorrarIdx);
-    cerrarModalBorrarGasto();
-    closeEditModal(); // cierra edición si estaba abierta
-  }
+async function ejecutarBorradoGasto() {
+  if (gastoABorrarIdx === null) return;
+  const idx = gastoABorrarIdx;
+  cerrarModalBorrarGasto();
+  closeEditModal(); // cierra edición si estaba abierta
+  // El gasto se quita de la lista al instante; el servidor se actualiza en segundo plano
+  const borrado = deleteExpense(idx);
+  renderAll();
+  goBackToGroup();
+  await borrado;
 }
 
 // ═══ MEMBERS ══════════════════════════════════════════════════════════
