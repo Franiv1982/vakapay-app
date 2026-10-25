@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vakapay - Acceso</title>
     <style>
+        *, *::before, *::after { box-sizing: border-box; }
         :root { --accent: #FFD700; }
         
         body { 
@@ -923,7 +924,7 @@ function handleLogin() {
 
 <!-- Modal Error de Inicio de Sesión -->
 <div id="modal-login-error" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center;">
-    <div style="background: #1e1e1e; width: 90%; max-width: 340px; padding: 25px; border-radius: 24px; border: 1px solid #333; text-align: center;">
+        <div style="background: #1e1e1e; width: calc(100% - 48px); max-width: 340px; padding: 28px 22px; border-radius: 24px; border: 1px solid #333; text-align: center;">
         
         <div style="font-size: 2.5rem; margin-bottom: 15px;">🔐</div>
         <h2 style="color: #F2F2F2; margin-bottom: 10px; font-size: 1.4rem;">Acceso denegado</h2>
