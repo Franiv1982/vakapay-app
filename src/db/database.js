@@ -1,5 +1,6 @@
 // src/db/database.js — PostgreSQL
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
+types.setTypeParser(1082, (valor) => valor);
 
 if (!process.env.DATABASE_URL) {
   console.error("❌ Error: La variable de entorno DATABASE_URL no está configurada.");

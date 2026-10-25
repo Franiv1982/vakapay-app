@@ -2716,12 +2716,13 @@ function openEditModal(idx) {
   // 1. Carga de datos básicos
   document.getElementById('editDesc').value = e.desc || '';
   document.getElementById('editAmount').value = e.amount || '';
-  document.getElementById('editDate').value = e.date || '';
+  // El campo de fecha solo acepta AAAA-MM-DD: se recortan horas o zonas horarias si las hubiera
+  const fechaOriginal = String(e.date || e.expense_date || '').slice(0, 10);
+  document.getElementById('editDate').value = /^\d{4}-\d{2}-\d{2}$/.test(fechaOriginal) ? fechaOriginal : '';
   document.getElementById('editCat').value = e.cat || 'other';
 
   // ... (el resto de tu lógica original sigue aquí) ...
   document.getElementById('editAmount').value = e.amount;
-  document.getElementById('editDate').value = e.date;
   document.getElementById('editCat').value = e.cat;
   // 2. Persistencia de Moneda
   document.getElementById('editCurrency').value = e.currency || getBase();
