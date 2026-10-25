@@ -121,6 +121,8 @@ const initSchema = async () => {
       ALTER TABLE expenses ADD COLUMN IF NOT EXISTS es_pago BOOLEAN NOT NULL DEFAULT FALSE;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS pago_bizum TEXT;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS pago_iban TEXT;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS login_fallos INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS login_bloqueado_hasta TIMESTAMP;
 
       -- Chat de cada grupo
       CREATE TABLE IF NOT EXISTS mensajes (

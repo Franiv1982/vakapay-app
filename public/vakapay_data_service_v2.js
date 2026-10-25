@@ -51,7 +51,7 @@ class VakaDataService {
     });
     if (res.status === 204) return true;
     const data = await res.json();
-    if (!res.ok) throw Object.assign(new Error(data.error || 'Error del servidor'), { status: res.status });
+    if (!res.ok) throw Object.assign(new Error(data.error || 'Error del servidor'), { status: res.status, data });
     return data;
   }
 
