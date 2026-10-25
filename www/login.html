@@ -295,7 +295,7 @@
         <p class="auth-sub">Introduce tus credenciales para entrar.</p>
         <div class="auth-form" style="display:flex; flex-direction:column;">
             <div style="margin-bottom: 15px;">
-                <input type="email" id="login-email" placeholder="Correo electrónico" class="auth-input" style="margin-bottom:0;" oninput="checkLoginFields()">
+                <input type="email" id="login-email" placeholder="ej: tu.correo@gmail.com" class="auth-input" style="margin-bottom:0;" oninput="checkLoginFields()">
             </div>
             <div class="password-wrapper" style="position: relative; width: 100%; margin-bottom: 15px;">
                 <input type="password" id="login-pass" placeholder="Contraseña" class="auth-input" style="width: 100%; margin-bottom:0;" oninput="checkLoginFields()">
@@ -323,7 +323,7 @@
         <p class="auth-sub" style="text-align:center;">Para proteger tu información, necesitamos verificar tu correo electrónico.</p>
         <div class="auth-form" style="display:flex; flex-direction:column; margin-top:15px;">
             <div style="margin-bottom: 15px;">
-                <input type="email" id="recuperar-email" placeholder="Ej: sofia.perez@gmail.com" class="auth-input" style="margin-bottom:0;" oninput="checkRecuperarFields()">
+                <input type="email" id="recuperar-email" placeholder="ej: tu.correo@gmail.com" class="auth-input" style="margin-bottom:0;" oninput="checkRecuperarFields()">
             </div>
         </div>
         <button id="btnContinuarRecuperar" onclick="enviarCodigoRecuperacion()" class="btn-primary" style="margin-top:10px;background:#3a3000;color:#6b5800;border:1px solid #4a4000;cursor:not-allowed;" disabled>Continuar</button>
@@ -364,7 +364,7 @@
         
         <div class="auth-form" style="display:flex; flex-direction:column; margin-top:15px;">
             <div class="input-group">
-                <input type="password" id="new-pass" placeholder="Nueva contraseña" class="auth-input" autocomplete="new-password" oninput="checkNewPassFields()">
+                <input type="password" id="new-pass" placeholder="Nueva contraseña (mín. 8 caracteres)" class="auth-input" autocomplete="new-password" oninput="checkNewPassFields()">
                 <span class="toggle-password" onclick="togglePass('new-pass', this)">👁️</span>
                 <div id="new-pass-rules" style="margin-top:8px;text-align:left;display:none;">
                     <div id="new-rule-len" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Mínimo 8 caracteres</div>
@@ -396,7 +396,7 @@
                 <span id="err-nombre" class="error-message"></span>
             </div>
             <div class="input-group">
-                <input type="email" id="reg-email" placeholder="Correo electrónico" class="auth-input" autocomplete="email" inputmode="email" oninput="checkRegistroFields()">
+                <input type="email" id="reg-email" placeholder="ej: tu.correo@gmail.com" class="auth-input" autocomplete="email" inputmode="email" oninput="checkRegistroFields()">
                 <span id="err-email" class="error-message"></span>
             </div>
             <div class="input-group" style="margin-bottom:25px;">
@@ -409,7 +409,7 @@
                 </div>
             </div>
             <div class="input-group">
-                <input type="password" id="reg-pass" placeholder="Contraseña" class="auth-input" autocomplete="new-password" oninput="checkRegistroFields()">
+                <input type="password" id="reg-pass" placeholder="Contraseña (mín. 8 caracteres)" class="auth-input" autocomplete="new-password" oninput="checkRegistroFields()">
                 <span class="toggle-password" onclick="togglePass('reg-pass', this)">👁️</span>
                 <span id="err-pass" class="error-message"></span>
                 <div id="pass-rules" style="margin-top:8px;text-align:left;display:none;">
@@ -1069,7 +1069,9 @@ function checkLoginFields() {
     const pass = document.getElementById('login-pass').value;
     const btn = document.getElementById('btnEntrar');
     if (!btn) return;
-    const ok = email.length > 0 && pass.length > 0;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    const ok = emailRegex.test(email) && passRegex.test(pass);
     btn.disabled = !ok;
     btn.style.background = ok ? '' : '#3a3000';
     btn.style.color = ok ? '' : '#6b5800';
