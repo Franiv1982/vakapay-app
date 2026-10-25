@@ -93,7 +93,9 @@ input[type="date"]::-webkit-datetime-edit-day-field:focus,
 input[type="date"]::-webkit-datetime-edit-month-field:focus,
 input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparent;color:inherit}
 /* ── GRID ── */
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:11px}
+.g2 > .field{min-width:0}
+.field input[type="date"]{min-width:0;max-width:100%}
 .g3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
 .span2{grid-column:span 2}
 
