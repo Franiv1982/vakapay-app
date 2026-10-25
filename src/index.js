@@ -66,6 +66,7 @@ api.use('/auth',     authRoutes);
 api.use('/users',    usersRoutes);
 api.use('/groups',   groupsRoutes);
 api.use('/groups/:id/expenses', expensesRoutes);   // /groups/:id/expenses (mergeParams)
+api.use('/groups/:id/chat',     require('./routes/chat'));
 api.use('/friends',  friendsRoutes);
 api.use('/activity', activityRoutes);
 api.use('/invite',   require('./routes/invite'));

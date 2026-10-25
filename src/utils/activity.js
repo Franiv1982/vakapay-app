@@ -50,9 +50,19 @@ async function logGroupActivity(groupId, actorId, type, buildMessage) {
         [uid, type, message, group.name]
       );
     }
+    await mensajeSistema(groupId, `${type === 'payment' ? '💸' : '🧾'} ${message.replace(` en "${group.name}"`, '')}`);
   } catch (err) {
     console.error('Error logging group activity:', err.message);
   }
 }
 
-module.exports = { logActivity, logGroupActivity };
+// Mensaje automático en el chat del grupo (gastos, pagos, altas y bajas)
+async function mensajeSistema(groupId, texto, cliente = db) {
+  try {
+    await cliente.query("INSERT INTO mensajes (group_id, texto, tipo) VALUES ($1, $2, 'sistema')", [groupId, texto]);
+  } catch (err) {
+    console.error('Error en mensaje de sistema del chat:', err.message);
+  }
+}
+
+module.exports = { logActivity, logGroupActivity, mensajeSistema };

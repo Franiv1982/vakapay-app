@@ -74,6 +74,8 @@ async function borrarDatosUsuario(userId, { eliminarCuenta = false } = {}) {
         SELECT user_id, 'member', $1, $2 FROM group_members
         WHERE group_id = $3 AND user_id IS NOT NULL AND user_id <> $4
       `, [msg, g.name, g.id, userId]);
+      await cliente.query("INSERT INTO mensajes (group_id, texto, tipo) VALUES ($1, $2, 'sistema')",
+        [g.id, eliminarCuenta ? `👋 ${nombre} eliminó su cuenta y salió del grupo` : `👋 ${nombre} salió del grupo`]);
       await cliente.query('DELETE FROM group_members WHERE group_id = $1 AND user_id = $2', [g.id, userId]);
       // Si eras el creador, el grupo pasa al siguiente participante con cuenta
       await cliente.query(`

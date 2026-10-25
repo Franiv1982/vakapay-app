@@ -51,6 +51,23 @@ router.get('/', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// ── GET /groups/chat/no-leidos ────────────────────────────────────
+// Mensajes del chat sin leer en cada uno de tus grupos (para los avisos)
+router.get('/chat/no-leidos', requireAuth, async (req, res, next) => {
+  try {
+    const r = await db.query(`
+      SELECT gm.group_id,
+        (SELECT COUNT(*)::int FROM mensajes m
+          WHERE m.group_id = gm.group_id AND NOT m.borrado
+            AND (m.user_id IS NULL OR m.user_id <> $1)
+            AND m.id > COALESCE((SELECT ultimo_leido FROM chat_lecturas l WHERE l.group_id = gm.group_id AND l.user_id = $1), 0)
+        ) AS no_leidos
+      FROM group_members gm WHERE gm.user_id = $1
+    `, [req.user.id]);
+    res.json(Object.fromEntries(r.rows.map(x => [x.group_id, x.no_leidos])));
+  } catch (err) { next(err); }
+});
+
 // ── POST /groups ──────────────────────────────────────────────────
 router.post('/', requireAuth, async (req, res, next) => {
   try {
