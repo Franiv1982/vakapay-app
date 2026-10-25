@@ -295,7 +295,7 @@
         <p class="auth-sub">Introduce tus credenciales para entrar.</p>
         <div class="auth-form" style="display:flex; flex-direction:column;">
             <div style="margin-bottom: 15px;">
-                <input type="email" id="login-email" placeholder="ej: tu.correo@gmail.com" class="auth-input" style="margin-bottom:0;" oninput="checkLoginFields()">
+                <input type="email" id="login-email" placeholder="ej: tu.email@gmail.com" class="auth-input" style="margin-bottom:0;" oninput="checkLoginFields()">
             </div>
             <div class="password-wrapper" style="position: relative; width: 100%; margin-bottom: 15px;">
                 <input type="password" id="login-pass" placeholder="Contraseña" class="auth-input" style="width: 100%; margin-bottom:0;" oninput="checkLoginFields()">
@@ -323,7 +323,7 @@
         <p class="auth-sub" style="text-align:center;">Para proteger tu información, necesitamos verificar tu correo electrónico.</p>
         <div class="auth-form" style="display:flex; flex-direction:column; margin-top:15px;">
             <div style="margin-bottom: 15px;">
-                <input type="email" id="recuperar-email" placeholder="ej: tu.correo@gmail.com" class="auth-input" style="margin-bottom:0;" oninput="checkRecuperarFields()">
+                <input type="email" id="recuperar-email" placeholder="ej: tu.email@gmail.com" class="auth-input" style="margin-bottom:0;" oninput="checkRecuperarFields()">
             </div>
         </div>
         <button id="btnContinuarRecuperar" onclick="enviarCodigoRecuperacion()" class="btn-primary" style="margin-top:10px;background:#3a3000;color:#6b5800;border:1px solid #4a4000;cursor:not-allowed;" disabled>Continuar</button>
@@ -396,7 +396,7 @@
                 <span id="err-nombre" class="error-message"></span>
             </div>
             <div class="input-group">
-                <input type="email" id="reg-email" placeholder="ej: tu.correo@gmail.com" class="auth-input" autocomplete="email" inputmode="email" oninput="checkRegistroFields()">
+                <input type="email" id="reg-email" placeholder="ej: tu.email@gmail.com" class="auth-input" autocomplete="email" inputmode="email" oninput="checkRegistroFields()">
                 <span id="err-email" class="error-message"></span>
             </div>
             <div class="input-group" style="margin-bottom:25px;">
