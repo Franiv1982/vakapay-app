@@ -548,8 +548,14 @@ async function reenviarCodigo() {
     const enlace = document.getElementById('enlace-reenviar');
     if (enlace.classList.contains('deshabilitado')) return;
     const email = document.getElementById('recuperar-email').value.trim();
-    // TODO: await vakaData.forgotPassword({ email });
-    console.log('Reenviando código a:', email);
+    enlace.classList.add('deshabilitado'); // evita pulsaciones repetidas mientras se envía
+    try {
+        await vakaData.forgotPassword({ email });
+    } catch (error) {
+        enlace.classList.remove('deshabilitado');
+        alert(error.message || 'No se pudo reenviar el código. Inténtalo de nuevo.');
+        return;
+    }
     ['otp-1','otp-2','otp-3','otp-4','otp-5','otp-6'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('otp-1').focus();
     checkOtpCompleto();
