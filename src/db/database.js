@@ -121,6 +121,32 @@ const initSchema = async () => {
       ALTER TABLE expenses ADD COLUMN IF NOT EXISTS es_pago BOOLEAN NOT NULL DEFAULT FALSE;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS pago_bizum TEXT;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS pago_iban TEXT;
+
+      -- Chat de cada grupo
+      CREATE TABLE IF NOT EXISTS mensajes (
+        id         SERIAL PRIMARY KEY,
+        group_id   INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+        user_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+        autor      TEXT,
+        texto      TEXT    NOT NULL,
+        tipo       TEXT    NOT NULL DEFAULT 'usuario',   -- 'usuario' | 'sistema'
+        borrado    BOOLEAN NOT NULL DEFAULT FALSE,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_mensajes_grupo ON mensajes(group_id, id);
+      CREATE TABLE IF NOT EXISTS reacciones (
+        mensaje_id INTEGER NOT NULL REFERENCES mensajes(id) ON DELETE CASCADE,
+        user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        emoji      TEXT    NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        PRIMARY KEY (mensaje_id, user_id)
+      );
+      CREATE TABLE IF NOT EXISTS chat_lecturas (
+        group_id     INTEGER NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
+        user_id      INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        ultimo_leido INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (group_id, user_id)
+      );
     `);
     console.log('✅ Schema PostgreSQL inicializado u optimizado');
   } catch (err) {

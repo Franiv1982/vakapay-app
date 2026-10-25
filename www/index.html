@@ -706,6 +706,16 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparen
     <button class="btn btn-gold btn-full" onclick="exportarPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
   </div>
 </div>
+
+<!-- Chat del grupo -->
+<div class="sec-title" id="sec7" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="abrirChat()">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="num">7</div>
+    <h2>Chat del grupo</h2>
+    <span id="chatBadge" style="display:none;background:var(--danger);color:#fff;font-size:.65rem;font-weight:900;border-radius:10px;padding:2px 8px;margin-left:2px;"></span>
+  </div>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+</div>
 </main>
 </div>
 <!-- ═══ PAGE: DETALLE GASTO ═══ -->
@@ -1985,8 +1995,8 @@ function renderGroupsList() {
     const nm = Object.keys(g.members || {}).length;
 
     return `
-      <div class="group-card" onclick="openGroup(${i})">
-        <div class="gc-icon">${TYPE_ICONS[g.type] || '📂'}</div>
+      <div class="group-card" data-gid="${g.id}" onclick="openGroup(${i})">
+        <div class="gc-icon" style="position:relative;">${TYPE_ICONS[g.type] || '📂'}<span class="chat-dot" title="Mensajes nuevos en el chat" style="display:${(typeof chatNoLeidos !== 'undefined' && chatNoLeidos[g.id] > 0) ? 'block' : 'none'}"></span></div>
         <div class="gc-info">
           <div class="gc-name">${g.name}</div>
           <div class="gc-meta">${nm} participante${nm !== 1 ? 's' : ''} · ${fmtDate(g.start)} → ${fmtDate(g.end)}</div>
@@ -2016,7 +2026,8 @@ async function openGroup(idx){
   document.getElementById('hbadge').textContent = TYPE_ICONS[g.type]+' '+g.name;
   document.getElementById('hbadge').style.display = 'block';
   posicionarBadge();
-  ['sec2','sec3','sec4','sec5','sec6'].forEach(id=>document.getElementById(id).style.opacity='1');
+  ['sec2','sec3','sec4','sec5','sec6','sec7'].forEach(id=>document.getElementById(id).style.opacity='1');
+  if (typeof actualizarNoLeidos === 'function') actualizarNoLeidos();
   document.getElementById('linkBox').style.display = 'none';
 
   // Cargar datos frescos del backend
@@ -5354,6 +5365,8 @@ function openDeleteFromEdit() {
 // Captura el botón atrás nativo de Android (API correcta de Capacitor)
 if (window.Capacitor && Capacitor.isNativePlatform() && Capacitor.Plugins.App) {
   Capacitor.Plugins.App.addListener('backButton', () => {
+    // Chat abierto: primero se cierra su menú/diálogo, después el chat
+    if (typeof chatAtras === 'function' && chatAtras()) return;
     // Si hay algún modal visible, ciérralo primero en vez de navegar
     const openModal = [...document.querySelectorAll('.modal-overlay')]
       .find(m => getComputedStyle(m).display !== 'none');
@@ -5915,5 +5928,342 @@ function tocarBotonGrupos(btn) {
     <button onclick="cerrarModalPendientes()" style="width:100%; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:#000; background:#F5C800;">Entendido</button>
   </div>
 </div>
+
+<style>
+/* ═══ CHAT DEL GRUPO ═══ */
+.chat-dot{position:absolute;top:-4px;right:-4px;width:11px;height:11px;border-radius:50%;background:var(--danger);border:2px solid var(--dark)}
+#page-chat{display:none;flex-direction:column;position:fixed;inset:0;z-index:2000;background:var(--dark)}
+#page-chat.active{display:flex}
+.chat-top{display:flex;align-items:center;gap:10px;padding:12px 14px 10px;padding-top:calc(12px + env(safe-area-inset-top));border-bottom:1px solid var(--border);background:rgba(14,14,14,.96)}
+.chat-top .t{font-weight:900;color:var(--gold);font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-top .s{font-size:.65rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-list{flex:1;overflow-y:auto;padding:12px 12px 6px;display:flex;flex-direction:column;gap:8px;-webkit-overflow-scrolling:touch}
+.chat-vacio{margin:auto;text-align:center;color:var(--muted);font-size:.8rem;line-height:1.5;padding:20px}
+.chat-dia{align-self:center;font-size:.62rem;color:var(--muted);background:var(--dark3);padding:3px 10px;border-radius:10px;margin:4px 0}
+.chat-sis{align-self:center;max-width:88%;text-align:center;font-size:.7rem;color:#cfcfcf;background:rgba(245,200,0,.08);border:1px solid rgba(245,200,0,.2);padding:6px 10px;border-radius:12px;line-height:1.35;word-break:break-word}
+.chat-sis .hora{display:block;font-size:.56rem;color:var(--muted);margin-top:2px}
+.msg{max-width:80%;display:flex;flex-direction:column;align-self:flex-start}
+.msg.yo{align-self:flex-end;align-items:flex-end}
+.msg .burb{background:var(--dark3);border:1px solid rgba(255,255,255,.06);padding:7px 10px;border-radius:14px 14px 14px 4px;font-size:.84rem;color:var(--text);line-height:1.35;white-space:pre-wrap;word-break:break-word;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.msg.yo .burb{background:rgba(245,200,0,.16);border-color:rgba(245,200,0,.3);border-radius:14px 14px 4px 14px}
+.msg.borrado .burb{font-style:italic;color:var(--muted)}
+.msg .autor{font-size:.62rem;font-weight:800;color:var(--gold);margin:0 0 2px 4px}
+.msg .hora{font-size:.58rem;color:var(--muted);margin-left:8px;white-space:nowrap}
+.chat-sis.enfocado,.msg.enfocado{position:relative;z-index:3}
+.reacc{display:flex;flex-wrap:wrap;gap:4px;margin-top:-6px;padding:0 6px;position:relative;z-index:1}
+.reacc button{background:var(--dark4);border:1px solid rgba(255,255,255,.12);border-radius:12px;font-size:.7rem;padding:1px 7px;color:var(--text);cursor:pointer}
+.reacc button.mia{border-color:var(--gold)}
+.chat-input{display:flex;gap:8px;align-items:flex-end;padding:10px 12px;padding-bottom:calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:var(--dark2)}
+.chat-input textarea{flex:1;resize:none;max-height:110px;min-height:42px;background:var(--dark3);border:1.5px solid rgba(255,255,255,.09);border-radius:20px;padding:10px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:.88rem;outline:none;line-height:1.3}
+.chat-input textarea:focus{border-color:var(--gold)}
+.chat-input button{width:42px;height:42px;flex-shrink:0;border-radius:50%;border:none;background:var(--gold);color:#000;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.chat-input button:disabled{opacity:.5}
+#chatCapa{display:none;position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:2}
+.chat-picker{position:absolute;z-index:4;display:flex;gap:2px;background:var(--dark4);border:1px solid var(--border);border-radius:24px;padding:5px 7px;box-shadow:var(--shadow)}
+.chat-picker button{font-size:1.35rem;background:none;border:none;padding:2px 4px;border-radius:50%;cursor:pointer}
+.chat-picker button.mia{background:rgba(245,200,0,.25)}
+.chat-menu{position:absolute;z-index:4;background:var(--dark3);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;font-size:.82rem;min-width:170px}
+.chat-menu button{display:block;width:100%;text-align:left;padding:11px 14px;color:var(--text);background:none;border:none;border-bottom:1px solid rgba(255,255,255,.05);font-family:'Nunito',sans-serif;font-size:.82rem;cursor:pointer}
+.chat-menu button.rojo{color:var(--danger)}
+#chatDialogo{display:none;position:absolute;inset:0;z-index:5;background:rgba(0,0,0,.6);align-items:center;justify-content:center}
+#chatDialogo .caja{background:#1e1e1e;width:88%;max-width:330px;padding:22px;border-radius:20px;border:1px solid #333;text-align:center;box-sizing:border-box}
+</style>
+
+<!-- ═══ PANTALLA: CHAT DEL GRUPO ═══ -->
+<div id="page-chat">
+  <div class="chat-top">
+    <button class="btn btn-sm btn-outline" style="font-size:.7rem;padding:3px 10px;flex-shrink:0;" onclick="cerrarChat()">← Volver</button>
+    <div style="min-width:0;"><div class="t" id="chatTitulo">Chat</div><div class="s" id="chatMiembros"></div></div>
+  </div>
+  <div class="chat-list" id="chatLista"></div>
+  <div class="chat-input">
+    <textarea id="chatTexto" rows="1" maxlength="1000" placeholder="Escribe un mensaje..." oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,110)+'px'"></textarea>
+    <button id="chatEnviar" onclick="enviarMensajeChat()" title="Enviar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+  </div>
+  <div id="chatCapa" onclick="cerrarMenuChat()"></div>
+  <div id="chatDialogo" onclick="if(event.target===this)cerrarDialogoChat()"><div class="caja" id="chatDialogoCaja"></div></div>
+</div>
+
+<script>
+// ═══ CHAT DEL GRUPO ═══════════════════════════════════════════════════
+// Un chat por grupo. Mientras está abierto, la app pide los mensajes cada 4 s.
+// Los mensajes automáticos (gastos, pagos, altas y bajas) los crea el servidor.
+const CHAT_EMOJIS = ['👍', '❤️', '😂', '😮', '🙏', '💸'];
+var chatNoLeidos = {};          // { idGrupo: nº de mensajes sin leer } (var: se usa también al pintar las tarjetas de grupo)
+let _chatGrupoId = null, _chatTimer = null, _chatFirma = '', _chatMensajes = [];
+let _chatMenuMsg = null, _chatPulsacion = null;
+
+const escaparHtml = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const chatAbierto = () => document.getElementById('page-chat').classList.contains('active');
+
+function apiChat(ruta = '', opciones = {}) {
+  return fetch(`${API_BASE}/api/v1/groups/${_chatGrupoId}/chat${ruta}`, {
+    ...opciones,
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` }
+  });
+}
+
+// ── Avisos de mensajes sin leer (sección 7 y tarjeta del grupo) ──────
+async function actualizarNoLeidos() {
+  try {
+    const r = await fetch(`${API_BASE}/api/v1/groups/chat/no-leidos`, { headers: { 'Authorization': `Bearer ${vakaData.getToken()}` } });
+    if (!r.ok) return;
+    chatNoLeidos = await r.json();
+  } catch (_) { return; }
+  pintarAvisosChat();
+}
+function pintarAvisosChat() {
+  const g = groups[currentGroupIdx];
+  const badge = document.getElementById('chatBadge');
+  if (badge) {
+    const n = (g && chatNoLeidos[g.id]) || 0;
+    badge.textContent = n === 1 ? '1 nuevo' : `${n} nuevos`;
+    badge.style.display = n > 0 && !chatAbierto() ? 'inline-block' : 'none';
+  }
+  document.querySelectorAll('.group-card[data-gid]').forEach(card => {
+    const dot = card.querySelector('.chat-dot');
+    if (dot) dot.style.display = (chatNoLeidos[card.dataset.gid] || 0) > 0 ? 'block' : 'none';
+  });
+}
+setInterval(() => { if (document.visibilityState === 'visible' && !chatAbierto()) actualizarNoLeidos(); }, 30000);
+setTimeout(actualizarNoLeidos, 2500);
+
+// ── Abrir / cerrar ───────────────────────────────────────────────────
+function abrirChat() {
+  const g = groups[currentGroupIdx];
+  if (!g || !g.id) { toast('Abre un grupo primero', 'e'); return; }
+  _chatGrupoId = g.id; _chatFirma = ''; _chatMensajes = [];
+  document.getElementById('chatTitulo').textContent = `${TYPE_ICONS[g.type] || '📂'} ${g.name} · Chat`;
+  document.getElementById('chatMiembros').textContent = Object.keys(g.members || {}).join(', ');
+  document.getElementById('chatLista').innerHTML = '<div class="chat-vacio">Cargando mensajes...</div>';
+  document.getElementById('page-chat').classList.add('active');
+  const hb = document.getElementById('hbadge'); if (hb) hb.style.visibility = 'hidden';
+  document.body.style.overflow = 'hidden';
+  pintarAvisosChat();
+  cargarChat(true);
+  clearInterval(_chatTimer);
+  _chatTimer = setInterval(() => { if (document.visibilityState === 'visible') cargarChat(); }, 4000);
+}
+function cerrarChat() {
+  clearInterval(_chatTimer); _chatTimer = null;
+  cerrarMenuChat(); cerrarDialogoChat();
+  document.getElementById('page-chat').classList.remove('active');
+  const hb = document.getElementById('hbadge'); if (hb) hb.style.visibility = '';
+  document.body.style.overflow = '';
+  actualizarNoLeidos();
+}
+// Botón atrás de Android: devuelve true si lo ha gestionado el chat
+function chatAtras() {
+  if (!chatAbierto()) return false;
+  if (document.getElementById('chatDialogo').style.display === 'flex') { cerrarDialogoChat(); return true; }
+  if (_chatMenuMsg !== null) { cerrarMenuChat(); return true; }
+  cerrarChat(); return true;
+}
+
+// ── Cargar y pintar ──────────────────────────────────────────────────
+async function cargarChat(forzar = false) {
+  if (!_chatGrupoId) return;
+  let datos;
+  try {
+    const r = await apiChat();
+    if (!r.ok) throw new Error();
+    datos = await r.json();
+  } catch (_) {
+    if (forzar) document.getElementById('chatLista').innerHTML = '<div class="chat-vacio">No se pudieron cargar los mensajes. Revisa tu conexión.</div>';
+    return;
+  }
+  const firma = JSON.stringify(datos.mensajes);
+  if (!forzar && firma === _chatFirma) return;
+  _chatFirma = firma; _chatMensajes = datos.mensajes;
+  if (_chatMenuMsg === null) pintarChat(forzar);
+  // Marcar como leído
+  const ultimo = datos.mensajes.length ? datos.mensajes[datos.mensajes.length - 1].id : 0;
+  if (ultimo > (datos.ultimo_leido || 0)) {
+    apiChat('/leido', { method: 'POST', body: JSON.stringify({ ultimo }) }).catch(() => {});
+  }
+  chatNoLeidos[_chatGrupoId] = 0;
+  pintarAvisosChat();
+}
+
+function diaChat(fecha) {
+  const d = new Date(fecha), hoy = new Date();
+  const ayer = new Date(); ayer.setDate(hoy.getDate() - 1);
+  if (d.toDateString() === hoy.toDateString()) return 'Hoy';
+  if (d.toDateString() === ayer.toDateString()) return 'Ayer';
+  return d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'short' });
+}
+const horaChat = f => new Date(f).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+function pintarChat(alFinal = false) {
+  const lista = document.getElementById('chatLista');
+  const cercaDelFinal = lista.scrollHeight - lista.scrollTop - lista.clientHeight < 80;
+  if (!_chatMensajes.length) {
+    lista.innerHTML = '<div class="chat-vacio">Todavía no hay mensajes.<br>Escribe el primero 👋<br><br>Aquí aparecerán también los gastos y pagos del grupo.</div>';
+    return;
+  }
+  let html = '', diaAnterior = '', autorAnterior = '';
+  for (const m of _chatMensajes) {
+    const dia = diaChat(m.created_at);
+    if (dia !== diaAnterior) { html += `<div class="chat-dia">${escaparHtml(dia)}</div>`; diaAnterior = dia; autorAnterior = ''; }
+    const reacciones = Object.entries(m.reacciones || {}).map(([emoji, nombres]) =>
+      `<button class="${m.mi_reaccion === emoji ? 'mia' : ''}" onclick="event.stopPropagation();reaccionarChat(${m.id},'${emoji}')">${emoji} ${nombres.length}</button>`).join('');
+    const bloqueReacc = reacciones ? `<div class="reacc">${reacciones}</div>` : '';
+    if (m.tipo === 'sistema') {
+      html += `<div class="chat-sis" data-id="${m.id}">${escaparHtml(m.texto)}<span class="hora">${horaChat(m.created_at)}</span></div>${bloqueReacc ? `<div style="align-self:center;">${bloqueReacc}</div>` : ''}`;
+      autorAnterior = '';
+      continue;
+    }
+    const mostrarAutor = !m.mio && m.autor !== autorAnterior;
+    autorAnterior = m.autor;
+    html += `<div class="msg ${m.mio ? 'yo' : ''} ${m.borrado ? 'borrado' : ''}" data-id="${m.id}">
+      ${mostrarAutor ? `<div class="autor">${escaparHtml(m.autor || 'Alguien')}</div>` : ''}
+      <div class="burb">${m.borrado ? 'Mensaje eliminado' : escaparHtml(m.texto)}<span class="hora">${horaChat(m.created_at)}</span></div>
+      ${bloqueReacc}
+    </div>`;
+  }
+  lista.innerHTML = html;
+  if (alFinal || cercaDelFinal) lista.scrollTop = lista.scrollHeight;
+}
+
+// ── Enviar ───────────────────────────────────────────────────────────
+async function enviarMensajeChat() {
+  const caja = document.getElementById('chatTexto');
+  const texto = caja.value.trim();
+  if (!texto || !_chatGrupoId) return;
+  const btn = document.getElementById('chatEnviar');
+  btn.disabled = true;
+  try {
+    const r = await apiChat('', { method: 'POST', body: JSON.stringify({ texto }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'No se pudo enviar');
+    caja.value = ''; caja.style.height = 'auto';
+    await cargarChat(true);
+  } catch (err) {
+    toast(err.message || 'No se pudo enviar el mensaje', 'e');
+  } finally {
+    btn.disabled = false;
+  }
+}
+document.getElementById('chatTexto').addEventListener('keydown', e => {
+  // En ordenador, Enter envía y Mayús+Enter hace salto de línea
+  if (e.key === 'Enter' && !e.shiftKey && !('ontouchstart' in window)) { e.preventDefault(); enviarMensajeChat(); }
+});
+
+// ── Reacciones ───────────────────────────────────────────────────────
+async function reaccionarChat(id, emoji) {
+  cerrarMenuChat();
+  try {
+    const r = await apiChat(`/${id}/reaccion`, { method: 'PUT', body: JSON.stringify({ emoji }) });
+    if (!r.ok) throw new Error();
+    await cargarChat(true);
+  } catch (_) { toast('No se pudo guardar la reacción', 'e'); }
+}
+
+// ── Mantener pulsado: reacciones + menú ──────────────────────────────
+(function () {
+  const lista = document.getElementById('chatLista');
+  const objetivo = e => e.target.closest('.msg .burb, .chat-sis');
+  lista.addEventListener('pointerdown', e => {
+    const el = objetivo(e); if (!el) return;
+    const x = e.clientX, y = e.clientY;
+    _chatPulsacion = { el, x, y, t: setTimeout(() => { _chatPulsacion = null; abrirMenuChat(el); }, 450) };
+  });
+  const cancelar = () => { if (_chatPulsacion) { clearTimeout(_chatPulsacion.t); _chatPulsacion = null; } };
+  lista.addEventListener('pointermove', e => {
+    if (_chatPulsacion && (Math.abs(e.clientX - _chatPulsacion.x) > 10 || Math.abs(e.clientY - _chatPulsacion.y) > 10)) cancelar();
+  });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => lista.addEventListener(ev, cancelar));
+  lista.addEventListener('scroll', cancelar, { passive: true });
+  lista.addEventListener('contextmenu', e => { const el = objetivo(e); if (!el) return; e.preventDefault(); cancelar(); abrirMenuChat(el); });
+})();
+
+function abrirMenuChat(el) {
+  const cont = el.classList.contains('chat-sis') ? el : el.closest('.msg');
+  const id = Number(cont.dataset.id);
+  const m = _chatMensajes.find(x => x.id === id);
+  if (!m || m.borrado) return;
+  cerrarMenuChat();
+  _chatMenuMsg = id;
+  if (navigator.vibrate) { try { navigator.vibrate(15); } catch (_) {} }
+  const pagina = document.getElementById('page-chat');
+  const marco = pagina.getBoundingClientRect();
+  const r = el.getBoundingClientRect();
+  cont.classList.add('enfocado');
+  document.getElementById('chatCapa').style.display = 'block';
+
+  const picker = document.createElement('div');
+  picker.className = 'chat-picker'; picker.id = 'chatPicker';
+  picker.innerHTML = CHAT_EMOJIS.map(e => `<button class="${m.mi_reaccion === e ? 'mia' : ''}" onclick="reaccionarChat(${id},'${e}')">${e}</button>`).join('');
+  const menu = document.createElement('div');
+  menu.className = 'chat-menu'; menu.id = 'chatMenu';
+  const tieneReacc = Object.keys(m.reacciones || {}).length > 0;
+  menu.innerHTML =
+    `<button onclick="copiarMensajeChat(${id})">Copiar</button>` +
+    (tieneReacc ? `<button onclick="verReaccionesChat(${id})">Ver quién reaccionó</button>` : '') +
+    (m.mio && m.tipo === 'usuario' ? `<button class="rojo" onclick="confirmarBorrarChat(${id})">Borrar</button>` : '');
+  pagina.appendChild(picker); pagina.appendChild(menu);
+
+  // Posición: emojis encima del mensaje y menú debajo (o al revés si no cabe)
+  const ancho = marco.width;
+  const izq = el.closest('.yo') ? Math.max(8, r.right - marco.left - picker.offsetWidth) : Math.max(8, r.left - marco.left);
+  picker.style.left = Math.min(izq, ancho - picker.offsetWidth - 8) + 'px';
+  let arriba = r.top - marco.top - picker.offsetHeight - 8;
+  if (arriba < 60) arriba = r.bottom - marco.top + 8 + menu.offsetHeight + 8;
+  picker.style.top = arriba + 'px';
+  const izqMenu = el.closest('.yo') ? Math.max(8, r.right - marco.left - menu.offsetWidth) : Math.max(8, r.left - marco.left);
+  menu.style.left = Math.min(izqMenu, ancho - menu.offsetWidth - 8) + 'px';
+  let abajo = r.bottom - marco.top + 8;
+  if (abajo + menu.offsetHeight > marco.height - 70) abajo = Math.max(60, r.top - marco.top - menu.offsetHeight - 8 - (arriba < r.top - marco.top ? picker.offsetHeight + 8 : 0));
+  menu.style.top = abajo + 'px';
+}
+function cerrarMenuChat() {
+  _chatMenuMsg = null;
+  ['chatPicker', 'chatMenu'].forEach(id => { const x = document.getElementById(id); if (x) x.remove(); });
+  const capa = document.getElementById('chatCapa'); if (capa) capa.style.display = 'none';
+  document.querySelectorAll('#chatLista .enfocado').forEach(x => x.classList.remove('enfocado'));
+}
+
+function copiarMensajeChat(id) {
+  const m = _chatMensajes.find(x => x.id === id);
+  cerrarMenuChat();
+  if (m) copiarTexto(m.texto);
+}
+
+// ── Diálogo (quién reaccionó / borrar) ───────────────────────────────
+function abrirDialogoChat(html) {
+  document.getElementById('chatDialogoCaja').innerHTML = html;
+  document.getElementById('chatDialogo').style.display = 'flex';
+}
+function cerrarDialogoChat() {
+  const d = document.getElementById('chatDialogo'); if (d) d.style.display = 'none';
+}
+function verReaccionesChat(id) {
+  const m = _chatMensajes.find(x => x.id === id);
+  cerrarMenuChat();
+  if (!m) return;
+  const filas = Object.entries(m.reacciones || {}).map(([emoji, nombres]) =>
+    `<div style="display:flex;gap:10px;align-items:flex-start;text-align:left;padding:8px 0;border-bottom:1px solid #333;">
+       <span style="font-size:1.2rem;">${emoji}</span><span style="color:#F2F2F2;font-size:.85rem;line-height:1.5;">${nombres.map(escaparHtml).join(', ')}</span></div>`).join('');
+  abrirDialogoChat(`<div style="color:#F2F2F2;font-size:1.2rem;font-weight:bold;margin-bottom:10px;">Reacciones</div>${filas}
+    <button onclick="cerrarDialogoChat()" style="width:100%;margin-top:16px;padding:12px;border-radius:12px;font-weight:bold;border:none;background:#F5C800;color:#000;cursor:pointer;">Cerrar</button>`);
+}
+function confirmarBorrarChat(id) {
+  cerrarMenuChat();
+  abrirDialogoChat(`<div style="color:#F2F2F2;font-size:1.3rem;font-weight:bold;margin-bottom:8px;">¿Borrar mensaje?</div>
+    <p style="color:#F2F2F2;font-size:.8rem;opacity:.8;margin-bottom:20px;">Se mostrará como «Mensaje eliminado» para todo el grupo.</p>
+    <div style="display:flex;gap:12px;">
+      <button onclick="cerrarDialogoChat()" style="flex:1;padding:13px;border-radius:12px;font-weight:bold;border:none;color:#fff;background:#28a745;cursor:pointer;">No, volver</button>
+      <button onclick="borrarMensajeChat(${id})" style="flex:1;padding:13px;border-radius:12px;font-weight:bold;border:none;color:#fff;background:#dc3545;cursor:pointer;">Sí, borrar</button>
+    </div>`);
+}
+async function borrarMensajeChat(id) {
+  cerrarDialogoChat();
+  try {
+    const r = await apiChat(`/${id}`, { method: 'DELETE' });
+    if (!r.ok) throw new Error();
+    await cargarChat(true);
+  } catch (_) { toast('No se pudo borrar el mensaje', 'e'); }
+}
+</script>
 </body>
 </html>

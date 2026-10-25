@@ -2,7 +2,7 @@
 const express = require('express');
 const db = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
-const { logActivity } = require('../utils/activity');
+const { logActivity, mensajeSistema } = require('../utils/activity');
 const { buscarAmigoDuplicado, completarAmigo } = require('../utils/contactos');
 
 const router = express.Router();
@@ -71,6 +71,7 @@ router.post('/:token/join', requireAuth, async (req, res, next) => {
     }
 
     logActivity(req.user.id, 'member', `Te uniste al grupo "${gRes.rows[0].name}"`);
+    await mensajeSistema(groupId, `👋 ${displayName} se unió al grupo`);
     res.status(201).json({ joined: true, group: gRes.rows[0], display_name: displayName });
   } catch (err) { next(err); }
 });
