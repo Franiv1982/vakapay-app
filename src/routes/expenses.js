@@ -2,13 +2,40 @@
 const express = require('express');
 const db      = require('../db/database');
 const { requireAuth }  = require('../middleware/auth');
-const { logActivity }  = require('../utils/activity');
+const { logGroupActivity } = require('../utils/activity');
 
 const router = express.Router({ mergeParams: true });
 
 const RATES = { EUR: 1, USD: 1 / 1.08, GBP: 1 / 0.86, ARS: 1 / 1100 };
 function toBase(amount, currency) {
   return +(amount * (RATES[currency] || 1)).toFixed(2);
+}
+
+// ── Textos para el historial de actividad ─────────────────────────
+const CAT_NAMES = { food: 'Comida', transport: 'Transporte', hotel: 'Alojamiento', activity: 'Actividad', other: 'Otro' };
+const catName = c => CAT_NAMES[c] || c || 'Otro';
+function fechaTexto(v) {
+  if (!v) return '';
+  const iso = v instanceof Date ? v.toISOString() : String(v);
+  const [y, m, d] = iso.slice(0, 10).split('-');
+  return d && m && y ? `${d}/${m}/${y}` : iso;
+}
+const importe = (a, c) => `${Number(a).toFixed(2)} ${c || 'EUR'}`;
+
+// Describe qué cambió entre la versión anterior y la nueva de un gasto
+function describirCambios(antes, despues) {
+  const cambios = [];
+  if (antes.description !== despues.description) cambios.push(`descripción "${antes.description}" → "${despues.description}"`);
+  if (Number(antes.amount) !== Number(despues.amount) || antes.currency !== despues.currency)
+    cambios.push(`monto ${importe(antes.amount, antes.currency)} → ${importe(despues.amount, despues.currency)}`);
+  if (antes.category !== despues.category) cambios.push(`categoría ${catName(antes.category)} → ${catName(despues.category)}`);
+  if (antes.payer_name !== despues.payer_name) cambios.push(`pagó ${antes.payer_name} → ${despues.payer_name}`);
+  if (fechaTexto(antes.expense_date) !== fechaTexto(despues.expense_date))
+    cambios.push(`fecha ${fechaTexto(antes.expense_date)} → ${fechaTexto(despues.expense_date)}`);
+  const a = [...(antes.involved || [])].sort().join(', ');
+  const b = [...(despues.involved || [])].sort().join(', ');
+  if (a !== b) cambios.push(`participantes ${a} → ${b}`);
+  return cambios;
 }
 
 async function ownsGroup(groupId, userId) {
@@ -110,7 +137,8 @@ router.post('/', requireAuth, async (req, res, next) => {
     const splits = await db.query('SELECT * FROM expense_splits WHERE expense_id = $1', [expense.id]);
     expense.splits = splits.rows;
 
-    logActivity(req.user.id, 'expense', `${payer_name} registró "${description}" · ${amount} ${currency}`);
+    await logGroupActivity(req.params.id, req.user.id, 'expense', (quien, grupo) =>
+      `${quien} registró "${description}" · ${importe(amount, currency)} (pagó ${payer_name}) en "${grupo}"`);
     res.status(201).json(expense);
   } catch (err) { next(err); }
 });
@@ -140,8 +168,12 @@ router.put('/:expId', requireAuth, async (req, res, next) => {
     if (!isOwner && !member) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
-    const existing = await db.query('SELECT id FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
+    const existing = await db.query('SELECT * FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
     if (!existing.rows[0]) return res.status(404).json({ error: 'Gasto no encontrado' });
+    // Guardamos cómo era el gasto antes de editarlo, para el historial
+    const antes = existing.rows[0];
+    const antesSplits = await db.query('SELECT member_name FROM expense_splits WHERE expense_id = $1', [req.params.expId]);
+    antes.involved = antesSplits.rows.map(s => s.member_name);
 
     const { description, amount, currency = 'EUR', category = 'other', payer_name, expense_date, involved } = req.body;
     if (!description || !amount || !payer_name || !expense_date || !involved?.length) {
@@ -171,6 +203,12 @@ router.put('/:expId', requireAuth, async (req, res, next) => {
     const expense = expRes.rows[0];
     const splits  = await db.query('SELECT * FROM expense_splits WHERE expense_id = $1', [expense.id]);
     expense.splits = splits.rows;
+
+    const cambios = describirCambios(antes, { description, amount, currency, category, payer_name, expense_date, involved });
+    if (cambios.length) {
+      await logGroupActivity(req.params.id, req.user.id, 'expense', (quien, grupo) =>
+        `${quien} editó "${antes.description}" en "${grupo}": ${cambios.join('; ')}`);
+    }
     res.json(expense);
   } catch (err) { next(err); }
 });
@@ -183,11 +221,14 @@ router.delete('/:expId', requireAuth, async (req, res, next) => {
     if (!isOwner && !member) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
-    const expRes = await db.query('SELECT id FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
-    if (!expRes.rows[0]) return res.status(404).json({ error: 'Gasto no encontrado' });
+    const expRes = await db.query('SELECT * FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
+    const borrado = expRes.rows[0];
+    if (!borrado) return res.status(404).json({ error: 'Gasto no encontrado' });
 
     await db.query('DELETE FROM expenses WHERE id = $1', [req.params.expId]);
     await recalcBalances(req.params.id);
+    await logGroupActivity(req.params.id, req.user.id, 'expense', (quien, grupo) =>
+      `${quien} eliminó "${borrado.description}" · ${importe(borrado.amount, borrado.currency)} en "${grupo}"`);
     res.status(204).end();
   } catch (err) { next(err); }
 });
