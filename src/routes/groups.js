@@ -40,7 +40,7 @@ router.get('/', requireAuth, async (req, res, next) => {
       SELECT g.*,
         (SELECT COUNT(*)::int FROM group_members WHERE group_id = g.id) AS member_count,
         (SELECT COUNT(*)::int FROM expenses WHERE group_id = g.id) AS expense_count,
-        COALESCE((SELECT SUM(amount_base) FROM expenses WHERE group_id = g.id), 0)::float AS total
+        COALESCE((SELECT SUM(amount_base) FROM expenses WHERE group_id = g.id AND NOT es_pago), 0)::float AS total
       FROM groups g
       LEFT JOIN group_members gm ON gm.group_id = g.id
       WHERE gm.user_id = $1

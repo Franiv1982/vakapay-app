@@ -139,6 +139,12 @@ router.post('/', requireAuth, async (req, res, next) => {
 
     const { description, amount, currency = 'EUR', category = 'other', payer_name, expense_date, involved } = req.body;
     const ticket = req.body.ticket ?? null;
+    // es_pago: liquidación de una deuda (quien debía paga a quien le debían).
+    // Ajusta los saldos como un gasto, pero no cuenta en totales ni estadísticas.
+    const es_pago = req.body.es_pago === true;
+    if (es_pago && involved?.length !== 1) {
+      return res.status(400).json({ error: 'Un pago debe tener un único destinatario' });
+    }
 
     if (!description || !amount || !payer_name || !expense_date || !involved?.length) {
       return res.status(400).json({ error: 'Faltan campos obligatorios' });
@@ -148,9 +154,9 @@ router.post('/', requireAuth, async (req, res, next) => {
     const amount_base = importeBase(req.body, amount, currency);
 
     const expRes = await db.query(`
-      INSERT INTO expenses (group_id, description, amount, currency, amount_base, category, payer_name, expense_date, member_id, ticket)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *
-    `, [req.params.id, description, amount, currency, amount_base, category, payer_name, expense_date, req.user.id, ticket]);
+      INSERT INTO expenses (group_id, description, amount, currency, amount_base, category, payer_name, expense_date, member_id, ticket, es_pago)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *
+    `, [req.params.id, description, amount, currency, amount_base, category, payer_name, expense_date, req.user.id, ticket, es_pago]);
 
     const expense = sinTicket(expRes.rows[0]);
 
@@ -166,8 +172,9 @@ router.post('/', requireAuth, async (req, res, next) => {
     const splits = await db.query('SELECT * FROM expense_splits WHERE expense_id = $1', [expense.id]);
     expense.splits = splits.rows;
 
-    await logGroupActivity(req.params.id, req.user.id, 'expense', (quien, grupo) =>
-      `${quien} registró "${description}" · ${importe(amount, currency)} (pagó ${payer_name}) en "${grupo}"`);
+    await logGroupActivity(req.params.id, req.user.id, es_pago ? 'payment' : 'expense', (quien, grupo) => es_pago
+      ? `${quien} registró un pago: ${payer_name} pagó ${importe(amount, currency)} a ${involved[0]} en "${grupo}"${ticket ? ' (con comprobante)' : ''}`
+      : `${quien} registró "${description}" · ${importe(amount, currency)} (pagó ${payer_name}) en "${grupo}"`);
     res.status(201).json(expense);
   } catch (err) { next(err); }
 });
@@ -286,12 +293,14 @@ router.delete('/:expId', requireAuth, async (req, res, next) => {
     }
     const expRes = await db.query('SELECT * FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
     const borrado = expRes.rows[0];
+    const textoBorrado = borrado && borrado.es_pago
+      ? (quien, grupo) => `${quien} anuló el pago de ${borrado.payer_name} (${importe(borrado.amount, borrado.currency)}) en "${grupo}"`
+      : (quien, grupo) => `${quien} eliminó "${borrado.description}" · ${importe(borrado.amount, borrado.currency)} en "${grupo}"`;
     if (!borrado) return res.status(404).json({ error: 'Gasto no encontrado' });
 
     await db.query('DELETE FROM expenses WHERE id = $1', [req.params.expId]);
     await recalcBalances(req.params.id);
-    await logGroupActivity(req.params.id, req.user.id, 'expense', (quien, grupo) =>
-      `${quien} eliminó "${borrado.description}" · ${importe(borrado.amount, borrado.currency)} en "${grupo}"`);
+    await logGroupActivity(req.params.id, req.user.id, 'expense', textoBorrado);
     res.status(204).end();
   } catch (err) { next(err); }
 });

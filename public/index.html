@@ -1959,7 +1959,7 @@ function renderGroupsList() {
 
   el.innerHTML = groups.map((g, i) => {
     // Cálculo seguro del total: forzamos a número y manejamos valores nulos
-    const total = (g.expenses || []).reduce((s, e) => {
+    const total = (g.expenses || []).filter(e => !e.es_pago).reduce((s, e) => {
       const val = Number(e.baseAmt) || 0;
       return s + val;
     }, 0);
@@ -2049,7 +2049,8 @@ function openGasto(idx) {
   const sym = SYMBOLS[base] || '€';
   const displaySym = SYMBOLS[e.currency || base] || '€';
 
-  document.getElementById('gastoTitle').textContent = CAT_ICONS[e.cat] + ' ' + e.desc;
+  const icono = e.es_pago ? '💸' : (CAT_ICONS[e.cat] || '💡');
+  document.getElementById('gastoTitle').textContent = icono + ' ' + e.desc;
   document.getElementById('gastoMeta').textContent = fmtDate(e.date) + ' · Pagó ' + e.payer;
 
   const ticketHTML = e.ticket ? `
@@ -2062,7 +2063,7 @@ function openGasto(idx) {
 
   document.getElementById('gastoDetail').innerHTML = `
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
-      <div class="exp-ico ${CAT_CSS[e.cat]}" style="width:52px;height:52px;font-size:1.6rem;">${CAT_ICONS[e.cat]}</div>
+      <div class="exp-ico ${e.es_pago ? 'c-other' : CAT_CSS[e.cat]}" style="width:52px;height:52px;font-size:1.6rem;">${icono}</div>
       <div>
         <div style="font-size:1.2rem;font-weight:800;color:var(--text);">${e.desc}</div>
         <div style="font-size:.75rem;color:var(--muted);">${fmtDate(e.date)}</div>
@@ -2115,8 +2116,8 @@ function openGasto(idx) {
     </div>
 
     <div style="display:flex;gap:10px;margin-top:18px;">
-      <button class="btn btn-full" onclick="openEditModal(${idx})" style="flex:1;background:#28a745;color:white;border:none;">Editar</button>
-      <button class="btn btn-full" onclick="openDeleteExpenseModal(${idx})" style="flex:1;background:#dc3545;color:white;border:none;">Eliminar</button>
+      ${e.es_pago ? '' : `<button class="btn btn-full" onclick="openEditModal(${idx})" style="flex:1;background:#28a745;color:white;border:none;">Editar</button>`}
+      <button class="btn btn-full" onclick="openDeleteExpenseModal(${idx})" style="flex:1;background:#dc3545;color:white;border:none;">${e.es_pago ? 'Anular pago' : 'Eliminar'}</button>
     </div>
   `;
 
@@ -2597,7 +2598,7 @@ async function addExpense() {
     await vakaData.addExpense(currentGroupIdx, nuevoGasto);
     
     // Sincronización de totales
-    g.total = g.expenses.reduce((sum, e) => sum + (Number(e.baseAmt) || 0), 0);
+    g.total = g.expenses.filter(e => !e.es_pago).reduce((sum, e) => sum + (Number(e.baseAmt) || 0), 0);
 
     // 4. Limpieza y refresco
     document.getElementById('expDesc').value = '';
@@ -2656,7 +2657,7 @@ async function deleteExpense(idx) {
 
   try {
     await vakaData.deleteExpense(currentGroupIdx, idx);
-    g.total = g.expenses.reduce((sum, exp) => sum + (Number(exp.baseAmt) || 0), 0);
+    g.total = g.expenses.filter(e => !e.es_pago).reduce((sum, exp) => sum + (Number(exp.baseAmt) || 0), 0);
     await refrescarActividad(); // el servidor ya registró el borrado para todo el grupo
     renderAll();
     if (typeof renderGroups === 'function') renderGroups();
@@ -2974,17 +2975,61 @@ function selectPayMethod(el,method){
   else if(method==='bank'){toast('Realiza la transferencia por tu app bancaria 🏦','i');}
 }
 
+// ═══ PAGOS ENTRE PARTICIPANTES ════════════════════════════════════════
+// Saldar una deuda se guarda en el servidor como un "pago": quien debía paga a quien
+// le debían. Ajusta los saldos de todos y queda en la Actividad del grupo, pero no
+// cuenta como gasto en totales ni estadísticas. Se puede anular borrándolo.
+async function registrarPago({ from, to, amount }, archivoComprobante) {
+  const g = groups[currentGroupIdx];
+  if (!g) return;
+  const hoy = new Date();
+  const fecha = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+  let ticket = null;
+  if (archivoComprobante) {
+    try { ticket = 'data:image/jpeg;base64,' + await fileToBase64(archivoComprobante); } catch (_) {}
+  }
+  const importe = +Number(amount).toFixed(2);
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/expenses`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: JSON.stringify({
+        description: `Pago de ${from} a ${to}`,
+        amount: importe, amount_base: importe, currency: getBase(),
+        category: 'other', payer_name: from, expense_date: fecha,
+        involved: [to], es_pago: true, ticket
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'No se pudo registrar el pago');
+  } catch (err) {
+    toast(err.message || 'No se pudo registrar el pago. Revisa tu conexión.', 'e');
+    return;
+  }
+  // Recargar el grupo desde el servidor para que los saldos sean los oficiales
+  try {
+    const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
+      headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    if (resFresh.ok) {
+      const fresh = await resFresh.json();
+      groups[currentGroupIdx] = {
+        ...groups[currentGroupIdx], ...fresh,
+        members: normalizeMembersField(fresh.members, groups[currentGroupIdx].members),
+        expenses: normalizeExpensesField(fresh.expenses)
+      };
+    }
+  } catch (_) {}
+  save(); renderAll(); calcDebts();
+  if (typeof refrescarActividad === 'function') refrescarActividad();
+  toast(`✅ Pago de ${from} a ${to} registrado`, 's');
+}
+
 function confirmPayment(settle){
   if(!_payData)return;
   if(settle){
-    // Mark settled: zero out in members
-    const g=groups[currentGroupIdx];
-    const {from,to,amount}=_payData;
-    if(g.members.hasOwnProperty(from))g.members[from]=+(g.members[from]+amount).toFixed(2);
-    if(g.members.hasOwnProperty(to))g.members[to]=+(g.members[to]-amount).toFixed(2);
-    save();renderAll();calcDebts();
-    logActivity(`Deuda de ${from} a ${to} marcada como saldada`);saveActivity();renderActivity();
-    toast(`✅ Deuda de ${from} saldada`,'s');
+    const archivo = document.getElementById('pmProofFile')?.files?.[0] || null;
+    registrarPago({ ..._payData }, archivo);
   } else {
     toast('Pago registrado, pendiente de confirmación 📨','i');
   }
@@ -3029,16 +3074,11 @@ function handleProofUpload(ev){
 }
 function sendProof(settle){
   if(!_proofData)return;
-  if(settle){confirmPayment_settle(_proofData);} else {toast('Comprobante enviado al acreedor 📨','i');}
+  if(settle){
+    const archivo = document.getElementById('proofFileInput')?.files?.[0] || null;
+    registrarPago({ ..._proofData }, archivo); // el comprobante queda adjunto al pago
+  } else {toast('Comprobante enviado al acreedor 📨','i');}
   closeProofModal();
-}
-function confirmPayment_settle(data){
-  const g=groups[currentGroupIdx];
-  if(g.members.hasOwnProperty(data.from))g.members[data.from]=+(g.members[data.from]+data.amount).toFixed(2);
-  if(g.members.hasOwnProperty(data.to))g.members[data.to]=+(g.members[data.to]-data.amount).toFixed(2);
-  save();renderAll();calcDebts();
-  logActivity(`Deuda de ${data.from} a ${data.to} saldada con comprobante`);saveActivity();renderActivity();
-  toast(`✅ Deuda de ${data.from} saldada`,'s');
 }
 /* ============================================================
    SECCIÓN: GESTIÓN DE SESIÓN Y LOGOUT
@@ -3334,7 +3374,8 @@ function renderExpenses() {
   const sg = document.getElementById('summaryGrid');
   if (!g || !el) return;
   const gc = document.getElementById('gastosCounter');
-  if (gc) gc.textContent = g.expenses.length > 0 ? `(${g.expenses.length})` : '';
+  const nGastos = g.expenses.filter(e => !e.es_pago).length;
+  if (gc) gc.textContent = nGastos > 0 ? `(${nGastos})` : '';
 
   if (g.expenses.length === 0) {
     el.innerHTML = '<div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div>Sin gastos registrados</div></div>';
@@ -3344,9 +3385,11 @@ function renderExpenses() {
 
   const base = getBase();
   const sym = SYMBOLS[base] || '€';
-  const total = g.expenses.reduce((s, e) => s + (Number(e.baseAmt || e.amount_base) || 0), 0);
+  // Los pagos entre participantes no son gastos: no cuentan en el total
+  const soloGastos = g.expenses.filter(e => !e.es_pago);
+  const total = soloGastos.reduce((s, e) => s + (Number(e.baseAmt || e.amount_base) || 0), 0);
 
-  const porPersona = g.expenses.reduce((s, e) => {
+  const porPersona = soloGastos.reduce((s, e) => {
     const nParticipants = e.splits?.length || e.involved?.length || 1;
     const amt = Number(e.baseAmt || e.amount_base) || 0;
     return s + (amt / nParticipants);
@@ -3367,6 +3410,20 @@ function renderExpenses() {
     const date = e.date || e.expense_date || 'Sin fecha';
     const amount = Number(e.amount || e.amount_base || 0);
 
+    if (e.es_pago) {
+      const destino = (e.involved && e.involved[0]) || (e.splits && e.splits[0] && e.splits[0].member_name) || '';
+      return `<div class="group-card" onclick="openGasto(${i})" style="cursor:pointer;border-style:dashed;">
+      <div class="exp-ico c-other">💸</div>
+      <div class="gc-info">
+        <div class="gc-name">Pago a ${destino}</div>
+        <div class="gc-meta"><strong>${payer}</strong> saldó deuda · ${fmtDate(date)}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="exp-amt" style="color:var(--success);">${displaySym}${amount.toFixed(2)}</div>
+        ${(e.ticket || e.has_ticket) ? '<div style="font-size:.65rem;color:var(--gold);">🧾</div>' : ''}
+      </div>
+    </div>`;
+    }
     return `<div class="group-card" onclick="openGasto(${i})" style="cursor:pointer;">
       <div class="exp-ico ${CAT_CSS[e.cat] || 'c-other'}">${CAT_ICONS[e.cat] || '💡'}</div>
       <div class="gc-info">
@@ -3527,12 +3584,12 @@ function buildInviteText(){
 function buildText(){
   if(currentGroupIdx===null)return'';
   const g=groups[currentGroupIdx];
-  const total=g.expenses.reduce((s,e)=>s+(Number(e.amount)||0),0);
+  const total=g.expenses.filter(e=>!e.es_pago).reduce((s,e)=>s+(Number(e.baseAmt)||Number(e.amount)||0),0);
   const nm=Math.max(1,Object.keys(g.members).length);
   let t=`💳 *VakaPay – ${g.name}* ${TYPE_ICONS[g.type]||''}\n📅 ${fmtDate(g.start)} → ${fmtDate(g.end)}\n\n`;
   t+=`💰 Total: $${total.toFixed(2)}  |  Por persona: $${(total/nm).toFixed(2)}\n`;
   t+=`👥 ${Object.keys(g.members).join(', ')}\n\n`;
-  if(g.expenses.length>0){t+=`📋 Gastos:\n`;g.expenses.forEach(e=>{t+=`  • ${e.desc}: $${(Number(e.amount)||0).toFixed(2)} (pagó ${e.payer})\n`;});}
+  if(g.expenses.length>0){t+=`📋 Gastos:\n`;g.expenses.forEach(e=>{t+= e.es_pago ? `  • 💸 ${e.desc}: $${(Number(e.amount)||0).toFixed(2)}\n` : `  • ${e.desc}: $${(Number(e.amount)||0).toFixed(2)} (pagó ${e.payer})\n`;});}
   const link=document.getElementById('linkInput').value;
   if(link){t+=`\n🔗 Únete al grupo:\n${link}\n`;}
   t+='\n_Generado con VakaPay_';return t;
@@ -3576,7 +3633,7 @@ function exportarPDF(){
   doc.text('PARTICIPANTES', pad, y);
   y += 5;
   const mbs = Object.keys(g.members);
-  const totalGastos = g.expenses.reduce((s,e)=>s+(Number(e.baseAmt)||0),0);
+  const totalGastos = g.expenses.filter(e=>!e.es_pago).reduce((s,e)=>s+(Number(e.baseAmt)||0),0);
   const porPersona = mbs.length ? totalGastos/mbs.length : 0;
   mbs.forEach(m => {
     const bal = g.members[m];
@@ -3603,7 +3660,7 @@ function exportarPDF(){
   doc.text(`Total gastado: ${g.currency||'EUR'} ${totalGastos.toFixed(2)}`, pad+3, y); y+=lh;
   doc.text(`Participantes: ${mbs.length}`, pad+3, y); y+=lh;
   doc.text(`Por persona: ${g.currency||'EUR'} ${porPersona.toFixed(2)}`, pad+3, y); y+=lh;
-  doc.text(`Gastos registrados: ${g.expenses.length}`, pad+3, y); y+=lh;
+  doc.text(`Gastos registrados: ${g.expenses.filter(e=>!e.es_pago).length}`, pad+3, y); y+=lh;
   y += 3;
 
   // — GASTOS —
@@ -4984,7 +5041,7 @@ function renderStats() {
   // 3. FILTRADO DE GASTOS
   let allExp = [];
   if (g.expenses) {
-    g.expenses.forEach(e => {
+    g.expenses.filter(e => !e.es_pago).forEach(e => {   // los pagos no son gastos
       const baseAmt = convertToBase(e.amount, e.currency || base);
       allExp.push({...e, baseAmt});
     });

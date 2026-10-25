@@ -118,6 +118,7 @@ const initSchema = async () => {
       ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_otp_expires TIMESTAMP;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_attempts INTEGER NOT NULL DEFAULT 0;
       ALTER TABLE expenses ADD COLUMN IF NOT EXISTS ticket TEXT;
+      ALTER TABLE expenses ADD COLUMN IF NOT EXISTS es_pago BOOLEAN NOT NULL DEFAULT FALSE;
     `);
     console.log('✅ Schema PostgreSQL inicializado u optimizado');
   } catch (err) {
