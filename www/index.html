@@ -279,7 +279,7 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparen
 .pg-sub{font-size:.73rem;color:var(--muted);margin-bottom:18px}
 
 /* ── TOAST ── */
-#toast{position:fixed;bottom:82px;left:50%;transform:translateX(-50%) translateY(50px);background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 20px;font-size:.81rem;font-weight:700;box-shadow:var(--shadow);z-index:9999;transition:transform .3s,opacity .3s;opacity:0;pointer-events:none;white-space:nowrap;max-width:90vw;text-align:center}
+#toast{position:fixed;bottom:82px;left:50%;transform:translateX(-50%) translateY(50px);background:var(--card);border:1px solid var(--border);border-radius:12px;padding:10px 20px;font-size:.81rem;font-weight:700;box-shadow:var(--shadow);z-index:9999;transition:transform .3s,opacity .3s;opacity:0;pointer-events:none;white-space:normal;width:max-content;max-width:calc(100vw - 32px);text-align:center}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 #toast.s{border-color:var(--success);color:var(--success)}
 #toast.e{border-color:var(--danger);color:var(--danger)}
@@ -585,7 +585,7 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparen
         </button>
         <input type="file" id="ocrFile" accept="image/*" style="display:none" onchange="handleOCRFile(event)">
         <!-- Popover -->
-        <div id="ocrPopover" style="display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:8000;background:var(--dark3);border:1px solid var(--border);border-radius:12px;padding:10px;min-width:200px;box-shadow:var(--shadow);">
+        <div id="ocrPopover" style="display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:8000;background:var(--dark3);border:1px solid var(--border);border-radius:12px;padding:10px;width:220px;max-width:calc(100vw - 32px);box-sizing:border-box;box-shadow:var(--shadow);">
           <div style="display:flex;align-items:center;gap:8px;">
             <img id="ocrPreview" style="width:36px;height:36px;object-fit:cover;border-radius:6px;border:1px solid var(--border);flex-shrink:0;">
             <div style="flex:1;min-width:0;">
@@ -4459,16 +4459,11 @@ async function processOCRFile(file) {
     const text = data.content?.map(c => c.text || '').join('') || '';
     let parsed;
     try { parsed = JSON.parse(text.replace(/```json|```/g, '')); } catch(e) { throw new Error('No se pudo parsear la respuesta'); }
-    if (parsed.desc) document.getElementById('expDesc').value = parsed.desc;
+    // Del ticket solo se toma el importe total; el resto lo completa el usuario
     if (parsed.amount) document.getElementById('expAmount').value = parsed.amount;
-    if (parsed.date) document.getElementById('expDate').value = parsed.date;
-    if (parsed.currency) {
-      const sel = document.getElementById('expCurrency');
-      if (sel) sel.value = parsed.currency;
-    }
     if (loading) loading.style.display = 'none';
     if (success) success.style.display = 'block';
-    toast('✅ Ticket escaneado — revisa y confirma', 's');
+    toast(parsed.amount ? `Importe del ticket: ${parsed.amount} — revisa y confirma` : 'Ticket adjuntado', 's');
   } catch(err) {
     if (loading) loading.style.display = 'none';
     toast('Error al procesar el ticket: ' + err.message, 'e');
@@ -4546,11 +4541,32 @@ async function downloadTicket(idx) {
   const g = groups[currentGroupIdx];
   const e = g.expenses[idx];
   const t = await cargarTicket(idx);
-  if (!t) return;
+  if (!t) { toast('No se pudo cargar el comprobante', 'e'); return; }
+  const nombre = `comprobante_${String(e.desc || 'gasto').replace(/[^\w\-]+/g, '_')}_${String(e.date || '').slice(0, 10)}.jpg`;
+
+  // En la APK un <a download> no hace nada: se guarda en el móvil y se abre el menú
+  // para compartir, desde donde se puede guardar en Archivos, Drive, WhatsApp...
+  const isNative = !!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
+  if (isNative && Capacitor.Plugins && Capacitor.Plugins.Filesystem && Capacitor.Plugins.Share) {
+    try {
+      const { Filesystem, Share } = Capacitor.Plugins;
+      await Filesystem.writeFile({ path: nombre, data: t.split(',')[1], directory: 'CACHE', recursive: true });
+      const { uri } = await Filesystem.getUri({ directory: 'CACHE', path: nombre });
+      await Share.share({ title: nombre, url: uri, dialogTitle: 'Guardar o compartir comprobante' });
+      return;
+    } catch (err) {
+      if (/cancel/i.test(err?.message || '')) return; // el usuario cerró el menú
+      console.warn('No se pudo compartir el comprobante:', err);
+      toast('No se pudo descargar el comprobante', 'e');
+      return;
+    }
+  }
   const a = document.createElement('a');
   a.href = t;
-  a.download = `ticket_${e.desc}_${e.date}.jpg`;
+  a.download = nombre;
+  document.body.appendChild(a);
   a.click();
+  a.remove();
 }
 
 // Guarda el comprobante en el servidor directamente desde la ficha (sin pasar por Editar)
@@ -4627,8 +4643,8 @@ function handleEditOCRFile(ev) {
 }
 
 async function processEditOCRFile(file) {
-  // Al editar un gasto que ya existe, el ticket se guarda solo como comprobante:
-  // no se cambian la descripción, el importe ni la fecha que ya tenía el gasto.
+  // Al editar un gasto, el ticket se guarda como comprobante y solo se toma
+  // de él el importe total; la descripción y la fecha no se cambian.
   const loading = document.getElementById('editOcrLoading');
   const success = document.getElementById('editOcrSuccess');
   if (loading) loading.style.display = 'none';
@@ -4645,6 +4661,21 @@ async function processEditOCRFile(file) {
   document.getElementById('editOcrDot').style.display = 'block';
   document.getElementById('editOcrClearBtn').style.display = 'block';
   document.getElementById('editOcrBtn').classList.add('has-file');
+
+  // Del ticket solo se toma el importe total (descripción y fecha no se tocan)
+  if (loading) loading.style.display = 'block';
+  try {
+    const data = await escanearTicket(b64, 'image/jpeg');
+    const text = data.content?.map(c => c.text || '').join('') || '';
+    const parsed = JSON.parse(text.replace(/```json|```/g, ''));
+    if (parsed.amount) {
+      document.getElementById('editAmount').value = parsed.amount;
+      toast(`Importe del ticket: ${parsed.amount} — revisa y guarda`, 's');
+    }
+  } catch (_) {
+    toast('No se pudo leer el importe; el comprobante se guardará igualmente', 'i');
+  }
+  if (loading) loading.style.display = 'none';
   if (success) { success.textContent = '✅ Se guarda al pulsar Guardar'; success.style.display = 'block'; }
 }
 
