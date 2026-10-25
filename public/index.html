@@ -336,7 +336,7 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparen
 .pay-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:600;align-items:flex-end;justify-content:center}
 .pay-modal-overlay.open{display:flex;animation:fadeIn .2s ease}
 .pay-modal-sheet{background:var(--card);border:1px solid var(--border);border-radius:22px 22px 0 0;padding:16px 16px 24px;width:100%;max-width:660px;animation:slideUp .25s ease;max-height:85vh;overflow-y:auto}
-.pay-method-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin:10px 0}
+.pay-method-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0}
 .pay-method-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:10px;border:2px solid rgba(255,255,255,.07);background:var(--dark3);cursor:pointer;font-family:'Nunito',sans-serif;font-weight:800;font-size:.62rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text);transition:border-color .2s,background .2s,transform .13s}
 .pay-method-btn:active{transform:scale(.93)}
 .pay-method-btn.selected{border-color:var(--gold);background:rgba(245,200,0,.09);color:var(--gold)}
@@ -814,6 +814,10 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparen
           <span style="color:var(--muted)">Sobre mí</span>
           <span id="readBio" style="font-weight:700;color:var(--text);text-align:right;max-width:60%">—</span>
         </div>
+        <div style="display:flex;justify-content:space-between;font-size:.85rem;">
+          <span style="color:var(--muted)">Cobros</span>
+          <span id="readCobro" style="font-weight:700;color:var(--text);text-align:right;max-width:60%">—</span>
+        </div>
       </div>
     </div>
 
@@ -826,6 +830,10 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparen
       <div class="field"><label>Email</label><input type="email" id="profEmail" placeholder="tu@email.com" oninput="updateProfilePreview()"></div>
       <div class="field"><label>Teléfono</label><input type="tel" id="profTel" placeholder="+34 600 000 000"></div>
       <div class="field"><label>Sobre mí (opcional)</label><textarea id="profBio" minlength="0" maxlength="140" placeholder="Cuéntanos algo sobre ti..."></textarea></div>
+      <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin:14px 0 4px;">Cómo quieres cobrar (opcional)</div>
+      <div style="font-size:.72rem;color:var(--muted);margin-bottom:10px;line-height:1.4;">Solo lo verán quienes te deban dinero en tus grupos, al pulsar «Pagar».</div>
+      <div class="field"><label>Teléfono para Bizum</label><input type="tel" id="profBizum" inputmode="tel" placeholder="ej: 600 000 000"></div>
+      <div class="field"><label>IBAN para transferencias</label><input type="text" id="profIban" autocapitalize="characters" placeholder="ej: ES00 0000 0000 0000 0000 0000" oninput="this.value=this.value.toUpperCase()"></div>
       <div style="display:flex;gap:10px;margin-top:8px;">
         <button class="btn btn-outline btn-full" onclick="toggleEditProfile()">Cancelar</button>
         <button class="btn btn-gold btn-full" onclick="saveProfile()">Guardar</button>
@@ -1426,7 +1434,15 @@ class VakaDataService {
     return friend;
   }
   async getProfile() { return this.#read(this.#KEYS.profile)??{}; }
-  async saveProfile(data) { const cur=await this.getProfile(); const upd={...cur,...data}; this.#write(this.#KEYS.profile,upd); try { await this.#req('PATCH', '/users/me', { nombre: data.nombre, apellido: data.apellido, email: data.email, tel: data.tel, bio: data.bio }); } catch(_) {} return upd; }
+  async saveProfile(data) {
+    const cur = await this.getProfile(); const upd = { ...cur, ...data }; this.#write(this.#KEYS.profile, upd);
+    const body = { nombre: data.nombre, apellido: data.apellido, email: data.email, tel: data.tel, bio: data.bio };
+    if (data.pago_bizum !== undefined) body.pago_bizum = data.pago_bizum;
+    if (data.pago_iban  !== undefined) body.pago_iban  = data.pago_iban;
+    try { await this.#req('PATCH', '/users/me', body); }
+    catch (err) { if (err.status === 400) throw err; } // datos no válidos (p. ej. IBAN): se avisa; sin conexión: se guarda en local
+    return upd;
+  }
 
   async getActivity() {
   try {
@@ -1597,6 +1613,8 @@ try {
   email: me.email || '',
   tel: me.tel || '',
   bio: me.bio || '',
+  pago_bizum: me.pago_bizum || '',
+  pago_iban: me.pago_iban || '',
     avatar: resolverAvatar(me.avatar_url)
 };
         await vakaData.saveProfile(profile);
@@ -2014,6 +2032,10 @@ async function openGroup(idx){
           members: (Array.isArray(fresh.members))
             ? { ...groups[idx].members, ...Object.fromEntries(fresh.members.map(m => [m.display_name, m.balance || 0])) }
             : groups[idx].members,
+          // Qué participante corresponde a cada cuenta (para saber quién es "yo" en Cuentas finales)
+          memberIds: (Array.isArray(fresh.members))
+            ? Object.fromEntries(fresh.members.filter(m => m.user_id).map(m => [m.display_name, m.user_id]))
+            : groups[idx].memberIds,
           expenses: (fresh.expenses || []).sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(e => ({
             ...e,
             desc: e.description || e.desc || 'Sin descripción',
@@ -2928,7 +2950,7 @@ function calcDebts(){
         <div style="display:flex;gap:6px;width:100%;justify-content:flex-end;align-items:center;">
           ${(() => {
             const g = groups[currentGroupIdx];
-            const myName = g && g.memberIds ? Object.entries(g.memberIds).find(([,uid]) => Number(uid) === Number(profile.id))?.[0] : null;
+            const myName = miNombreEnGrupo(g);
             const isDebtor = myName === t.from;
             const isCreditor = myName === t.to;
             if (isDebtor) return `<button class="btn btn-gold btn-sm" onclick="openPayModal(${i},'${t.from}','${t.to}',${t.amount})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Pagar</button>`;
@@ -2954,25 +2976,99 @@ function openPayModal(idx,from,to,amount){
   document.getElementById('pmProofThumb').style.display='none';
   document.getElementById('pmProofFile').value='';
   document.querySelectorAll('.pay-method-btn').forEach(b=>b.classList.remove('selected'));
+  document.getElementById('pmDetalle').style.display='none';
   document.getElementById('payModal').classList.add('open');
   document.body.style.overflow='hidden';
+  // Pedimos cómo cobra el acreedor
+  _cobro = 'cargando';
+  const g = groups[currentGroupIdx];
+  fetch(`${API_BASE}/api/v1/groups/${g.id}/cobro/${encodeURIComponent(to)}`, {
+    headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+  }).then(r => r.ok ? r.json() : null).then(d => {
+    _cobro = d;
+    const sel = document.querySelector('.pay-method-btn.selected');
+    if (sel) sel.click(); // refresca el detalle si ya había un método elegido
+  }).catch(() => { _cobro = null; });
 }
 function closePayModal(){
   document.getElementById('payModal').classList.remove('open');
   document.body.style.overflow='';
   _payData=null;
 }
-function selectPayMethod(el,method){
-  document.querySelectorAll('.pay-method-btn').forEach(b=>b.classList.remove('selected'));
+// Datos de cobro del acreedor (se piden al abrir el modal de pago)
+let _cobro = null;
+
+function selectPayMethod(el, method) {
+  document.querySelectorAll('.pay-method-btn').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
-  if(!_payData)return;
-  const base=document.getElementById('baseCurrency')?.value||'EUR';
-  const amt=_payData.amount.toFixed(2);
-  const concept=encodeURIComponent(`VakaPay deuda a ${_payData.to}`);
-  if(method==='bizum'){window.open(`https://bizum.es/?amount=${amt}&concept=${concept}`,'_blank');}
-  else if(method==='revolut'){window.open(`https://revolut.es/pay?amount=${amt}`,'_blank');}
-  else if(method==='paypal'){window.open(`https://www.paypal.me/${_payData.to}/${amt}`,'_blank');}
-  else if(method==='bank'){toast('Realiza la transferencia por tu app bancaria 🏦','i');}
+  if (!_payData) return;
+  const det = document.getElementById('pmDetalle');
+  const base = document.getElementById('baseCurrency')?.value || 'EUR';
+  const importe = Number(_payData.amount).toFixed(2);
+  const g = groups[currentGroupIdx];
+  const concepto = `VakaPay · ${g ? g.name : 'deuda'}`;
+  const to = _payData.to;
+  const fila = (etiqueta, valor, copiar) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);">
+      <div style="min-width:0;"><div style="color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;">${etiqueta}</div>
+      <div style="font-weight:800;color:var(--text);word-break:break-all;">${valor}</div></div>
+      <button type="button" class="btn btn-outline btn-sm" style="flex-shrink:0;font-size:.68rem;padding:4px 10px;" onclick="copiarTexto(${JSON.stringify(copiar).replace(/"/g, '&quot;')})">Copiar</button>
+    </div>`;
+  let html = '';
+  if (_cobro === 'cargando') {
+    html = '<div style="color:var(--muted);">Cargando datos de cobro...</div>';
+  } else if (method === 'bizum') {
+    html = (_cobro && _cobro.bizum)
+      ? `<div style="margin-bottom:6px;">Envía un Bizum a <strong>${to}</strong> desde la app de tu banco:</div>
+         ${fila('Teléfono', _cobro.bizum, _cobro.bizum)}${fila('Importe', formatAmountBase(Number(importe), base), importe.replace('.', ','))}${fila('Concepto', concepto, concepto)}`
+      : `<strong>${to}</strong> aún no ha añadido su teléfono para Bizum. Puedes pedírselo o elegir otro método.`;
+  } else if (method === 'transferencia') {
+    html = (_cobro && _cobro.iban)
+      ? `<div style="margin-bottom:6px;">Haz una transferencia a <strong>${to}</strong> desde la app de tu banco:</div>
+         ${fila('Titular', _cobro.titular || to, _cobro.titular || to)}${fila('IBAN', formatearIban(_cobro.iban), _cobro.iban)}${fila('Importe', formatAmountBase(Number(importe), base), importe.replace('.', ','))}${fila('Concepto', concepto, concepto)}`
+      : `<strong>${to}</strong> aún no ha añadido su IBAN. Puedes pedírselo o elegir otro método.`;
+  } else if (method === 'efectivo') {
+    html = `Entrega <strong>${formatAmountBase(Number(importe), base)}</strong> en efectivo a <strong>${to}</strong> y después pulsa <strong>«Marcar saldado»</strong>.`;
+  }
+  if (method !== 'efectivo' && _cobro && !_cobro.tiene_cuenta) {
+    html = `<strong>${to}</strong> no tiene cuenta en VakaPay, así que no tiene datos de cobro guardados. Acordad el pago entre vosotros y pulsa «Marcar saldado».`;
+  }
+  det.innerHTML = html + (method !== 'efectivo' ? '<div style="margin-top:8px;color:var(--muted);font-size:.72rem;">Cuando hayas pagado, adjunta la captura y pulsa «Marcar saldado».</div>' : '');
+  det.style.display = 'block';
+}
+
+// Copiar al portapapeles (con alternativa para WebViews antiguos)
+async function copiarTexto(texto) {
+  try { await navigator.clipboard.writeText(texto); }
+  catch (_) {
+    const ta = document.createElement('textarea');
+    ta.value = texto; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (__) {}
+    ta.remove();
+  }
+  toast('Copiado ✓', 's');
+}
+
+function formatearIban(iban) {
+  return String(iban || '').replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim();
+}
+function ibanValido(iban) {
+  const s = String(iban || '').replace(/\s+/g, '').toUpperCase();
+  if (!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(s)) return false;
+  const num = (s.slice(4) + s.slice(0, 4)).replace(/[A-Z]/g, c => String(c.charCodeAt(0) - 55));
+  let resto = 0;
+  for (const d of num) resto = (resto * 10 + Number(d)) % 97;
+  return resto === 1;
+}
+
+// Qué participante del grupo soy yo (por mi cuenta; si no se sabe, por mi nombre)
+function miNombreEnGrupo(g) {
+  if (!g) return null;
+  const porId = g.memberIds && Object.entries(g.memberIds).find(([, uid]) => Number(uid) === Number(profile.id));
+  if (porId) return porId[0];
+  const nombre = (profile.nombre || '').trim();
+  return nombre && Object.keys(g.members || {}).includes(nombre) ? nombre : null;
 }
 
 // ═══ PAGOS ENTRE PARTICIPANTES ════════════════════════════════════════
@@ -4253,6 +4349,8 @@ function loadProfile(){
   set('profEmail',  profile.email);
   set('profTel',    profile.tel);
   set('profBio',    profile.bio);
+  set('profBizum',  profile.pago_bizum);
+  set('profIban',   formatearIban(profile.pago_iban));
 
   // Avatar
   const wrap = document.getElementById('avatarDisplay');
@@ -4325,6 +4423,8 @@ function updateReadMode() {
   set('readEmail', p.email);
   set('readTel', p.tel);
   set('readBio', p.bio);
+  const cobros = [p.pago_bizum ? 'Bizum' : '', p.pago_iban ? 'Transferencia' : ''].filter(Boolean);
+  set('readCobro', cobros.length ? cobros.join(' · ') : 'Sin configurar');
 }
 
 async function saveProfile() {
@@ -4333,9 +4433,13 @@ async function saveProfile() {
     email: document.getElementById('profEmail').value.trim(),
     tel: document.getElementById('profTel').value.trim(),
     bio: document.getElementById('profBio').value.trim(),
+    pago_bizum: (document.getElementById('profBizum')?.value || '').trim(),
+    pago_iban: (document.getElementById('profIban')?.value || '').replace(/\s+/g, '').toUpperCase(),
     avatar: profile.avatar || null
   };
   if (data.nombre.length < 3) return toast('El nombre debe tener al menos 3 caracteres ⚠️', 'e');
+  if (data.pago_bizum && !/^\+?[\d\s-]{9,20}$/.test(data.pago_bizum)) return toast('El teléfono para Bizum no es válido', 'e');
+  if (data.pago_iban && !ibanValido(data.pago_iban)) return toast('El IBAN no es válido. Revisa que esté completo.', 'e');
   try {
     profile = await vakaData.saveProfile(data);
     updateProfilePreview();
@@ -4345,7 +4449,7 @@ async function saveProfile() {
     renderActivity();
     toast('Perfil guardado ✓', 's');
   } catch (error) {
-    toast('Error al guardar el perfil ❌', 'e');
+    toast(error.status === 400 && error.message ? error.message : 'Error al guardar el perfil ❌', 'e');
     console.error("Error en saveProfile:", error);
   }
 }
@@ -5214,11 +5318,11 @@ function cerrarModalSalir() {
     </div>
     <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:6px">Elige método de pago</div>
     <div class="pay-method-grid">
-      <button class="pay-method-btn" onclick="selectPayMethod(this,'bizum')"><span class="pm-icon">📱</span>Bizum</button>
-      <button class="pay-method-btn" onclick="selectPayMethod(this,'revolut')"><span class="pm-icon">💜</span>Revolut</button>
-      <button class="pay-method-btn" onclick="selectPayMethod(this,'paypal')"><span class="pm-icon">🅿️</span>PayPal</button>
-      <button class="pay-method-btn" onclick="selectPayMethod(this,'bank')"><span class="pm-icon">🏦</span>Banco</button>
+      <button class="pay-method-btn" onclick="selectPayMethod(this,'bizum')"><span class="pm-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>Bizum</button>
+      <button class="pay-method-btn" onclick="selectPayMethod(this,'transferencia')"><span class="pm-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/><line x1="4" y1="10" x2="4" y2="21"/><line x1="20" y1="10" x2="20" y2="21"/><line x1="8" y1="14" x2="8" y2="17"/><line x1="12" y1="14" x2="12" y2="17"/><line x1="16" y1="14" x2="16" y2="17"/></svg></span>Transferencia</button>
+      <button class="pay-method-btn" onclick="selectPayMethod(this,'efectivo')"><span class="pm-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><line x1="6" y1="12" x2="6.01" y2="12"/><line x1="18" y1="12" x2="18.01" y2="12"/></svg></span>Efectivo</button>
     </div>
+    <div id="pmDetalle" style="display:none;background:var(--dark3);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;font-size:.82rem;line-height:1.45;"></div>
     <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:6px;margin-top:8px">Adjuntar comprobante (opcional)</div>
     <div class="proof-area" onclick="document.getElementById('pmProofFile').click()" style="padding:8px;margin-top:0;display:flex;align-items:center;gap:10px;text-align:left">
       <input type="file" id="pmProofFile" accept="image/*" onchange="handleProofUpload(event)">

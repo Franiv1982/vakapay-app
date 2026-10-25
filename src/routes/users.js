@@ -5,6 +5,7 @@ const path     = require('path');
 const fs       = require('fs');
 const db       = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
+const { normalizarBizum, normalizarIban } = require('../utils/cobro');
 
 const router = express.Router();
 
@@ -41,7 +42,7 @@ const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 router.get('/me', requireAuth, async (req, res, next) => {
   try {
     const result = await db.query(`
-      SELECT id, nombre, apellido, email, tel, bio, avatar_url, created_at, updated_at
+      SELECT id, nombre, apellido, email, tel, bio, avatar_url, pago_bizum, pago_iban, created_at, updated_at
       FROM users WHERE id = $1
     `, [req.user.id]);
     if (!result.rows[0]) return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -53,8 +54,15 @@ router.get('/me', requireAuth, async (req, res, next) => {
 router.patch('/me', requireAuth, async (req, res, next) => {
   try {
     const { nombre, apellido, email, tel, bio } = req.body;
+    // Datos para cobrar (opcionales); cadena vacía = quitar
+    const bizum = normalizarBizum(req.body.pago_bizum);
+    if (!bizum.ok) return res.status(400).json({ error: bizum.error });
+    const iban = normalizarIban(req.body.pago_iban);
+    if (!iban.ok) return res.status(400).json({ error: iban.error });
     const fields = [], values = [];
     let i = 1;
+    if (bizum.valor !== undefined) { fields.push(`pago_bizum = $${i++}`); values.push(bizum.valor); }
+    if (iban.valor  !== undefined) { fields.push(`pago_iban = $${i++}`);  values.push(iban.valor); }
     if (nombre   !== undefined) { fields.push(`nombre = $${i++}`);   values.push(nombre); }
     if (apellido !== undefined) { fields.push(`apellido = $${i++}`); values.push(apellido); }
     if (email    !== undefined) { fields.push(`email = $${i++}`);    values.push(email); }
@@ -66,7 +74,7 @@ router.patch('/me', requireAuth, async (req, res, next) => {
     values.push(req.user.id);
 
     const result = await db.query(`
-      UPDATE users SET ${fields.join(', ')} WHERE id = $${i} RETURNING id, nombre, apellido, email, tel, bio, avatar_url, created_at, updated_at
+      UPDATE users SET ${fields.join(', ')} WHERE id = $${i} RETURNING id, nombre, apellido, email, tel, bio, avatar_url, pago_bizum, pago_iban, created_at, updated_at
     `, values);
     res.json(result.rows[0]);
   } catch (err) { next(err); }
