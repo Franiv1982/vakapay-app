@@ -2636,7 +2636,7 @@ async function addExpense() {
     } catch(_) {}
     renderAll();
     renderGroups();
-    await logActivity(`${payer} registró "${desc}" · ${amount} ${currency} en "${g.name}"`);
+    await refrescarActividad(); // el servidor ya registró el gasto para todo el grupo
     clearOCR();
     toast('Gasto registrado ✓', 's');
     } catch (err) {
@@ -2657,7 +2657,7 @@ async function deleteExpense(idx) {
   try {
     await vakaData.deleteExpense(currentGroupIdx, idx);
     g.total = g.expenses.reduce((sum, exp) => sum + (Number(exp.baseAmt) || 0), 0);
-    await logActivity(`Gasto "${e.desc}" eliminado en "${g.name}"`);
+    await refrescarActividad(); // el servidor ya registró el borrado para todo el grupo
     renderAll();
     if (typeof renderGroups === 'function') renderGroups();
     toast('Gasto eliminado', 'i');
@@ -2867,6 +2867,7 @@ async function saveEditExpense() {
     document.getElementById('editModal').classList.remove('open');
     document.body.style.overflow = '';
         toast('Gasto actualizado ✓', 's');
+    await refrescarActividad(); // el servidor ya registró la edición para todo el grupo
 
     // Si la ficha del gasto está abierta, se vuelve a dibujar con los datos nuevos
     if (document.getElementById('page-gasto').classList.contains('active')) {
@@ -4019,6 +4020,14 @@ async function guardarCambiosGrupo() {
 }
 
 // ═══ ACTIVITY ════════════════════════════════════════════════════════
+// Recarga la actividad desde el servidor (incluye los cambios de otros participantes)
+async function refrescarActividad() {
+  try {
+    activity = (await vakaData.getActivity() || []).map(a => ({ ...a, groupName: a.groupName || a.group_name || null }));
+    renderActivity();
+  } catch (_) {}
+}
+
 async function logActivity(msg) {
   const groupName = (currentGroupIdx !== null && currentGroupIdx >= 0 && groups[currentGroupIdx])
     ? groups[currentGroupIdx].name
