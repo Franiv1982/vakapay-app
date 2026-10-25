@@ -3769,7 +3769,55 @@ function exportarPDF(){
   doc.text(`Participantes: ${mbs.length}`, pad+3, y); y+=lh;
   doc.text(`Por persona: ${g.currency||'EUR'} ${porPersona.toFixed(2)}`, pad+3, y); y+=lh;
   doc.text(`Gastos registrados: ${g.expenses.filter(e=>!e.es_pago).length}`, pad+3, y); y+=lh;
+  const gastosPdf = g.expenses.filter(e => !e.es_pago);
+  if (gastosPdf.length) {
+    const mayor = gastosPdf.reduce((m, e) => (Number(e.baseAmt) || 0) > (Number(m.baseAmt) || 0) ? e : m, gastosPdf[0]);
+    doc.text(`Gasto medio: ${g.currency||'EUR'} ${(totalGastos / gastosPdf.length).toFixed(2)}`, pad+3, y); y+=lh;
+    doc.text(`Gasto mayor: ${g.currency||'EUR'} ${(Number(mayor.baseAmt)||0).toFixed(2)} (${mayor.desc || 'Sin descripcion'})`, pad+3, y); y+=lh;
+  }
   y += 3;
+
+  // — ESTADÍSTICAS (igual que en la pestaña Estadísticas) —
+  // Cada fila: color, etiqueta, barra proporcional, importe y porcentaje del total
+  const hexRgb = h => { const n = parseInt(String(h || '#F5C800').slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const filaBarra = (etiqueta, importe, color) => {
+    if (y > 270) { doc.addPage(); y = 20; }
+    const pct = totalGastos > 0 ? importe / totalGastos : 0;
+    const [r, g2, b] = hexRgb(color);
+    sf(r, g2, b); doc.rect(pad + 3, y - 3, 3, 3, 'F');                 // marca de color
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); sc(0,0,0);
+    doc.text(etiqueta, pad + 9, y);
+    const barX = pad + 55, barW = 70;
+    sf(235,235,235); doc.rect(barX, y - 3, barW, 3.2, 'F');            // fondo de la barra
+    sf(r, g2, b); doc.rect(barX, y - 3, Math.max(0.5, barW * pct), 3.2, 'F');
+    doc.text(`${g.currency||'EUR'} ${importe.toFixed(2)}`, W - pad - 18, y, {align:'right'});
+    doc.setFont('helvetica','bold');
+    doc.text(`${(pct * 100).toFixed(1)}%`, W - pad, y, {align:'right'});
+    y += lh;
+  };
+  const seccion = titulo => {
+    if (y > 255) { doc.addPage(); y = 20; }
+    sd(180,180,180); doc.setLineWidth(0.3); doc.line(pad, y, W-pad, y);
+    y += 6;
+    doc.setFont('helvetica','bold'); doc.setFontSize(9); sc(0,0,0);
+    doc.text(titulo, pad, y);
+    y += 6;
+  };
+  if (gastosPdf.length) {
+    seccion('GASTOS POR CATEGORÍA');
+    const porCat = {};
+    gastosPdf.forEach(e => { porCat[e.cat || 'other'] = (porCat[e.cat || 'other'] || 0) + (Number(e.baseAmt) || 0); });
+    Object.entries(porCat).sort((a, b) => b[1] - a[1])
+      .forEach(([cat, imp]) => filaBarra(catNames[cat] || cat, imp, CAT_COLORS[cat]));
+    y += 3;
+
+    seccion('PAGADO POR CADA PARTICIPANTE');
+    const porPagador = {};
+    gastosPdf.forEach(e => { const p = e.payer || '-'; porPagador[p] = (porPagador[p] || 0) + (Number(e.baseAmt) || 0); });
+    Object.entries(porPagador).sort((a, b) => b[1] - a[1])
+      .forEach(([nombre, imp]) => filaBarra(nombre, imp, '#F5C800'));
+    y += 3;
+  }
 
   // — GASTOS —
   sd(180,180,180); doc.line(pad, y, W-pad, y);
@@ -3778,7 +3826,7 @@ function exportarPDF(){
   doc.setFontSize(9); sc(0,0,0);
   doc.text('LISTA DE GASTOS', pad, y);
   y += 5;
-  g.expenses.forEach((e,i) => {
+  gastosPdf.forEach((e,i) => {
     if(y > 265){ doc.addPage(); y=20; }
     doc.setFont('helvetica','bold');
     doc.setFontSize(8); sc(20,60,160);
@@ -3790,10 +3838,27 @@ function exportarPDF(){
     doc.setFontSize(7); sc(80,80,80);
     const cat = catNames[e.cat]||e.cat||'';
     const fecha = e.date ? new Date(e.date).toLocaleDateString('es-ES') : '';
-    doc.text(`Pago: ${e.payer||'-'}  |  ${cat}  |  ${fecha}`, pad+6, y);
+    doc.text(`Pagó: ${e.payer||'-'}  |  ${cat}  |  ${fecha}`, pad+6, y);
     y += lh;
   });
   y += 3;
+
+  // — PAGOS ENTRE PARTICIPANTES (deudas ya saldadas) —
+  const pagosPdf = g.expenses.filter(e => e.es_pago);
+  if (pagosPdf.length) {
+    seccion('PAGOS ENTRE PARTICIPANTES');
+    pagosPdf.forEach(e => {
+      if (y > 265) { doc.addPage(); y = 20; }
+      const destino = (e.involved && e.involved[0]) || (e.splits && e.splits[0] && e.splits[0].member_name) || '-';
+      const fecha = e.date ? new Date(e.date).toLocaleDateString('es-ES') : '';
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); sc(0,0,0);
+      doc.text(`• ${e.payer || '-'}  pagó a  ${destino}   ${fecha}`, pad+3, y);
+      sc(0,130,60);
+      doc.text(`${g.currency||'EUR'} ${(Number(e.baseAmt)||0).toFixed(2)}`, W-pad, y, {align:'right'});
+      y += lh;
+    });
+    y += 3;
+  }
 
   // — DEUDAS —
   if(y > 250){ doc.addPage(); y=20; }
