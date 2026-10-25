@@ -18,6 +18,18 @@ function importeBase(body, amount, currency) {
   return Number.isFinite(enviado) && enviado > 0 ? +enviado.toFixed(2) : toBase(amount, currency);
 }
 
+// ── Comprobantes (foto del ticket) ────────────────────────────────
+// Se guardan como imagen en texto (data:image/...) en la columna expenses.ticket.
+const MAX_TICKET = 2 * 1024 * 1024; // ~1,5 MB de imagen; la app la reduce antes de enviarla
+function ticketValido(t) {
+  return t === null || (typeof t === 'string' && t.startsWith('data:image/') && t.length <= MAX_TICKET);
+}
+// Quita la imagen de la respuesta y deja solo si existe (los listados no la necesitan)
+function sinTicket(row) {
+  const { ticket, ...resto } = row;
+  return { ...resto, has_ticket: !!ticket };
+}
+
 // Reparte un importe entre varias personas sin perder céntimos:
 // 100 € entre 3 → 33.34, 33.33, 33.33 (suma exactamente 100).
 function repartir(total, nombres) {
@@ -107,7 +119,7 @@ router.get('/', requireAuth, async (req, res, next) => {
       SELECT * FROM expenses WHERE group_id = $1 ORDER BY expense_date DESC, created_at DESC
     `, [req.params.id]);
 
-    const expenses = expensesRes.rows;
+    const expenses = expensesRes.rows.map(sinTicket);
     for (const ex of expenses) {
       const splits = await db.query('SELECT * FROM expense_splits WHERE expense_id = $1', [ex.id]);
       ex.splits = splits.rows;
@@ -126,19 +138,21 @@ router.post('/', requireAuth, async (req, res, next) => {
     }
 
     const { description, amount, currency = 'EUR', category = 'other', payer_name, expense_date, involved } = req.body;
+    const ticket = req.body.ticket ?? null;
 
     if (!description || !amount || !payer_name || !expense_date || !involved?.length) {
       return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
+    if (!ticketValido(ticket)) return res.status(400).json({ error: 'Comprobante no válido o demasiado grande' });
 
     const amount_base = importeBase(req.body, amount, currency);
 
     const expRes = await db.query(`
-      INSERT INTO expenses (group_id, description, amount, currency, amount_base, category, payer_name, expense_date, member_id)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *
-    `, [req.params.id, description, amount, currency, amount_base, category, payer_name, expense_date, req.user.id]);
+      INSERT INTO expenses (group_id, description, amount, currency, amount_base, category, payer_name, expense_date, member_id, ticket)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *
+    `, [req.params.id, description, amount, currency, amount_base, category, payer_name, expense_date, req.user.id, ticket]);
 
-    const expense = expRes.rows[0];
+    const expense = sinTicket(expRes.rows[0]);
 
     for (const { nombre, share } of repartir(amount_base, involved)) {
       await db.query(
@@ -194,6 +208,11 @@ router.put('/:expId', requireAuth, async (req, res, next) => {
     if (!description || !amount || !payer_name || !expense_date || !involved?.length) {
       return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
+    // ticket: si no viene, se conserva el que hubiera; null lo elimina; una imagen lo sustituye
+    const cambiaTicket = req.body.ticket !== undefined;
+    if (cambiaTicket && !ticketValido(req.body.ticket)) {
+      return res.status(400).json({ error: 'Comprobante no válido o demasiado grande' });
+    }
 
     const amount_base = importeBase(req.body, amount, currency);
 
@@ -202,6 +221,9 @@ router.put('/:expId', requireAuth, async (req, res, next) => {
       SET description=$1, amount=$2, currency=$3, amount_base=$4, category=$5, payer_name=$6, expense_date=$7
       WHERE id=$8 AND group_id=$9
     `, [description, amount, currency, amount_base, category, payer_name, expense_date, req.params.expId, req.params.id]);
+    if (cambiaTicket) {
+      await db.query('UPDATE expenses SET ticket = $1 WHERE id = $2', [req.body.ticket, req.params.expId]);
+    }
 
     await db.query('DELETE FROM expense_splits WHERE expense_id = $1', [req.params.expId]);
     for (const { nombre, share } of repartir(amount_base, involved)) {
@@ -214,16 +236,43 @@ router.put('/:expId', requireAuth, async (req, res, next) => {
     await recalcBalances(req.params.id);
 
     const expRes = await db.query('SELECT * FROM expenses WHERE id = $1', [req.params.expId]);
-    const expense = expRes.rows[0];
+    const expense = sinTicket(expRes.rows[0]);
     const splits  = await db.query('SELECT * FROM expense_splits WHERE expense_id = $1', [expense.id]);
     expense.splits = splits.rows;
 
     const cambios = describirCambios(antes, { description, amount, currency, category, payer_name, expense_date, involved });
+    if (cambiaTicket && (req.body.ticket || null) !== (antes.ticket || null)) {
+      cambios.push(!req.body.ticket ? 'comprobante eliminado' : (antes.ticket ? 'comprobante cambiado' : 'comprobante adjuntado'));
+    }
     if (cambios.length) {
       await logGroupActivity(req.params.id, req.user.id, 'expense', (quien, grupo) =>
         `${quien} editó "${antes.description}" en "${grupo}": ${cambios.join('; ')}`);
     }
     res.json(expense);
+  } catch (err) { next(err); }
+});
+
+// ── PUT /groups/:id/expenses/:expId/ticket ───────────────────────
+// Adjunta, cambia o elimina (ticket: null) el comprobante sin tocar el resto del gasto
+router.put('/:expId/ticket', requireAuth, async (req, res, next) => {
+  try {
+    const isOwner = await ownsGroup(req.params.id, req.user.id);
+    const member = await isMember(req.params.id, req.user.id);
+    if (!isOwner && !member) {
+      return res.status(404).json({ error: 'Grupo no encontrado' });
+    }
+    const ticket = req.body.ticket ?? null;
+    if (!ticketValido(ticket)) return res.status(400).json({ error: 'Comprobante no válido o demasiado grande' });
+
+    const expRes = await db.query('SELECT id, description, ticket FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
+    const gasto = expRes.rows[0];
+    if (!gasto) return res.status(404).json({ error: 'Gasto no encontrado' });
+
+    await db.query('UPDATE expenses SET ticket = $1 WHERE id = $2', [ticket, gasto.id]);
+    const accion = !ticket ? 'eliminó el comprobante de' : (gasto.ticket ? 'cambió el comprobante de' : 'adjuntó un comprobante a');
+    await logGroupActivity(req.params.id, req.user.id, 'expense', (quien, grupo) =>
+      `${quien} ${accion} "${gasto.description}" en "${grupo}"`);
+    res.json({ ok: true, has_ticket: !!ticket });
   } catch (err) { next(err); }
 });
 

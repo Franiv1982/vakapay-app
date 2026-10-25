@@ -1255,7 +1255,7 @@ class VakaDataService {
     return true; 
   }
 
-  async addExpense(idx, {desc, amount, cat, payer, date, involved, currency, baseAmt}) {
+  async addExpense(idx, {desc, amount, cat, payer, date, involved, currency, baseAmt, ticket}) {
     const gs = groups;
     const g = gs[idx];
     
@@ -1273,7 +1273,7 @@ class VakaDataService {
     const groupId = g.id || g._id; 
     
     const ba = Number(baseAmt || amount);
-    const newExp = {desc, amount: Number(amount), cat, payer, date, involved, currency: currency || 'EUR', baseAmt: ba};
+    const newExp = {desc, amount: Number(amount), cat, payer, date, involved, currency: currency || 'EUR', baseAmt: ba, ticket: ticket || null};
     
     // 2. Actualización local inmediata
     g.expenses.unshift(newExp);
@@ -1293,7 +1293,8 @@ class VakaDataService {
         category: cat || 'other',
         payer_name: payer,
         expense_date: date,
-        involved: involved
+        involved: involved,
+        ticket: ticket || null    // comprobante (imagen reducida), visible para todo el grupo
       });
       
       console.log("☁️ Sincronizado correctamente con el servidor");
@@ -2058,6 +2059,7 @@ function openGasto(idx) {
   const e = g.expenses[idx];
   console.log("Datos recibidos del gasto:", e);
   if (!e) return;
+  const tieneTicket = !!(e.ticket || e.has_ticket);
   const base = getBase();
   const sym = SYMBOLS[base] || '€';
   const displaySym = SYMBOLS[e.currency || base] || '€';
@@ -2111,17 +2113,17 @@ function openGasto(idx) {
       <div style="display:flex;gap:8px;align-items:center;background:var(--dark3);border:1px solid var(--border);border-radius:10px;padding:8px 12px;">
         <button type="button" onclick="document.getElementById('gastoTicketFile').click()"
           style="flex-shrink:0;background:rgba(245,200,0,.1);border:1px solid rgba(245,200,0,.3);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.8rem;color:var(--gold);font-weight:700;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> ${e.ticket ? 'Cambiar' : 'Adjuntar'}
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> ${tieneTicket ? 'Cambiar' : 'Adjuntar'}
         </button>
         <input type="file" id="gastoTicketFile" accept="image/*" style="display:none" onchange="attachGastoTicket(event,${idx})">
         <div style="flex:1;overflow:hidden;">
           <div style="color:var(--muted);font-size:.65rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-            ${e.ticket ? 'Comprobante adjunto' : 'Sin comprobante'}
+            ${tieneTicket ? 'Comprobante adjunto · toca la imagen para verlo' : 'Sin comprobante'}
           </div>
-          ${e.ticket ? `<div style="font-size:.6rem;color:var(--success);">✅ Guardado</div>` : ''}
+          ${tieneTicket ? `<div style="font-size:.6rem;color:var(--success);">✅ Guardado</div>` : ''}
         </div>
-        ${e.ticket ? `
-          <img src="${e.ticket}" style="width:32px;height:32px;object-fit:cover;border-radius:6px;border:1px solid var(--border);flex-shrink:0;cursor:pointer;" onclick="downloadTicket(${idx})" title="Descargar">
+        ${tieneTicket ? `
+          <img id="gastoTicketThumb" src="${e.ticket || ''}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--border);flex-shrink:0;cursor:pointer;background:var(--dark4);" onclick="verTicket(${idx})" title="Ver comprobante">
           <button onclick="removeGastoTicket(${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.75rem;flex-shrink:0;padding:2px 4px;border:1px solid var(--border);border-radius:6px;" title="Quitar comprobante">✕</button>
         ` : ''}
       </div>
@@ -2134,6 +2136,14 @@ function openGasto(idx) {
   `;
 
   switchPage('page-gasto', null);
+
+  // La imagen del comprobante se descarga aparte (no viene en el listado del grupo)
+  if (!e.ticket && e.has_ticket) {
+    cargarTicket(idx).then(t => {
+      const thumb = document.getElementById('gastoTicketThumb');
+      if (t && thumb && currentExpenseIdx === idx) thumb.src = t;
+    });
+  }
 }
 
 function goBackToGroup() {
@@ -2595,7 +2605,7 @@ async function addExpense() {
       currency,
       baseAmt,
       exchangeRate: rateToUse,
-	  ticket: (document.getElementById('ocrPreview').src && document.getElementById('ocrPreview').src !== window.location.href) ? document.getElementById('ocrPreview').src : null  
+	  ticket: window._ticketNuevo || null  // imagen reducida del ticket escaneado
     };
 
     await vakaData.addExpense(currentGroupIdx, nuevoGasto);
@@ -2761,14 +2771,18 @@ function openEditModal(idx) {
   // 6. Cargar ticket si existe
   clearEditOCR();
   window._editTicketDeleted = false;
-  if (e.ticket) {
+  if (!e.ticket && e.has_ticket) {
+    cargarTicket(idx).then(t => { if (t) document.getElementById('editOcrPreview').src = t; });
+  }
+  if (e.ticket || e.has_ticket) {
 	document.getElementById('editOcrBtn').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Adjuntar <span id="editOcrDot" style="display:none;position:absolute;top:3px;right:3px;width:7px;height:7px;background:var(--success);border-radius:50%;border:1.5px solid var(--dark);"></span>';
-    document.getElementById('editOcrPreview').src = e.ticket;
+    document.getElementById('editOcrPreview').src = e.ticket || '';
     document.getElementById('editOcrPreview').style.display = 'block';
     document.getElementById('editOcrFileName').textContent = 'Comprobante guardado';
     document.getElementById('editOcrDot').style.display = 'block';
     document.getElementById('editOcrClearBtn').style.display = 'block';
     document.getElementById('editOcrBtn').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Cambiar <span id="editOcrDot" style="display:none;position:absolute;top:3px;right:3px;width:7px;height:7px;background:var(--success);border-radius:50%;border:1.5px solid var(--dark);"></span>';
+    document.getElementById('editOcrSuccess').textContent = '✅ Guardado';
     document.getElementById('editOcrSuccess').style.display = 'block';
   }
   // 7. Actualizar estado visual y abrir modal
@@ -2823,6 +2837,10 @@ async function saveEditExpense() {
   const editRate = parseFloat(document.getElementById('editExchangeRate').value);
   const rateEdit = (currency === getBase()) ? 1 : (editRate || RATES[currency] || 1);
   const baseAmtEdit = +(amount / rateEdit).toFixed(2);
+  // Comprobante: nuevo → se envía; quitado → null; sin cambios → no se envía (se conserva)
+  const teniaTicket = !!(old.ticket || old.has_ticket);
+  const ticketEdit = window._editTicketNuevo ? window._editTicketNuevo
+                   : (window._editTicketDeleted && teniaTicket ? null : undefined);
   const involved = [...document.querySelectorAll('#editInvolvedChips .modal-chip.sel')].map(c => c.dataset.name);
 
   if (!desc) { toast('Añade una descripción', 'e'); if (saveBtn) saveBtn.disabled = false; return; }
@@ -2834,13 +2852,14 @@ async function saveEditExpense() {
     const response = await fetch(`${API_BASE}/api/v1/groups/${g.id}/expenses/${expId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
-        body: JSON.stringify({ description: desc, amount, amount_base: baseAmtEdit, currency, category: cat, payer_name: payer, expense_date: date, involved })
+        body: JSON.stringify({ description: desc, amount, amount_base: baseAmtEdit, currency, category: cat, payer_name: payer, expense_date: date, involved, ticket: ticketEdit })
     });
 
     // Actualización local inmediata
     g.expenses[editingExpenseIdx] = { 
         ...g.expenses[editingExpenseIdx], 
-        desc, amount, currency, cat, payer, date, involved, baseAmt: baseAmtEdit, exchangeRate: rateEdit
+        desc, amount, currency, cat, payer, date, involved, baseAmt: baseAmtEdit, exchangeRate: rateEdit,
+        ...(ticketEdit !== undefined ? { ticket: ticketEdit, has_ticket: !!ticketEdit } : {})
     };
 
     if (!response.ok) {
@@ -3367,7 +3386,7 @@ function renderExpenses() {
       <div style="text-align:right;">
         <div class="exp-amt">${displaySym}${amount.toFixed(2)}</div>
         ${displayCurrency !== base ? `<div style="font-size:.65rem;color:var(--muted);">≈ ${sym}${(Number(e.baseAmt)||0).toFixed(2)}</div>` : ''}
-        ${e.ticket ? '<div style="font-size:.65rem;color:var(--gold);">🧾</div>' : ''}
+        ${(e.ticket || e.has_ticket) ? '<div style="font-size:.65rem;color:var(--gold);">🧾</div>' : ''}
       </div>
     </div>`;
   }).join('');
@@ -4433,6 +4452,7 @@ async function processOCRFile(file) {
 
   const b64 = await fileToBase64(file);
   const mediaType = 'image/jpeg'; // fileToBase64 siempre devuelve JPEG reducido
+  window._ticketNuevo = 'data:image/jpeg;base64,' + b64; // se guardará como comprobante del gasto
 
   try {
     const data = await escanearTicket(b64, mediaType);
@@ -4479,6 +4499,7 @@ function closeOcrOnOutside(e) {
 }
 
 function clearOCR() {
+  window._ticketNuevo = null;
   document.getElementById('ocrFile').value = '';
   document.getElementById('ocrPreview').src = '';
   document.getElementById('ocrFileName').textContent = '';
@@ -4490,34 +4511,91 @@ function clearOCR() {
   document.removeEventListener('click', closeOcrOnOutside);
 }
 
-function downloadTicket(idx) {
+// Descarga del servidor la imagen del comprobante de un gasto (y la guarda en memoria)
+async function cargarTicket(idx) {
+  const g = groups[currentGroupIdx];
+  const e = g && g.expenses[idx];
+  if (!e) return null;
+  if (e.ticket) return e.ticket;
+  const expId = e.id || e._id;
+  if (!expId || !e.has_ticket) return null;
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/expenses/${expId}`, {
+      headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    e.ticket = data.ticket || null;
+    return e.ticket;
+  } catch (_) { return null; }
+}
+
+// Muestra el comprobante a pantalla completa
+async function verTicket(idx) {
+  const t = await cargarTicket(idx);
+  if (!t) { toast('No se pudo cargar el comprobante', 'e'); return; }
+  document.getElementById('visorTicketImg').src = t;
+  document.getElementById('visorTicketModal').dataset.idx = idx;
+  document.getElementById('visorTicketModal').style.display = 'flex';
+}
+function cerrarVisorTicket() {
+  document.getElementById('visorTicketModal').style.display = 'none';
+}
+
+async function downloadTicket(idx) {
   const g = groups[currentGroupIdx];
   const e = g.expenses[idx];
-  if (!e.ticket) return;
+  const t = await cargarTicket(idx);
+  if (!t) return;
   const a = document.createElement('a');
-  a.href = e.ticket;
+  a.href = t;
   a.download = `ticket_${e.desc}_${e.date}.jpg`;
   a.click();
 }
 
-function attachGastoTicket(ev, idx) {
-  const file = ev.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = e => {
-    groups[currentGroupIdx].expenses[idx].ticket = e.target.result;
-    save();
-    openGasto(idx); // refrescar la pantalla
-    toast('Comprobante adjuntado ✓', 's');
-  };
-  reader.readAsDataURL(file);
+// Guarda el comprobante en el servidor directamente desde la ficha (sin pasar por Editar)
+async function guardarTicketServidor(idx, ticket) {
+  const g = groups[currentGroupIdx];
+  const e = g.expenses[idx];
+  const expId = e.id || e._id;
+  if (!expId) throw new Error('El gasto aún no está sincronizado');
+  const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/expenses/${expId}/ticket`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+    body: JSON.stringify({ ticket })
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'No se pudo guardar el comprobante');
+  e.ticket = ticket;
+  e.has_ticket = !!ticket;
+  save();
 }
 
-function removeGastoTicket(idx) {
-  groups[currentGroupIdx].expenses[idx].ticket = null;
-  save();
-  openGasto(idx);
-  toast('Comprobante eliminado', 'i');
+async function attachGastoTicket(ev, idx) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  toast('Guardando comprobante...', 'i');
+  try {
+    const ticket = 'data:image/jpeg;base64,' + await fileToBase64(file);
+    await guardarTicketServidor(idx, ticket);
+    openGasto(idx); // refrescar la pantalla
+    toast('Comprobante guardado ✓', 's');
+    if (typeof refrescarActividad === 'function') refrescarActividad();
+  } catch (err) {
+    toast(err.message || 'No se pudo guardar el comprobante', 'e');
+  }
+}
+
+async function removeGastoTicket(idx) {
+  if (!confirm('¿Quitar el comprobante de este gasto?')) return;
+  try {
+    await guardarTicketServidor(idx, null);
+    openGasto(idx);
+    toast('Comprobante eliminado', 'i');
+    if (typeof refrescarActividad === 'function') refrescarActividad();
+  } catch (err) {
+    toast(err.message || 'No se pudo eliminar el comprobante', 'e');
+  }
 }
 
 function toggleEditOcrPopover() {
@@ -4549,43 +4627,25 @@ function handleEditOCRFile(ev) {
 }
 
 async function processEditOCRFile(file) {
-  const preview = document.getElementById('editOcrPreview');
+  // Al editar un gasto que ya existe, el ticket se guarda solo como comprobante:
+  // no se cambian la descripción, el importe ni la fecha que ya tenía el gasto.
   const loading = document.getElementById('editOcrLoading');
   const success = document.getElementById('editOcrSuccess');
-  const fileName = document.getElementById('editOcrFileName');
+  if (loading) loading.style.display = 'none';
+  if (success) success.style.display = 'none';
 
-  const reader = new FileReader();
-  reader.onload = e => {
-    const preview = document.getElementById('editOcrPreview');
-    if (preview) { preview.src = e.target.result; preview.style.display = 'block'; }
-    document.getElementById('editOcrFileName').textContent = file.name;
-    document.getElementById('editOcrDot').style.display = 'block';
-    document.getElementById('editOcrClearBtn').style.display = 'block';
-    document.getElementById('editOcrBtn').classList.add('has-file');
-    document.getElementById('editOcrLoading').style.display = 'block';
-    document.getElementById('editOcrSuccess').style.display = 'none';
-    window._editTicketDeleted = false;
-  };
-  reader.readAsDataURL(file);
+  const b64 = await fileToBase64(file); // imagen reducida
+  const ticket = 'data:image/jpeg;base64,' + b64;
+  window._editTicketNuevo = ticket;
+  window._editTicketDeleted = false;
 
-  const b64 = await fileToBase64(file);
-  const mediaType = 'image/jpeg'; // fileToBase64 siempre devuelve JPEG reducido
-  try {
-    const data = await escanearTicket(b64, mediaType);
-    const text = data.content?.map(c => c.text || '').join('') || '';
-    let parsed;
-    try { parsed = JSON.parse(text.replace(/```json|```/g, '')); } catch(e) { throw new Error('No se pudo parsear'); }
-    if (parsed.desc) document.getElementById('editDesc').value = parsed.desc;
-    if (parsed.amount) document.getElementById('editAmount').value = parsed.amount;
-    if (parsed.date) document.getElementById('editDate').value = parsed.date;
-    if (parsed.currency) { const sel = document.getElementById('editCurrency'); if (sel) sel.value = parsed.currency; }
-    if (loading) loading.style.display = 'none';
-    if (success) success.style.display = 'block';
-    toast('✅ Ticket escaneado — revisa y confirma', 's');
-  } catch(err) {
-    if (loading) loading.style.display = 'none';
-    toast('Error al procesar el ticket', 'e');
-  }
+  const preview = document.getElementById('editOcrPreview');
+  if (preview) { preview.src = ticket; preview.style.display = 'block'; }
+  document.getElementById('editOcrFileName').textContent = 'Comprobante nuevo';
+  document.getElementById('editOcrDot').style.display = 'block';
+  document.getElementById('editOcrClearBtn').style.display = 'block';
+  document.getElementById('editOcrBtn').classList.add('has-file');
+  if (success) { success.textContent = '✅ Se guarda al pulsar Guardar'; success.style.display = 'block'; }
 }
 
 function clearEditOCR() {
@@ -4599,6 +4659,7 @@ function clearEditOCR() {
   document.getElementById('editOcrClearBtn').style.display = 'none';
   document.getElementById('editOcrBtn').classList.remove('has-file');
   window._editTicketDeleted = true;
+  window._editTicketNuevo = null;
 }
 
 // Convierte la foto en JPEG de como máximo 1600 px (base64 sin cabecera).
@@ -5395,9 +5456,27 @@ function tocarBotonGrupos(btn) {
 <div id="origenImagenModal" onclick="if(event.target===this)cerrarOrigenImagen()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;align-items:flex-end;justify-content:center;">
   <div style="background:var(--dark3);width:100%;max-width:460px;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));border-top:1px solid var(--border);">
     <div style="color:var(--text);font-weight:800;text-align:center;margin-bottom:14px;">Añadir imagen</div>
-    <button type="button" onclick="elegirOrigenImagen('camara')" class="btn btn-gold btn-full" style="margin-bottom:10px;">📷 Hacer foto</button>
-    <button type="button" onclick="elegirOrigenImagen('galeria')" class="btn btn-outline btn-full" style="margin-bottom:10px;">🖼️ Elegir de la galería</button>
+    <button type="button" onclick="elegirOrigenImagen('camara')" class="btn btn-gold btn-full" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      Hacer foto
+    </button>
+    <button type="button" onclick="elegirOrigenImagen('galeria')" class="btn btn-outline btn-full" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Elegir de la galería
+    </button>
     <button type="button" onclick="cerrarOrigenImagen()" style="width:100%;background:none;border:none;color:var(--muted);padding:10px;font-weight:700;cursor:pointer;">Cancelar</button>
+  </div>
+</div>
+
+<!-- Visor del comprobante a pantalla completa -->
+<div id="visorTicketModal" onclick="if(event.target===this)cerrarVisorTicket()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:10001;flex-direction:column;align-items:center;justify-content:center;padding:16px;">
+  <img id="visorTicketImg" alt="Comprobante" style="max-width:100%;max-height:78vh;object-fit:contain;border-radius:10px;">
+  <div style="display:flex;gap:10px;margin-top:16px;width:100%;max-width:420px;">
+    <button type="button" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="downloadTicket(+document.getElementById('visorTicketModal').dataset.idx)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Descargar
+    </button>
+    <button type="button" class="btn btn-gold" style="flex:1;" onclick="cerrarVisorTicket()">Cerrar</button>
   </div>
 </div>
 </body>
