@@ -84,10 +84,32 @@ router.put('/me/avatar', requireAuth, upload.single('avatar'), async (req, res, 
   } catch (err) { next(err); }
 });
 
+// ── Borrar datos / eliminar cuenta ───────────────────────────────
+// Reglas en src/utils/borrado.js. Si hay saldos pendientes en grupos
+// compartidos se responde 409 con la lista y no se borra nada.
+const { previsualizar, borrarDatosUsuario } = require('../utils/borrado');
+const MSG_PENDIENTES = 'Tienes cuentas pendientes en grupos compartidos. Sáldalas antes de continuar.';
+
+// GET /users/me/borrado — qué pasaría al borrar (vista previa)
+router.get('/me/borrado', requireAuth, async (req, res, next) => {
+  try { res.json(await previsualizar(req.user.id)); } catch (err) { next(err); }
+});
+
+// DELETE /users/me/datos — borra grupos propios, sale de los compartidos, amigos y actividad
+router.delete('/me/datos', requireAuth, async (req, res, next) => {
+  try {
+    const r = await borrarDatosUsuario(req.user.id);
+    if (r.pendientes) return res.status(409).json({ error: MSG_PENDIENTES, pendientes: r.pendientes });
+    res.json(r);
+  } catch (err) { next(err); }
+});
+
+// DELETE /users/me — lo mismo que /me/datos y además elimina la cuenta
 router.delete('/me', requireAuth, async (req, res, next) => {
   try {
-    await db.query('DELETE FROM users WHERE id = $1', [req.user.id]);
-    res.status(204).end();
+    const r = await borrarDatosUsuario(req.user.id, { eliminarCuenta: true });
+    if (r.pendientes) return res.status(409).json({ error: MSG_PENDIENTES, pendientes: r.pendientes });
+    res.json(r);
   } catch (err) { next(err); }
 });
 
