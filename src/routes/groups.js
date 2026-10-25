@@ -40,7 +40,7 @@ router.get('/', requireAuth, async (req, res, next) => {
       SELECT g.*,
         (SELECT COUNT(*)::int FROM group_members WHERE group_id = g.id) AS member_count,
         (SELECT COUNT(*)::int FROM expenses WHERE group_id = g.id) AS expense_count,
-        COALESCE((SELECT SUM(amount) FROM expenses WHERE group_id = g.id), 0)::float AS total
+        COALESCE((SELECT SUM(amount_base) FROM expenses WHERE group_id = g.id), 0)::float AS total
       FROM groups g
       LEFT JOIN group_members gm ON gm.group_id = g.id
       WHERE gm.user_id = $1
@@ -93,7 +93,9 @@ router.get('/:id', requireAuth, async (req, res, next) => {
     const membersRes  = await db.query('SELECT * FROM group_members WHERE group_id = $1 ORDER BY joined_at', [group.id]);
     const expensesRes = await db.query('SELECT * FROM expenses WHERE group_id = $1 ORDER BY expense_date DESC', [group.id]);
 
-    const expenses = expensesRes.rows;
+    // La imagen del comprobante no se envía en el listado (pesa mucho): solo si existe.
+    // Se descarga aparte, al abrir el gasto.
+    const expenses = expensesRes.rows.map(({ ticket, ...ex }) => ({ ...ex, has_ticket: !!ticket }));
     for (const ex of expenses) {
       const splits = await db.query('SELECT * FROM expense_splits WHERE expense_id = $1', [ex.id]);
       ex.splits = splits.rows;
