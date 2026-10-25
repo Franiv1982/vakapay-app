@@ -298,6 +298,29 @@ router.get('/shared/:token', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// ── GET /groups/:id/cobro/:name ───────────────────────────────────
+// Cómo cobra un participante (Bizum / IBAN). Solo para miembros del grupo.
+router.get('/:id/cobro/:name', requireAuth, async (req, res, next) => {
+  try {
+    const yo = await db.query('SELECT id FROM group_members WHERE group_id = $1 AND user_id = $2', [req.params.id, req.user.id]);
+    if (!yo.rows[0]) return res.status(404).json({ error: 'Grupo no encontrado' });
+    const r = await db.query(`
+      SELECT gm.display_name, gm.user_id, u.pago_bizum, u.pago_iban, u.nombre
+      FROM group_members gm LEFT JOIN users u ON u.id = gm.user_id
+      WHERE gm.group_id = $1 AND gm.display_name = $2
+    `, [req.params.id, req.params.name]);
+    const m = r.rows[0];
+    if (!m) return res.status(404).json({ error: 'Participante no encontrado' });
+    res.json({
+      nombre: m.display_name,
+      tiene_cuenta: !!m.user_id,
+      titular: m.nombre || m.display_name,
+      bizum: m.pago_bizum || null,
+      iban: m.pago_iban || null,
+    });
+  } catch (err) { next(err); }
+});
+
 router.patch('/:id/members/:name/rename', requireAuth, async (req, res, next) => {
   try {
     if (!await ownsGroup(req.params.id, req.user.id)) {
