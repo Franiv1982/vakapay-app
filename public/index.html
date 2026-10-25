@@ -1663,40 +1663,87 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
     const pendingInvite = localStorage.getItem('vp_pending_invite');
     console.log('🔑 Invite pendiente:', pendingInvite);
     console.log('🔑 Token usuario:', vakaData.getToken() ? 'existe' : 'no existe');
-    if (pendingInvite) {
-      try {
-        const token = vakaData.getToken();
-        const displayName = profile.nombre || document.getElementById('profileDisplayName')?.textContent || '';
-        const res = await fetch(`${API_BASE}/api/v1/invite/${pendingInvite}/join`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ display_name: displayName })
-        });
-        
-        if (!res.ok) {
-          localStorage.removeItem('vp_pending_invite');
-        } else {
-          const data = await res.json();
-          console.log('📨 Respuesta invitación:', data);
-          if (data.joined || data.already_member) {
-            localStorage.removeItem('vp_pending_invite');
-            groups = await vakaData.getGroups() || [];
-            friends = await vakaData.getFriends() || [];
-            renderGroupsList();
-            renderFriends();
-            const msg = data.already_member ? `Ya eres miembro de "${data.group.name}"` : `Te has unido al grupo "${data.group.name}" ✓`;
-            toast(msg, 's');
-          } else {
-            localStorage.removeItem('vp_pending_invite');
-          }
-        }
-      } catch(err) {
-        console.error('Error al unirse al grupo:', err);
-        localStorage.removeItem('vp_pending_invite');
-      }
-    }
+    if (pendingInvite) await procesarInvitacion(pendingInvite);
 	loadFromHash();
 })();
+
+// ═══ UNIRSE A UN GRUPO POR INVITACIÓN ═══════════════════════════════
+// Si en el grupo hay participantes sin cuenta, se pregunta "¿Quién eres?":
+// al elegir tu nombre, ese participante pasa a tu cuenta con sus gastos y saldos.
+let _invitacion = null;
+async function procesarInvitacion(token) {
+  const auth = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` };
+  let info;
+  try {
+    const r = await fetch(`${API_BASE}/api/v1/invite/${token}`, { headers: auth });
+    if (r.status === 404) { localStorage.removeItem('vp_pending_invite'); toast('El enlace de invitación no es válido o ha caducado', 'e'); return; }
+    if (!r.ok) return; // sin conexión: se reintenta la próxima vez
+    info = await r.json();
+  } catch (_) { return; }
+
+  if (info.ya_miembro) {
+    localStorage.removeItem('vp_pending_invite');
+    toast(`Ya eres miembro de "${info.group.name}"`, 'i');
+    return;
+  }
+  _invitacion = { token, info };
+  if (info.sin_cuenta.length) mostrarModalQuienEres(info);
+  else unirseAGrupo({});
+}
+
+function mostrarModalQuienEres(info, sugerido) {
+  const norm = t => String(t || '').trim().replace(/\s+/g, ' ').toLowerCase();
+  const marcado = sugerido || info.sin_cuenta.find(n => norm(n) === norm(info.tu_nombre)) || null;
+  document.getElementById('quien-titulo').textContent = `Te uniste a "${info.group.name}"`;
+  document.getElementById('quien-opciones').innerHTML = info.sin_cuenta.map(n => `
+    <label style="display:flex;align-items:center;gap:10px;padding:11px 12px;border:1.5px solid ${n === marcado ? 'var(--gold)' : '#333'};border-radius:12px;margin-bottom:8px;cursor:pointer;">
+      <input type="radio" name="quienEres" value="${escaparHtml(n)}" ${n === marcado ? 'checked' : ''} style="accent-color:#F5C800;" onchange="document.querySelectorAll('#quien-opciones label').forEach(l=>l.style.borderColor='#333');this.parentNode.style.borderColor='var(--gold)'">
+      <span style="color:#F2F2F2;font-weight:700;">${escaparHtml(n)}</span>
+    </label>`).join('') + `
+    <label style="display:flex;align-items:center;gap:10px;padding:11px 12px;border:1.5px solid ${marcado ? '#333' : 'var(--gold)'};border-radius:12px;cursor:pointer;">
+      <input type="radio" name="quienEres" value="" ${marcado ? '' : 'checked'} style="accent-color:#F5C800;" onchange="document.querySelectorAll('#quien-opciones label').forEach(l=>l.style.borderColor='#333');this.parentNode.style.borderColor='var(--gold)'">
+      <span style="color:#F2F2F2;">Ninguno, soy nuevo <span style="color:var(--muted);">(entrar como ${escaparHtml(info.tu_nombre || 'tu nombre')})</span></span>
+    </label>`;
+  document.getElementById('modal-quien-eres').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function confirmarQuienEres() {
+  const sel = document.querySelector('input[name="quienEres"]:checked');
+  document.getElementById('modal-quien-eres').style.display = 'none';
+  document.body.style.overflow = '';
+  if (sel && sel.value) unirseAGrupo({ reclamar: sel.value });
+  else unirseAGrupo({ confirmar_nuevo: true });
+}
+
+async function unirseAGrupo(opciones) {
+  if (!_invitacion) return;
+  const { token, info } = _invitacion;
+  try {
+    const r = await fetch(`${API_BASE}/api/v1/invite/${token}/join`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: JSON.stringify({ display_name: profile.nombre || info.tu_nombre || '', ...opciones })
+    });
+    const data = await r.json().catch(() => ({}));
+    if (r.status === 409 && data.conflicto) {
+      // Hay alguien sin cuenta con tu mismo nombre: se pregunta si eres tú
+      mostrarModalQuienEres({ ...info, sin_cuenta: data.sin_cuenta || info.sin_cuenta }, data.sugerido);
+      return;
+    }
+    if (!r.ok) throw new Error(data.error || 'No se pudo unir al grupo');
+    localStorage.removeItem('vp_pending_invite');
+    _invitacion = null;
+    groups = await vakaData.getGroups() || [];
+    friends = await vakaData.getFriends() || [];
+    renderGroupsList(); renderFriends();
+    toast(data.already_member ? `Ya eres miembro de "${data.group.name}"`
+      : data.reclamado ? `Te has unido a "${data.group.name}" como ${data.display_name} ✓`
+      : `Te has unido al grupo "${data.group.name}" ✓`, 's');
+  } catch (err) {
+    toast(err.message || 'No se pudo unir al grupo', 'e');
+  }
+}
 
 async function save() {
   try {
@@ -6265,5 +6312,15 @@ async function borrarMensajeChat(id) {
   } catch (_) { toast('No se pudo borrar el mensaje', 'e'); }
 }
 </script>
+
+<!-- Modal: ¿Quién eres en este grupo? (invitaciones) -->
+<div class="modal-overlay" id="modal-quien-eres" style="display:none; z-index:9999;">
+  <div style="background:#1e1e1e; width:90%; max-width:360px; padding:24px; border-radius:24px; border:1px solid #333; box-sizing:border-box; max-height:85vh; overflow-y:auto;">
+    <div id="quien-titulo" style="color:#F2F2F2; font-size:1.25rem; font-weight:bold; margin-bottom:8px; text-align:center;"></div>
+    <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:16px; opacity:0.8; text-align:center; line-height:1.4;">¿Quién eres en este grupo? Si ya te habían añadido, elige tu nombre: conservarás tus gastos y saldos.</p>
+    <div id="quien-opciones" style="margin-bottom:18px;"></div>
+    <button onclick="confirmarQuienEres()" style="width:100%; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:#000; background:#F5C800;">Continuar</button>
+  </div>
+</div>
 </body>
 </html>
