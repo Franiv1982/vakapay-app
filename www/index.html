@@ -1570,22 +1570,23 @@ const TYPE_ICONS={viaje:'✈️',casa:'🏠',pareja:'💑',otros:'🎯'};
         return;
     }
 
-    // 2. Validación flexible de sesión con el backend (Soporte Offline / APK)
+    // 2. Validación de sesión con el backend
+    //    - Si el servidor rechaza el token (sesión caducada o inválida) → se vuelve al login.
+    //    - Si no hay conexión → se continúa con los datos guardados (modo sin conexión).
+    let sesionRechazada = false;
     try {
         const response = await fetch(`${API_BASE}/api/v1/users/me`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        
-        // Si el servidor rechaza explícitamente el token por unauthorized, sí redirigimos al login
-        if (!response.ok) {
-            if (response.status === 401 || response.status === 403) {
-                throw new Error("Sesión no autorizada");
-            }
-        }
+        if (response.status === 401 || response.status === 403) sesionRechazada = true;
     } catch(err) {
-        console.warn("Aviso de red o sesión inválida. Continuando con caché local:", err);
-        // Si es un error crítico de autenticación real, puedes forzar el logout aquí si lo deseas.
-        // Si es solo falta de red, dejamos que pase para que la app no se quede en blanco.
+        console.warn("Sin conexión con el servidor. Continuando con los datos guardados:", err);
+    }
+    if (sesionRechazada) {
+        vakaData.setToken(null);
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+        return;
     }
    
 	// 3. CARGA DE DATOS
