@@ -3142,7 +3142,13 @@ function confirmPayment(settle){
 let _proofData = null;
 function openProofModal(idx,from,to,amount){
   _proofData={idx,from,to,amount};
-  document.getElementById('proofTitle').textContent=`Comprobante: ${from} → ${to}`;
+  document.getElementById('proofTitle').textContent=`Pago: ${from} → ${to}`;
+  // Cualquier participante puede registrar el pago de otro (p. ej. alguien sin cuenta que pagó en efectivo).
+  // Queda en la Actividad del grupo quién lo registró, y se puede anular.
+  const yo = miNombreEnGrupo(groups[currentGroupIdx]);
+  document.getElementById('proofSubtitulo').textContent = yo === from
+    ? `Registra que pagaste ${formatAmountBase(amount, getBase())} a ${to}. El comprobante es opcional.`
+    : `Registra que ${from} pagó ${formatAmountBase(amount, getBase())} a ${to}. Quedará en la Actividad que lo registraste tú.`;
   document.getElementById('proofThumbView').style.display='none';
   document.getElementById('proofFileInput').value='';
   document.getElementById('proofModal').classList.add('open');
@@ -5349,6 +5355,7 @@ function cerrarModalSalir() {
     <div class="modal-handle"></div>
     <button class="modal-close" onclick="closeProofModal()">✕ Cerrar</button>
     <div class="modal-title" id="proofTitle">Comprobante de pago</div>
+    <div id="proofSubtitulo" style="font-size:.78rem;color:var(--muted);margin:-4px 0 12px;line-height:1.4;"></div>
     <div class="proof-area" onclick="document.getElementById('proofFileInput').click()" style="padding:10px;margin-bottom:10px;">
       <input type="file" id="proofFileInput" accept="image/*" onchange="handleProofModalFile(event)">
       <span style="font-size:1.2rem">🧾</span>
@@ -5356,12 +5363,9 @@ function cerrarModalSalir() {
       <div style="font-size:.62rem;color:var(--muted2);margin-top:2px">Bizum, transferencia, screenshot…</div>
       <img id="proofThumbView" class="proof-thumb" style="max-height:80px;">
     </div>
-    <div style="display:flex;gap:8px;margin-top:8px;">
-      <button class="btn btn-outline" onclick="closeProofModal()" style="flex:1;font-size:.75rem;">Cancelar</button>
-      <button class="btn btn-outline" onclick="confirmPayment(false)" style="flex:1;font-size:.75rem;">📨 Enviar</button>
-    </div>
     <div style="margin-top:8px;">
-      <button class="btn btn-green btn-full" onclick="confirmPayment(true)">✅ Marcar como saldado</button>
+      <button class="btn btn-green btn-full" onclick="sendProof(true)">✅ Marcar como saldado</button>
+      <button class="btn btn-outline btn-full" style="margin-top:8px;" onclick="closeProofModal()">Cancelar</button>
     </div>
   </div>
 </div>
