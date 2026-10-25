@@ -3,22 +3,22 @@ const express = require('express');
 const db = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
 const { logActivity } = require('../utils/activity');
+const { buscarAmigoDuplicado, completarAmigo } = require('../utils/contactos');
 
 const router = express.Router();
 
+// Añade el contacto como amigo salvo que ya exista (mismo email, teléfono o nombre);
+// si existe, solo completa el email o teléfono que le falten.
 async function addFriendIfNotExists(ownerId, name, email, phone) {
-  const existing = await db.query(
-    'SELECT id FROM friends WHERE owner_id = $1 AND name = $2',
-    [ownerId, name]
-  );
-  console.log(`🔍 Checking friend: owner=${ownerId} name=${name} exists=${existing.rows.length > 0}`);
-  if (existing.rows.length === 0) {
-    const result = await db.query(
-      'INSERT INTO friends (owner_id, name, email, phone) VALUES ($1, $2, $3, $4) RETURNING id',
-      [ownerId, name, email || '', phone || '']
-    );
-    console.log(`✅ Friend added: id=${result.rows[0].id} owner=${ownerId} name=${name}`);
+  const dup = await buscarAmigoDuplicado(ownerId, { name, email, phone });
+  if (dup) {
+    await completarAmigo(dup.amigo, { email, phone });
+    return;
   }
+  await db.query(
+    'INSERT INTO friends (owner_id, name, email, phone) VALUES ($1, $2, $3, $4)',
+    [ownerId, name, email || '', phone || '']
+  );
 }
 
 router.post('/:token/join', requireAuth, async (req, res, next) => {
