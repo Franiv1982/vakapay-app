@@ -206,12 +206,13 @@ router.post('/:id/members', requireAuth, async (req, res, next) => {
     const { display_name, user_id = null } = req.body;
     if (!display_name) return res.status(400).json({ error: 'display_name es obligatorio' });
 
+    // Sin distinguir mayúsculas ni espacios: "Juan" y "juan " son el mismo participante
     const existing = await db.query(
-      'SELECT id FROM group_members WHERE group_id = $1 AND display_name = $2',
+      'SELECT display_name FROM group_members WHERE group_id = $1 AND LOWER(TRIM(display_name)) = LOWER(TRIM($2))',
       [req.params.id, display_name]
     );
     if (existing.rows.length > 0) {
-      return res.status(409).json({ error: `El participante "${display_name}" ya existe` });
+      return res.status(409).json({ error: `El participante "${existing.rows[0].display_name}" ya existe` });
     }
 
     const result = await db.query(`
@@ -306,8 +307,8 @@ router.patch('/:id/members/:name/rename', requireAuth, async (req, res, next) =>
     if (!display_name) return res.status(400).json({ error: 'display_name es obligatorio' });
 
     const existing = await db.query(
-      'SELECT id FROM group_members WHERE group_id = $1 AND display_name = $2',
-      [req.params.id, display_name]
+      'SELECT id FROM group_members WHERE group_id = $1 AND LOWER(TRIM(display_name)) = LOWER(TRIM($2)) AND display_name <> $3',
+      [req.params.id, display_name, req.params.name]
     );
     if (existing.rows.length > 0) return res.status(409).json({ error: 'Ya existe un participante con ese nombre' });
 

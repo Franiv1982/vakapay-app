@@ -6,6 +6,7 @@ const fs      = require('fs');
 const db      = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
 const { logActivity } = require('../utils/activity');
+const { buscarAmigoDuplicado, completarAmigo } = require('../utils/contactos');
 
 const router = express.Router();
 
@@ -51,6 +52,16 @@ router.post('/', requireAuth, async (req, res, next) => {
     const { name, email = '', phone = '', notes = '' } = req.body;
     if (!name) return res.status(400).json({ error: 'name es obligatorio' });
 
+    // Evita duplicados: mismo email, teléfono o nombre que un amigo ya guardado
+    const dup = await buscarAmigoDuplicado(req.user.id, { name, email, phone });
+    if (dup) {
+      await completarAmigo(dup.amigo, { email, phone }); // aprovecha los datos nuevos que falten
+      return res.status(409).json({
+        error: `Ya tienes a "${dup.amigo.name}" en tus amigos (mismo ${dup.motivo})`,
+        friend: dup.amigo, motivo: dup.motivo,
+      });
+    }
+
     const result = await db.query(`
       INSERT INTO friends (owner_id, name, email, phone, notes)
       VALUES ($1, $2, $3, $4, $5) RETURNING *
@@ -77,6 +88,15 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
     if (!existing.rows[0]) return res.status(404).json({ error: 'Amigo no encontrado' });
 
     const { name, email, phone, notes, avatar_url } = req.body;
+    const actual = existing.rows[0];
+    const dup = await buscarAmigoDuplicado(req.user.id, {
+      name:  name  !== undefined ? name  : actual.name,
+      email: email !== undefined ? email : actual.email,
+      phone: phone !== undefined ? phone : actual.phone,
+    }, actual.id);
+    if (dup) {
+      return res.status(409).json({ error: `Ya tienes a "${dup.amigo.name}" en tus amigos (mismo ${dup.motivo})`, motivo: dup.motivo });
+    }
     // La foto llega como imagen en texto (data:image/...); se guarda en la propia columna
     if (avatar_url !== undefined && avatar_url !== null) {
       if (typeof avatar_url !== 'string' || !avatar_url.startsWith('data:image/') || avatar_url.length > 500000) {

@@ -2335,7 +2335,8 @@ async function addMember() {
   if (!n) { toast('Escribe un nombre', 'e'); return; }
   if (n.length > 20) { toast('El nombre no puede superar 20 caracteres', 'e'); return; }
   const g = groups[currentGroupIdx];
-  if (g.members.hasOwnProperty(n)) { toast('Ya existe ese participante', 'e'); return; }
+  const yaEsta = Object.keys(g.members).find(m => _normNombre(m) === _normNombre(n));
+  if (yaEsta) { mostrarModalDuplicado({ titulo: 'Participante repetido', nombre: yaEsta, motivo: 'participante' }); return; }
 
   // 1. Añadimos al grupo
   g.members[n] = 0; 
@@ -2351,7 +2352,7 @@ async function addMember() {
   } catch(err) { console.error('Error añadiendo miembro:', err); }
 
   // 3. Añadir a lista global de amigos
-  if (!friends.some(f => f.name === n)) {
+  if (!buscarAmigoDuplicado({ name: n })) {
     try {
       const friend = await vakaData.addFriend({ name: n, email: '', phone: '', notes: 'Añadido desde grupo' });
       friends.push(friend);
@@ -3229,10 +3230,14 @@ async function addFromContacts() {
     const tel = c.phones?.[0]?.number || '';
     const email = c.emails?.[0]?.address || '';
     if (!name) { toast('El contacto no tiene nombre', 'e'); return; }
-    document.getElementById('memberName').value = name.slice(0, 20);
+    // Si ya es amigo (mismo teléfono o email), se usa el nombre con el que está guardado
+    const yaAmigo = buscarAmigoDuplicado({ email, phone: tel });
+    const nombreFinal = yaAmigo ? yaAmigo.amigo.name : name;
+    if (yaAmigo) toast(`Ya está en tus amigos como "${yaAmigo.amigo.name}"`, 'i');
+    document.getElementById('memberName').value = nombreFinal.slice(0, 20);
     document.getElementById('manualAddWrap').style.display = 'block';
     document.getElementById('friendPickerWrap').style.display = 'none';
-    toast(`Contacto "${name}" cargado. Pulsa Añadir para confirmar.`, 's');
+    if (!yaAmigo) toast(`Contacto "${name}" cargado. Pulsa Añadir para confirmar.`, 's');
   } catch(err) {
     console.error('Error accediendo a contactos:', err);
     toast('No se pudo acceder a los contactos', 'e');
@@ -3795,6 +3800,42 @@ function populateFriendGroupSelect(){
     groups.map(g=>`<option value="${g.id}">${TYPE_ICONS[g.type]||'📂'} ${g.name}</option>`).join('');
   if(prev)sel.value=prev;
 }
+// ── Detección de contactos duplicados ────────────────────────────
+// Mismo contacto si coincide el email, el teléfono (últimos 9 dígitos) o el nombre
+// (sin distinguir mayúsculas ni espacios). Igual que en el servidor.
+const _normEmail  = e => String(e || '').trim().toLowerCase();
+const _normNombre = n => String(n || '').trim().replace(/\s+/g, ' ').toLowerCase();
+const _normTel    = t => { const d = String(t || '').replace(/\D/g, ''); return d.length >= 6 ? d.slice(-9) : ''; };
+function buscarAmigoDuplicado({ name, email, phone }, excluirIdx = null) {
+  const em = _normEmail(email), tel = _normTel(phone), nom = _normNombre(name);
+  for (let i = 0; i < friends.length; i++) {
+    if (i === excluirIdx) continue;
+    const f = friends[i];
+    if (em && _normEmail(f.email) === em) return { amigo: f, motivo: 'email' };
+    if (tel && _normTel(f.phone) === tel) return { amigo: f, motivo: 'teléfono' };
+    if (nom && _normNombre(f.name) === nom) return { amigo: f, motivo: 'nombre' };
+  }
+  return null;
+}
+
+// Modal de la app que avisa de que el contacto o participante ya existe
+function mostrarModalDuplicado({ titulo = 'Contacto duplicado', nombre, motivo, valor }) {
+  document.getElementById('dup-titulo').textContent = titulo;
+  document.getElementById('dup-nombre').textContent = nombre || '';
+  const det = motivo === 'email' ? `Coincide el email${valor ? ': ' + valor : ''}`
+            : motivo === 'teléfono' ? `Coincide el teléfono${valor ? ': ' + valor : ''}`
+            : motivo === 'participante' ? 'Ya forma parte de este grupo'
+            : 'Ya existe con el mismo nombre';
+  document.getElementById('dup-motivo').textContent = det;
+  document.getElementById('modal-duplicado').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function cerrarModalDuplicado() {
+  document.getElementById('modal-duplicado').style.display = 'none';
+  document.body.style.overflow = '';
+}
+const _valorDup = (dup, datos) => dup.motivo === 'email' ? datos.email : dup.motivo === 'teléfono' ? datos.phone : '';
+
 async function addFriend(){
   const n=document.getElementById('friendName').value.trim();
   const last=document.getElementById('friendLastName').value.trim();
@@ -3804,7 +3845,8 @@ async function addFriend(){
   if(n.length>20){toast('El nombre no puede superar 20 caracteres','e');return;}
   if(last.length>20){toast('El apellido no puede superar 20 caracteres','e');return;}
   const fullName=last?n+' '+last:n;
-  if(friends.some(f=>f.name===fullName)){toast('Ya existe ese amigo','e');return;}
+  const dup = buscarAmigoDuplicado({ name: fullName, email, phone });
+  if (dup) { mostrarModalDuplicado({ titulo: 'Este amigo ya existe', nombre: dup.amigo.name, motivo: dup.motivo, valor: _valorDup(dup, { email, phone }) }); return; }
   try {
     const friend = await vakaData.addFriend({name:fullName, email, phone, notes:''});
     friends.push({...friend, name:fullName, email, phone, contact:email||phone, addedAt:new Date().toISOString()});
@@ -3818,7 +3860,14 @@ async function addFriend(){
     toast(`${fullName} añadido como amigo ✓`,'s');
     saveActivity();renderActivity();
   } catch(err) {
-    toast('Error al añadir amigo','e');
+    // 409: el servidor detectó que ya existe (p. ej. añadido desde otro dispositivo o por invitación)
+    if (err.status === 409) {
+      friends = await vakaData.getFriends() || friends; renderFriends();
+      const d = buscarAmigoDuplicado({ name: fullName, email, phone });
+      mostrarModalDuplicado({ titulo: 'Este amigo ya existe', nombre: d ? d.amigo.name : fullName, motivo: d ? d.motivo : 'nombre', valor: d ? _valorDup(d, { email, phone }) : '' });
+    } else {
+      toast('Error al añadir amigo', 'e');
+    }
     console.error(err);
   }
 }
@@ -3929,8 +3978,9 @@ async function saveEditFriend(){
   if(lastName.length>20){toast('El apellido no puede superar 20 caracteres','e');return;}
   const newName=lastName?firstName+' '+lastName:firstName;
   const oldName=f.name;
+  const dupEdit = buscarAmigoDuplicado({ name: newName, email, phone }, editingFriendIdx);
+  if (dupEdit) { mostrarModalDuplicado({ titulo: 'Ya tienes este contacto', nombre: dupEdit.amigo.name, motivo: dupEdit.motivo, valor: _valorDup(dupEdit, { email, phone }) }); return; }
   if(newName!==oldName){
-    if(friends.some((fr,i)=>fr.name===newName&&i!==editingFriendIdx)){toast('Ya existe un amigo con ese nombre','e');return;}
     groups.forEach(g=>{
       if(g.members.hasOwnProperty(oldName)){
         g.members[newName]=g.members[oldName];delete g.members[oldName];
@@ -5546,6 +5596,22 @@ function tocarBotonGrupos(btn) {
       <button onclick="cerrarModalQuitarComprobante()" style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#28a745;">No, volver</button>
       <button onclick="confirmarQuitarComprobante()" style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#dc3545;">Sí, quitar</button>
     </div>
+  </div>
+</div>
+
+<!-- Modal: contacto o participante duplicado -->
+<div class="modal-overlay" id="modal-duplicado" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalDuplicado()">
+  <div style="background:#1e1e1e; width:90%; max-width:340px; padding:25px; border-radius:24px; border:1px solid #333; text-align:center; box-sizing:border-box;">
+    <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:rgba(245,200,0,.12); display:flex; align-items:center; justify-content:center;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F5C800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+    </div>
+    <div id="dup-titulo" style="color:#F2F2F2; font-size:1.4rem; font-weight:bold; margin-bottom:10px;">Contacto duplicado</div>
+    <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:18px; opacity:0.8;">No se ha añadido para evitar duplicados.</p>
+    <div style="background:#2a2a2a; border-radius:16px; padding:14px; margin-bottom:22px; text-align:left;">
+      <div id="dup-nombre" style="color:white; font-weight:800; font-size:1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
+      <div id="dup-motivo" style="color:#aaa; font-size:0.8rem; margin-top:4px; word-break:break-word;"></div>
+    </div>
+    <button onclick="cerrarModalDuplicado()" style="width:100%; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:#000; background:#F5C800;">Entendido</button>
   </div>
 </div>
 </body>
