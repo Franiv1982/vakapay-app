@@ -4624,16 +4624,102 @@ function fileToBase64(file) {
   });
 }
 
-// Envía el ticket a nuestro servidor, que es quien llama a Claude con la clave guardada en Vercel
+// ═══ ESCANEO DE TICKETS ═══════════════════════════════════════════════
+// 'local'    → se lee en el propio móvil con Tesseract.js (gratis, sin servidor)
+// 'servidor' → se envía a /api/v1/ocr, que usa Claude (más preciso, de pago; requiere ANTHROPIC_API_KEY en Vercel)
+const OCR_MODO = 'local';
+
+// Devuelve la respuesta con la misma forma que la API de Claude ({content:[{text}]}),
+// así el resto del código no cambia sea cual sea el modo.
 async function escanearTicket(b64, mediaType) {
-  const res = await fetch(`${API_BASE}/api/v1/ocr`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
-    body: JSON.stringify({ image: b64, media_type: mediaType })
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || 'No se pudo analizar el ticket');
-  return data;
+  if (OCR_MODO === 'servidor') {
+    const res = await fetch(`${API_BASE}/api/v1/ocr`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: JSON.stringify({ image: b64, media_type: mediaType })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'No se pudo analizar el ticket');
+    return data;
+  }
+  const texto = await leerTextoTicket(`data:${mediaType};base64,${b64}`);
+  const datos = interpretarTicket(texto);
+  if (!datos.amount) throw new Error('No se encontró el importe. Prueba con una foto más nítida y recta.');
+  return { content: [{ type: 'text', text: JSON.stringify(datos) }] };
+}
+
+// Carga Tesseract.js solo la primera vez que se escanea (no ralentiza el arranque de la app)
+let _tesseractWorker = null;
+async function leerTextoTicket(imagen) {
+  if (!window.Tesseract) {
+    await new Promise((resolve, reject) => {
+      const sc = document.createElement('script');
+      sc.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
+      sc.onload = resolve;
+      sc.onerror = () => reject(new Error('No se pudo cargar el lector de tickets. Revisa tu conexión.'));
+      document.head.appendChild(sc);
+    });
+  }
+  if (!_tesseractWorker) _tesseractWorker = await Tesseract.createWorker('spa');
+  const { data } = await _tesseractWorker.recognize(imagen);
+  return data.text || '';
+}
+
+// Convierte "1.234,56", "1,234.56", "12,50" o "12.50" en número
+function _numeroTicket(txt) {
+  let t = String(txt).replace(/\s/g, '');
+  const ultComa = t.lastIndexOf(','), ultPunto = t.lastIndexOf('.');
+  if (ultComa > -1 && ultPunto > -1) {
+    t = ultComa > ultPunto ? t.replace(/\./g, '').replace(',', '.') : t.replace(/,/g, '');
+  } else if (ultComa > -1) {
+    t = t.replace(',', '.');
+  }
+  const n = parseFloat(t);
+  return Number.isFinite(n) ? n : null;
+}
+
+// Extrae descripción (comercio), importe total, fecha y divisa del texto leído
+function interpretarTicket(texto) {
+  const lineas = String(texto).split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const reImporte = /(\d{1,3}(?:[.,\s]\d{3})*[.,]\d{2}|\d+[.,]\d{2})(?!\d)/g;
+
+  // 1. Importe: la línea de TOTAL (no subtotal); si no la hay, el importe más alto del ticket
+  let amount = null;
+  const reTotal = /(total|importe|a pagar|a cobrar|tarjeta|efectivo)/i;
+  for (let i = lineas.length - 1; i >= 0 && amount === null; i--) {
+    const l = lineas[i];
+    if (!reTotal.test(l) || /sub\s*-?\s*total|base\s+imp|iva|i\.v\.a|cambio|devol/i.test(l)) continue;
+    let nums = l.match(reImporte);
+    if (!nums && lineas[i + 1]) nums = lineas[i + 1].match(reImporte); // el importe a veces va en la línea siguiente
+    if (nums) amount = _numeroTicket(nums[nums.length - 1]);
+  }
+  if (amount === null) {
+    const todos = (texto.match(reImporte) || []).map(_numeroTicket).filter(n => n !== null && n < 100000);
+    if (todos.length) amount = Math.max(...todos);
+  }
+
+  // 2. Fecha: dd/mm/aaaa, dd-mm-aa, dd.mm.aaaa o aaaa-mm-dd
+  let date = new Date().toISOString().slice(0, 10);
+  const mf = texto.match(/\b(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})\b/) || null;
+  const mi = texto.match(/\b(20\d{2})[\/\-.](\d{1,2})[\/\-.](\d{1,2})\b/) || null;
+  let d, m, y;
+  if (mi) { [, y, m, d] = mi; } else if (mf) { [, d, m, y] = mf; if (y.length === 2) y = '20' + y; }
+  if (y && +m >= 1 && +m <= 12 && +d >= 1 && +d <= 31) date = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+  // 3. Divisa
+  let currency = getBase();
+  if (/€|\bEUR\b|EUROS?\b/i.test(texto)) currency = 'EUR';
+  else if (/£|\bGBP\b/i.test(texto)) currency = 'GBP';
+  else if (/\bARS\b|PESOS?\b/i.test(texto)) currency = 'ARS';
+  else if (/US\$|\bUSD\b|\$/i.test(texto)) currency = 'USD';
+
+  // 4. Descripción: la primera línea con aspecto de nombre de comercio
+  const ignorar = /(\bfactura\b|\bticket\b|simplificada|\bcif\b|\bnif\b|n\.i\.f|c\.i\.f|\btel[fé.:]?\b|\btel[eé]fono|www|http|@|\bfecha\b|\bhora\b|\bcalle\b|\bc\/|\bavda|direcci|n[ºo°]\s*\d)/i;
+  const tieneImporte = l => new RegExp(reImporte.source).test(l);
+  const nombre = lineas.slice(0, 8).find(l => /[a-záéíóúñ]{3,}/i.test(l) && !ignorar.test(l) && !tieneImporte(l) && l.length <= 40);
+  const desc = nombre ? nombre.replace(/[^\wáéíóúüñÁÉÍÓÚÜÑ&'.\- ]/g, '').replace(/\s+/g, ' ').trim().slice(0, 30) : 'Ticket';
+
+  return { desc, amount: amount !== null ? +amount.toFixed(2) : null, date, currency };
 }
 
 // ═══ STATISTICS ═══════════════════════════════════════════════════════
