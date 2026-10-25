@@ -5314,6 +5314,36 @@ const MAIN_PAGES = ['page-grupos', 'page-amigos', 'page-stats', 'page-actividad'
 })();
 
 
+// ═══ CÁMARA O GALERÍA ═════════════════════════════════════════════════
+// Cualquier botón que pide una imagen (ticket, comprobante, foto de perfil o de un amigo)
+// muestra primero dos opciones: hacer una foto con la cámara o elegirla de la galería.
+let _inputImagenPendiente = null;
+let _abriendoImagen = false;
+
+document.addEventListener('click', (e) => {
+  const input = e.target;
+  if (!input || input.tagName !== 'INPUT' || input.type !== 'file') return;
+  if (!/image/.test(input.accept || '')) return;
+  if (_abriendoImagen) return;           // la abrimos nosotros tras elegir opción: dejar pasar
+  e.preventDefault();                    // se cancela el selector y se muestran las opciones
+  _inputImagenPendiente = input;
+  document.getElementById('origenImagenModal').style.display = 'flex';
+}, true);
+
+function elegirOrigenImagen(origen) {
+  const input = _inputImagenPendiente;
+  cerrarOrigenImagen();
+  if (!input) return;
+  if (origen === 'camara') input.setAttribute('capture', 'environment');
+  else input.removeAttribute('capture');
+  _abriendoImagen = true;
+  try { input.click(); } finally { _abriendoImagen = false; }
+}
+
+function cerrarOrigenImagen() {
+  document.getElementById('origenImagenModal').style.display = 'none';
+}
+
 // Evita que una doble pulsación ejecute dos veces la misma acción
 // (crear dos grupos iguales, añadir dos veces el mismo amigo o participante...)
 function sinDoblePulsacion(fn) {
@@ -5360,5 +5390,15 @@ function tocarBotonGrupos(btn) {
 
 </script>
 
+
+<!-- Elegir origen de la imagen: cámara o galería -->
+<div id="origenImagenModal" onclick="if(event.target===this)cerrarOrigenImagen()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;align-items:flex-end;justify-content:center;">
+  <div style="background:var(--dark3);width:100%;max-width:460px;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));border-top:1px solid var(--border);">
+    <div style="color:var(--text);font-weight:800;text-align:center;margin-bottom:14px;">Añadir imagen</div>
+    <button type="button" onclick="elegirOrigenImagen('camara')" class="btn btn-gold btn-full" style="margin-bottom:10px;">📷 Hacer foto</button>
+    <button type="button" onclick="elegirOrigenImagen('galeria')" class="btn btn-outline btn-full" style="margin-bottom:10px;">🖼️ Elegir de la galería</button>
+    <button type="button" onclick="cerrarOrigenImagen()" style="width:100%;background:none;border:none;color:var(--muted);padding:10px;font-weight:700;cursor:pointer;">Cancelar</button>
+  </div>
+</div>
 </body>
 </html>
