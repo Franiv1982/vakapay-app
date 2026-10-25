@@ -4044,7 +4044,7 @@ async function guardarCambiosGrupo() {
   const nuevoNombre = inputNombre.value.trim();
 
   if (!nuevoNombre) {
-    alert("El nombre del grupo no puede estar vacío.");
+    toast('El nombre del grupo no puede estar vacío', 'e');
     return;
   }
 
@@ -4602,8 +4602,27 @@ async function attachGastoTicket(ev, idx) {
   }
 }
 
-async function removeGastoTicket(idx) {
-  if (!confirm('¿Quitar el comprobante de este gasto?')) return;
+// Pide confirmación con el modal de la app (no el del sistema)
+let comprobanteAQuitarIdx = null;
+function removeGastoTicket(idx) {
+  comprobanteAQuitarIdx = idx;
+  const e = groups[currentGroupIdx]?.expenses[idx];
+  document.getElementById('quitar-comp-desc').textContent = e ? e.desc : '';
+  const img = document.getElementById('quitar-comp-img');
+  img.src = (e && e.ticket) || '';
+  img.style.display = (e && e.ticket) ? 'block' : 'none';
+  document.getElementById('modal-quitar-comprobante').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function cerrarModalQuitarComprobante() {
+  document.getElementById('modal-quitar-comprobante').style.display = 'none';
+  document.body.style.overflow = '';
+  comprobanteAQuitarIdx = null;
+}
+async function confirmarQuitarComprobante() {
+  const idx = comprobanteAQuitarIdx;
+  cerrarModalQuitarComprobante();
+  if (idx === null) return;
   try {
     await guardarTicketServidor(idx, null);
     openGasto(idx);
@@ -5508,6 +5527,25 @@ function tocarBotonGrupos(btn) {
       Descargar
     </button>
     <button type="button" class="btn btn-gold" style="flex:1;" onclick="cerrarVisorTicket()">Cerrar</button>
+  </div>
+</div>
+
+<!-- Modal de confirmación: quitar comprobante -->
+<div class="modal-overlay" id="modal-quitar-comprobante" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalQuitarComprobante()">
+  <div style="background:#1e1e1e; width:90%; max-width:340px; padding:25px; border-radius:24px; border:1px solid #333; text-align:center; box-sizing:border-box;">
+    <div style="color:#F2F2F2; font-size:1.5rem; font-weight:bold; margin-bottom:10px;">¿Quitar comprobante?</div>
+    <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:20px; opacity:0.8;">El gasto se mantiene; solo se elimina la imagen adjunta para todo el grupo.</p>
+    <div style="background:#2a2a2a; border-radius:16px; padding:12px; margin-bottom:25px; display:flex; align-items:center; gap:12px; text-align:left;">
+      <img id="quitar-comp-img" alt="" style="width:48px; height:48px; object-fit:cover; border-radius:8px; border:1px solid #444; flex-shrink:0;">
+      <div style="min-width:0;">
+        <div style="color:#aaa; font-size:0.7rem; text-transform:uppercase; letter-spacing:.5px;">Gasto</div>
+        <div id="quitar-comp-desc" style="color:white; font-weight:800; font-size:1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
+      </div>
+    </div>
+    <div style="display:flex; gap:12px; width:100%;">
+      <button onclick="cerrarModalQuitarComprobante()" style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#28a745;">No, volver</button>
+      <button onclick="confirmarQuitarComprobante()" style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#dc3545;">Sí, quitar</button>
+    </div>
   </div>
 </div>
 </body>
