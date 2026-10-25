@@ -1020,7 +1020,7 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparen
 </div>
 
 <nav class="bottom-nav">
-  <button class="nav-btn" data-page="page-grupos" onclick="switchPage('page-grupos',this)">
+   <button class="nav-btn" data-page="page-grupos" onclick="tocarBotonGrupos(this)">
   <div class="nav-ico-wrapper" style="margin: 0 auto 4px auto; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
@@ -5204,6 +5204,21 @@ function volverAlGrupoActual() {
   badge.style.display = 'block';
   renderAll();
   requestAnimationFrame(posicionarBadge);
+}
+
+
+// Botón "Grupos" de la barra inferior:
+// - si hay un grupo seleccionado y no estás ya dentro de él → vuelve a ese grupo
+// - si ya estás dentro del grupo (o no hay ninguno) → muestra la lista de grupos
+function tocarBotonGrupos(btn) {
+  const activa = document.querySelector('.page.active');
+  const enDetalle = activa && activa.id === 'page-detalle';
+  const hayGrupo = currentGroupIdx !== null && currentGroupIdx >= 0 && groups[currentGroupIdx];
+  if (hayGrupo && !enDetalle) {
+    volverAlGrupoActual();
+  } else {
+    switchPage('page-grupos', btn);
+  }
 }
 
 </script>
