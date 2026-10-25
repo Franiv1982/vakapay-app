@@ -2866,7 +2866,15 @@ async function saveEditExpense() {
     renderGroups();
     document.getElementById('editModal').classList.remove('open');
     document.body.style.overflow = '';
-    toast('Gasto actualizado ✓', 's');
+        toast('Gasto actualizado ✓', 's');
+
+    // Si la ficha del gasto está abierta, se vuelve a dibujar con los datos nuevos
+    if (document.getElementById('page-gasto').classList.contains('active')) {
+      const expId = old.id || old._id;
+      const lista = groups[currentGroupIdx].expenses;
+      const nuevoIdx = lista.findIndex(x => (x.id || x._id) === expId);
+      openGasto(nuevoIdx >= 0 ? nuevoIdx : editingExpenseIdx);
+    }
   } catch (err) {
     console.error(err);
     toast('Error: ' + (err.message || 'No se pudo guardar'), 'e');
