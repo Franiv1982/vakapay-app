@@ -3018,10 +3018,16 @@ function selectPayMethod(el, method) {
   if (_cobro === 'cargando') {
     html = '<div style="color:var(--muted);">Cargando datos de cobro...</div>';
   } else if (method === 'bizum') {
-    html = (_cobro && _cobro.bizum)
+    // 1º el teléfono que esa persona puso en su perfil para cobrar;
+    // 2º si no lo puso, el teléfono que tú tienes guardado de ella en Amigos
+    const amigo = (friends || []).find(f => _normNombre(f.name) === _normNombre(to) && _normTel(f.phone));
+    const telBizum = (_cobro && _cobro.bizum) || (amigo && amigo.phone) || '';
+    const desdeAmigos = !(_cobro && _cobro.bizum) && !!telBizum;
+    html = telBizum
       ? `<div style="margin-bottom:6px;">Envía un Bizum a <strong>${to}</strong> desde la app de tu banco:</div>
-         ${fila('Teléfono', _cobro.bizum, _cobro.bizum)}${fila('Importe', formatAmountBase(Number(importe), base), importe.replace('.', ','))}${fila('Concepto', concepto, concepto)}`
-      : `<strong>${to}</strong> aún no ha añadido su teléfono para Bizum. Puedes pedírselo o elegir otro método.`;
+         ${fila(desdeAmigos ? 'Teléfono (de tus amigos)' : 'Teléfono', telBizum, telBizum.replace(/\s+/g, ''))}${fila('Importe', formatAmountBase(Number(importe), base), importe.replace('.', ','))}${fila('Concepto', concepto, concepto)}
+         ${desdeAmigos ? `<div style="margin-top:8px;color:var(--gold);font-size:.72rem;">${to} no ha configurado Bizum en su perfil; es el número que tienes guardado en Amigos. Comprueba que sea el que usa para Bizum.</div>` : ''}`
+      : `<strong>${to}</strong> aún no ha añadido su teléfono para Bizum, y tampoco lo tienes en Amigos. Puedes añadirlo en Amigos o elegir otro método.`;
   } else if (method === 'transferencia') {
     html = (_cobro && _cobro.iban)
       ? `<div style="margin-bottom:6px;">Haz una transferencia a <strong>${to}</strong> desde la app de tu banco:</div>
@@ -3030,7 +3036,7 @@ function selectPayMethod(el, method) {
   } else if (method === 'efectivo') {
     html = `Entrega <strong>${formatAmountBase(Number(importe), base)}</strong> en efectivo a <strong>${to}</strong> y después pulsa <strong>«Marcar saldado»</strong>.`;
   }
-  if (method !== 'efectivo' && _cobro && !_cobro.tiene_cuenta) {
+  if (method === 'transferencia' && _cobro && !_cobro.tiene_cuenta) {
     html = `<strong>${to}</strong> no tiene cuenta en VakaPay, así que no tiene datos de cobro guardados. Acordad el pago entre vosotros y pulsa «Marcar saldado».`;
   }
   det.innerHTML = html + (method !== 'efectivo' ? '<div style="margin-top:8px;color:var(--muted);font-size:.72rem;">Cuando hayas pagado, adjunta la captura y pulsa «Marcar saldado».</div>' : '');
