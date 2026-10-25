@@ -845,9 +845,9 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparen
 
   <div class="card" style="margin-top:13px">
     <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Opciones</div>
-    <button class="btn btn-danger btn-full" onclick="document.getElementById('modal-borrar-datos').style.display='flex';document.body.style.overflow='hidden'" style="margin-bottom:10px;">Borrar todos mis datos</button>
+    <button class="btn btn-danger btn-full" onclick="abrirBorrado('datos')" style="margin-bottom:10px;">Borrar todos mis datos</button>
     <button class="btn btn-full" onclick="handleLogout()" style="background:none;border:1px solid #ff4d4d;color:#ff4d4d;border-radius:10px;padding:12px;font-weight:bold;font-size:.8rem;cursor:pointer;">Cerrar Sesión</button>
-    <button class="btn btn-full" onclick="document.getElementById('modal-eliminar-cuenta').style.display='flex';document.body.style.overflow='hidden'" style="background:none;border:1px solid #990000;color:#990000;border-radius:10px;padding:12px;font-weight:bold;font-size:.8rem;cursor:pointer;margin-top:8px;">Eliminar mi cuenta</button>
+    <button class="btn btn-full" onclick="abrirBorrado('cuenta')" style="background:none;border:1px solid #990000;color:#990000;border-radius:10px;padding:12px;font-weight:bold;font-size:.8rem;cursor:pointer;margin-top:8px;">Eliminar mi cuenta</button>
   </div>
 </main>
 </div>
@@ -1151,7 +1151,7 @@ class VakaDataService {
     }
 
     if (!res.ok) {
-      throw Object.assign(new Error(data.error || 'Error del servidor'), { status: res.status });
+      throw Object.assign(new Error(data.error || 'Error del servidor'), { status: res.status, datos: data });
     }
     
     return data;
@@ -1497,32 +1497,17 @@ async logActivity(msg, groupName = null) {
     }
   }
 
+  // Borrado en el servidor, en una sola operación (ver src/utils/borrado.js).
+  // Si hay saldos pendientes en grupos compartidos, el servidor responde 409 y no borra nada.
   async deleteAllData() {
-    try {
-      const gs = await this.#req('GET', '/groups');
-      if (Array.isArray(gs)) {
-        for (const g of gs) await this.#req('DELETE', `/groups/${g.id}`);
-      }
-      const fs = await this.#req('GET', '/friends');
-      if (Array.isArray(fs)) {
-        for (const f of fs) await this.#req('DELETE', `/friends/${f.id}`);
-      }
-      try { await this.#req('DELETE', '/activity'); } catch(_) {}
-    } catch(err) {
-      console.error('Error durante el borrado de datos:', err);
-    }
+    return await this.#req('DELETE', '/users/me/datos');
   }
 
   async deleteAccount() {
-    await this.deleteAllData();
-    try {
-      await this.#req('DELETE', '/users/me');
-    } catch(err) {
-      console.error('❌ Error al eliminar usuario:', err);
-      throw err;
-    }
+    const r = await this.#req('DELETE', '/users/me');
     this.setToken(null);
     localStorage.clear();
+    return r;
   }
 }
 
@@ -4417,26 +4402,93 @@ function cerrarModalBorrarDatos() {
   document.body.style.overflow = '';
 }
 
-async function ejecutarBorradoDatos() {
+// ── Borrar datos / eliminar cuenta ───────────────────────────────
+// 1. Se consulta al servidor qué pasaría.
+// 2. Si hay saldos pendientes en grupos compartidos → modal con la lista (no se puede continuar).
+// 3. Si no → modal de confirmación que explica exactamente qué se borra.
+async function abrirBorrado(tipo) {
+  let plan;
   try {
-    await vakaData.deleteAllData();
-  } catch(_) {}
-  clearAll();
+    const res = await fetch(`${API_BASE}/api/v1/users/me/borrado`, {
+      headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    if (!res.ok) throw new Error();
+    plan = await res.json();
+  } catch (_) {
+    toast('Necesitas conexión a internet para hacer esto', 'e');
+    return;
+  }
+  if (plan.pendientes && plan.pendientes.length) {
+    mostrarModalPendientes(plan.pendientes, tipo);
+    return;
+  }
+  const n = plan.grupos_a_borrar.length, m = plan.grupos_a_salir.length;
+  const partes = [];
+  if (n) partes.push(`Se borrarán ${n === 1 ? 'el grupo' : `${n} grupos`} que solo usas tú, con sus gastos.`);
+  if (m) partes.push(`Saldrás de ${m === 1 ? '1 grupo compartido' : `${m} grupos compartidos`}; tus gastos pasados seguirán en su historial para el resto.`);
+  partes.push('También se borrarán tus amigos y tu actividad.');
+  if (tipo === 'cuenta') {
+    document.getElementById('eliminar-cuenta-resumen').innerHTML =
+      `Se eliminará tu cuenta. ${partes.join(' ')} Esta acción <strong>no se puede deshacer</strong>.`;
+    document.getElementById('modal-eliminar-cuenta').style.display = 'flex';
+  } else {
+    document.getElementById('borrar-datos-resumen').textContent = `${partes.join(' ')} Esta acción no se puede deshacer.`;
+    document.getElementById('modal-borrar-datos').style.display = 'flex';
+  }
+  document.body.style.overflow = 'hidden';
+}
+
+function mostrarModalPendientes(pendientes, tipo) {
+  const sym = SYMBOLS[getBase()] || '€';
+  document.getElementById('pendientes-intro').textContent =
+    `Para ${tipo === 'cuenta' ? 'eliminar tu cuenta' : 'borrar tus datos'} no puedes tener saldos pendientes en grupos compartidos. Divide gastos, no amistades: salda primero estas cuentas.`;
+  document.getElementById('pendientes-lista').innerHTML = pendientes.map(p => {
+    const debes = p.balance < 0;
+    const importe = `${sym}${Math.abs(p.balance).toFixed(2)}`;
+    return `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #333;">
+      <span style="color:white;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>
+      <span style="flex-shrink:0;font-weight:800;color:${debes ? '#ff4d4d' : '#3DBA6F'};">${debes ? 'Debes' : 'Te deben'} ${importe}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('modal-pendientes').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function cerrarModalPendientes() {
+  document.getElementById('modal-pendientes').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function resumenBorrado(r) {
+  const p = [];
+  if (r.grupos_borrados) p.push(`${r.grupos_borrados} grupo(s) borrado(s)`);
+  if (r.grupos_abandonados) p.push(`saliste de ${r.grupos_abandonados} grupo(s)`);
+  return p.length ? ` (${p.join(', ')})` : '';
+}
+
+async function ejecutarBorradoDatos() {
   cerrarModalBorrarDatos();
-  toast('Datos borrados correctamente','s');
+  try {
+    const r = await vakaData.deleteAllData();
+    clearAll();
+    toast('Datos borrados' + resumenBorrado(r), 's');
+  } catch (err) {
+    if (err.status === 409 && err.datos?.pendientes) { mostrarModalPendientes(err.datos.pendientes, 'datos'); return; }
+    toast('No se pudieron borrar los datos. No se ha cambiado nada.', 'e');
+  }
 }
 
 async function ejecutarEliminarCuenta() {
+  document.getElementById('modal-eliminar-cuenta').style.display = 'none';
+  document.body.style.overflow = '';
   try {
     await vakaData.deleteAccount();
-    console.log('✅ Cuenta eliminada del backend');
-  } catch(err) {
-    console.error('❌ Error al eliminar cuenta:', err);
+  } catch (err) {
+    if (err.status === 409 && err.datos?.pendientes) { mostrarModalPendientes(err.datos.pendientes, 'cuenta'); return; }
+    toast('No se pudo eliminar la cuenta. No se ha cambiado nada.', 'e');
+    return;
   }
   clearAll();
   localStorage.clear();
-  document.getElementById('modal-eliminar-cuenta').style.display='none';
-  document.body.style.overflow='';
   window.location.href = 'login.html';
 }
 
@@ -5324,7 +5376,7 @@ function cerrarModalSalir() {
     
     <div style="font-size:2.5rem; margin-bottom:10px;">⚠️</div>
     <div style="color:#F2F2F2; font-size:1.5rem; font-weight:bold; margin-bottom:10px;">¿Borrar todo?</div>
-    <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:20px; opacity:0.8;">Se eliminarán todos tus grupos, gastos, amigos y actividad. Esta acción no se puede deshacer.</p>
+    <p id="borrar-datos-resumen" style="color:#F2F2F2; font-size:0.8rem; margin-bottom:20px; opacity:0.8; line-height:1.4;">Se eliminarán todos tus grupos, gastos, amigos y actividad. Esta acción no se puede deshacer.</p>
 
     <div style="display:flex; gap:12px; width:100%;">
       <button onclick="cerrarModalBorrarDatos()" 
@@ -5343,7 +5395,7 @@ function cerrarModalSalir() {
   <div style="background:#1e1e1e; width:90%; max-width:340px; padding:25px; border-radius:24px; border:1px solid #990000; text-align:center;">
     <div style="font-size:2.5rem; margin-bottom:10px;">🚨</div>
     <div style="color:#ff4d4d; font-size:1.5rem; font-weight:bold; margin-bottom:10px;">Eliminar cuenta</div>
-    <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:20px; opacity:0.8;">Se eliminarán permanentemente tu cuenta, grupos, gastos, amigos y toda tu actividad. Esta acción <strong>no se puede deshacer</strong>.</p>
+    <p id="eliminar-cuenta-resumen" style="color:#F2F2F2; font-size:0.8rem; margin-bottom:20px; opacity:0.8; line-height:1.4;">Se eliminarán permanentemente tu cuenta, grupos, gastos, amigos y toda tu actividad. Esta acción <strong>no se puede deshacer</strong>.</p>
     <div style="display:flex; gap:12px; width:100%;">
       <button onclick="document.getElementById('modal-eliminar-cuenta').style.display='none';document.body.style.overflow=''"
         style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#28a745;">
@@ -5612,6 +5664,19 @@ function tocarBotonGrupos(btn) {
       <div id="dup-motivo" style="color:#aaa; font-size:0.8rem; margin-top:4px; word-break:break-word;"></div>
     </div>
     <button onclick="cerrarModalDuplicado()" style="width:100%; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:#000; background:#F5C800;">Entendido</button>
+  </div>
+</div>
+
+<!-- Modal: saldos pendientes que impiden borrar datos o eliminar la cuenta -->
+<div class="modal-overlay" id="modal-pendientes" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalPendientes()">
+  <div style="background:#1e1e1e; width:90%; max-width:340px; padding:25px; border-radius:24px; border:1px solid #333; text-align:center; box-sizing:border-box;">
+    <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:rgba(255,77,77,.12); display:flex; align-items:center; justify-content:center;">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    </div>
+    <div style="color:#F2F2F2; font-size:1.4rem; font-weight:bold; margin-bottom:10px;">Primero salda tus cuentas</div>
+    <p id="pendientes-intro" style="color:#F2F2F2; font-size:0.8rem; margin-bottom:16px; opacity:0.8; line-height:1.4;"></p>
+    <div id="pendientes-lista" style="background:#2a2a2a; border-radius:16px; padding:6px 14px; margin-bottom:22px; text-align:left; font-size:.85rem; max-height:40vh; overflow-y:auto;"></div>
+    <button onclick="cerrarModalPendientes()" style="width:100%; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:#000; background:#F5C800;">Entendido</button>
   </div>
 </div>
 </body>
