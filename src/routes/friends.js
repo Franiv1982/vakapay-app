@@ -76,9 +76,16 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
     const existing = await db.query('SELECT * FROM friends WHERE id = $1 AND owner_id = $2', [req.params.id, req.user.id]);
     if (!existing.rows[0]) return res.status(404).json({ error: 'Amigo no encontrado' });
 
-    const { name, email, phone, notes } = req.body;
+    const { name, email, phone, notes, avatar_url } = req.body;
+    // La foto llega como imagen en texto (data:image/...); se guarda en la propia columna
+    if (avatar_url !== undefined && avatar_url !== null) {
+      if (typeof avatar_url !== 'string' || !avatar_url.startsWith('data:image/') || avatar_url.length > 500000) {
+        return res.status(400).json({ error: 'Imagen no válida o demasiado grande' });
+      }
+    }
     const fields = [], values = [];
     let i = 1;
+    if (avatar_url !== undefined) { fields.push(`avatar_url = $${i++}`); values.push(avatar_url); }
     if (name  !== undefined) { fields.push(`name = $${i++}`);  values.push(name); }
     if (email !== undefined) { fields.push(`email = $${i++}`); values.push(email); }
     if (phone !== undefined) { fields.push(`phone = $${i++}`); values.push(phone); }
@@ -108,7 +115,9 @@ router.put('/:id/avatar', requireAuth, upload.single('avatar'), async (req, res,
     if (!existing.rows[0]) return res.status(404).json({ error: 'Amigo no encontrado' });
     if (!req.file) return res.status(400).json({ error: 'No se recibió ningún archivo' });
 
-    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
+    // En Vercel no hay disco persistente: guardamos la imagen como base64 dentro de la columna
+    const buffer = req.file.buffer || fs.readFileSync(req.file.path);
+    const avatarUrl = `data:${req.file.mimetype || 'image/jpeg'};base64,${buffer.toString('base64')}`;
     await db.query('UPDATE friends SET avatar_url = $1 WHERE id = $2', [avatarUrl, req.params.id]);
     res.json({ avatar_url: avatarUrl });
   } catch (err) { next(err); }

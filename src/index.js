@@ -69,6 +69,7 @@ api.use('/groups/:id/expenses', expensesRoutes);   // /groups/:id/expenses (merg
 api.use('/friends',  friendsRoutes);
 api.use('/activity', activityRoutes);
 api.use('/invite',   require('./routes/invite'));
+api.use('/ocr',      require('./routes/ocr'));
 
 // Vista pública compartida (sin auth, fuera del prefix /api/v1)
 app.use('/shared', require('./routes/groups'));

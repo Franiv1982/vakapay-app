@@ -123,7 +123,7 @@ router.post('/forgot-password', async (req, res, next) => {
     
     // 3. Guardar el código en la base de datos con expiración
     await db.query(
-      'UPDATE users SET reset_otp = $1, reset_otp_expires = NOW() + INTERVAL \'3 minutes\' WHERE id = $2',
+      'UPDATE users SET reset_otp = $1, reset_otp_expires = NOW() + INTERVAL \'3 minutes\', reset_attempts = 0 WHERE id = $2',
       [otpCode, user.id]
     );
 
@@ -160,21 +160,38 @@ router.post('/forgot-password', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// ── Comprobación del código de recuperación ───────────────────────
+// Máximo 5 intentos por código: después hay que pedir uno nuevo.
+// Evita que alguien pruebe los 6 dígitos uno a uno hasta acertar.
+const MAX_INTENTOS_CODIGO = 5;
+async function comprobarCodigo(email, codigo) {
+  const r = await db.query(
+    'SELECT id, reset_otp, reset_attempts, (reset_otp_expires > NOW()) AS vigente FROM users WHERE email = $1',
+    [email]
+  );
+  const u = r.rows[0];
+  if (!u || !u.reset_otp || !u.vigente) {
+    return { status: 400, error: 'El código no es válido o ha expirado. Solicita uno nuevo.' };
+  }
+  if ((u.reset_attempts || 0) >= MAX_INTENTOS_CODIGO) {
+    return { status: 429, error: 'Demasiados intentos. Solicita un código nuevo.' };
+  }
+  if (String(codigo) !== String(u.reset_otp)) {
+    await db.query('UPDATE users SET reset_attempts = COALESCE(reset_attempts, 0) + 1 WHERE id = $1', [u.id]);
+    return { status: 400, error: 'El código ingresado no es válido o ha expirado' };
+  }
+  return { user: { id: u.id } };
+}
+
 // ── POST /auth/verify-reset-code ─────────────────────────────────
 router.post('/verify-reset-code', async (req, res, next) => {
   try {
     const { email, codigo } = req.body;
     if (!email || !codigo) return res.status(400).json({ error: 'Email y código son obligatorios' });
 
-    // Validar el código y su expiración en la base de datos
-    const result = await db.query(
-      'SELECT id FROM users WHERE email = $1 AND reset_otp = $2 AND reset_otp_expires > NOW()',
-      [email, codigo]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(400).json({ error: 'El código ingresado no es válido o ha expirado' });
-    }
+    // Validar el código, su expiración y el número de intentos
+    const check = await comprobarCodigo(email, codigo);
+    if (check.error) return res.status(check.status).json({ error: check.error });
 
     res.json({ ok: true, message: 'Código verificado correctamente' });
   } catch (err) { next(err); }
@@ -189,23 +206,16 @@ router.post('/reset-password', async (req, res, next) => {
     }
 
     // 1. Verificar nuevamente que el código sea válido y no haya expirado
-    const result = await db.query(
-      'SELECT id FROM users WHERE email = $1 AND reset_otp = $2 AND reset_otp_expires > NOW()',
-      [email, codigo]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(400).json({ error: 'El código no es válido o ha expirado. Solicita uno nuevo.' });
-    }
-
-    const user = result.rows[0];
+    const check = await comprobarCodigo(email, codigo);
+    if (check.error) return res.status(check.status).json({ error: check.error });
+    const user = check.user;
 
     // 2. Cifrar la nueva contraseña con bcrypt
     const hash = bcrypt.hashSync(newPassword, 10);
 
     // 3. Actualizar la contraseña en la base de datos y limpiar los campos de OTP
     await db.query(
-      'UPDATE users SET password_hash = $1, reset_otp = NULL, reset_otp_expires = NULL WHERE id = $2',
+      'UPDATE users SET password_hash = $1, reset_otp = NULL, reset_otp_expires = NULL, reset_attempts = 0 WHERE id = $2',
       [hash, user.id]
     );
 

@@ -114,6 +114,9 @@ const initSchema = async () => {
       CREATE INDEX IF NOT EXISTS idx_friends_owner       ON friends(owner_id);
 
       ALTER TABLE activity_log ADD COLUMN IF NOT EXISTS group_name TEXT;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_otp TEXT;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_otp_expires TIMESTAMP;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_attempts INTEGER NOT NULL DEFAULT 0;
     `);
     console.log('✅ Schema PostgreSQL inicializado u optimizado');
   } catch (err) {

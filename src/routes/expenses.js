@@ -11,6 +11,22 @@ function toBase(amount, currency) {
   return +(amount * (RATES[currency] || 1)).toFixed(2);
 }
 
+// Importe en moneda base: se usa el que calcula la app (respeta el tipo de cambio
+// manual del usuario). Solo si no llega uno válido se usa la tabla fija de arriba.
+function importeBase(body, amount, currency) {
+  const enviado = Number(body.amount_base);
+  return Number.isFinite(enviado) && enviado > 0 ? +enviado.toFixed(2) : toBase(amount, currency);
+}
+
+// Reparte un importe entre varias personas sin perder céntimos:
+// 100 € entre 3 → 33.34, 33.33, 33.33 (suma exactamente 100).
+function repartir(total, nombres) {
+  const centimos = Math.round(Number(total) * 100);
+  const cada = Math.floor(centimos / nombres.length);
+  const resto = centimos - cada * nombres.length;
+  return nombres.map((nombre, i) => ({ nombre, share: (cada + (i < resto ? 1 : 0)) / 100 }));
+}
+
 // ── Textos para el historial de actividad ─────────────────────────
 const CAT_NAMES = { food: 'Comida', transport: 'Transporte', hotel: 'Alojamiento', activity: 'Actividad', other: 'Otro' };
 const catName = c => CAT_NAMES[c] || c || 'Otro';
@@ -115,8 +131,7 @@ router.post('/', requireAuth, async (req, res, next) => {
       return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
 
-    const amount_base = toBase(amount, currency);
-    const shareBase   = +(amount_base / involved.length).toFixed(2);
+    const amount_base = importeBase(req.body, amount, currency);
 
     const expRes = await db.query(`
       INSERT INTO expenses (group_id, description, amount, currency, amount_base, category, payer_name, expense_date, member_id)
@@ -125,10 +140,10 @@ router.post('/', requireAuth, async (req, res, next) => {
 
     const expense = expRes.rows[0];
 
-    for (const name of involved) {
+    for (const { nombre, share } of repartir(amount_base, involved)) {
       await db.query(
         'INSERT INTO expense_splits (expense_id, member_name, share) VALUES ($1, $2, $3)',
-        [expense.id, name, shareBase]
+        [expense.id, nombre, share]
       );
     }
 
@@ -180,8 +195,7 @@ router.put('/:expId', requireAuth, async (req, res, next) => {
       return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
 
-    const amount_base = toBase(amount, currency);
-    const shareBase   = +(amount_base / involved.length).toFixed(2);
+    const amount_base = importeBase(req.body, amount, currency);
 
     await db.query(`
       UPDATE expenses 
@@ -190,10 +204,10 @@ router.put('/:expId', requireAuth, async (req, res, next) => {
     `, [description, amount, currency, amount_base, category, payer_name, expense_date, req.params.expId, req.params.id]);
 
     await db.query('DELETE FROM expense_splits WHERE expense_id = $1', [req.params.expId]);
-    for (const name of involved) {
+    for (const { nombre, share } of repartir(amount_base, involved)) {
       await db.query(
         'INSERT INTO expense_splits (expense_id, member_name, share) VALUES ($1, $2, $3)',
-        [req.params.expId, name, shareBase]
+        [req.params.expId, nombre, share]
       );
     }
 

@@ -32,3 +32,5 @@ Thumbs.db
 # Build
 dist/
 .env
+# Bases de datos locales antiguas
+*.db
