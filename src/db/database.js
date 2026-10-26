@@ -136,6 +136,7 @@ const initSchema = async () => {
         created_at TIMESTAMP NOT NULL DEFAULT NOW()
       );
       CREATE INDEX IF NOT EXISTS idx_mensajes_grupo ON mensajes(group_id, id);
+      ALTER TABLE mensajes ADD COLUMN IF NOT EXISTS respuesta_a INTEGER REFERENCES mensajes(id) ON DELETE SET NULL;
       CREATE TABLE IF NOT EXISTS reacciones (
         mensaje_id INTEGER NOT NULL REFERENCES mensajes(id) ON DELETE CASCADE,
         user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,

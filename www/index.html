@@ -6103,6 +6103,13 @@ function tocarBotonGrupos(btn) {
 .reacc{display:flex;flex-wrap:wrap;gap:4px;margin-top:-6px;padding:0 6px;position:relative;z-index:1}
 .reacc button{background:var(--dark4);border:1px solid rgba(255,255,255,.12);border-radius:12px;font-size:.7rem;padding:1px 7px;color:var(--text);cursor:pointer}
 .reacc button.mia{border-color:var(--gold)}
+.msg .cita,.chat-sis .cita{display:block;border-left:3px solid var(--gold);background:rgba(0,0,0,.22);border-radius:6px;padding:4px 8px;margin:0 0 5px;font-size:.72rem;line-height:1.3;cursor:pointer;max-width:100%;overflow:hidden}
+.cita .c-autor{display:block;color:var(--gold);font-weight:800;font-size:.66rem}
+.cita .c-texto{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:#cfcfcf;white-space:normal}
+.msg.resaltado .burb,.chat-sis.resaltado{box-shadow:0 0 0 2px var(--gold);transition:box-shadow .3s}
+#chatRespondiendo{display:none;align-items:center;gap:8px;padding:8px 12px;background:var(--dark2);border-top:1px solid var(--border)}
+#chatRespondiendo .cita{flex:1;margin:0;cursor:default}
+#chatRespondiendo button{background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;padding:4px 6px}
 .chat-input{display:flex;gap:8px;align-items:flex-end;padding:10px 12px;padding-bottom:calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--border);background:var(--dark2)}
 .chat-input textarea{flex:1;resize:none;max-height:110px;min-height:42px;background:var(--dark3);border:1.5px solid rgba(255,255,255,.09);border-radius:20px;padding:10px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:.88rem;outline:none;line-height:1.3}
 .chat-input textarea:focus{border-color:var(--gold)}
@@ -6126,6 +6133,10 @@ function tocarBotonGrupos(btn) {
     <div style="min-width:0;"><div class="t" id="chatTitulo">Chat</div><div class="s" id="chatMiembros"></div></div>
   </div>
   <div class="chat-list" id="chatLista"></div>
+  <div id="chatRespondiendo">
+    <div class="cita"><span class="c-autor" id="chatRespAutor"></span><span class="c-texto" id="chatRespTexto"></span></div>
+    <button type="button" onclick="cancelarRespuestaChat()" title="Cancelar respuesta">✕</button>
+  </div>
   <div class="chat-input">
     <textarea id="chatTexto" rows="1" maxlength="1000" placeholder="Escribe un mensaje..." oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,110)+'px'"></textarea>
     <button id="chatEnviar" onclick="enviarMensajeChat()" title="Enviar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
@@ -6142,6 +6153,7 @@ const CHAT_EMOJIS = ['👍', '❤️', '😂', '😮', '🙏', '💸'];
 var chatNoLeidos = {};          // { idGrupo: nº de mensajes sin leer } (var: se usa también al pintar las tarjetas de grupo)
 let _chatGrupoId = null, _chatTimer = null, _chatFirma = '', _chatMensajes = [];
 let _chatMenuMsg = null, _chatPulsacion = null;
+let _chatRespuestaA = null;     // id del mensaje al que se está respondiendo
 
 const escaparHtml = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const chatAbierto = () => document.getElementById('page-chat').classList.contains('active');
@@ -6196,7 +6208,7 @@ function abrirChat() {
 }
 function cerrarChat() {
   clearInterval(_chatTimer); _chatTimer = null;
-  cerrarMenuChat(); cerrarDialogoChat();
+  cerrarMenuChat(); cerrarDialogoChat(); cancelarRespuestaChat();
   document.getElementById('page-chat').classList.remove('active');
   const hb = document.getElementById('hbadge'); if (hb) hb.style.visibility = '';
   document.body.style.overflow = '';
@@ -6207,6 +6219,7 @@ function chatAtras() {
   if (!chatAbierto()) return false;
   if (document.getElementById('chatDialogo').style.display === 'flex') { cerrarDialogoChat(); return true; }
   if (_chatMenuMsg !== null) { cerrarMenuChat(); return true; }
+  if (_chatRespuestaA !== null) { cancelarRespuestaChat(); return true; }
   cerrarChat(); return true;
 }
 
@@ -6258,6 +6271,9 @@ function pintarChat(alFinal = false) {
     const reacciones = Object.entries(m.reacciones || {}).map(([emoji, nombres]) =>
       `<button class="${m.mi_reaccion === emoji ? 'mia' : ''}" onclick="event.stopPropagation();reaccionarChat(${m.id},'${emoji}')">${emoji} ${nombres.length}</button>`).join('');
     const bloqueReacc = reacciones ? `<div class="reacc">${reacciones}</div>` : '';
+    const cita = m.respuesta
+      ? `<span class="cita" onclick="event.stopPropagation();irAMensajeChat(${m.respuesta.id})"><span class="c-autor">${escaparHtml(m.respuesta.autor)}</span><span class="c-texto">${escaparHtml(m.respuesta.texto)}</span></span>`
+      : '';
     if (m.tipo === 'sistema') {
       html += `<div class="chat-sis" data-id="${m.id}">${escaparHtml(m.texto)}<span class="hora">${horaChat(m.created_at)}</span></div>${bloqueReacc ? `<div style="align-self:center;">${bloqueReacc}</div>` : ''}`;
       autorAnterior = '';
@@ -6267,7 +6283,7 @@ function pintarChat(alFinal = false) {
     autorAnterior = m.autor;
     html += `<div class="msg ${m.mio ? 'yo' : ''} ${m.borrado ? 'borrado' : ''}" data-id="${m.id}">
       ${mostrarAutor ? `<div class="autor">${escaparHtml(m.autor || 'Alguien')}</div>` : ''}
-      <div class="burb">${m.borrado ? 'Mensaje eliminado' : escaparHtml(m.texto)}<span class="hora">${horaChat(m.created_at)}</span></div>
+      <div class="burb">${m.borrado ? '' : cita}${m.borrado ? 'Mensaje eliminado' : escaparHtml(m.texto)}<span class="hora">${horaChat(m.created_at)}</span></div>
       ${bloqueReacc}
     </div>`;
   }
@@ -6283,10 +6299,11 @@ async function enviarMensajeChat() {
   const btn = document.getElementById('chatEnviar');
   btn.disabled = true;
   try {
-    const r = await apiChat('', { method: 'POST', body: JSON.stringify({ texto }) });
+    const r = await apiChat('', { method: 'POST', body: JSON.stringify({ texto, respuesta_a: _chatRespuestaA }) });
     const d = await r.json().catch(() => ({}));
     if (!r.ok) throw new Error(d.error || 'No se pudo enviar');
     caja.value = ''; caja.style.height = 'auto';
+    cancelarRespuestaChat();
     await cargarChat(true);
   } catch (err) {
     toast(err.message || 'No se pudo enviar el mensaje', 'e');
@@ -6348,6 +6365,7 @@ function abrirMenuChat(el) {
   menu.className = 'chat-menu'; menu.id = 'chatMenu';
   const tieneReacc = Object.keys(m.reacciones || {}).length > 0;
   menu.innerHTML =
+    `<button onclick="responderMensajeChat(${id})">Responder</button>` +
     `<button onclick="copiarMensajeChat(${id})">Copiar</button>` +
     (tieneReacc ? `<button onclick="verReaccionesChat(${id})">Ver quién reaccionó</button>` : '') +
     (m.mio && m.tipo === 'usuario' ? `<button class="rojo" onclick="confirmarBorrarChat(${id})">Borrar</button>` : '');
@@ -6371,6 +6389,31 @@ function cerrarMenuChat() {
   ['chatPicker', 'chatMenu'].forEach(id => { const x = document.getElementById(id); if (x) x.remove(); });
   const capa = document.getElementById('chatCapa'); if (capa) capa.style.display = 'none';
   document.querySelectorAll('#chatLista .enfocado').forEach(x => x.classList.remove('enfocado'));
+}
+
+// ── Responder ────────────────────────────────────────────────────────
+function responderMensajeChat(id) {
+  const m = _chatMensajes.find(x => x.id === id);
+  cerrarMenuChat();
+  if (!m) return;
+  _chatRespuestaA = id;
+  document.getElementById('chatRespAutor').textContent = m.tipo === 'sistema' ? 'VakaPay' : (m.mio ? 'Tú' : (m.autor || 'Alguien'));
+  document.getElementById('chatRespTexto').textContent = m.texto;
+  document.getElementById('chatRespondiendo').style.display = 'flex';
+  document.getElementById('chatTexto').focus();
+}
+function cancelarRespuestaChat() {
+  _chatRespuestaA = null;
+  const barra = document.getElementById('chatRespondiendo');
+  if (barra) barra.style.display = 'none';
+}
+// Al tocar una cita, se va al mensaje original y se resalta un momento
+function irAMensajeChat(id) {
+  const el = document.querySelector(`#chatLista [data-id="${id}"]`);
+  if (!el) { toast('Ese mensaje es antiguo y ya no se muestra', 'i'); return; }
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.classList.add('resaltado');
+  setTimeout(() => el.classList.remove('resaltado'), 1500);
 }
 
 function copiarMensajeChat(id) {
