@@ -528,7 +528,7 @@ function irAEscribirCodigo(email) {
     ['otp-1','otp-2','otp-3','otp-4','otp-5','otp-6'].forEach(id => document.getElementById(id).value = '');
     checkOtpCompleto();
     switchPage('page-verificar-codigo');
-    iniciarContadorReenvio();
+    iniciarContadorReenvio(30 * 60);
     document.getElementById('otp-1')?.focus();
 }
 
@@ -547,9 +547,11 @@ function checkOtpCompleto() {
 }
 
 let contadorReenvio = null;
-function iniciarContadorReenvio() {
-    let segundos = 180;
+// segundos: espera antes de poder pedir otro código. Si lo facilita soporte son
+// 30 min (lo que dura ese código): reenviar crearía uno nuevo y el suyo dejaría de valer.
+function iniciarContadorReenvio(segundos = 180) {
     const display = document.getElementById('contador-reenvio');
+    display.textContent = `${Math.floor(segundos/60)}:${String(segundos%60).padStart(2,'0')}`;
     const enlace = document.getElementById('enlace-reenviar');
     enlace.classList.add('deshabilitado');
     clearInterval(contadorReenvio);
