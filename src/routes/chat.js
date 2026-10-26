@@ -24,10 +24,13 @@ router.get('/', requireAuth, async (req, res, next) => {
   try {
     if (!await miembro(req.params.id, req.user.id)) return res.status(404).json({ error: 'Grupo no encontrado' });
     const m = await db.query(`
-      SELECT * FROM (
-        SELECT id, user_id, autor, texto, tipo, borrado, created_at
+      SELECT t.*, o.autor AS r_autor, o.texto AS r_texto, o.tipo AS r_tipo, o.borrado AS r_borrado
+      FROM (
+        SELECT id, user_id, autor, texto, tipo, borrado, created_at, respuesta_a
         FROM mensajes WHERE group_id = $1 ORDER BY id DESC LIMIT $2
-      ) t ORDER BY id ASC
+      ) t
+      LEFT JOIN mensajes o ON o.id = t.respuesta_a
+      ORDER BY t.id ASC
     `, [req.params.id, LIMITE]);
     const ids = m.rows.map(x => x.id);
     const reacc = ids.length ? (await db.query(`
@@ -59,6 +62,13 @@ router.get('/', requireAuth, async (req, res, next) => {
         mio: x.user_id === req.user.id,
         created_at: x.created_at,
         reacciones: x.borrado ? {} : (porMensaje[x.id]?.reacciones || {}),
+        // Mensaje al que responde (cita corta)
+        respuesta: (!x.borrado && x.respuesta_a) ? {
+          id: x.respuesta_a,
+          autor: x.r_tipo === 'sistema' ? 'VakaPay' : (x.r_autor || 'Alguien'),
+          texto: x.r_borrado ? 'Mensaje eliminado' : String(x.r_texto || '').slice(0, 140),
+          borrado: !!x.r_borrado,
+        } : null,
         mi_reaccion: x.borrado ? null : (porMensaje[x.id]?.mia || null),
       })),
     });
@@ -73,9 +83,16 @@ router.post('/', requireAuth, async (req, res, next) => {
     const texto = String(req.body.texto || '').trim();
     if (!texto) return res.status(400).json({ error: 'El mensaje está vacío' });
     if (texto.length > MAX_TEXTO) return res.status(400).json({ error: `Máximo ${MAX_TEXTO} caracteres` });
+    // Respuesta a otro mensaje del mismo grupo (opcional)
+    let respuestaA = null;
+    if (req.body.respuesta_a) {
+      const o = await db.query('SELECT id FROM mensajes WHERE id = $1 AND group_id = $2', [req.body.respuesta_a, req.params.id]);
+      if (!o.rows[0]) return res.status(400).json({ error: 'El mensaje al que respondes ya no existe' });
+      respuestaA = o.rows[0].id;
+    }
     const r = await db.query(
-      'INSERT INTO mensajes (group_id, user_id, autor, texto) VALUES ($1, $2, $3, $4) RETURNING id, created_at',
-      [req.params.id, req.user.id, autor, texto]
+      'INSERT INTO mensajes (group_id, user_id, autor, texto, respuesta_a) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at',
+      [req.params.id, req.user.id, autor, texto, respuestaA]
     );
     await marcarLeido(req.params.id, req.user.id, r.rows[0].id);
     res.status(201).json({ id: r.rows[0].id, created_at: r.rows[0].created_at });
