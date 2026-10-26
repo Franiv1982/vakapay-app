@@ -12,6 +12,19 @@ const router = express.Router({ mergeParams: true });
 const EMOJIS = ['👍', '❤️', '😂', '😮', '🙏', '💸'];
 const MAX_TEXTO = 1000;
 const LIMITE = 150; // últimos mensajes que se envían a la app
+const MAX_IMAGEN = 2 * 1024 * 1024; // ~1,5 MB; la app reduce la foto antes de enviarla
+
+// Fotos: data:image/... en texto. GIF: solo URLs https de GIPHY.
+const imagenValida = t => typeof t === 'string' && /^data:image\/(jpeg|png|webp);base64,/.test(t) && t.length <= MAX_IMAGEN;
+function gifValido(u) {
+  try {
+    const x = new URL(u);
+    return x.protocol === 'https:' && (x.hostname === 'giphy.com' || x.hostname.endsWith('.giphy.com')) && u.length <= 500;
+  } catch (_) { return false; }
+}
+// Texto que se ve en una cita o en la barra de "respondiendo"
+const resumenMensaje = (texto, tieneImagen, gif) =>
+  String(texto || '').slice(0, 140) || (tieneImagen ? '📷 Foto' : gif ? 'GIF' : '');
 
 // Devuelve el nombre del usuario dentro del grupo, o null si no es participante
 async function miembro(groupId, userId) {
@@ -24,9 +37,11 @@ router.get('/', requireAuth, async (req, res, next) => {
   try {
     if (!await miembro(req.params.id, req.user.id)) return res.status(404).json({ error: 'Grupo no encontrado' });
     const m = await db.query(`
-      SELECT t.*, o.autor AS r_autor, o.texto AS r_texto, o.tipo AS r_tipo, o.borrado AS r_borrado
+      SELECT t.*, o.autor AS r_autor, o.texto AS r_texto, o.tipo AS r_tipo, o.borrado AS r_borrado,
+             (o.imagen IS NOT NULL) AS r_imagen, o.gif AS r_gif
       FROM (
-        SELECT id, user_id, autor, texto, tipo, borrado, created_at, respuesta_a
+        SELECT id, user_id, autor, texto, tipo, borrado, created_at, respuesta_a,
+               (imagen IS NOT NULL) AS tiene_imagen, gif
         FROM mensajes WHERE group_id = $1 ORDER BY id DESC LIMIT $2
       ) t
       LEFT JOIN mensajes o ON o.id = t.respuesta_a
@@ -59,6 +74,9 @@ router.get('/', requireAuth, async (req, res, next) => {
         texto: x.borrado ? '' : x.texto,
         tipo: x.tipo,
         borrado: x.borrado,
+        // La foto no va en el listado (se pide aparte y la app la guarda en memoria)
+        imagen: !x.borrado && x.tiene_imagen,
+        gif: x.borrado ? null : (x.gif || null),
         mio: x.user_id === req.user.id,
         created_at: x.created_at,
         reacciones: x.borrado ? {} : (porMensaje[x.id]?.reacciones || {}),
@@ -66,7 +84,8 @@ router.get('/', requireAuth, async (req, res, next) => {
         respuesta: (!x.borrado && x.respuesta_a) ? {
           id: x.respuesta_a,
           autor: x.r_tipo === 'sistema' ? 'VakaPay' : (x.r_autor || 'Alguien'),
-          texto: x.r_borrado ? 'Mensaje eliminado' : String(x.r_texto || '').slice(0, 140),
+          texto: x.r_borrado ? 'Mensaje eliminado' : resumenMensaje(x.r_texto, x.r_imagen, x.r_gif),
+          imagen: !x.r_borrado && x.r_imagen,
           borrado: !!x.r_borrado,
         } : null,
         mi_reaccion: x.borrado ? null : (porMensaje[x.id]?.mia || null),
@@ -81,7 +100,13 @@ router.post('/', requireAuth, async (req, res, next) => {
     const autor = await miembro(req.params.id, req.user.id);
     if (!autor) return res.status(404).json({ error: 'Grupo no encontrado' });
     const texto = String(req.body.texto || '').trim();
-    if (!texto) return res.status(400).json({ error: 'El mensaje está vacío' });
+    const imagen = req.body.imagen || null;
+    const gif = req.body.gif || null;
+    if (imagen && gif) return res.status(400).json({ error: 'Envía la foto y el GIF por separado' });
+    if (imagen && !imagenValida(imagen)) return res.status(400).json({ error: 'La foto no es válida o es demasiado grande' });
+    if (gif && !gifValido(gif)) return res.status(400).json({ error: 'GIF no válido' });
+    if (gif && texto) return res.status(400).json({ error: 'Un GIF no lleva texto' });
+    if (!texto && !imagen && !gif) return res.status(400).json({ error: 'El mensaje está vacío' });
     if (texto.length > MAX_TEXTO) return res.status(400).json({ error: `Máximo ${MAX_TEXTO} caracteres` });
     // Respuesta a otro mensaje del mismo grupo (opcional)
     let respuestaA = null;
@@ -91,11 +116,36 @@ router.post('/', requireAuth, async (req, res, next) => {
       respuestaA = o.rows[0].id;
     }
     const r = await db.query(
-      'INSERT INTO mensajes (group_id, user_id, autor, texto, respuesta_a) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at',
-      [req.params.id, req.user.id, autor, texto, respuestaA]
+      'INSERT INTO mensajes (group_id, user_id, autor, texto, respuesta_a, imagen, gif) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at',
+      [req.params.id, req.user.id, autor, texto, respuestaA, imagen, gif]
     );
     await marcarLeido(req.params.id, req.user.id, r.rows[0].id);
     res.status(201).json({ id: r.rows[0].id, created_at: r.rows[0].created_at });
+  } catch (err) { next(err); }
+});
+
+// ── GET /groups/:id/chat/gif-config — clave de GIPHY para buscar GIF ─
+// GIPHY exige que las búsquedas salgan del móvil de cada usuario, así que la
+// app necesita la clave. Se guarda en Vercel (GIPHY_API_KEY); sin ella, no hay GIF.
+router.get('/gif-config', requireAuth, async (req, res, next) => {
+  try {
+    if (!await miembro(req.params.id, req.user.id)) return res.status(404).json({ error: 'Grupo no encontrado' });
+    const clave = process.env.GIPHY_API_KEY || '';
+    res.json({ disponible: !!clave, proveedor: 'giphy', clave });
+  } catch (err) { next(err); }
+});
+
+// ── GET /groups/:id/chat/:msgId/imagen — la foto de un mensaje ─────
+router.get('/:msgId/imagen', requireAuth, async (req, res, next) => {
+  try {
+    if (!await miembro(req.params.id, req.user.id)) return res.status(404).json({ error: 'Grupo no encontrado' });
+    const r = await db.query(
+      'SELECT imagen FROM mensajes WHERE id = $1 AND group_id = $2 AND NOT borrado AND imagen IS NOT NULL',
+      [req.params.msgId, req.params.id]
+    );
+    if (!r.rows[0]) return res.status(404).json({ error: 'Foto no encontrada' });
+    res.set('Cache-Control', 'private, max-age=86400');
+    res.json({ imagen: r.rows[0].imagen });
   } catch (err) { next(err); }
 });
 
@@ -103,7 +153,7 @@ router.post('/', requireAuth, async (req, res, next) => {
 router.delete('/:msgId', requireAuth, async (req, res, next) => {
   try {
     const r = await db.query(
-      `UPDATE mensajes SET borrado = TRUE, texto = ''
+      `UPDATE mensajes SET borrado = TRUE, texto = '', imagen = NULL, gif = NULL
        WHERE id = $1 AND group_id = $2 AND user_id = $3 AND tipo = 'usuario' RETURNING id`,
       [req.params.msgId, req.params.id, req.user.id]
     );
