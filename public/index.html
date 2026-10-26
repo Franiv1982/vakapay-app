@@ -749,7 +749,13 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparen
   </div>
 <main>
   <div class="card" style="margin-bottom:14px">
-    <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:11px">➕ Nuevo amigo</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px;">
+      <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;">➕ Nuevo amigo</div>
+      <button type="button" id="btnAmigoContactos" onclick="rellenarAmigoDesdeContactos()" style="display:none;background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:7px 11px;color:#F2F2F2;font-size:.72rem;cursor:pointer;align-items:center;gap:6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Contactos
+      </button>
+    </div>
     <div class="g2">
       <div class="field">
         <label>Nombre</label>
@@ -2499,30 +2505,27 @@ async function addMember() {
   const yaEsta = Object.keys(g.members).find(m => _normNombre(m) === _normNombre(n));
   if (yaEsta) { mostrarModalDuplicado({ titulo: 'Participante repetido', nombre: yaEsta, motivo: 'participante' }); return; }
 
+  // Si el nombre viene de la agenda, se guardan también su teléfono y email
+  const contacto = (_contactoParticipante && _normNombre(_contactoParticipante.name) === _normNombre(n)) ? _contactoParticipante : null;
+  _contactoParticipante = null;
+  const eraAmigo = !!buscarAmigoDuplicado({ name: n, email: contacto?.email, phone: contacto?.phone });
+
   // 1. Añadimos al grupo
   g.members[n] = 0; 
   await save(); 
 
-  // 2. Sincronización backend
+  // 2. Sincronización backend (el servidor lo guarda también en Amigos, sin duplicar)
   try {
     await fetch(`${API_BASE}/api/v1/groups/${g.id}/members`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
-      body: JSON.stringify({ display_name: n })
+      body: JSON.stringify({ display_name: n, email: contacto?.email || '', phone: contacto?.phone || '' })
     });
   } catch(err) { console.error('Error añadiendo miembro:', err); }
 
-  // 3. Añadir a lista global de amigos
-  if (!buscarAmigoDuplicado({ name: n })) {
-    try {
-      const friend = await vakaData.addFriend({ name: n, email: '', phone: '', notes: 'Añadido desde grupo' });
-      friends.push(friend);
-      await saveFriends();
-    } catch(e) { console.error(e); }
-    toast(`${n} añadido al grupo y a tus amigos ✓`, 's');
-  } else {
-    toast(`${n} añadido ✓`, 's');
-  }
+  // 3. Lista de amigos actualizada desde el servidor
+  try { friends = await vakaData.getFriends() || friends; renderFriends(); renderFriendPicker(); updateStats(); } catch (_) {}
+  toast(eraAmigo ? `${n} añadido ✓` : `${n} añadido al grupo y a tus amigos ✓`, 's');
 
   // 4. Refresco final
   inp.value = '';
@@ -3496,6 +3499,8 @@ function toggleManualAdd() {
   document.getElementById('friendPickerWrap').style.display = 'none';
 }
 
+let _contactoParticipante = null; // { name, email, phone } elegido de la agenda para «Añadir participante»
+
 async function addFromContacts() {
   if (!window.Capacitor || !Capacitor.isNativePlatform() || !Capacitor.Plugins.Contacts) {
     toast('Tu navegador no soporta acceso a contactos. Usa la opción manual.', 'e');
@@ -3521,6 +3526,7 @@ async function addFromContacts() {
     const nombreFinal = yaAmigo ? yaAmigo.amigo.name : name;
     if (yaAmigo) toast(`Ya está en tus amigos como "${yaAmigo.amigo.name}"`, 'i');
     document.getElementById('memberName').value = nombreFinal.slice(0, 20);
+    _contactoParticipante = { name: nombreFinal.slice(0, 20), email, phone: tel };
     document.getElementById('manualAddWrap').style.display = 'block';
     document.getElementById('friendPickerWrap').style.display = 'none';
     if (!yaAmigo) toast(`Contacto "${name}" cargado. Pulsa Añadir para confirmar.`, 's');
@@ -4239,6 +4245,38 @@ async function addFriend(){
     console.error(err);
   }
 }
+
+// Sección Amigos: rellena el formulario con un contacto de la agenda (solo en la app del móvil)
+async function rellenarAmigoDesdeContactos() {
+  if (!window.Capacitor || !Capacitor.isNativePlatform() || !Capacitor.Plugins.Contacts) {
+    toast('Tu navegador no permite leer los contactos. Escríbelo a mano.', 'e'); return;
+  }
+  try {
+    const { Contacts } = Capacitor.Plugins;
+    const permiso = await Contacts.requestPermissions();
+    if (permiso.contacts !== 'granted') { toast('Necesitas dar permiso de contactos', 'e'); return; }
+    const { contact: c } = await Contacts.pickContact({ projection: { name: true, phones: true, emails: true } });
+    const nombre = (c.name?.given || '').trim(), apellido = (c.name?.family || '').trim();
+    const completo = (c.name?.display || '').trim();
+    const tel = c.phones?.[0]?.number || '', email = c.emails?.[0]?.address || '';
+    if (!nombre && !completo) { toast('El contacto no tiene nombre', 'e'); return; }
+    const dup = buscarAmigoDuplicado({ name: completo, email, phone: tel });
+    if (dup) { mostrarModalDuplicado({ titulo: 'Este amigo ya existe', nombre: dup.amigo.name, motivo: dup.motivo, valor: _valorDup(dup, { email, phone: tel }) }); return; }
+    document.getElementById('friendName').value = (nombre || completo).slice(0, 20);
+    document.getElementById('friendLastName').value = (nombre ? apellido : '').slice(0, 20);
+    document.getElementById('friendEmail').value = email;
+    document.getElementById('friendPhone').value = tel;
+    toast('Contacto cargado. Revisa los datos y pulsa Añadir Amigo.', 's');
+  } catch (err) {
+    if (/cancel/i.test(err?.message || '')) return;
+    console.error('Error accediendo a contactos:', err);
+    toast('No se pudo acceder a los contactos', 'e');
+  }
+}
+(function () {
+  const b = document.getElementById('btnAmigoContactos');
+  if (b && window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()) b.style.display = 'flex';
+})();
 
 function removeFriend(idx){
   const name=friends[idx].name;

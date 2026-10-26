@@ -154,6 +154,8 @@ const initSchema = async () => {
       );
     `);
     console.log('✅ Schema PostgreSQL inicializado u optimizado');
+    // Se carga aquí (y no arriba) porque contactos.js usa este mismo módulo
+    await require('../utils/contactos').migrarAmigosDeGrupos();
   } catch (err) {
     console.error('❌ Error inicializando schema:', err.message);
   }

@@ -3,23 +3,9 @@ const express = require('express');
 const db = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
 const { logActivity, mensajeSistema } = require('../utils/activity');
-const { buscarAmigoDuplicado, completarAmigo } = require('../utils/contactos');
+const { sincronizarAmigosGrupo } = require('../utils/contactos');
 
 const router = express.Router();
-
-// Añade el contacto como amigo salvo que ya exista (mismo email, teléfono o nombre);
-// si existe, solo completa el email o teléfono que le falten.
-async function addFriendIfNotExists(ownerId, name, email, phone) {
-  const dup = await buscarAmigoDuplicado(ownerId, { name, email, phone });
-  if (dup) {
-    await completarAmigo(dup.amigo, { email, phone });
-    return;
-  }
-  await db.query(
-    'INSERT INTO friends (owner_id, name, email, phone) VALUES ($1, $2, $3, $4)',
-    [ownerId, name, email || '', phone || '']
-  );
-}
 
 const normNombre = n => String(n || '').trim().replace(/\s+/g, ' ').toLowerCase();
 
@@ -93,16 +79,8 @@ router.post('/:token/join', requireAuth, async (req, res, next) => {
       await db.query('INSERT INTO group_members (group_id, user_id, display_name) VALUES ($1, $2, $3)', [groupId, req.user.id, displayName]);
     }
 
-    // Añadirse mutuamente como amigos con quienes tienen cuenta
-    const membersRes = await db.query(`
-      SELECT gm.display_name, gm.user_id, u.email, u.tel
-      FROM group_members gm LEFT JOIN users u ON u.id = gm.user_id
-      WHERE gm.group_id = $1 AND gm.user_id IS NOT NULL AND gm.user_id <> $2
-    `, [groupId, req.user.id]);
-    for (const member of membersRes.rows) {
-      await addFriendIfNotExists(req.user.id, member.display_name, member.email, member.tel);
-      await addFriendIfNotExists(member.user_id, displayName, newUser?.email, newUser?.tel);
-    }
+    // El nuevo tiene en Amigos a todo el grupo, y quienes tienen cuenta le tienen a él
+    await sincronizarAmigosGrupo(groupId);
 
     logActivity(req.user.id, 'member', `Te uniste al grupo "${grupo.name}"`);
     await mensajeSistema(groupId, req.body.reclamar
