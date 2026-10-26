@@ -137,6 +137,7 @@
 			visibility: visible;
 		}
         .auth-input.input-error { border-color: #ff4d4d !important; }
+        .prefix-btn.input-error { border-color: #ff4d4d !important; }
 
         /* --- PASSWORD WRAPPER & TOGGLE --- */
 		.password-wrapper {
@@ -405,8 +406,9 @@
                         <span id="prefixFlag">🌍</span>
                         <span id="prefixCode">+--</span>
                     </button>
-                    <input type="tel" id="reg-tel" placeholder="Número de teléfono" class="auth-input phone-input" autocomplete="tel" inputmode="tel">
+                    <input type="tel" id="reg-tel" placeholder="Número de teléfono" class="auth-input phone-input" autocomplete="tel" inputmode="tel" oninput="this.value=this.value.replace(/[^\d\s-]/g,'');limpiarErrorTelefono();checkRegistroFields()">
                 </div>
+                <span id="err-tel" class="error-message" style="top:54px;"></span>
             </div>
             <div class="input-group">
                 <input type="password" id="reg-pass" placeholder="Contraseña (mín. 8 caracteres)" class="auth-input" autocomplete="new-password" oninput="checkRegistroFields()">
@@ -718,11 +720,17 @@ async function handleRegistro() {
         hasError = true;
     }
 
+    const telValidado = validarTelefonoRegistro();
+    if (!telValidado.ok) {
+        const e = document.getElementById('err-tel');
+        e.innerText = telValidado.error; e.style.display = 'block';
+        document.getElementById(telValidado.campo)?.classList.add('input-error');
+        hasError = true;
+    }
+
     if (hasError) return;
 
-    const prefijo = document.getElementById('prefixCode').textContent;
-    const tel = document.getElementById('reg-tel').value.trim();
-    const telefonoCompleto = tel ? `${prefijo} ${tel}` : '';
+    const telefonoCompleto = telValidado.valor; // ya validado y con formato "+34 608534056"
     const datosUsuario = {
         nombre: nombre,
         apellido: '',
@@ -747,7 +755,11 @@ async function handleRegistro() {
         if(modal) modal.style.display = 'flex';
     } catch (error) {
             console.error("❌ Error al registrar en el servidor:", error);
-            if (error.status === 409 || (error.message && (error.message.includes('409') || error.message.includes('Ya existe')))) {
+            if (error.status === 400 && error.data && error.data.campo === 'tel') {
+                const e = document.getElementById('err-tel');
+                e.innerText = '⚠️ ' + error.message; e.style.display = 'block';
+                document.getElementById('reg-tel').classList.add('input-error');
+            } else if (error.status === 409 || (error.message && (error.message.includes('409') || error.message.includes('Ya existe')))) {
                 document.getElementById('modal-cuenta-existente').style.display = 'flex';
             } else {
                 mostrarAvisoLogin('No se pudo crear la cuenta', error.message || 'Inténtalo de nuevo en unos minutos.', 'error');
@@ -761,7 +773,7 @@ function cerrarModalYEntrar() {
     if(modal) modal.style.display = 'none';
 
     // 2. Limpiamos los campos del registro por seguridad
-    const campos = ['reg-nombre', 'reg-email', 'reg-pass', 'reg-pass-confirm'];
+    const campos = ['reg-nombre', 'reg-email', 'reg-tel', 'reg-pass', 'reg-pass-confirm'];
     campos.forEach(id => {
         const el = document.getElementById(id);
         if(el) el.value = '';
@@ -960,7 +972,7 @@ function cerrarModalAbandono() {
 // Función para el botón rojo: Cierra y sale
 function confirmarSalida() {
     // Limpiamos los campos del registro por seguridad
-    const campos = ['reg-nombre', 'reg-email', 'reg-pass', 'reg-pass-confirm'];
+    const campos = ['reg-nombre', 'reg-email', 'reg-tel', 'reg-pass', 'reg-pass-confirm'];
     campos.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
@@ -979,7 +991,7 @@ function confirmarSalida() {
 
 // Limpieza extra al cargar la página por historial
 window.addEventListener('pageshow', function(event) {
-    const campos = ['reg-nombre', 'reg-email', 'reg-pass', 'reg-pass-confirm'];
+    const campos = ['reg-nombre', 'reg-email', 'reg-tel', 'reg-pass', 'reg-pass-confirm'];
     campos.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
@@ -998,6 +1010,7 @@ window.addEventListener('pageshow', function(event) {
 });
 </script>
 
+<script src="libphonenumber-min.js"></script>
 <script src="vakapay_data_service_v2.js"></script>
 	
 <script>
@@ -1078,7 +1091,10 @@ function checkRegistroFields() {
     const confirm = document.getElementById('reg-pass-confirm').value;
     const btn = document.getElementById('btnRegistrarse');
     if (!btn) return;
-    const ok = nombre.length > 0 && email.length > 0 && pass.length > 0 && confirm.length > 0;
+    const telefono = (document.getElementById('reg-tel')?.value || '').replace(/\D/g, '');
+    const prefijoElegido = document.getElementById('prefixCode')?.textContent.trim() !== '+--';
+    const ok = nombre.length > 0 && email.length > 0 && pass.length > 0 && confirm.length > 0
+            && prefijoElegido && telefono.length > 0;
     btn.style.background = ok ? '' : '#3a3000';
     btn.style.color = ok ? '' : '#6b5800';
     btn.style.border = ok ? '' : '1px solid #4a4000';
@@ -1238,7 +1254,36 @@ function seleccionarPais(flag, code) {
   document.getElementById('prefixFlag').textContent = flag;
   document.getElementById('prefixCode').textContent = code;
   cerrarSelectorPais();
+  limpiarErrorTelefono();
+  checkRegistroFields();
   document.getElementById('reg-tel').focus();
+}
+
+// ── Teléfono: prefijo y número obligatorios, y válidos para el país ──
+function limpiarErrorTelefono() {
+  const e = document.getElementById('err-tel'); if (e) { e.innerText = ''; e.style.display = 'none'; }
+  document.getElementById('reg-tel')?.classList.remove('input-error');
+  document.getElementById('prefixBtn')?.classList.remove('input-error');
+}
+// Devuelve { ok, valor: "+34 608534056" } o { ok:false, error }
+function validarTelefonoRegistro() {
+  const prefijo = document.getElementById('prefixCode').textContent.trim();
+  const numero = document.getElementById('reg-tel').value.trim();
+  if (prefijo === '+--') return { ok: false, error: '⚠️ Elige el prefijo de tu país.', campo: 'prefixBtn' };
+  if (!numero) return { ok: false, error: '⚠️ Escribe tu número de teléfono.', campo: 'reg-tel' };
+  const completo = `${prefijo} ${numero}`;
+  if (window.libphonenumber) {
+    const n = libphonenumber.parsePhoneNumberFromString(completo);
+    if (!n || !n.isValid()) {
+      const pais = PAISES.find(p => p.code === prefijo);
+      return { ok: false, error: `⚠️ El número no es válido${pais ? ' para ' + pais.name : ''}. Revísalo.`, campo: 'reg-tel' };
+    }
+    return { ok: true, valor: `+${n.countryCallingCode} ${n.nationalNumber}` };
+  }
+  // Sin la librería (no debería pasar): comprobación básica de longitud
+  const digitos = numero.replace(/\D/g, '');
+  if (digitos.length < 6 || digitos.length > 15) return { ok: false, error: '⚠️ El número no parece válido.', campo: 'reg-tel' };
+  return { ok: true, valor: `${prefijo} ${digitos}` };
 }
 </script>
 <script>

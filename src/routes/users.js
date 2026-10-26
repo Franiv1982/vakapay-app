@@ -6,6 +6,7 @@ const fs       = require('fs');
 const db       = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
 const { normalizarBizum, normalizarIban } = require('../utils/cobro');
+const { normalizarTelefono } = require('../utils/telefono');
 
 const router = express.Router();
 
@@ -66,7 +67,19 @@ router.patch('/me', requireAuth, async (req, res, next) => {
     if (nombre   !== undefined) { fields.push(`nombre = $${i++}`);   values.push(nombre); }
     if (apellido !== undefined) { fields.push(`apellido = $${i++}`); values.push(apellido); }
     if (email    !== undefined) { fields.push(`email = $${i++}`);    values.push(email); }
-    if (tel      !== undefined) { fields.push(`tel = $${i++}`);      values.push(tel); }
+    if (tel !== undefined) {
+      // Solo se valida si cambia: la app reenvía el perfil completo al arrancar y
+      // no debe fallar por teléfonos guardados antes de existir esta validación
+      const actual = (await db.query('SELECT tel FROM users WHERE id = $1', [req.user.id])).rows[0];
+      if (String(tel || '').trim() !== String((actual && actual.tel) || '').trim()) {
+        if (String(tel || '').trim() === '') { fields.push(`tel = $${i++}`); values.push(''); }
+        else {
+          const telefono = normalizarTelefono(tel);
+          if (!telefono.ok) return res.status(400).json({ error: telefono.error, campo: 'tel' });
+          fields.push(`tel = $${i++}`); values.push(telefono.valor);
+        }
+      }
+    }
     if (bio      !== undefined) { fields.push(`bio = $${i++}`);      values.push(bio); }
     if (!fields.length) return res.status(400).json({ error: 'Nada que actualizar' });
 
