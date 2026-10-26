@@ -4,6 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const db      = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
 const { logActivity }  = require('../utils/activity');
+const { agregarAmigoSiNoExiste, sincronizarAmigosGrupo } = require('../utils/contactos');
 
 const router = express.Router();
 
@@ -220,7 +221,8 @@ router.post('/:id/members', requireAuth, async (req, res, next) => {
     if (!isOwner && !memberCheck.rows[0]) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
-    const { display_name, user_id = null } = req.body;
+    // user_id no se acepta desde la app: una cuenta solo entra en un grupo con su enlace de invitación
+    const { display_name, email = '', phone = '' } = req.body;
     if (!display_name) return res.status(400).json({ error: 'display_name es obligatorio' });
 
     // Sin distinguir mayúsculas ni espacios: "Juan" y "juan " son el mismo participante
@@ -235,7 +237,14 @@ router.post('/:id/members', requireAuth, async (req, res, next) => {
     const result = await db.query(`
       INSERT INTO group_members (group_id, user_id, display_name)
       VALUES ($1, $2, $3) RETURNING *
-    `, [req.params.id, user_id, display_name]);
+    `, [req.params.id, null, display_name]);
+
+    // Quien lo añade lo guarda en Amigos con el email/teléfono de la agenda (si vienen);
+    // después, todos los del grupo con cuenta lo tienen también en Amigos
+    try {
+      await agregarAmigoSiNoExiste(req.user.id, { name: display_name, email: String(email).trim(), phone: String(phone).trim(), notes: 'Añadido desde grupo' });
+      await sincronizarAmigosGrupo(req.params.id);
+    } catch (e) { console.error('No se pudieron actualizar los amigos:', e.message); }
 
     logActivity(req.user.id, 'member', `${display_name} añadido al grupo`);
     res.status(201).json(result.rows[0]);
