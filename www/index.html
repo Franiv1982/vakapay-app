@@ -4225,13 +4225,24 @@ async function addFriend(){
     const friend = await vakaData.addFriend({name:fullName, email, phone, notes:''});
     friends.push({...friend, name:fullName, email, phone, contact:email||phone, addedAt:new Date().toISOString()});
     await saveFriends();
+    // «Vincular a un grupo»: se añade también como participante de ese grupo
+    const gidSel = document.getElementById('friendGroupLink').value;
+    const gSel = gidSel ? groups.find(x => String(x.id) === String(gidSel)) : null;
+    let vinculado = false;
+    if (gSel) {
+      const res = await agregarAmigoAGrupo(gSel, fullName, { email, phone });
+      vinculado = res.ok;
+      if (!res.ok) toast(`${fullName} se guardó como amigo, pero no se pudo añadir a "${gSel.name}": ${res.error || 'inténtalo desde el grupo'}`, 'e');
+      await refrescarGruposYAmigos();
+    }
     renderFriends();renderFriendPicker();updateStats();
     document.getElementById('friendName').value='';
     document.getElementById('friendLastName').value='';
     if(document.getElementById('friendEmail')) document.getElementById('friendEmail').value='';
     if(document.getElementById('friendPhone')) document.getElementById('friendPhone').value='';
     document.getElementById('friendGroupLink').value='';
-    toast(`${fullName} añadido como amigo ✓`,'s');
+    if (!gSel) toast(`${fullName} añadido como amigo ✓`,'s');
+    else if (vinculado) toast(`${fullName} añadido como amigo y a "${gSel.name}" ✓`,'s');
     saveActivity();renderActivity();
   } catch(err) {
     // 409: el servidor detectó que ya existe (p. ej. añadido desde otro dispositivo o por invitación)
@@ -4343,14 +4354,58 @@ function closeFriendModal(){
   document.body.style.overflow='';
   editingFriendIdx=null;
 }
-function toggleFriendGroupChip(el,friendName){
-  const gIdx=parseInt(el.dataset.gidx);
-  const g=groups[gIdx];
-  if(el.classList.contains('sel')){
-    if(g.expenses.some(e=>e.payer===friendName||e.involved.includes(friendName))){toast('Tiene gastos en ese grupo, no se puede desvincular','e');return;}
-    delete g.members[friendName];el.classList.remove('sel');
-  }else{g.members[friendName]=0;el.classList.add('sel');}
-  save();
+// Añade un amigo como participante de un grupo en el servidor (lo ven todos los miembros)
+async function agregarAmigoAGrupo(g, nombre, { email = '', phone = '' } = {}) {
+  if (Object.keys(g.members || {}).some(m => _normNombre(m) === _normNombre(nombre))) return { ok: true, yaEstaba: true };
+  const r = await fetch(`${API_BASE}/api/v1/groups/${g.id}/members`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+    body: JSON.stringify({ display_name: nombre, email, phone })
+  });
+  if (!r.ok) { const d = await r.json().catch(() => ({})); return { ok: false, error: d.error }; }
+  g.members[nombre] = 0;
+  return { ok: true };
+}
+async function refrescarGruposYAmigos() {
+  try { groups = await vakaData.getGroups() || groups; } catch (_) {}
+  try { friends = await vakaData.getFriends() || friends; } catch (_) {}
+  renderGroupsList(); renderFriends(); renderFriendPicker(); updateStats();
+  if (currentGroupIdx !== null && groups[currentGroupIdx]) renderAll();
+}
+
+// Ficha del amigo → «Grupos vinculados»: añadir o quitar del grupo (se guarda en el servidor)
+async function toggleFriendGroupChip(el, friendName) {
+  if (el.dataset.ocupado) return;
+  const g = groups[parseInt(el.dataset.gidx)];
+  const f = friends.find(x => x.name === friendName) || {};
+  el.dataset.ocupado = '1'; el.style.opacity = '.5';
+  try {
+    if (el.classList.contains('sel')) {
+      if (g.expenses.some(e => (e.payer || e.payer_name) === friendName || (e.involved || []).includes(friendName))) {
+        toast('Tiene gastos en ese grupo, no se puede desvincular', 'e'); return;
+      }
+      if (g.memberIds && g.memberIds[friendName]) {
+        toast(`${friendName} tiene cuenta y está en el grupo con ella; no se puede quitar desde aquí`, 'e'); return;
+      }
+      const r = await fetch(`${API_BASE}/api/v1/groups/${g.id}/members/${encodeURIComponent(friendName)}`, {
+        method: 'DELETE', headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+      });
+      if (!r.ok) { toast('Solo quien creó el grupo puede quitar participantes', 'e'); return; }
+      delete g.members[friendName];
+      el.classList.remove('sel');
+      toast(`${friendName} quitado de "${g.name}"`, 'i');
+    } else {
+      const res = await agregarAmigoAGrupo(g, friendName, { email: f.email || '', phone: f.phone || '' });
+      if (!res.ok) { toast(res.error || 'No se pudo añadir al grupo', 'e'); return; }
+      el.classList.add('sel');
+      toast(res.yaEstaba ? `${friendName} ya estaba en "${g.name}"` : `${friendName} añadido a "${g.name}" ✓`, 's');
+    }
+    await refrescarGruposYAmigos();
+  } catch (_) {
+    toast('Sin conexión. Inténtalo de nuevo.', 'e');
+  } finally {
+    delete el.dataset.ocupado; el.style.opacity = '';
+  }
 }
 function handleFriendAvatarChange(ev){
   const file=ev.target.files[0];if(!file)return;
