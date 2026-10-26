@@ -5044,7 +5044,11 @@ async function downloadTicket(idx) {
   const t = await cargarTicket(idx);
   if (!t) { toast('No se pudo cargar el comprobante', 'e'); return; }
   const nombre = `comprobante_${String(e.desc || 'gasto').replace(/[^\w\-]+/g, '_')}_${String(e.date || '').slice(0, 10)}.jpg`;
+  return guardarImagenDataUrl(t, nombre, 'Guardar o compartir comprobante');
+}
 
+// Guarda una imagen (data:image/...) en el móvil o la descarga en el navegador
+async function guardarImagenDataUrl(t, nombre, titulo) {
   // En la APK un <a download> no hace nada: se guarda en el móvil y se abre el menú
   // para compartir, desde donde se puede guardar en Archivos, Drive, WhatsApp...
   const isNative = !!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
@@ -5053,12 +5057,12 @@ async function downloadTicket(idx) {
       const { Filesystem, Share } = Capacitor.Plugins;
       await Filesystem.writeFile({ path: nombre, data: t.split(',')[1], directory: 'CACHE', recursive: true });
       const { uri } = await Filesystem.getUri({ directory: 'CACHE', path: nombre });
-      await Share.share({ title: nombre, url: uri, dialogTitle: 'Guardar o compartir comprobante' });
+      await Share.share({ title: nombre, url: uri, dialogTitle: titulo });
       return;
     } catch (err) {
       if (/cancel/i.test(err?.message || '')) return; // el usuario cerró el menú
-      console.warn('No se pudo compartir el comprobante:', err);
-      toast('No se pudo descargar el comprobante', 'e');
+      console.warn('No se pudo compartir la imagen:', err);
+      toast('No se pudo descargar la imagen', 'e');
       return;
     }
   }
@@ -6122,6 +6126,46 @@ function tocarBotonGrupos(btn) {
 .chat-menu{position:absolute;z-index:4;background:var(--dark3);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;font-size:.82rem;min-width:170px}
 .chat-menu button{display:block;width:100%;text-align:left;padding:11px 14px;color:var(--text);background:none;border:none;border-bottom:1px solid rgba(255,255,255,.05);font-family:'Nunito',sans-serif;font-size:.82rem;cursor:pointer}
 .chat-menu button.rojo{color:var(--danger)}
+/* Adjuntos: fotos y GIF */
+.chat-input #chatMas{background:none;color:var(--gold);border:1.5px solid rgba(245,200,0,.35)}
+.chat-input #chatMas svg{transition:transform .2s}
+.chat-input #chatMas.abierto svg{transform:rotate(45deg)}
+.msg .burb.media{padding:4px 4px 6px}
+.msg .burb.media .cita{margin:2px 2px 5px}
+.burb .pie{display:block;padding:5px 6px 0}
+.chat-foto,.chat-gif{display:block;max-width:100%;border-radius:11px;background:var(--dark4);-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
+.chat-foto{width:230px;max-height:320px;object-fit:cover;cursor:pointer}
+.chat-foto.cargando{height:170px}
+.chat-gif{width:200px;min-height:90px}
+.burb.media .hora{display:block;text-align:right;margin:3px 4px 0 0}
+#chatCapaAdj{display:none;position:absolute;inset:0;z-index:3}
+#chatAdjuntos{display:none;position:absolute;left:10px;z-index:4;background:var(--dark3);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow);padding:14px 10px 10px;gap:6px}
+#chatAdjuntos button{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:6px;width:76px;color:var(--text);font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:700;cursor:pointer}
+#chatAdjuntos .ic{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff}
+#chatFotoPrevia,#chatVisor{display:none;position:absolute;inset:0;z-index:6;background:#000;flex-direction:column;padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom))}
+#chatFotoPrevia img,#chatVisor img{flex:1;min-height:0;width:100%;object-fit:contain;border-radius:10px}
+#chatFotoPrevia .barra{display:flex;gap:8px;align-items:flex-end;margin-top:12px}
+#chatFotoPrevia textarea{flex:1;resize:none;min-height:42px;max-height:100px;background:var(--dark3);border:1.5px solid rgba(255,255,255,.09);border-radius:20px;padding:10px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:.88rem;outline:none}
+#chatFotoPrevia .enviar{width:46px;height:46px;flex-shrink:0;border-radius:50%;border:none;background:var(--gold);color:#000;display:flex;align-items:center;justify-content:center;cursor:pointer}
+#chatFotoPrevia .enviar:disabled{opacity:.5}
+.chat-x{align-self:flex-start;background:none;border:none;color:#fff;padding:4px;margin-bottom:8px;cursor:pointer;display:flex}
+#chatVisor .botones{display:flex;gap:10px;margin-top:14px}
+#chatGif{display:none;position:absolute;left:0;right:0;bottom:0;height:min(72%,480px);z-index:5;background:var(--dark2);border-top:1px solid var(--border);border-radius:18px 18px 0 0;flex-direction:column;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -8px 24px rgba(0,0,0,.45)}
+#chatGif .cab{display:flex;gap:8px;align-items:center;padding:10px 12px 6px}
+#chatGif .buscar{flex:1;display:flex;align-items:center;gap:8px;background:var(--dark3);border:1.5px solid rgba(255,255,255,.09);border-radius:20px;padding:0 12px;color:var(--muted)}
+#chatGif .buscar:focus-within{border-color:var(--gold)}
+#chatGif .buscar input{flex:1;min-width:0;background:none;border:none;outline:none;color:var(--text);font-family:'Nunito',sans-serif;font-size:.86rem;padding:9px 0}
+#chatGif .cab>button{background:none;border:none;color:var(--muted);padding:6px;cursor:pointer;display:flex}
+#chatGifChips{display:flex;gap:6px;overflow-x:auto;padding:4px 12px 8px;scrollbar-width:none;flex-shrink:0}
+#chatGifChips::-webkit-scrollbar{display:none}
+#chatGifChips button{flex-shrink:0;background:var(--dark3);border:1px solid rgba(255,255,255,.1);color:var(--text);border-radius:16px;padding:5px 12px;font-family:'Nunito',sans-serif;font-size:.74rem;font-weight:700;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:5px}
+#chatGifChips button.activa{background:var(--gold);color:#000;border-color:var(--gold)}
+#chatGifCuerpo{flex:1;overflow-y:auto;padding:0 8px 6px;-webkit-overflow-scrolling:touch}
+#chatGifRejilla{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.gif-celda{padding:0;border:none;background:var(--dark4);border-radius:8px;overflow:hidden;height:96px;cursor:pointer}
+.gif-celda img{width:100%;height:100%;object-fit:cover;display:block}
+#chatGifAviso{text-align:center;color:var(--muted);font-size:.78rem;padding:16px 10px;line-height:1.45}
+#chatGif .giphy{font-size:.58rem;color:var(--muted);text-align:center;padding:4px 0 6px;letter-spacing:.04em;flex-shrink:0}
 #chatDialogo{display:none;position:absolute;inset:0;z-index:5;background:rgba(0,0,0,.6);align-items:center;justify-content:center}
 #chatDialogo .caja{background:#1e1e1e;width:88%;max-width:330px;padding:22px;border-radius:20px;border:1px solid #333;text-align:center;box-sizing:border-box}
 </style>
@@ -6138,10 +6182,42 @@ function tocarBotonGrupos(btn) {
     <button type="button" onclick="cancelarRespuestaChat()" title="Cancelar respuesta">✕</button>
   </div>
   <div class="chat-input">
+    <button id="chatMas" type="button" onclick="alternarAdjuntosChat()" title="Adjuntar foto o GIF"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    <input type="file" id="chatImagenFile" accept="image/*" style="display:none" onchange="imagenElegidaChat(event)">
     <textarea id="chatTexto" rows="1" maxlength="1000" placeholder="Escribe un mensaje..." oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,110)+'px'"></textarea>
     <button id="chatEnviar" onclick="enviarMensajeChat()" title="Enviar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
   </div>
   <div id="chatCapa" onclick="cerrarMenuChat()"></div>
+  <div id="chatCapaAdj" onclick="cerrarAdjuntosChat()"></div>
+  <div id="chatAdjuntos">
+    <button type="button" onclick="elegirAdjuntoChat('camara')"><span class="ic" style="background:#E5486B;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>Cámara</button>
+    <button type="button" onclick="elegirAdjuntoChat('galeria')"><span class="ic" style="background:#8B63E8;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>Galería</button>
+    <button type="button" onclick="elegirAdjuntoChat('gif')"><span class="ic" style="background:#13A87E;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M9.5 10H7.8a1.3 1.3 0 0 0-1.3 1.3v1.4A1.3 1.3 0 0 0 7.8 14h.4a1.3 1.3 0 0 0 1.3-1.3V12H8.2"/><line x1="12" y1="10" x2="12" y2="14"/><path d="M17.5 10h-2.5v4M15 12h2"/></svg></span>GIF</button>
+  </div>
+  <div id="chatFotoPrevia">
+    <button type="button" class="chat-x" onclick="cerrarFotoPreviaChat()" title="Cancelar"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <img id="chatFotoPreviaImg" alt="Foto a enviar">
+    <div class="barra">
+      <textarea id="chatFotoPie" rows="1" maxlength="1000" placeholder="Añade un comentario..."></textarea>
+      <button type="button" class="enviar" id="chatFotoEnviar" onclick="enviarFotoChat()" title="Enviar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+    </div>
+  </div>
+  <div id="chatVisor" onclick="if(event.target===this)cerrarVisorChat()">
+    <img id="chatVisorImg" alt="Foto">
+    <div class="botones">
+      <button type="button" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="descargarFotoChat()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar</button>
+      <button type="button" class="btn btn-gold" style="flex:1;" onclick="cerrarVisorChat()">Cerrar</button>
+    </div>
+  </div>
+  <div id="chatGif">
+    <div class="cab">
+      <label class="buscar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.6" y2="16.6"/></svg><input id="chatGifBuscar" type="search" placeholder="Buscar GIF" autocomplete="off" oninput="buscarGifEscrito()"></label>
+      <button type="button" onclick="cerrarGifChat()" title="Cerrar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="chatGifChips"></div>
+    <div id="chatGifCuerpo"><div id="chatGifRejilla"></div><div id="chatGifAviso"></div></div>
+    <div class="giphy">POWERED BY GIPHY</div>
+  </div>
   <div id="chatDialogo" onclick="if(event.target===this)cerrarDialogoChat()"><div class="caja" id="chatDialogoCaja"></div></div>
 </div>
 
@@ -6209,6 +6285,7 @@ function abrirChat() {
 function cerrarChat() {
   clearInterval(_chatTimer); _chatTimer = null;
   cerrarMenuChat(); cerrarDialogoChat(); cancelarRespuestaChat();
+  cerrarAdjuntosChat(); cerrarGifChat(); cerrarFotoPreviaChat(); cerrarVisorChat();
   document.getElementById('page-chat').classList.remove('active');
   const hb = document.getElementById('hbadge'); if (hb) hb.style.visibility = '';
   document.body.style.overflow = '';
@@ -6218,6 +6295,10 @@ function cerrarChat() {
 function chatAtras() {
   if (!chatAbierto()) return false;
   if (document.getElementById('chatDialogo').style.display === 'flex') { cerrarDialogoChat(); return true; }
+  if (document.getElementById('chatVisor').style.display === 'flex') { cerrarVisorChat(); return true; }
+  if (document.getElementById('chatFotoPrevia').style.display === 'flex') { cerrarFotoPreviaChat(); return true; }
+  if (document.getElementById('chatGif').style.display === 'flex') { cerrarGifChat(); return true; }
+  if (document.getElementById('chatAdjuntos').style.display === 'flex') { cerrarAdjuntosChat(); return true; }
   if (_chatMenuMsg !== null) { cerrarMenuChat(); return true; }
   if (_chatRespuestaA !== null) { cancelarRespuestaChat(); return true; }
   cerrarChat(); return true;
@@ -6281,14 +6362,20 @@ function pintarChat(alFinal = false) {
     }
     const mostrarAutor = !m.mio && m.autor !== autorAnterior;
     autorAnterior = m.autor;
+    const adjunto = m.borrado ? '' : htmlAdjuntoChat(m);
+    const cuerpo = m.borrado ? 'Mensaje eliminado'
+      : adjunto ? `${adjunto}${m.texto ? `<span class="pie">${escaparHtml(m.texto)}</span>` : ''}`
+      : escaparHtml(m.texto);
     html += `<div class="msg ${m.mio ? 'yo' : ''} ${m.borrado ? 'borrado' : ''}" data-id="${m.id}">
       ${mostrarAutor ? `<div class="autor">${escaparHtml(m.autor || 'Alguien')}</div>` : ''}
-      <div class="burb">${m.borrado ? '' : cita}${m.borrado ? 'Mensaje eliminado' : escaparHtml(m.texto)}<span class="hora">${horaChat(m.created_at)}</span></div>
+      <div class="burb${adjunto ? ' media' : ''}">${m.borrado ? '' : cita}${cuerpo}<span class="hora">${horaChat(m.created_at)}</span></div>
       ${bloqueReacc}
     </div>`;
   }
   lista.innerHTML = html;
   if (alFinal || cercaDelFinal) lista.scrollTop = lista.scrollHeight;
+  _chatPegadoAlFinal = alFinal || cercaDelFinal;
+  cargarFotosChat();
 }
 
 // ── Enviar ───────────────────────────────────────────────────────────
@@ -6366,7 +6453,8 @@ function abrirMenuChat(el) {
   const tieneReacc = Object.keys(m.reacciones || {}).length > 0;
   menu.innerHTML =
     `<button onclick="responderMensajeChat(${id})">Responder</button>` +
-    `<button onclick="copiarMensajeChat(${id})">Copiar</button>` +
+    (m.texto ? `<button onclick="copiarMensajeChat(${id})">Copiar</button>` : '') +
+    (m.imagen ? `<button onclick="cerrarMenuChat();verFotoChat(${id})">Ver / descargar foto</button>` : '') +
     (tieneReacc ? `<button onclick="verReaccionesChat(${id})">Ver quién reaccionó</button>` : '') +
     (m.mio && m.tipo === 'usuario' ? `<button class="rojo" onclick="confirmarBorrarChat(${id})">Borrar</button>` : '');
   pagina.appendChild(picker); pagina.appendChild(menu);
@@ -6398,7 +6486,7 @@ function responderMensajeChat(id) {
   if (!m) return;
   _chatRespuestaA = id;
   document.getElementById('chatRespAutor').textContent = m.tipo === 'sistema' ? 'VakaPay' : (m.mio ? 'Tú' : (m.autor || 'Alguien'));
-  document.getElementById('chatRespTexto').textContent = m.texto;
+  document.getElementById('chatRespTexto').textContent = m.texto || (m.imagen ? '📷 Foto' : m.gif ? 'GIF' : '');
   document.getElementById('chatRespondiendo').style.display = 'flex';
   document.getElementById('chatTexto').focus();
 }
@@ -6456,6 +6544,323 @@ async function borrarMensajeChat(id) {
     if (!r.ok) throw new Error();
     await cargarChat(true);
   } catch (_) { toast('No se pudo borrar el mensaje', 'e'); }
+}
+
+// ═══ ADJUNTOS: FOTOS Y GIF ═══════════════════════════════════════════
+// Botón «+» junto al campo de texto: Cámara, Galería o GIF.
+// Las fotos se guardan en el servidor; el listado solo dice que hay foto y la
+// app la pide aparte una vez (se queda en memoria mientras la app está abierta).
+// Los GIF vienen de GIPHY y solo se guarda su dirección.
+const PIXEL_VACIO = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+const _chatFotos = {};             // id del mensaje → foto (data:image/...)
+const _chatFotosPidiendo = new Set();
+let _chatPegadoAlFinal = true;
+let _chatFotoNueva = null, _chatVisorId = null;
+
+function htmlAdjuntoChat(m) {
+  if (m.imagen) {
+    const src = _chatFotos[m.id];
+    return `<img class="chat-foto${src ? '' : ' cargando'}" data-foto="${m.id}" src="${src || PIXEL_VACIO}" alt="Foto" draggable="false" onclick="if(_chatMenuMsg===null)verFotoChat(${m.id})" onload="adjuntoCargadoChat()">`;
+  }
+  if (m.gif) return `<img class="chat-gif" src="${escaparHtml(m.gif)}" alt="GIF" draggable="false" onload="adjuntoCargadoChat()">`;
+  return '';
+}
+// Si estabas al final del chat, sigue al final cuando termina de cargar una imagen
+function adjuntoCargadoChat() {
+  if (!_chatPegadoAlFinal) return;
+  const lista = document.getElementById('chatLista');
+  lista.scrollTop = lista.scrollHeight;
+}
+document.getElementById('chatLista').addEventListener('scroll', function () {
+  _chatPegadoAlFinal = this.scrollHeight - this.scrollTop - this.clientHeight < 120;
+}, { passive: true });
+
+async function pedirFotoChat(id) {
+  if (_chatFotos[id]) return _chatFotos[id];
+  try {
+    const r = await apiChat(`/${id}/imagen`);
+    if (!r.ok) return null;
+    const d = await r.json();
+    if (d.imagen) _chatFotos[id] = d.imagen;
+    return d.imagen || null;
+  } catch (_) { return null; }
+}
+function cargarFotosChat() {
+  document.querySelectorAll('#chatLista img.chat-foto.cargando').forEach(img => {
+    const id = img.dataset.foto;
+    if (_chatFotosPidiendo.has(id)) return;
+    _chatFotosPidiendo.add(id);
+    pedirFotoChat(id).then(src => {
+      if (!src) return;
+      document.querySelectorAll(`#chatLista img.chat-foto[data-foto="${id}"]`).forEach(x => { x.src = src; x.classList.remove('cargando'); });
+    }).finally(() => _chatFotosPidiendo.delete(id));
+  });
+}
+
+// ── Menú «+» ─────────────────────────────────────────────────────────
+function alternarAdjuntosChat() {
+  if (document.getElementById('chatAdjuntos').style.display === 'flex') { cerrarAdjuntosChat(); return; }
+  cerrarMenuChat();
+  const pagina = document.getElementById('page-chat').getBoundingClientRect();
+  const entrada = document.querySelector('#page-chat .chat-input').getBoundingClientRect();
+  const panel = document.getElementById('chatAdjuntos');
+  panel.style.bottom = (pagina.bottom - entrada.top + 8) + 'px';
+  panel.style.display = 'flex';
+  document.getElementById('chatCapaAdj').style.display = 'block';
+  document.getElementById('chatMas').classList.add('abierto');
+}
+function cerrarAdjuntosChat() {
+  const p = document.getElementById('chatAdjuntos'); if (p) p.style.display = 'none';
+  const c = document.getElementById('chatCapaAdj'); if (c) c.style.display = 'none';
+  const b = document.getElementById('chatMas'); if (b) b.classList.remove('abierto');
+}
+function elegirAdjuntoChat(tipo) {
+  cerrarAdjuntosChat();
+  if (tipo === 'gif') { abrirGifChat(); return; }
+  const input = document.getElementById('chatImagenFile');
+  input.value = '';
+  if (tipo === 'camara') input.setAttribute('capture', 'environment');
+  else input.removeAttribute('capture');
+  _abriendoImagen = true;          // sin pasar por la ventana «Hacer foto / Galería»: ya se ha elegido
+  try { input.click(); } finally { _abriendoImagen = false; }
+}
+
+// ── Fotos ────────────────────────────────────────────────────────────
+// Reduce la foto a JPEG (máx. 1280 px) para que suba rápido y no pase de ~1,5 MB
+function reducirFotoChat(file, max = 1280, calidad = 0.75) {
+  return new Promise((resolve, reject) => {
+    const lector = new FileReader();
+    lector.onerror = () => reject(new Error('No se pudo leer la foto'));
+    lector.onload = e => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('El archivo no es una imagen válida'));
+      img.onload = () => {
+        const escala = Math.min(1, max / Math.max(img.width, img.height));
+        const lienzo = document.createElement('canvas');
+        lienzo.width = Math.round(img.width * escala);
+        lienzo.height = Math.round(img.height * escala);
+        lienzo.getContext('2d').drawImage(img, 0, 0, lienzo.width, lienzo.height);
+        resolve(lienzo.toDataURL('image/jpeg', calidad));
+      };
+      img.src = e.target.result;
+    };
+    lector.readAsDataURL(file);
+  });
+}
+async function imagenElegidaChat(ev) {
+  const file = ev.target.files && ev.target.files[0];
+  ev.target.value = '';
+  if (!file) return;
+  try {
+    let foto = await reducirFotoChat(file);
+    if (foto.length > 1900000) foto = await reducirFotoChat(file, 960, 0.6);
+    _chatFotoNueva = foto;
+    document.getElementById('chatFotoPreviaImg').src = foto;
+    document.getElementById('chatFotoPie').value = document.getElementById('chatTexto').value.trim();
+    document.getElementById('chatFotoPrevia').style.display = 'flex';
+  } catch (err) { toast(err.message || 'No se pudo abrir la foto', 'e'); }
+}
+function cerrarFotoPreviaChat() {
+  _chatFotoNueva = null;
+  const p = document.getElementById('chatFotoPrevia'); if (p) p.style.display = 'none';
+}
+async function enviarAdjuntoChat(cuerpo) {
+  const r = await apiChat('', { method: 'POST', body: JSON.stringify({ ...cuerpo, respuesta_a: _chatRespuestaA }) });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || 'No se pudo enviar');
+  cancelarRespuestaChat();
+  return d;
+}
+async function enviarFotoChat() {
+  if (!_chatFotoNueva) return;
+  const btn = document.getElementById('chatFotoEnviar');
+  btn.disabled = true;
+  const foto = _chatFotoNueva, pie = document.getElementById('chatFotoPie').value.trim();
+  try {
+    const d = await enviarAdjuntoChat({ imagen: foto, texto: pie });
+    _chatFotos[d.id] = foto;
+    // El comentario de la foto sustituye a lo que hubiera escrito en el campo
+    if (pie && pie === document.getElementById('chatTexto').value.trim()) {
+      const caja = document.getElementById('chatTexto'); caja.value = ''; caja.style.height = 'auto';
+    }
+    cerrarFotoPreviaChat();
+    await cargarChat(true);
+  } catch (err) {
+    toast(err.message || 'No se pudo enviar la foto', 'e');
+  } finally { btn.disabled = false; }
+}
+async function verFotoChat(id) {
+  const src = await pedirFotoChat(id);
+  if (!src) { toast('No se pudo cargar la foto', 'e'); return; }
+  _chatVisorId = id;
+  document.getElementById('chatVisorImg').src = src;
+  document.getElementById('chatVisor').style.display = 'flex';
+}
+function cerrarVisorChat() {
+  _chatVisorId = null;
+  const v = document.getElementById('chatVisor'); if (v) v.style.display = 'none';
+}
+function descargarFotoChat() {
+  const src = _chatFotos[_chatVisorId];
+  if (src) guardarImagenDataUrl(src, `vakapay_foto_${_chatVisorId}.jpg`, 'Guardar o compartir foto');
+}
+
+// ── GIF (GIPHY) ──────────────────────────────────────────────────────
+// Categorías rápidas: [id, texto del botón, búsqueda en GIPHY]
+const GIF_CATEGORIAS = [
+  ['recientes', 'Recientes'], ['tendencias', 'Tendencias'],
+  ['hola', 'Hola', 'hello'], ['jaja', 'Jajaja', 'lol'], ['amor', 'Te quiero', 'love'],
+  ['cumple', 'Feliz cumpleaños', 'happy birthday'], ['gracias', 'Gracias', 'thank you'],
+  ['entusiasmo', 'Entusiasmo', 'excited'], ['si', 'Sí', 'yes'], ['no', 'No', 'no'],
+  ['perdon', 'Lo siento', 'sorry'], ['feliz', 'Feliz', 'happy'], ['triste', 'Triste', 'sad'],
+  ['pulgar', 'Pulgares arriba', 'thumbs up'], ['susto', 'Asustado', 'scared'], ['adios', 'Adiós', 'bye'],
+  ['confuso', 'Confundido', 'confused'], ['enojado', 'Enojado', 'angry'], ['hambre', 'Hambriento', 'hungry'],
+  ['beso', 'Beso', 'kiss'], ['aplausos', 'Aplausos', 'applause'], ['fiesta', 'Fiesta', 'party'],
+  ['salud', 'Salud', 'cheers'], ['bailar', 'Bailar', 'dance'], ['sorpresa', 'Sorpresa', 'surprised'],
+  ['cansado', 'Cansado', 'tired'], ['ojos', 'Ojos en blanco', 'eye roll'], ['ok', 'OK', 'ok'],
+  ['dinero', 'Dinero', 'money'], ['pagame', '¡Págame!', 'pay me'], ['vacaciones', 'Vacaciones', 'vacation'],
+];
+const GIF_RECIENTES_KEY = 'vp_gif_recientes';
+let _gifConfig = null;
+const _gifCache = new Map();
+const _gifEstado = { cat: 'tendencias', q: '', offset: 0, mas: false, cargando: false, peticion: 0 };
+let _gifTimer = null;
+
+function gifsRecientes() {
+  try { return JSON.parse(localStorage.getItem(GIF_RECIENTES_KEY) || '[]').slice(0, 30); } catch (_) { return []; }
+}
+function guardarGifReciente(g) {
+  try {
+    const lista = [g, ...gifsRecientes().filter(x => x.url !== g.url)].slice(0, 30);
+    localStorage.setItem(GIF_RECIENTES_KEY, JSON.stringify(lista));
+  } catch (_) {}
+}
+async function configGif() {
+  if (_gifConfig) return _gifConfig;
+  try {
+    const r = await apiChat('/gif-config');
+    if (r.ok) _gifConfig = await r.json();
+  } catch (_) {}
+  return _gifConfig || { disponible: false };
+}
+
+async function abrirGifChat() {
+  cerrarMenuChat();
+  document.getElementById('chatGif').style.display = 'flex';
+  document.getElementById('chatGifBuscar').value = '';
+  _gifEstado.q = '';
+  _gifEstado.cat = gifsRecientes().length ? 'recientes' : 'tendencias';
+  pintarChipsGif();
+  const cfg = await configGif();
+  if (!cfg.disponible) {
+    document.getElementById('chatGifRejilla').innerHTML = '';
+    avisoGif('Los GIF todavía no están activados en VakaPay. Vuelve a intentarlo más adelante.');
+    return;
+  }
+  cargarGifs(true);
+}
+function cerrarGifChat() {
+  clearTimeout(_gifTimer);
+  _gifEstado.peticion++;
+  const p = document.getElementById('chatGif'); if (p) p.style.display = 'none';
+}
+function avisoGif(t) { document.getElementById('chatGifAviso').textContent = t; }
+
+function pintarChipsGif() {
+  const cont = document.getElementById('chatGifChips');
+  cont.innerHTML = GIF_CATEGORIAS.map(([id, nombre]) => {
+    const icono = id === 'recientes'
+      ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg>'
+      : id === 'tendencias'
+        ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>'
+        : '';
+    return `<button type="button" data-cat="${id}" class="${!_gifEstado.q && _gifEstado.cat === id ? 'activa' : ''}" onclick="elegirCategoriaGif('${id}')">${icono}${escaparHtml(nombre)}</button>`;
+  }).join('');
+}
+function elegirCategoriaGif(id) {
+  _gifEstado.cat = id; _gifEstado.q = '';
+  document.getElementById('chatGifBuscar').value = '';
+  pintarChipsGif();
+  cargarGifs(true);
+}
+function buscarGifEscrito() {
+  clearTimeout(_gifTimer);
+  _gifTimer = setTimeout(() => {
+    const q = document.getElementById('chatGifBuscar').value.trim();
+    if (!q) { elegirCategoriaGif(gifsRecientes().length ? 'recientes' : 'tendencias'); return; }
+    _gifEstado.q = q;
+    pintarChipsGif();
+    cargarGifs(true);
+  }, 600);   // espera a que termines de escribir (ahorra búsquedas)
+}
+
+async function pedirGifsGiphy(q, idioma, offset) {
+  const clave = `${q || '#tendencias'}|${idioma}|${offset}`;
+  if (_gifCache.has(clave)) return _gifCache.get(clave);
+  const cfg = await configGif();
+  const params = new URLSearchParams({ api_key: cfg.clave, limit: '24', offset: String(offset), rating: 'pg-13' });
+  if (q) { params.set('q', q); params.set('lang', idioma); }
+  const r = await fetch(`https://api.giphy.com/v1/gifs/${q ? 'search' : 'trending'}?${params}`);
+  if (!r.ok) throw new Error(r.status === 429 ? 'limite' : 'error');
+  const d = await r.json();
+  const lista = (d.data || []).map(g => {
+    const im = g.images || {};
+    return {
+      vista: (im.fixed_width_small || im.fixed_width || {}).url,
+      url: (im.fixed_width || im.downsized || {}).url,
+    };
+  }).filter(g => g.vista && g.url);
+  const p = d.pagination || {};
+  const res = { lista, mas: lista.length > 0 && (p.offset || 0) + (p.count || 0) < (p.total_count || 0) };
+  _gifCache.set(clave, res);
+  return res;
+}
+const celdaGif = g =>
+  `<button type="button" class="gif-celda" data-url="${escaparHtml(g.url)}" data-vista="${escaparHtml(g.vista)}" onclick="enviarGifChat(this)"><img src="${escaparHtml(g.vista)}" alt="GIF" loading="lazy" draggable="false"></button>`;
+
+async function cargarGifs(desdeCero) {
+  const st = _gifEstado, rejilla = document.getElementById('chatGifRejilla');
+  const peticion = ++st.peticion;
+  if (desdeCero) { st.offset = 0; st.mas = false; rejilla.innerHTML = ''; document.getElementById('chatGifCuerpo').scrollTop = 0; }
+  if (!st.q && st.cat === 'recientes') {
+    const rec = gifsRecientes();
+    rejilla.innerHTML = rec.map(celdaGif).join('');
+    avisoGif(rec.length ? '' : 'Aquí aparecerán los GIF que envíes.');
+    return;
+  }
+  const cat = GIF_CATEGORIAS.find(c => c[0] === st.cat);
+  const q = st.q || (cat && cat[2]) || '';
+  st.cargando = true;
+  avisoGif('Cargando GIF...');
+  try {
+    const res = await pedirGifsGiphy(q, st.q ? 'es' : 'en', st.offset);
+    if (peticion !== st.peticion) return;
+    rejilla.insertAdjacentHTML('beforeend', res.lista.map(celdaGif).join(''));
+    st.offset += res.lista.length;
+    st.mas = res.mas;
+    avisoGif(!rejilla.children.length ? 'No se encontraron GIF. Prueba con otra palabra.' : '');
+  } catch (err) {
+    if (peticion !== st.peticion) return;
+    avisoGif(err.message === 'limite'
+      ? 'Se ha alcanzado el límite de búsquedas de GIF. Prueba de nuevo en un rato.'
+      : 'No se pudieron cargar los GIF. Revisa tu conexión.');
+  } finally {
+    if (peticion === st.peticion) st.cargando = false;
+  }
+}
+// Al llegar al final de la lista se cargan más
+document.getElementById('chatGifCuerpo').addEventListener('scroll', function () {
+  if (_gifEstado.mas && !_gifEstado.cargando && this.scrollHeight - this.scrollTop - this.clientHeight < 200) cargarGifs(false);
+}, { passive: true });
+
+async function enviarGifChat(btn) {
+  const g = { url: btn.dataset.url, vista: btn.dataset.vista };
+  cerrarGifChat();
+  guardarGifReciente(g);
+  try {
+    await enviarAdjuntoChat({ gif: g.url });
+    await cargarChat(true);
+  } catch (err) { toast(err.message || 'No se pudo enviar el GIF', 'e'); }
 }
 </script>
 

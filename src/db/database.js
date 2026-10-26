@@ -137,6 +137,8 @@ const initSchema = async () => {
       );
       CREATE INDEX IF NOT EXISTS idx_mensajes_grupo ON mensajes(group_id, id);
       ALTER TABLE mensajes ADD COLUMN IF NOT EXISTS respuesta_a INTEGER REFERENCES mensajes(id) ON DELETE SET NULL;
+      ALTER TABLE mensajes ADD COLUMN IF NOT EXISTS imagen TEXT;   -- foto (data:image/jpeg;base64,...)
+      ALTER TABLE mensajes ADD COLUMN IF NOT EXISTS gif TEXT;      -- URL del GIF (GIPHY)
       CREATE TABLE IF NOT EXISTS reacciones (
         mensaje_id INTEGER NOT NULL REFERENCES mensajes(id) ON DELETE CASCADE,
         user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
