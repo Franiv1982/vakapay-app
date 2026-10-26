@@ -1095,6 +1095,7 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparen
 <div id="toast"></div>
 
 <script src="jspdf.umd.min.js"></script>
+<script src="libphonenumber-min.js"></script>
 <script>
 
 // ═══ LOGO ════════════════════════════════════════════════════════════
@@ -4667,6 +4668,14 @@ async function saveProfile() {
     avatar: profile.avatar || null
   };
   if (data.nombre.length < 3) return toast('El nombre debe tener al menos 3 caracteres ⚠️', 'e');
+  // Teléfono obligatorio, con prefijo y válido para su país (se guarda como "+34 608534056")
+  if (!data.tel) return toast('Escribe tu teléfono con el prefijo del país (ej: +34 600 000 000)', 'e');
+  if (!data.tel.startsWith('+')) return toast('Añade el prefijo del país al teléfono (ej: +34)', 'e');
+  if (window.libphonenumber) {
+    const n = libphonenumber.parsePhoneNumberFromString(data.tel);
+    if (!n || !n.isValid()) return toast('El número de teléfono no es válido para ese país', 'e');
+    data.tel = `+${n.countryCallingCode} ${n.nationalNumber}`;
+  }
   if (data.pago_bizum && !/^\+?[\d\s-]{9,20}$/.test(data.pago_bizum)) return toast('El teléfono para Bizum no es válido', 'e');
   if (data.pago_iban && !ibanValido(data.pago_iban)) return toast('El IBAN no es válido. Revisa que esté completo.', 'e');
   try {

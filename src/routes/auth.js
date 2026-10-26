@@ -1,6 +1,7 @@
 // src/routes/auth.js — PostgreSQL
 const express  = require('express');
 const bcrypt   = require('bcryptjs');
+const { normalizarTelefono } = require('../utils/telefono');
 const db       = require('../db/database');
 const { signToken, requireAuth } = require('../middleware/auth');
 
@@ -9,10 +10,14 @@ const router = express.Router();
 // ── POST /auth/register ──────────────────────────────────────────
 router.post('/register', async (req, res, next) => {
   try {
-    const { nombre = '', apellido = '', email, password, tel = '' } = req.body;
+    const { nombre = '', apellido = '', email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
     }
+    // Teléfono obligatorio, con prefijo y válido para su país
+    const telefono = normalizarTelefono(req.body.tel);
+    if (!telefono.ok) return res.status(400).json({ error: telefono.error, campo: 'tel' });
+    const tel = telefono.valor;
 
     const existing = await db.query('SELECT id FROM users WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
