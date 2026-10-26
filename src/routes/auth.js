@@ -33,6 +33,8 @@ router.post('/register', async (req, res, next) => {
 });
 
 // ── POST /auth/login ─────────────────────────────────────────────
+const MAX_FALLOS  = 5;   // intentos fallidos seguidos permitidos
+const BLOQUEO_MIN = 15;  // minutos de bloqueo después
 router.post('/login', async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -40,22 +42,48 @@ router.post('/login', async (req, res, next) => {
       return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
     }
 
-    const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
+    const result = await db.query(
+      `SELECT *, GREATEST(0, CEIL(EXTRACT(EPOCH FROM (login_bloqueado_hasta - NOW())) / 60))::int AS minutos_bloqueo
+       FROM users WHERE LOWER(email) = LOWER(TRIM($1))`, [email]);
     const user   = result.rows[0];
 
     if (!user) return res.status(401).json({ error: 'Credenciales incorrectas' });
 
+    // Límite de intentos: tras MAX_FALLOS contraseñas incorrectas seguidas,
+    // la cuenta queda bloqueada BLOQUEO_MIN minutos (evita probar contraseñas sin fin)
+    if (user.minutos_bloqueo > 0) {
+      return res.status(429).json({
+        error: `Demasiados intentos fallidos. Vuelve a intentarlo en ${user.minutos_bloqueo} minuto${user.minutos_bloqueo === 1 ? '' : 's'} o restablece tu contraseña.`,
+        minutos: user.minutos_bloqueo,
+      });
+    }
+
+    let valid = false;
     if (!user.password_hash) {
-      if (process.env.NODE_ENV === 'production') {
-        return res.status(401).json({ error: 'Credenciales incorrectas' });
-      }
+      valid = process.env.NODE_ENV !== 'production';
     } else {
-      const valid = bcrypt.compareSync(password, user.password_hash);
-      if (!valid) return res.status(401).json({ error: 'Credenciales incorrectas' });
+      valid = bcrypt.compareSync(password, user.password_hash);
+    }
+    if (!valid) {
+      const fallos = (user.login_fallos || 0) + 1;
+      if (fallos >= MAX_FALLOS) {
+        await db.query(`UPDATE users SET login_fallos = 0, login_bloqueado_hasta = NOW() + INTERVAL '${BLOQUEO_MIN} minutes' WHERE id = $1`, [user.id]);
+        return res.status(429).json({
+          error: `Demasiados intentos fallidos. Vuelve a intentarlo en ${BLOQUEO_MIN} minutos o restablece tu contraseña.`,
+          minutos: BLOQUEO_MIN,
+        });
+      }
+      await db.query('UPDATE users SET login_fallos = $1 WHERE id = $2', [fallos, user.id]);
+      return res.status(401).json({ error: 'Credenciales incorrectas', intentos_restantes: MAX_FALLOS - fallos });
+    }
+
+    if (user.login_fallos || user.login_bloqueado_hasta) {
+      await db.query('UPDATE users SET login_fallos = 0, login_bloqueado_hasta = NULL WHERE id = $1', [user.id]);
     }
 
     const token = signToken(user);
-    const { password_hash, ...safeUser } = user;
+    // No se devuelven datos internos (contraseña, códigos de recuperación, contadores)
+    const { password_hash, reset_otp, reset_otp_expires, reset_attempts, login_fallos, login_bloqueado_hasta, minutos_bloqueo, ...safeUser } = user;
     res.json({ token, user: safeUser });
   } catch (err) { next(err); }
 });
@@ -215,7 +243,7 @@ router.post('/reset-password', async (req, res, next) => {
 
     // 3. Actualizar la contraseña en la base de datos y limpiar los campos de OTP
     await db.query(
-      'UPDATE users SET password_hash = $1, reset_otp = NULL, reset_otp_expires = NULL, reset_attempts = 0 WHERE id = $2',
+      'UPDATE users SET password_hash = $1, reset_otp = NULL, reset_otp_expires = NULL, reset_attempts = 0, login_fallos = 0, login_bloqueado_hasta = NULL WHERE id = $2',
       [hash, user.id]
     );
 

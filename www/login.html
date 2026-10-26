@@ -934,7 +934,7 @@ function handleLogin() {
         
         <div style="font-size: 2.5rem; margin-bottom: 15px;">🔐</div>
         <h2 style="color: #F2F2F2; margin-bottom: 10px; font-size: 1.4rem;">Acceso denegado</h2>
-        <p style="color: #F2F2F2; margin-bottom: 25px; font-size: 0.85rem; opacity: 0.8;">El correo electrónico o la contraseña son incorrectos. Por favor, verifica tus datos e inténtalo de nuevo.</p>
+        <p id="login-error-texto" style="color: #F2F2F2; margin-bottom: 25px; font-size: 0.85rem; opacity: 0.8;">El correo electrónico o la contraseña son incorrectos. Por favor, verifica tus datos e inténtalo de nuevo.</p>
         
         <!-- BOTÓN ACEPTAR (VERDE SÓLIDO - CONTINUIDAD) -->
         <button onclick="cerrarModalLoginError()" 
@@ -1129,6 +1129,16 @@ async function iniciarSesion() {
         
     } catch (error) {
         console.error("❌ Detalle del fallo:", error);   
+        // Mensaje según el motivo: bloqueo por intentos, últimos intentos o datos incorrectos
+        const texto = document.getElementById('login-error-texto');
+        if (error.status === 429) {
+            texto.textContent = error.message;
+        } else if (error.status === 401 && error.data && error.data.intentos_restantes <= 2) {
+            const n = error.data.intentos_restantes;
+            texto.textContent = `El correo electrónico o la contraseña son incorrectos. Te queda${n === 1 ? '' : 'n'} ${n} intento${n === 1 ? '' : 's'} antes de que la cuenta se bloquee 15 minutos.`;
+        } else {
+            texto.textContent = 'El correo electrónico o la contraseña son incorrectos. Por favor, verifica tus datos e inténtalo de nuevo.';
+        }
         document.getElementById('modal-login-error').style.display = 'flex';
     }
 }
