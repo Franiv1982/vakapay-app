@@ -3,7 +3,7 @@ const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const db      = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
-const { logActivity }  = require('../utils/activity');
+const { logActivity, registrarEnGrupo, actorName, mensajeSistema } = require('../utils/activity');
 const { agregarAmigoSiNoExiste, sincronizarAmigosGrupo } = require('../utils/contactos');
 
 const router = express.Router();
@@ -246,7 +246,12 @@ router.post('/:id/members', requireAuth, async (req, res, next) => {
       await sincronizarAmigosGrupo(req.params.id);
     } catch (e) { console.error('No se pudieron actualizar los amigos:', e.message); }
 
-    logActivity(req.user.id, 'member', `${display_name} añadido al grupo`);
+    // Actividad para todo el grupo y aviso en el chat
+    const quien = await actorName(req.params.id, req.user.id);
+    await registrarEnGrupo(req.params.id, 'member', (uid, nombreGrupo) => uid === req.user.id
+      ? `Añadiste a ${display_name} al grupo "${nombreGrupo}"`
+      : `${quien} añadió a ${display_name} al grupo "${nombreGrupo}"`);
+    await mensajeSistema(req.params.id, `➕ ${quien} añadió a ${display_name} al grupo`);
     res.status(201).json(result.rows[0]);
   } catch (err) { next(err); }
 });
@@ -264,6 +269,11 @@ router.delete('/:id/members/:name', requireAuth, async (req, res, next) => {
     const member = mRes.rows[0];
     if (!member) return res.status(404).json({ error: 'Participante no encontrado' });
     await db.query('DELETE FROM group_members WHERE id = $1', [member.id]);
+    const quien = await actorName(req.params.id, req.user.id);
+    await registrarEnGrupo(req.params.id, 'member', (uid, nombreGrupo) => uid === req.user.id
+      ? `Quitaste a ${member.display_name} del grupo "${nombreGrupo}"`
+      : `${quien} quitó a ${member.display_name} del grupo "${nombreGrupo}"`);
+    await mensajeSistema(req.params.id, `➖ ${quien} quitó a ${member.display_name} del grupo`);
     res.status(204).end();
   } catch (err) { next(err); }
 });

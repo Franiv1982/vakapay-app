@@ -56,6 +56,27 @@ async function logGroupActivity(groupId, actorId, type, buildMessage) {
   }
 }
 
+// Registra un aviso en la actividad de todos los del grupo con cuenta (y del creador).
+// textoPara(userId, nombreDelGrupo) devuelve el texto para esa persona, o null para no avisarle;
+// así quien lo hizo lee "Añadiste a..." y los demás "Ana añadió a...".
+async function registrarEnGrupo(groupId, type, textoPara) {
+  try {
+    const g = (await db.query('SELECT name, owner_id FROM groups WHERE id = $1', [groupId])).rows[0];
+    if (!g) return;
+    const m = await db.query('SELECT DISTINCT user_id FROM group_members WHERE group_id = $1 AND user_id IS NOT NULL', [groupId]);
+    const ids = new Set(m.rows.map(r => r.user_id));
+    if (g.owner_id) ids.add(g.owner_id);
+    for (const uid of ids) {
+      const texto = textoPara(uid, g.name);
+      if (texto) {
+        await db.query('INSERT INTO activity_log (user_id, type, message, group_name) VALUES ($1, $2, $3, $4)', [uid, type, texto, g.name]);
+      }
+    }
+  } catch (err) {
+    console.error('Error registrando actividad del grupo:', err.message);
+  }
+}
+
 // Mensaje automático en el chat del grupo (gastos, pagos, altas y bajas)
 async function mensajeSistema(groupId, texto, cliente = db) {
   try {
@@ -65,4 +86,4 @@ async function mensajeSistema(groupId, texto, cliente = db) {
   }
 }
 
-module.exports = { logActivity, logGroupActivity, mensajeSistema };
+module.exports = { logActivity, logGroupActivity, mensajeSistema, registrarEnGrupo, actorName };
