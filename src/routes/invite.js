@@ -2,7 +2,7 @@
 const express = require('express');
 const db = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
-const { logActivity, mensajeSistema } = require('../utils/activity');
+const { mensajeSistema, registrarEnGrupo } = require('../utils/activity');
 const { sincronizarAmigosGrupo } = require('../utils/contactos');
 
 const router = express.Router();
@@ -82,7 +82,11 @@ router.post('/:token/join', requireAuth, async (req, res, next) => {
     // El nuevo tiene en Amigos a todo el grupo, y quienes tienen cuenta le tienen a él
     await sincronizarAmigosGrupo(groupId);
 
-    logActivity(req.user.id, 'member', `Te uniste al grupo "${grupo.name}"`);
+    // Actividad: quien entra y todos los del grupo lo ven
+    const reclamado = !!req.body.reclamar;
+    await registrarEnGrupo(groupId, 'member', (uid, nombreGrupo) => uid === req.user.id
+      ? `Te uniste al grupo "${nombreGrupo}"${reclamado ? ` como ${displayName}` : ''}`
+      : `${displayName} se unió al grupo "${nombreGrupo}" ${reclamado ? 'con su cuenta' : 'con el enlace de invitación'}`);
     await mensajeSistema(groupId, req.body.reclamar
       ? `👋 ${displayName} se unió al grupo con su cuenta`
       : `👋 ${displayName} se unió al grupo`);

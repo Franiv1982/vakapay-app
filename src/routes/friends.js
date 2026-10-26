@@ -121,9 +121,10 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
 // ── DELETE /friends/:id ───────────────────────────────────────────
 router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
-    const existing = await db.query('SELECT id FROM friends WHERE id = $1 AND owner_id = $2', [req.params.id, req.user.id]);
+    const existing = await db.query('SELECT id, name FROM friends WHERE id = $1 AND owner_id = $2', [req.params.id, req.user.id]);
     if (!existing.rows[0]) return res.status(404).json({ error: 'Amigo no encontrado' });
     await db.query('DELETE FROM friends WHERE id = $1', [req.params.id]);
+    logActivity(req.user.id, 'friend', `${existing.rows[0].name} eliminado de tus contactos`);
     res.status(204).end();
   } catch (err) { next(err); }
 });

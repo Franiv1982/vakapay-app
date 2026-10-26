@@ -2471,9 +2471,6 @@ async function addMemberFromFriend(friendName) {
   await save();
   renderAll();
   
-  logActivity(`${friendName} añadido al grupo "${g.name}"`);
-  saveActivity();
-  renderActivity();
 
   // Sincronización backend — SIN esto el miembro se pierde al refrescar
   try {
@@ -2493,6 +2490,7 @@ async function addMemberFromFriend(friendName) {
   }
   
   toast(`${friendName} añadido ✓`, 's');
+  refrescarActividad();
 }
 
 async function addMember() {
@@ -2526,13 +2524,14 @@ async function addMember() {
   // 3. Lista de amigos actualizada desde el servidor
   try { friends = await vakaData.getFriends() || friends; renderFriends(); renderFriendPicker(); updateStats(); } catch (_) {}
   toast(eraAmigo ? `${n} añadido ✓` : `${n} añadido al grupo y a tus amigos ✓`, 's');
+  refrescarActividad();
 
   // 4. Refresco final
   inp.value = '';
   groups = await vakaData.getGroups() || [];
   renderAll();
   renderFriendPicker();
-  logActivity(`${n} añadido al grupo "${g.name}"`); 
+ 
   saveActivity(); 
   renderActivity();
 }
@@ -2590,6 +2589,7 @@ async function ejecutarBorradoMiembro() {
   renderAll();
   cerrarModalBorrarMiembro();
   toast(`${n} eliminado del grupo`, 'i');
+  refrescarActividad();
 }
 function updateSelectAllBtn(){
   const chips=document.querySelectorAll('#involvedChips .chip');
@@ -2674,8 +2674,7 @@ async function toggleFriendInGroup(name, el) {
         body: JSON.stringify({ display_name: name })
       });
       toast(`${name} añadido ✓`, 's');
-      logActivity(`${name} añadido al grupo "${g.name}"`);
-      saveActivity();
+      refrescarActividad();
     } catch (e) {
       console.error("Error sincronizando miembro:", e);
       toast('Añadido solo localmente (sin conexión)', 'w');
@@ -4371,6 +4370,7 @@ async function refrescarGruposYAmigos() {
   try { friends = await vakaData.getFriends() || friends; } catch (_) {}
   renderGroupsList(); renderFriends(); renderFriendPicker(); updateStats();
   if (currentGroupIdx !== null && groups[currentGroupIdx]) renderAll();
+  refrescarActividad();
 }
 
 // Ficha del amigo → «Grupos vinculados»: añadir o quitar del grupo (se guarda en el servidor)
@@ -4517,6 +4517,7 @@ async function ejecutarBorradoAmigo() {
   cerrarModalBorrarAmigo();
   closeFriendModal();
   toast(`${name} eliminado`, 'i');
+  refrescarActividad();
 }
 
 function confirmDeleteFriend(idx) {
