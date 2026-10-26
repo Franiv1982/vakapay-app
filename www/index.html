@@ -1707,21 +1707,10 @@ function abrirUnirseConEnlace() {
   document.getElementById('unirse-enlace-error').style.display = 'none';
   document.getElementById('modal-unirse-enlace').style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  // Botón "Pegar" solo si el móvil permite leer el portapapeles
-  document.getElementById('unirse-enlace-pegar').style.display = (navigator.clipboard && navigator.clipboard.readText) ? 'block' : 'none';
 }
 function cerrarUnirseConEnlace() {
   document.getElementById('modal-unirse-enlace').style.display = 'none';
   document.body.style.overflow = '';
-}
-async function pegarEnlaceInvitacion() {
-  try {
-    const t = await navigator.clipboard.readText();
-    if (t) document.getElementById('unirse-enlace-input').value = t.trim();
-    document.getElementById('unirse-enlace-error').style.display = 'none';
-  } catch (_) {
-    toast('Mantén pulsado el campo y elige «Pegar»', 'i');
-  }
 }
 // Acepta el enlace completo (…/login.html?invite=XXXX) o solo el código
 function extraerTokenInvitacion(texto) {
@@ -6381,11 +6370,10 @@ async function borrarMensajeChat(id) {
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F5C800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
     </div>
     <div style="color:#F2F2F2; font-size:1.3rem; font-weight:bold; margin-bottom:8px; text-align:center;">Unirse a un grupo</div>
-    <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:16px; opacity:0.8; text-align:center; line-height:1.4;">Copia el enlace de invitación que te enviaron (por WhatsApp, email…) y pégalo aquí.</p>
-    <div class="field" style="margin-bottom:8px;">
+    <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:16px; opacity:0.8; text-align:center; line-height:1.4;">Copia el enlace de invitación que te enviaron (por WhatsApp, email…) y pégalo en el campo.</p>
+    <div class="field" style="margin-bottom:10px;">
       <input type="text" id="unirse-enlace-input" placeholder="https://vakapay-app.vercel.app/login.html?invite=…" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="document.getElementById('unirse-enlace-error').style.display='none'" onkeydown="if(event.key==='Enter')unirseConEnlace()">
     </div>
-    <button type="button" id="unirse-enlace-pegar" class="btn btn-outline btn-sm" style="margin-bottom:10px;" onclick="pegarEnlaceInvitacion()" ><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>Pegar</button>
     <div id="unirse-enlace-error" style="display:none; color:#ff4d4d; font-size:.75rem; margin-bottom:10px; line-height:1.4;"></div>
     <div style="display:flex; gap:12px; margin-top:6px;">
       <button onclick="cerrarUnirseConEnlace()" style="flex:1; padding:13px; border-radius:12px; font-weight:bold; cursor:pointer; border:1px solid #444; color:#F2F2F2; background:none;">Cancelar</button>
