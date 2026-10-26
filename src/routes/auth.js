@@ -156,10 +156,13 @@ router.post('/forgot-password', async (req, res, next) => {
     );
 
     // 4. Enviar el correo usando Resend 
-    const { Resend } = require('resend');
-    const resend = new Resend(process.env.RESEND_API_KEY);
-
-    await resend.emails.send({
+    // Resend no lanza error si rechaza el envío: devuelve { error }. Hay que comprobarlo,
+    // si no la app diría "código enviado" y el usuario esperaría un correo que no llega.
+    let envio;
+    try {
+      const { Resend } = require('resend');
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      envio = await resend.emails.send({
       from: 'VakaPay <onboarding@resend.dev>',
       to: email,
       subject: 'Código de recuperación de contraseña - VakaPay',
@@ -183,6 +186,18 @@ router.post('/forgot-password', async (req, res, next) => {
         </div>
       `
     });
+    } catch (e) {
+      envio = { error: e };
+    }
+    if (!envio || envio.error) {
+      console.error('No se pudo enviar el correo de recuperación:', envio && envio.error && (envio.error.message || envio.error));
+      // El código se mantiene válido (3 min) por si soporte se lo facilita al usuario
+      return res.status(502).json({
+        error: 'No hemos podido enviarte el correo con el código. Inténtalo más tarde o contacta con soporte.',
+        email_no_enviado: true,
+      });
+    }
+
 
     res.json({ ok: true, message: 'Código enviado correctamente' });
   } catch (err) { next(err); }

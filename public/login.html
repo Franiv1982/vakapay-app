@@ -282,7 +282,7 @@
             <button onclick="switchPage('page-registro')" class="btn-primary">Regístrate</button>
             <button onclick="switchPage('page-login-formulario')" class="btn-outline">Iniciar sesión</button>
             <div class="separator">o bien</div>
-            <button class="btn-google" onclick="alert('Conectando con Google...')">
+            <button class="btn-google" onclick="mostrarAvisoLogin('Próximamente', 'El acceso con Google estará disponible en una próxima versión. Mientras tanto, regístrate con tu email.', '🔜')">
                 <img src="logo_google.png" alt="Google"> Seguir con Google
             </button>
         </div></div>
@@ -505,7 +505,8 @@ async function enviarCodigoRecuperacion() {
         document.getElementById('otp-1')?.focus();
     } catch (error) {
         console.error("Error en recuperación:", error);
-        alert(error.message || 'No se pudo enviar el código. Inténtalo de nuevo.');
+        mostrarAvisoLogin(error.data && error.data.email_no_enviado ? 'Correo no enviado' : 'No se pudo continuar',
+                          error.message || 'No se pudo enviar el código. Inténtalo de nuevo.', error.data && error.data.email_no_enviado ? '📭' : '⚠️');
     } finally {
         btn.disabled = false; 
         btn.textContent = 'Continuar';
@@ -553,7 +554,8 @@ async function reenviarCodigo() {
         await vakaData.forgotPassword({ email });
     } catch (error) {
         enlace.classList.remove('deshabilitado');
-        alert(error.message || 'No se pudo reenviar el código. Inténtalo de nuevo.');
+        mostrarAvisoLogin(error.data && error.data.email_no_enviado ? 'Correo no enviado' : 'No se pudo reenviar',
+                          error.message || 'No se pudo reenviar el código. Inténtalo de nuevo.', error.data && error.data.email_no_enviado ? '📭' : '⚠️');
         return;
     }
     ['otp-1','otp-2','otp-3','otp-4','otp-5','otp-6'].forEach(id => document.getElementById(id).value = '');
@@ -585,7 +587,7 @@ async function verificarCodigo() {
         
     } catch (error) {
         console.error("Error al verificar código:", error);
-        alert(error.message || 'El código ingresado no es válido o ha expirado.');
+        mostrarAvisoLogin('Código no válido', error.message || 'El código ingresado no es válido o ha expirado.', '🔢');
     }
 }
 
@@ -619,7 +621,7 @@ async function guardarNuevaPassword() {
         document.getElementById('modal-password-exito').style.display = 'flex';
     } catch (error) {
         console.error("❌ Error al actualizar contraseña:", error);
-        alert(error.message || 'No se pudo actualizar la contraseña. Inténtalo de nuevo.');
+        mostrarAvisoLogin('No se pudo guardar', error.message || 'No se pudo actualizar la contraseña. Inténtalo de nuevo.', '⚠️');
     } finally {
         btn.disabled = false;
         btn.textContent = 'Continuar';
@@ -748,7 +750,7 @@ async function handleRegistro() {
             if (error.status === 409 || (error.message && (error.message.includes('409') || error.message.includes('Ya existe')))) {
                 document.getElementById('modal-cuenta-existente').style.display = 'flex';
             } else {
-                alert("No se pudo crear la cuenta: " + error.message);
+                mostrarAvisoLogin('No se pudo crear la cuenta', error.message || 'Inténtalo de nuevo en unos minutos.', '⚠️');
             }
         }
 }
@@ -861,22 +863,7 @@ document.addEventListener('DOMContentLoaded', () => {
             check('new-rule-sym',   /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(v));
         });
     }
-	
-// --- 5. LÓGICA DE INICIO DE SESIÓN ---
-function handleLogin() {
-    clearErrors();
-    const email = document.getElementById('login-email').value.trim();
-    const pass = document.getElementById('login-pass').value;
 
-    if (!email || !pass) {
-        alert("Por favor, completa todos los campos para entrar.");
-        return;
-    }
-
-    // Aquí iría la validación real con base de datos
-    console.log("Intentando iniciar sesión con:", email);
-    alert("Próximamente: Conexión con el servidor de VakaPay.");
-	}
 });
 
 </script>
@@ -1263,6 +1250,27 @@ function seleccionarPais(flag, code) {
     localStorage.setItem('vp_pending_invite', invite);
   }
 })();
+</script>
+
+<!-- Modal de aviso de la app (sustituye a los alert() del sistema) -->
+<div id="modal-aviso-login" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center;" onclick="if(event.target===this)cerrarAvisoLogin()">
+    <div style="background:#1e1e1e; width:calc(100% - 48px); max-width:340px; padding:28px 22px; border-radius:24px; border:1px solid #333; text-align:center;">
+        <div id="aviso-login-icono" style="font-size:2.5rem; margin-bottom:15px;">⚠️</div>
+        <h2 id="aviso-login-titulo" style="color:#F2F2F2; margin-bottom:10px; font-size:1.4rem;"></h2>
+        <p id="aviso-login-texto" style="color:#F2F2F2; margin-bottom:25px; font-size:0.85rem; opacity:0.8; line-height:1.4;"></p>
+        <button onclick="cerrarAvisoLogin()" style="width:100%; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:#000; background:#FFD700;">Entendido</button>
+    </div>
+</div>
+<script>
+function mostrarAvisoLogin(titulo, texto, icono) {
+    document.getElementById('aviso-login-icono').textContent = icono || '⚠️';
+    document.getElementById('aviso-login-titulo').textContent = titulo;
+    document.getElementById('aviso-login-texto').textContent = texto;
+    document.getElementById('modal-aviso-login').style.display = 'flex';
+}
+function cerrarAvisoLogin() {
+    document.getElementById('modal-aviso-login').style.display = 'none';
+}
 </script>
 </body>
 </html>
