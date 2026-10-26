@@ -410,7 +410,11 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparen
     <div class="no-items"><div class="ni">📂</div><div>No tienes grupos creados aún</div></div>
   </div>
 </div>
-<button class="btn btn-gold btn-full" style="margin:14px 0 26px" onclick="showNewGroupForm()">＋ Crear Nuevo Grupo</button>
+<button class="btn btn-gold btn-full" style="margin:14px 0 10px" onclick="showNewGroupForm()">＋ Crear Nuevo Grupo</button>
+<button class="btn btn-outline btn-full" style="margin:0 0 26px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="abrirUnirseConEnlace()">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+  Unirse con un enlace
+</button>
 
   <!-- New group form (hidden initially) -->
   <div id="newGroupForm" style="display:none">
@@ -1671,15 +1675,19 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
 // Si en el grupo hay participantes sin cuenta, se pregunta "¿Quién eres?":
 // al elegir tu nombre, ese participante pasa a tu cuenta con sus gastos y saldos.
 let _invitacion = null;
-async function procesarInvitacion(token) {
+async function procesarInvitacion(token, manual = false) {
   const auth = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` };
   let info;
   try {
     const r = await fetch(`${API_BASE}/api/v1/invite/${token}`, { headers: auth });
     if (r.status === 404) { localStorage.removeItem('vp_pending_invite'); toast('El enlace de invitación no es válido o ha caducado', 'e'); return; }
-    if (!r.ok) return; // sin conexión: se reintenta la próxima vez
+    if (!r.ok) throw new Error();
     info = await r.json();
-  } catch (_) { return; }
+  } catch (_) {
+    // Sin conexión: si vino por el enlace se reintenta la próxima vez que abras la app
+    if (manual) toast('No se pudo comprobar la invitación. Revisa tu conexión.', 'e');
+    return;
+  }
 
   if (info.ya_miembro) {
     localStorage.removeItem('vp_pending_invite');
@@ -1689,6 +1697,49 @@ async function procesarInvitacion(token) {
   _invitacion = { token, info };
   if (info.sin_cuenta.length) mostrarModalQuienEres(info);
   else unirseAGrupo({});
+}
+
+// ── "Unirse con un enlace": pegar en la app el enlace recibido por WhatsApp, email... ──
+// Necesario en la APK, porque al tocar el enlace Android lo abre en el navegador.
+function abrirUnirseConEnlace() {
+  const inp = document.getElementById('unirse-enlace-input');
+  inp.value = '';
+  document.getElementById('unirse-enlace-error').style.display = 'none';
+  document.getElementById('modal-unirse-enlace').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  // Botón "Pegar" solo si el móvil permite leer el portapapeles
+  document.getElementById('unirse-enlace-pegar').style.display = (navigator.clipboard && navigator.clipboard.readText) ? 'block' : 'none';
+}
+function cerrarUnirseConEnlace() {
+  document.getElementById('modal-unirse-enlace').style.display = 'none';
+  document.body.style.overflow = '';
+}
+async function pegarEnlaceInvitacion() {
+  try {
+    const t = await navigator.clipboard.readText();
+    if (t) document.getElementById('unirse-enlace-input').value = t.trim();
+    document.getElementById('unirse-enlace-error').style.display = 'none';
+  } catch (_) {
+    toast('Mantén pulsado el campo y elige «Pegar»', 'i');
+  }
+}
+// Acepta el enlace completo (…/login.html?invite=XXXX) o solo el código
+function extraerTokenInvitacion(texto) {
+  const t = String(texto || '').trim();
+  const m = t.match(/[?&]invite=([A-Za-z0-9_-]+)/);
+  if (m) return m[1];
+  return /^[A-Za-z0-9_-]{16,64}$/.test(t) ? t : null;
+}
+async function unirseConEnlace() {
+  const token = extraerTokenInvitacion(document.getElementById('unirse-enlace-input').value);
+  const err = document.getElementById('unirse-enlace-error');
+  if (!token) {
+    err.textContent = 'No parece un enlace de invitación de VakaPay. Copia el enlace completo que te enviaron.';
+    err.style.display = 'block';
+    return;
+  }
+  cerrarUnirseConEnlace();
+  await procesarInvitacion(token, true);
 }
 
 function mostrarModalQuienEres(info, sugerido) {
@@ -6320,6 +6371,26 @@ async function borrarMensajeChat(id) {
     <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:16px; opacity:0.8; text-align:center; line-height:1.4;">¿Quién eres en este grupo? Si ya te habían añadido, elige tu nombre: conservarás tus gastos y saldos.</p>
     <div id="quien-opciones" style="margin-bottom:18px;"></div>
     <button onclick="confirmarQuienEres()" style="width:100%; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:#000; background:#F5C800;">Continuar</button>
+  </div>
+</div>
+
+<!-- Modal: unirse a un grupo pegando el enlace de invitación -->
+<div class="modal-overlay" id="modal-unirse-enlace" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarUnirseConEnlace()">
+  <div style="background:#1e1e1e; width:90%; max-width:360px; padding:24px; border-radius:24px; border:1px solid #333; box-sizing:border-box;">
+    <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:rgba(245,200,0,.12); display:flex; align-items:center; justify-content:center;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F5C800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    </div>
+    <div style="color:#F2F2F2; font-size:1.3rem; font-weight:bold; margin-bottom:8px; text-align:center;">Unirse a un grupo</div>
+    <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:16px; opacity:0.8; text-align:center; line-height:1.4;">Copia el enlace de invitación que te enviaron (por WhatsApp, email…) y pégalo aquí.</p>
+    <div class="field" style="margin-bottom:8px;">
+      <input type="text" id="unirse-enlace-input" placeholder="https://vakapay-app.vercel.app/login.html?invite=…" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="document.getElementById('unirse-enlace-error').style.display='none'" onkeydown="if(event.key==='Enter')unirseConEnlace()">
+    </div>
+    <button type="button" id="unirse-enlace-pegar" class="btn btn-outline btn-sm" style="margin-bottom:10px;" onclick="pegarEnlaceInvitacion()" ><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>Pegar</button>
+    <div id="unirse-enlace-error" style="display:none; color:#ff4d4d; font-size:.75rem; margin-bottom:10px; line-height:1.4;"></div>
+    <div style="display:flex; gap:12px; margin-top:6px;">
+      <button onclick="cerrarUnirseConEnlace()" style="flex:1; padding:13px; border-radius:12px; font-weight:bold; cursor:pointer; border:1px solid #444; color:#F2F2F2; background:none;">Cancelar</button>
+      <button onclick="unirseConEnlace()" style="flex:1; padding:13px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:#000; background:#F5C800;">Unirse</button>
+    </div>
   </div>
 </div>
 </body>
