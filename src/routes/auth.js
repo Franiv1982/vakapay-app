@@ -196,9 +196,11 @@ router.post('/forgot-password', async (req, res, next) => {
     }
     if (!envio || envio.error) {
       console.error('No se pudo enviar el correo de recuperación:', envio && envio.error && (envio.error.message || envio.error));
-      // El código se mantiene válido (3 min) por si soporte se lo facilita al usuario
+      // El código sigue siendo válido, y durante más tiempo (30 min), para que
+      // soporte pueda facilitárselo al usuario y este lo escriba en la app
+      await db.query('UPDATE users SET reset_otp_expires = NOW() + INTERVAL \'30 minutes\' WHERE id = $1', [user.id]);
       return res.status(502).json({
-        error: 'No hemos podido enviarte el correo con el código. Inténtalo más tarde o contacta con soporte.',
+        error: 'No hemos podido enviarte el correo con el código. Contacta con soporte para que te lo facilite y pulsa «Tengo un código» para escribirlo.',
         email_no_enviado: true,
       });
     }
