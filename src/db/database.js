@@ -20,6 +20,27 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
+// Seguridad en Supabase: RLS activado y SIN políticas en todas las tablas.
+// Así la API pública de Supabase (URL del proyecto + clave anon) no puede leer ni
+// modificar nada. La app no se ve afectada: el servidor se conecta como dueño de
+// las tablas, y RLS no se aplica al dueño. Se repite en cada arranque para que
+// las tablas nuevas también queden protegidas.
+async function activarRLS() {
+  try {
+    await pool.query('CREATE TABLE IF NOT EXISTS migraciones (nombre TEXT PRIMARY KEY, aplicada TIMESTAMP NOT NULL DEFAULT NOW())');
+    const t = await pool.query(`
+      SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+      WHERE n.nspname = 'public' AND c.relkind = 'r' AND NOT c.relrowsecurity
+    `);
+    for (const { relname } of t.rows) {
+      await pool.query(`ALTER TABLE public."${relname.replace(/"/g, '""')}" ENABLE ROW LEVEL SECURITY`);
+      console.log(`🔒 RLS activado en ${relname}`);
+    }
+  } catch (err) {
+    console.error('❌ No se pudo activar RLS:', err.message);
+  }
+}
+
 const initSchema = async () => {
   try {
     await pool.query(`
@@ -154,6 +175,7 @@ const initSchema = async () => {
       );
     `);
     console.log('✅ Schema PostgreSQL inicializado u optimizado');
+    await activarRLS();
     // Se carga aquí (y no arriba) porque contactos.js usa este mismo módulo
     await require('../utils/contactos').migrarAmigosDeGrupos();
   } catch (err) {
