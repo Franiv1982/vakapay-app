@@ -13,7 +13,7 @@ Web + app Android · Node.js · PostgreSQL
 
 <img src="docs/vakapay-demo.gif" alt="Recorrido por VakaPay: grupos, gastos, cuentas finales, chat y estadísticas" width="300">
 
-<sub>Recorrido de ~45 s con datos de ejemplo · <a href="docs/vakapay-demo.mp4">ver en MP4</a></sub>
+<sub>Vista rápida con datos de ejemplo · <a href="docs/vakapay-recorrido.mp4"><b>Ver el recorrido completo (2:20)</b></a>: registro, inicio de sesión, grupos, gastos (crear, editar y borrar), cuentas, chat, todas las pestañas y cierre de sesión.</sub>
 
 </div>
 
