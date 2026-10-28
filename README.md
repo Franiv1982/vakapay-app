@@ -15,6 +15,12 @@ Web + app Android · Node.js · PostgreSQL
 
 <sub>Vista rápida con datos de ejemplo · <a href="docs/vakapay-recorrido.mp4"><b>Ver el recorrido completo (2:20)</b></a>: registro, inicio de sesión, grupos, gastos (crear, editar y borrar), cuentas, chat, todas las pestañas y cierre de sesión.</sub>
 
+
+
+https://github.com/user-attachments/assets/88bae315-2cab-4a46-aec1-23d706311edd
+
+
+
 </div>
 
 ---
@@ -139,4 +145,6 @@ npx cap open android    # abre Android Studio para compilar la APK
 
 ## Autor
 
-Desarrollado por [Franiv1982](https://github.com/Franiv1982).
+- Francisco Rodriguez: idea, diseño y desarrollo de VakaPay.
+
+- GitHub: [Franiv1982](https://github.com/Franiv1982)
