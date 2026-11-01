@@ -3652,14 +3652,7 @@ function renderExpenses() {
   const base = getBase();
   const sym = SYMBOLS[base] || '€';
   // Los pagos entre participantes no son gastos: no cuentan en el total
-  const soloGastos = g.expenses.filter(e => !e.es_pago);
-  const total = soloGastos.reduce((s, e) => s + (Number(e.baseAmt || e.amount_base) || 0), 0);
-
-  const porPersona = soloGastos.reduce((s, e) => {
-    const nParticipants = e.splits?.length || e.involved?.length || 1;
-    const amt = Number(e.baseAmt || e.amount_base) || 0;
-    return s + (amt / nParticipants);
-  }, 0);
+  const { total, porPersona } = resumenPorPersona(g);
 
   if (sg) {
     sg.style.display = 'grid';
@@ -3850,12 +3843,14 @@ function buildInviteText(){
 function buildText(){
   if(currentGroupIdx===null)return'';
   const g=groups[currentGroupIdx];
-  const total=g.expenses.filter(e=>!e.es_pago).reduce((s,e)=>s+(Number(e.baseAmt)||Number(e.amount)||0),0);
-  const nm=Math.max(1,Object.keys(g.members).length);
+  const pp=resumenPorPersona(g);
+  const sym=SYMBOLS[g.currency||'EUR']||'€';
+  const imp=e=>`${SYMBOLS[e.currency]||sym}${(Number(e.amount)||0).toFixed(2)}`;
   let t=`💳 *VakaPay – ${g.name}* ${TYPE_ICONS[g.type]||''}\n📅 ${fmtDate(g.start)} → ${fmtDate(g.end)}\n\n`;
-  t+=`💰 Total: $${total.toFixed(2)}  |  Por persona: $${(total/nm).toFixed(2)}\n`;
+  t+=`💰 Total: ${sym}${pp.total.toFixed(2)}  |  Por persona: ${sym}${pp.porPersona.toFixed(2)}`;
+  t+= pp.participantes && pp.participantes!==pp.miembros ? ` (entre ${pp.participantes} participantes)\n` : `\n`;
   t+=`👥 ${Object.keys(g.members).join(', ')}\n\n`;
-  if(g.expenses.length>0){t+=`📋 Gastos:\n`;g.expenses.forEach(e=>{t+= e.es_pago ? `  • 💸 ${e.desc}: $${(Number(e.amount)||0).toFixed(2)}\n` : `  • ${e.desc}: $${(Number(e.amount)||0).toFixed(2)} (pagó ${e.payer})\n`;});}
+  if(g.expenses.length>0){t+=`📋 Gastos:\n`;g.expenses.forEach(e=>{t+= e.es_pago ? `  • 💸 ${e.desc}: ${imp(e)}\n` : `  • ${e.desc}: ${imp(e)} (pagó ${e.payer})\n`;});}
   const link=document.getElementById('linkInput').value;
   if(link){t+=`\n🔗 Únete al grupo:\n${link}\n`;}
   t+='\n_Generado con VakaPay_';return t;
@@ -3899,8 +3894,9 @@ function exportarPDF(){
   doc.text('PARTICIPANTES', pad, y);
   y += 5;
   const mbs = Object.keys(g.members);
-  const totalGastos = g.expenses.filter(e=>!e.es_pago).reduce((s,e)=>s+(Number(e.baseAmt)||0),0);
-  const porPersona = mbs.length ? totalGastos/mbs.length : 0;
+  const resPP = resumenPorPersona(g);
+  const totalGastos = resPP.total;
+  const porPersona = resPP.porPersona;
   mbs.forEach(m => {
     const bal = g.members[m];
     doc.setFont('helvetica','normal');
@@ -3924,7 +3920,9 @@ function exportarPDF(){
   doc.setFont('helvetica','normal');
   doc.setFontSize(8); sc(0,0,0);
   doc.text(`Total gastado: ${g.currency||'EUR'} ${totalGastos.toFixed(2)}`, pad+3, y); y+=lh;
-  doc.text(`Participantes: ${mbs.length}`, pad+3, y); y+=lh;
+  doc.text(resPP.participantes && resPP.participantes !== mbs.length
+    ? `Participantes: ${mbs.length} (${resPP.participantes} en los gastos)`
+    : `Participantes: ${mbs.length}`, pad+3, y); y+=lh;
   doc.text(`Por persona: ${g.currency||'EUR'} ${porPersona.toFixed(2)}`, pad+3, y); y+=lh;
   doc.text(`Gastos registrados: ${g.expenses.filter(e=>!e.es_pago).length}`, pad+3, y); y+=lh;
   const gastosPdf = g.expenses.filter(e => !e.es_pago);
@@ -4988,6 +4986,18 @@ async function ejecutarEliminarCuenta() {
 // ═══ MULTI-CURRENCY ══════════════════════════════════════════════════
 const RATES = { EUR:1, USD:1.09, GBP:0.86, ARS:1050 };
 const SYMBOLS = { EUR:'€', USD:'$', GBP:'£', ARS:'$' };
+
+// «Por persona» igual en la app, el PDF y el resumen de texto: el total se reparte
+// entre quienes participan en al menos un gasto. Los miembros que no comparten
+// ningún gasto (p. ej. se apuntaron y al final no fueron) no cuentan.
+function resumenPorPersona(g) {
+  const gastos = (g.expenses || []).filter(e => !e.es_pago);
+  const total = gastos.reduce((s, e) => s + (Number(e.baseAmt || e.amount_base) || 0), 0);
+  const participantes = new Set();
+  gastos.forEach(e => (e.involved || (e.splits ? e.splits.map(x => x.member_name) : [])).forEach(n => participantes.add(n)));
+  const n = participantes.size;
+  return { total, participantes: n, miembros: Object.keys(g.members || {}).length, porPersona: n ? total / n : 0 };
+}
 
 function convertToBase(amount, fromCurrency) {
   // Postgres devuelve las columnas NUMERIC/DECIMAL como STRING (ej. "45.50"),
