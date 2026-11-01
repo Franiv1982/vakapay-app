@@ -1119,6 +1119,42 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 <script src="jspdf.umd.min.js"></script>
 <script src="libphonenumber-min.js"></script>
 <script>
+// ═══ CUENTA BLOQUEADA O ELIMINADA ═════════════════════════════════════
+// Cualquier respuesta del servidor que diga que la cuenta está bloqueada (403) o
+// que ya no existe (401) muestra un aviso y cierra la sesión.
+(function () {
+  const fetchOriginal = window.fetch.bind(window);
+  let avisado = false;
+  function salir(titulo, texto) {
+    if (avisado) return; avisado = true;
+    try { ['vp_token','vp_groups','vp_friends','vp_activity','vp_profile','vaka_groups','vaka_friends'].forEach(k => localStorage.removeItem(k)); } catch (_) {}
+    const caja = document.createElement('div');
+    caja.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:24px;font-family:Nunito,Arial,sans-serif';
+    caja.innerHTML = `<div style="background:#1e1e1e;border:1px solid #333;border-radius:24px;padding:26px 22px;max-width:340px;width:100%;text-align:center;">
+        <div style="width:56px;height:56px;margin:0 auto 14px;border-radius:50%;background:rgba(255,77,77,.12);display:flex;align-items:center;justify-content:center;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div style="color:#F2F2F2;font-size:1.3rem;font-weight:800;margin-bottom:10px;"></div>
+        <p style="color:#F2F2F2;opacity:.8;font-size:.85rem;line-height:1.45;margin-bottom:22px;"></p>
+        <button style="width:100%;padding:14px;border-radius:12px;border:none;font-weight:800;background:#F5C800;color:#000;cursor:pointer;">Entendido</button></div>`;
+    caja.querySelector('div > div:nth-child(2)').textContent = titulo;
+    caja.querySelector('p').textContent = texto;
+    caja.querySelector('button').onclick = () => { window.location.href = 'login.html'; };
+    (document.body || document.documentElement).appendChild(caja);
+  }
+  window.fetch = async function (...args) {
+    const res = await fetchOriginal(...args);
+    const url = String((args[0] && args[0].url) || args[0] || '');
+    if ((res.status === 403 || res.status === 401) && url.includes('/api/v1/') && !url.includes('/auth/login')) {
+      res.clone().json().then(d => {
+        if (d && d.cuenta_bloqueada) salir('Cuenta desactivada', d.error);
+        else if (d && d.sesion_invalida && res.status === 401 && /ya no existe/.test(d.error || '')) salir('Cuenta eliminada', 'Esta cuenta ya no existe. Inicia sesión con otra cuenta o regístrate de nuevo.');
+      }).catch(() => {});
+    }
+    return res;
+  };
+})();
+</script>
+<script>
 
 // ═══ LOGO ════════════════════════════════════════════════════════════
 document.getElementById('logoImg').src = "logo_vakapay.png";
