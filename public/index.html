@@ -1767,6 +1767,7 @@ function iconoModalSvg(nombre) {
 let _invitacionGrupoId = null;
 function mostrarResultadoInvitacion({ icono, titulo, texto, grupoId = null }) {
   _invitacionGrupoId = grupoId;
+  document.getElementById('inv-res-texto').style.whiteSpace = '';
   document.getElementById('inv-res-icono').innerHTML = iconoModalSvg(icono);
   document.getElementById('inv-res-titulo').textContent = titulo;
   document.getElementById('inv-res-texto').textContent = texto;
@@ -1781,6 +1782,7 @@ function mostrarResultadoInvitacion({ icono, titulo, texto, grupoId = null }) {
 // Aviso genérico con el mismo modal (icono de error y botón «Entendido»)
 function mostrarModalInfo(titulo, texto, icono = 'error') {
   mostrarResultadoInvitacion({ icono, titulo, texto });
+  document.getElementById('inv-res-texto').style.whiteSpace = 'pre-line';
 }
 function cerrarResultadoInvitacion() {
   document.getElementById('modal-invitacion-resultado').style.display = 'none';
@@ -3096,6 +3098,7 @@ function calcDebts(){
     d[0][1]=+(d[0][1]+amt).toFixed(2);c[0][1]=+(c[0][1]-amt).toFixed(2);
     if(Math.abs(d[0][1])<0.01)d.shift();if(Math.abs(c[0][1])<0.01)c.shift();
   }
+  _deudasActuales = txs;
   const dl=document.getElementById('debtList');
   dl.innerHTML=txs.length===0
     ?'<div class="all-good">✅ ¡Todas las cuentas están cuadradas!</div>'
@@ -3125,6 +3128,27 @@ function calcDebts(){
   toast('Cálculo completado 🧮','i');
 }
 
+// ─── PAGAR TAMBIÉN POR… ─────────────────────────────────────────────
+// Quien paga puede saldar a la vez las deudas de otras personas con el MISMO
+// acreedor (p. ej. paga 36 € por él y por su pareja). Se registra un pago por
+// cada deuda, con el mismo comprobante y anotando quién pagó de verdad.
+let _deudasActuales = [];   // última lista de «quién paga a quién»
+const totalPago = d => +(Number(d.amount) + (d.extras || []).reduce((s, x) => s + Number(x.amount), 0)).toFixed(2);
+function pintarPagarTambien(idCont, datos, alCambiar) {
+  const el = document.getElementById(idCont);
+  datos.extras = [];
+  const otros = (_deudasActuales || []).filter(t => t.to === datos.to && t.from !== datos.from);
+  if (!otros.length) { el.style.display = 'none'; el.innerHTML = ''; return; }
+  el.innerHTML = `<div class="pt-titulo">Pagar también por…</div>` +
+    otros.map((t, i) => `<label><input type="checkbox" data-i="${i}"><span class="pt-nombre">${escaparHtml(t.from)}</span><span class="pt-imp">${formatAmountBase(t.amount, getBase())}</span></label>`).join('') +
+    `<div class="pt-nota">Marca a quien también pagas a ${escaparHtml(datos.to)}. Se saldará la deuda de cada uno, con el mismo comprobante.</div>`;
+  el.style.display = 'block';
+  el.querySelectorAll('input').forEach(cb => cb.onchange = () => {
+    datos.extras = [...el.querySelectorAll('input:checked')].map(c => otros[+c.dataset.i]);
+    alCambiar();
+  });
+}
+
 // ─── PAY MODAL ──────────────────────────────────────────────────────
 let _payData = null;
 function openPayModal(idx,from,to,amount){
@@ -3132,6 +3156,11 @@ function openPayModal(idx,from,to,amount){
   const base=document.getElementById('baseCurrency')?.value||'EUR';
   document.getElementById('pmTitle').textContent=`${from} → ${to}`;
   document.getElementById('pmAmount').textContent=formatAmountBase(amount,base);
+  pintarPagarTambien('pmTambien', _payData, () => {
+    document.getElementById('pmAmount').textContent = formatAmountBase(totalPago(_payData), base);
+    const sel = document.querySelector('.pay-method-btn.selected');
+    if (sel) sel.click();   // actualiza el importe del Bizum / transferencia
+  });
   document.getElementById('pmProofThumb').style.display='none';
   document.getElementById('pmProofFile').value='';
   document.querySelectorAll('.pay-method-btn').forEach(b=>b.classList.remove('selected'));
@@ -3163,7 +3192,7 @@ function selectPayMethod(el, method) {
   if (!_payData) return;
   const det = document.getElementById('pmDetalle');
   const base = document.getElementById('baseCurrency')?.value || 'EUR';
-  const importe = Number(_payData.amount).toFixed(2);
+  const importe = totalPago(_payData).toFixed(2);
   const g = groups[currentGroupIdx];
   const concepto = `VakaPay · ${g ? g.name : 'deuda'}`;
   const to = _payData.to;
@@ -3241,12 +3270,55 @@ function miNombreEnGrupo(g) {
 // le debían. Ajusta los saldos de todos y queda en la Actividad del grupo, pero no
 // cuenta como gasto en totales ni estadísticas. Se puede anular borrándolo.
 let _registrandoPago = false;   // evita enviar el mismo pago dos veces (doble pulsación)
-async function registrarPago({ from, to, amount }, archivoComprobante) {
+// extras: deudas de otras personas con el mismo acreedor que paga «from» («Pagar también por…»)
+async function registrarPago({ from, to, amount }, archivoComprobante, extras = []) {
   const g = groups[currentGroupIdx];
   if (!g || _registrandoPago) return;
   _registrandoPago = true;
-  try { await _registrarPago(g, { from, to, amount }, archivoComprobante); }
-  finally { _registrandoPago = false; }
+  try {
+    if (!extras.length) { await _registrarPago(g, { from, to, amount }, archivoComprobante); return; }
+    let ticket = null;
+    if (archivoComprobante) { try { ticket = 'data:image/jpeg;base64,' + await fileToBase64(archivoComprobante); } catch (_) {} }
+    const pagos = [{ from, to, amount }, ...extras.map(x => ({ from: x.from, to: x.to, amount: x.amount, pagadoPor: from }))];
+    const hechos = [], rechazados = [];
+    for (const p of pagos) {
+      const r = await enviarPago(g, p, ticket);
+      if (r.ok) hechos.push(p);
+      else if (r.rechazado) rechazados.push(`${p.from}: ${r.error}`);
+      else { rechazados.push(`${p.from}: ${r.error}`); break; }
+    }
+    await recargarGrupoDelServidor(g);
+    if (typeof refrescarActividad === 'function') refrescarActividad();
+    if (rechazados.length) {
+      mostrarModalInfo(hechos.length ? 'Algunos pagos no se registraron' : 'Pago no registrado',
+        (hechos.length ? `Registrados: ${hechos.map(p => p.from).join(', ')}.\n\n` : '') + rechazados.join('\n'));
+    } else {
+      toast(`✅ ${from} saldó ${formatAmountBase(pagos.reduce((s, p) => s + Number(p.amount), 0), getBase())} a ${to} (${pagos.map(p => p.from).join(', ')})`, 's');
+    }
+  } finally { _registrandoPago = false; }
+}
+// Envía un pago al servidor. Devuelve { ok } o { ok:false, rechazado, error }
+async function enviarPago(g, { from, to, amount, pagadoPor }, ticket) {
+  const hoy = new Date();
+  const fecha = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+  const importe = +Number(amount).toFixed(2);
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/expenses`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: JSON.stringify({
+        description: pagadoPor ? `Pago de ${from} a ${to} (pagó ${pagadoPor})` : `Pago de ${from} a ${to}`,
+        amount: importe, amount_base: importe, currency: getBase(),
+        category: 'other', payer_name: from, expense_date: fecha,
+        involved: [to], es_pago: true, ticket, pagado_por: pagadoPor || null
+      })
+    });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) return { ok: true };
+    return { ok: false, rechazado: res.status === 409 && !!data.pago_rechazado, error: data.error || 'No se pudo registrar el pago' };
+  } catch (_) {
+    return { ok: false, rechazado: false, error: 'Sin conexión. Revisa tu conexión e inténtalo de nuevo.' };
+  }
 }
 async function _registrarPago(g, { from, to, amount }, archivoComprobante) {
   const hoy = new Date();
@@ -3307,7 +3379,7 @@ function confirmPayment(settle){
   if(!_payData)return;
   if(settle){
     const archivo = document.getElementById('pmProofFile')?.files?.[0] || null;
-    registrarPago({ ..._payData }, archivo);
+    registrarPago({ ..._payData }, archivo, _payData.extras);
   } else {
     toast('Pago registrado, pendiente de confirmación 📨','i');
   }
@@ -3322,9 +3394,15 @@ function openProofModal(idx,from,to,amount){
   // Cualquier participante puede registrar el pago de otro (p. ej. alguien sin cuenta que pagó en efectivo).
   // Queda en la Actividad del grupo quién lo registró, y se puede anular.
   const yo = miNombreEnGrupo(groups[currentGroupIdx]);
-  document.getElementById('proofSubtitulo').textContent = yo === from
-    ? `Registra que pagaste ${formatAmountBase(amount, getBase())} a ${to}. El comprobante es opcional.`
-    : `Registra que ${from} pagó ${formatAmountBase(amount, getBase())} a ${to}. Quedará en la Actividad que lo registraste tú.`;
+  const subtitulo = () => {
+    const total = formatAmountBase(totalPago(_proofData), getBase());
+    const por = (_proofData.extras || []).length ? ` (también por ${_proofData.extras.map(x => x.from).join(', ')})` : '';
+    document.getElementById('proofSubtitulo').textContent = yo === from
+      ? `Registra que pagaste ${total} a ${to}${por}. El comprobante es opcional.`
+      : `Registra que ${from} pagó ${total} a ${to}${por}. Quedará en la Actividad que lo registraste tú.`;
+  };
+  pintarPagarTambien('proofTambien', _proofData, subtitulo);
+  subtitulo();
   document.getElementById('proofThumbView').style.display='none';
   document.getElementById('proofFileInput').value='';
   document.getElementById('proofModal').classList.add('open');
@@ -3360,7 +3438,7 @@ function sendProof(settle){
   if(!_proofData)return;
   if(settle){
     const archivo = document.getElementById('proofFileInput')?.files?.[0] || null;
-    registrarPago({ ..._proofData }, archivo); // el comprobante queda adjunto al pago
+    registrarPago({ ..._proofData }, archivo, _proofData.extras); // el comprobante queda adjunto a cada pago
   } else {toast('Comprobante enviado al acreedor 📨','i');}
   closeProofModal();
 }
@@ -5685,6 +5763,7 @@ function cerrarModalSalir() {
       <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px">Importe</div>
       <div style="font-family:'Bebas Neue',cursive;font-size:1.6rem;color:var(--gold)" id="pmAmount">€0</div>
     </div>
+    <div id="pmTambien" class="pagar-tambien" style="display:none"></div>
     <div style="font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:6px">Elige método de pago</div>
     <div class="pay-method-grid">
       <button class="pay-method-btn" onclick="selectPayMethod(this,'bizum')"><span class="pm-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>Bizum</button>
@@ -5706,6 +5785,16 @@ function cerrarModalSalir() {
   </div>
 </div>
 
+<style>
+.pagar-tambien{background:var(--dark3);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:12px}
+.pagar-tambien .pt-titulo{font-size:.7rem;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:6px}
+.pagar-tambien label{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;font-size:.84rem;color:var(--text)}
+.pagar-tambien label:last-of-type{border-bottom:none}
+.pagar-tambien input{width:18px;height:18px;accent-color:#F5C800;flex-shrink:0}
+.pagar-tambien .pt-nombre{flex:1;font-weight:700}
+.pagar-tambien .pt-imp{color:var(--gold);font-weight:800}
+.pagar-tambien .pt-nota{font-size:.68rem;color:var(--muted);margin-top:6px;line-height:1.35}
+</style>
 <!-- ═══ PROOF MODAL ═══ -->
 <div class="modal-overlay" id="proofModal" onclick="if(event.target===this)closeProofModal()">
   <div class="modal-sheet" style="max-width:380px;">
@@ -5713,6 +5802,7 @@ function cerrarModalSalir() {
     <button class="modal-close" onclick="closeProofModal()">✕ Cerrar</button>
     <div class="modal-title" id="proofTitle">Comprobante de pago</div>
     <div id="proofSubtitulo" style="font-size:.78rem;color:var(--muted);margin:-4px 0 12px;line-height:1.4;"></div>
+    <div id="proofTambien" class="pagar-tambien" style="display:none"></div>
     <div class="proof-area" onclick="document.getElementById('proofFileInput').click()" style="padding:10px;margin-bottom:10px;">
       <input type="file" id="proofFileInput" accept="image/*" onchange="handleProofModalFile(event)">
       <span style="font-size:1.2rem">🧾</span>

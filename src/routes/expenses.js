@@ -173,6 +173,8 @@ router.post('/', requireAuth, async (req, res, next) => {
     if (!ticketValido(ticket)) return res.status(400).json({ error: 'Comprobante no válido o demasiado grande' });
 
     const amount_base = importeBase(req.body, amount, currency);
+    // «Pagar también por…»: quién pagó de verdad esta deuda (solo para la actividad)
+    const pagadoPor = es_pago && typeof req.body.pagado_por === 'string' ? req.body.pagado_por.trim().slice(0, 40) : '';
 
     // Pagos: se comprueban y registran de uno en uno por grupo (bloqueo en la base de datos)
     if (es_pago) {
@@ -202,7 +204,7 @@ router.post('/', requireAuth, async (req, res, next) => {
     expense.splits = splits.rows;
 
     await logGroupActivity(req.params.id, req.user.id, es_pago ? 'payment' : 'expense', (quien, grupo) => es_pago
-      ? `${quien} registró un pago: ${payer_name} pagó ${importe(amount, currency)} a ${involved[0]} en "${grupo}"${ticket ? ' (con comprobante)' : ''}`
+      ? `${quien} registró un pago: ${pagadoPor ? `${pagadoPor} pagó por ${payer_name}` : `${payer_name} pagó`} ${importe(amount, currency)} a ${involved[0]} en "${grupo}"${ticket ? ' (con comprobante)' : ''}`
       : `${quien} registró "${description}" · ${importe(amount, currency)} (pagó ${payer_name}) en "${grupo}"`);
     res.status(201).json(expense);
   } catch (err) { next(err); }
