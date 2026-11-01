@@ -2230,12 +2230,23 @@ async function openGroup(idx){
 
 let currentExpenseIdx = null;
 
-function openGasto(idx) {
+// Un pago solo lo anulan (o cambian su comprobante) quien pagó, quien cobró
+// o quien lo registró (p. ej. al «pagar también por…» otra persona)
+function puedoGestionarPago(g, e) {
+  if (!e || !e.es_pago) return true;
+  const yo = miNombreEnGrupo(g);
+  return (!!yo && (yo === e.payer || (e.involved || []).includes(yo))) || (profile.id && Number(e.member_id) === Number(profile.id));
+}
+
+// origen: 'gastos' (Lista de gastos) o 'pagos' (Cuentas finales → Pagos realizados), para volver al mismo sitio
+let _origenDetalle = 'gastos';
+function openGasto(idx, origen) {
+  if (origen) _origenDetalle = origen;
   currentExpenseIdx = idx;
   const g = groups[currentGroupIdx];
   const e = g.expenses[idx];
-  console.log("Datos recibidos del gasto:", e);
   if (!e) return;
+  const puede = puedoGestionarPago(g, e);
   const tieneTicket = !!(e.ticket || e.has_ticket);
   const base = getBase();
   const sym = SYMBOLS[base] || '€';
@@ -2289,11 +2300,11 @@ function openGasto(idx) {
     <div class="card" style="padding:12px;margin-bottom:16px;">
       <div style="font-size:.65rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Comprobante</div>
       <div style="display:flex;gap:8px;align-items:center;background:var(--dark3);border:1px solid var(--border);border-radius:10px;padding:8px 12px;">
-        <button type="button" onclick="document.getElementById('gastoTicketFile').click()"
+        ${puede ? `<button type="button" onclick="document.getElementById('gastoTicketFile').click()"
           style="flex-shrink:0;background:rgba(245,200,0,.1);border:1px solid rgba(245,200,0,.3);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.8rem;color:var(--gold);font-weight:700;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> ${tieneTicket ? 'Cambiar' : 'Adjuntar'}
         </button>
-        <input type="file" id="gastoTicketFile" accept="image/*" style="display:none" onchange="attachGastoTicket(event,${idx})">
+        <input type="file" id="gastoTicketFile" accept="image/*" style="display:none" onchange="attachGastoTicket(event,${idx})">` : ''}
         <div style="flex:1;overflow:hidden;">
           <div style="color:var(--muted);font-size:.65rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
             ${tieneTicket ? 'Comprobante adjunto · toca la imagen para verlo' : 'Sin comprobante'}
@@ -2302,14 +2313,16 @@ function openGasto(idx) {
         </div>
         ${tieneTicket ? `
           <img id="gastoTicketThumb" src="${e.ticket || ''}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;border:1px solid var(--border);flex-shrink:0;cursor:pointer;background:var(--dark4);" onclick="verTicket(${idx})" title="Ver comprobante">
-          <button onclick="removeGastoTicket(${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.75rem;flex-shrink:0;padding:2px 4px;border:1px solid var(--border);border-radius:6px;" title="Quitar comprobante">✕</button>
+          ${puede ? `<button onclick="removeGastoTicket(${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:.75rem;flex-shrink:0;padding:2px 4px;border:1px solid var(--border);border-radius:6px;" title="Quitar comprobante">✕</button>` : ''}
         ` : ''}
       </div>
     </div>
 
     <div style="display:flex;gap:10px;margin-top:18px;">
       ${e.es_pago ? '' : `<button class="btn btn-full" onclick="openEditModal(${idx})" style="flex:1;background:#28a745;color:white;border:none;">Editar</button>`}
-      <button class="btn btn-full" onclick="openDeleteExpenseModal(${idx})" style="flex:1;background:#dc3545;color:white;border:none;">${e.es_pago ? 'Anular pago' : 'Eliminar'}</button>
+      ${puede
+        ? `<button class="btn btn-full" onclick="openDeleteExpenseModal(${idx})" style="flex:1;background:#dc3545;color:white;border:none;">${e.es_pago ? 'Anular pago' : 'Eliminar'}</button>`
+        : `<div style="flex:1;text-align:center;font-size:.75rem;color:var(--muted);line-height:1.4;">Solo ${escaparHtml(e.payer)} o ${escaparHtml((e.involved || [])[0] || '')} pueden anular este pago.</div>`}
     </div>
   `;
 
@@ -2330,12 +2343,24 @@ function goBackToGroup() {
     if (b.dataset.page === 'page-grupos') b.classList.add('active');
   });
 
-  // Al volver del detalle de un gasto, reabrir "Lista de gastos" en vez de dejar el acordeón cerrado
-  const wrap = document.getElementById('gastosListSectionWrap');
-  const chevron = document.getElementById('gastosListChevron');
-  if (wrap && wrap.style.display !== 'block') {
-    wrap.style.display = 'block';
-    if (chevron) chevron.style.transform = 'rotate(180deg)';
+  // Volver a la sección desde la que se abrió: «Lista de gastos» o «Cuentas finales → Pagos realizados»
+  const abrir = (wrapId, chevId, abierta) => {
+    const w = document.getElementById(wrapId), c = document.getElementById(chevId);
+    if (!w) return;
+    w.style.display = abierta ? 'block' : 'none';
+    if (c) c.style.transform = abierta ? 'rotate(180deg)' : '';
+  };
+  const desdePagos = _origenDetalle === 'pagos';
+  abrir('gastosListSectionWrap', 'gastosListChevron', !desdePagos);
+  if (desdePagos) {
+    abrir('cuentasSectionWrap', 'cuentasChevron', true);
+    renderPagosRealizados();
+    requestAnimationFrame(() => {
+      const destino = document.getElementById('pagosRealizadosWrap');
+      if (destino && destino.style.display !== 'none') destino.scrollIntoView({ block: 'start', behavior: 'instant' });
+      else document.getElementById('sec5')?.scrollIntoView({ block: 'start', behavior: 'instant' });
+      window.scrollBy(0, -150);   // que no quede debajo de la cabecera fija
+    });
   }
 }
 
@@ -3171,7 +3196,7 @@ function renderPagosRealizados() {
     const pagoPor = (String(e.desc || '').match(/\(pagó ([^)]+)\)$/) || [])[1];
     const quien = nombrePorId[String(e.member_id)];
     const detalles = [fmtDate(e.date), pagoPor ? `pagó ${pagoPor}` : '', quien ? `registró ${quien}` : ''].filter(Boolean).join(' · ');
-    return `<div onclick="openGasto(${i})" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;">
+    return `<div onclick="openGasto(${i},'pagos')" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;">
       <div style="flex:1;min-width:0;">
         <div style="font-size:.82rem;color:var(--text);"><strong>${escaparHtml(e.payer)}</strong> → <strong>${escaparHtml(para)}</strong></div>
         <div style="font-size:.66rem;color:var(--muted);margin-top:2px;">${escaparHtml(detalles)}</div>
@@ -3798,7 +3823,7 @@ function renderExpenses() {
 
     if (e.es_pago) {
       const destino = (e.involved && e.involved[0]) || (e.splits && e.splits[0] && e.splits[0].member_name) || '';
-      return `<div class="group-card" onclick="openGasto(${i})" style="cursor:pointer;border-style:dashed;">
+      return `<div class="group-card" onclick="openGasto(${i},'gastos')" style="cursor:pointer;border-style:dashed;">
       <div class="exp-ico c-other">💸</div>
       <div class="gc-info">
         <div class="gc-name">Pago a ${destino}</div>
@@ -3810,7 +3835,7 @@ function renderExpenses() {
       </div>
     </div>`;
     }
-    return `<div class="group-card" onclick="openGasto(${i})" style="cursor:pointer;">
+    return `<div class="group-card" onclick="openGasto(${i},'gastos')" style="cursor:pointer;">
       <div class="exp-ico ${CAT_CSS[e.cat] || 'c-other'}">${CAT_ICONS[e.cat] || '💡'}</div>
       <div class="gc-info">
         <div class="gc-name">${desc}</div>

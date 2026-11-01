@@ -127,6 +127,19 @@ async function errorDePago(groupId, de, para, importeBase) {
   return null;
 }
 
+// Un pago (es_pago) solo lo anula o cambia su comprobante quien pagó, quien
+// cobró o quien lo registró
+async function puedeGestionarPago(groupId, userId, gasto) {
+  if (!gasto.es_pago) return true;
+  if (Number(gasto.member_id) === Number(userId)) return true;
+  const yo = (await db.query('SELECT display_name FROM group_members WHERE group_id = $1 AND user_id = $2', [groupId, userId])).rows[0];
+  if (!yo) return false;
+  if (yo.display_name === gasto.payer_name) return true;
+  const r = await db.query('SELECT 1 FROM expense_splits WHERE expense_id = $1 AND member_name = $2', [gasto.id, yo.display_name]);
+  return r.rows.length > 0;
+}
+const NO_PUEDE_PAGO = 'Solo quien pagó o quien cobró puede anular o cambiar este pago';
+
 // ── GET /groups/:id/expenses ──────────────────────────────────────
 router.get('/', requireAuth, async (req, res, next) => {
   try {
@@ -256,6 +269,8 @@ router.put('/:expId', requireAuth, async (req, res, next) => {
     }
     const existing = await db.query('SELECT * FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
     if (!existing.rows[0]) return res.status(404).json({ error: 'Gasto no encontrado' });
+    // Los pagos no se editan (cambiaría quién debe a quién): se anulan y se registran de nuevo
+    if (existing.rows[0].es_pago) return res.status(400).json({ error: 'Los pagos no se editan: anúlalo y vuelve a registrarlo' });
     // Guardamos cómo era el gasto antes de editarlo, para el historial
     const antes = existing.rows[0];
     const antesSplits = await db.query('SELECT member_name FROM expense_splits WHERE expense_id = $1', [req.params.expId]);
@@ -321,9 +336,10 @@ router.put('/:expId/ticket', requireAuth, async (req, res, next) => {
     const ticket = req.body.ticket ?? null;
     if (!ticketValido(ticket)) return res.status(400).json({ error: 'Comprobante no válido o demasiado grande' });
 
-    const expRes = await db.query('SELECT id, description, ticket FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
+    const expRes = await db.query('SELECT id, description, ticket, es_pago, payer_name, member_id FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
     const gasto = expRes.rows[0];
     if (!gasto) return res.status(404).json({ error: 'Gasto no encontrado' });
+    if (!await puedeGestionarPago(req.params.id, req.user.id, gasto)) return res.status(403).json({ error: NO_PUEDE_PAGO });
 
     await db.query('UPDATE expenses SET ticket = $1 WHERE id = $2', [ticket, gasto.id]);
     const accion = !ticket ? 'eliminó el comprobante de' : (gasto.ticket ? 'cambió el comprobante de' : 'adjuntó un comprobante a');
@@ -347,6 +363,7 @@ router.delete('/:expId', requireAuth, async (req, res, next) => {
       ? (quien, grupo) => `${quien} anuló el pago de ${borrado.payer_name} (${importe(borrado.amount, borrado.currency)}) en "${grupo}"`
       : (quien, grupo) => `${quien} eliminó "${borrado.description}" · ${importe(borrado.amount, borrado.currency)} en "${grupo}"`;
     if (!borrado) return res.status(404).json({ error: 'Gasto no encontrado' });
+    if (!await puedeGestionarPago(req.params.id, req.user.id, borrado)) return res.status(403).json({ error: NO_PUEDE_PAGO });
 
     await db.query('DELETE FROM expenses WHERE id = $1', [req.params.expId]);
     await recalcBalances(req.params.id);
