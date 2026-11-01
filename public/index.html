@@ -2957,6 +2957,7 @@ function openEditModal(idx) {
   }
   // 7. Actualizar estado visual y abrir modal
   updateEditSelectAllBtn();
+  document.getElementById('editModal').style.display = '';
   document.getElementById('editModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -3165,6 +3166,7 @@ function openPayModal(idx,from,to,amount){
   document.getElementById('pmProofFile').value='';
   document.querySelectorAll('.pay-method-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('pmDetalle').style.display='none';
+  document.getElementById('payModal').style.display = '';
   document.getElementById('payModal').classList.add('open');
   document.body.style.overflow='hidden';
   // Pedimos cómo cobra el acreedor
@@ -3405,6 +3407,7 @@ function openProofModal(idx,from,to,amount){
   subtitulo();
   document.getElementById('proofThumbView').style.display='none';
   document.getElementById('proofFileInput').value='';
+  document.getElementById('proofModal').style.display = '';
   document.getElementById('proofModal').classList.add('open');
   document.body.style.overflow='hidden';
 }
@@ -4442,6 +4445,7 @@ function openFriendModal(idx){
     return`<div class="modal-chip ${inGroup?'sel':''}" data-gidx="${gi}" onclick="toggleFriendGroupChip(this,'${f.name.replace(/'/g,'\\\'')}')">`+
       `<span style="font-size:.9rem">${TYPE_ICONS[g.type]||'📂'}</span>${g.name}</div>`;
   }).join('');}
+  document.getElementById('friendModal').style.display = '';
   document.getElementById('friendModal').classList.add('open');
   document.body.style.overflow='hidden';
 }
@@ -5724,11 +5728,22 @@ if (window.Capacitor && Capacitor.isNativePlatform() && Capacitor.Plugins.App) {
   Capacitor.Plugins.App.addListener('backButton', () => {
     // Chat abierto: primero se cierra su menú/diálogo, después el chat
     if (typeof chatAtras === 'function' && chatAtras()) return;
-    // Si hay algún modal visible, ciérralo primero en vez de navegar
+    // Visores a pantalla completa (comprobante, elegir cámara/galería): se cierran primero
+    const visor = ['visorTicketModal', 'origenImagenModal'].map(id => document.getElementById(id))
+      .find(v => v && getComputedStyle(v).display !== 'none');
+    if (visor) { visor.style.display = 'none'; return; }
+    // Si hay algún modal visible, ciérralo primero en vez de navegar.
+    // Los que se abren con la clase «open» (Pagar, Comprobante, editar gasto, ficha de
+    // amigo) se cierran con su propia función: ocultarlos con style.display='none'
+    // los dejaba ocultos para siempre, y al volver a abrirlos no aparecían pero
+    // la página quedaba sin scroll.
+    const cierres = { payModal: closePayModal, proofModal: closeProofModal, editModal: closeEditModal, friendModal: closeFriendModal };
     const openModal = [...document.querySelectorAll('.modal-overlay')]
       .find(m => getComputedStyle(m).display !== 'none');
     if (openModal) {
-      openModal.style.display = 'none';
+      if (cierres[openModal.id]) cierres[openModal.id]();
+      else if (openModal.classList.contains('open')) openModal.classList.remove('open');
+      else openModal.style.display = 'none';
       document.body.style.overflow = '';
       return;
     }
@@ -6092,6 +6107,22 @@ function posicionarBadge() {
   const centerY = rect.top + rect.height / 2;
   badge.style.top = (centerY - badge.offsetHeight / 2) + 'px';
 }
+
+// ═══ SCROLL: DESBLOQUEO DE SEGURIDAD ══════════════════════════════
+// Los modales y el chat bloquean el scroll de la página mientras están abiertos
+// (body overflow:hidden). Si alguno se cerraba por un camino que no lo
+// desbloqueaba (botón atrás, cambiar de pestaña, dos modales seguidos…), la app
+// se quedaba sin scroll. Esto lo desbloquea en cuanto no queda ninguna capa abierta.
+const CAPAS_QUE_BLOQUEAN = '.modal-overlay, [id^="modal-"], [id$="Modal"], #modalLogout, #page-chat';
+function desbloquearScrollSiProcede() {
+  if (document.body.style.overflow !== 'hidden') return;
+  const abierta = [...document.querySelectorAll(CAPAS_QUE_BLOQUEAN)].some(el =>
+    el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden');
+  if (!abierta) document.body.style.overflow = '';
+}
+['click', 'touchend', 'keyup'].forEach(ev =>
+  document.addEventListener(ev, () => setTimeout(desbloquearScrollSiProcede, 350), true));
+setInterval(desbloquearScrollSiProcede, 1500);
 
 // ═══ NAVEGACIÓN POR DESLIZAMIENTO (SWIPE) ══════════════════════════
 // Adicional al tap en los botones de abajo — no lo reemplaza.
