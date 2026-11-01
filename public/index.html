@@ -1778,6 +1778,10 @@ function mostrarResultadoInvitacion({ icono, titulo, texto, grupoId = null }) {
   document.getElementById('modal-invitacion-resultado').style.display = 'flex';
   document.body.style.overflow = 'hidden';
 }
+// Aviso genérico con el mismo modal (icono de error y botón «Entendido»)
+function mostrarModalInfo(titulo, texto, icono = 'error') {
+  mostrarResultadoInvitacion({ icono, titulo, texto });
+}
 function cerrarResultadoInvitacion() {
   document.getElementById('modal-invitacion-resultado').style.display = 'none';
   document.body.style.overflow = '';
@@ -3236,9 +3240,15 @@ function miNombreEnGrupo(g) {
 // Saldar una deuda se guarda en el servidor como un "pago": quien debía paga a quien
 // le debían. Ajusta los saldos de todos y queda en la Actividad del grupo, pero no
 // cuenta como gasto en totales ni estadísticas. Se puede anular borrándolo.
+let _registrandoPago = false;   // evita enviar el mismo pago dos veces (doble pulsación)
 async function registrarPago({ from, to, amount }, archivoComprobante) {
   const g = groups[currentGroupIdx];
-  if (!g) return;
+  if (!g || _registrandoPago) return;
+  _registrandoPago = true;
+  try { await _registrarPago(g, { from, to, amount }, archivoComprobante); }
+  finally { _registrandoPago = false; }
+}
+async function _registrarPago(g, { from, to, amount }, archivoComprobante) {
   const hoy = new Date();
   const fecha = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
   let ticket = null;
@@ -3258,12 +3268,25 @@ async function registrarPago({ from, to, amount }, archivoComprobante) {
       })
     });
     const data = await res.json().catch(() => ({}));
+    if (res.status === 409 && data.pago_rechazado) {
+      // La deuda ya no es la que se veía (p. ej. otro móvil ya registró este pago):
+      // se recargan los saldos y la lista de deudas, y se explica por qué
+      await recargarGrupoDelServidor(g);
+      mostrarModalInfo('Pago no registrado', data.error);
+      return;
+    }
     if (!res.ok) throw new Error(data.error || 'No se pudo registrar el pago');
   } catch (err) {
     toast(err.message || 'No se pudo registrar el pago. Revisa tu conexión.', 'e');
     return;
   }
-  // Recargar el grupo desde el servidor para que los saldos sean los oficiales
+  await recargarGrupoDelServidor(g);
+  if (typeof refrescarActividad === 'function') refrescarActividad();
+  toast(`✅ Pago de ${from} a ${to} registrado`, 's');
+}
+
+// Recarga el grupo desde el servidor (saldos oficiales) y recalcula las deudas
+async function recargarGrupoDelServidor(g) {
   try {
     const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
       headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
@@ -3278,8 +3301,6 @@ async function registrarPago({ from, to, amount }, archivoComprobante) {
     }
   } catch (_) {}
   save(); renderAll(); calcDebts();
-  if (typeof refrescarActividad === 'function') refrescarActividad();
-  toast(`✅ Pago de ${from} a ${to} registrado`, 's');
 }
 
 function confirmPayment(settle){

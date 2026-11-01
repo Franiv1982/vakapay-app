@@ -107,6 +107,26 @@ async function recalcBalances(groupId) {
   }
 }
 
+// Un pago no puede ser mayor que lo que debe quien paga ni que lo que se le debe
+// a quien lo recibe. Evita pagos repetidos (doble pulsación, o dos móviles con la
+// lista de deudas sin actualizar), que dejarían a alguien sin gastos como acreedor.
+const MARGEN_PAGO = 0.05; // céntimos de redondeo
+async function errorDePago(groupId, de, para, importeBase) {
+  await recalcBalances(groupId);
+  const r = await db.query('SELECT display_name, balance FROM group_members WHERE group_id = $1 AND display_name = ANY($2::text[])', [groupId, [de, para]]);
+  const saldo = Object.fromEntries(r.rows.map(x => [x.display_name, Number(x.balance) || 0]));
+  if (saldo[de] === undefined || saldo[para] === undefined) return 'Participante no encontrado en el grupo';
+  if (de === para) return 'Quien paga y quien cobra deben ser personas distintas';
+  const debe = -saldo[de], leDeben = saldo[para];
+  if (debe < MARGEN_PAGO) return `${de} no tiene deudas pendientes en este grupo. Puede que este pago ya se haya registrado.`;
+  if (leDeben < MARGEN_PAGO) return `A ${para} ya no se le debe nada en este grupo. Puede que este pago ya se haya registrado.`;
+  const maximo = Math.min(debe, leDeben);
+  if (importeBase > maximo + MARGEN_PAGO) {
+    return `El pago (${importeBase.toFixed(2)}) es mayor de lo pendiente (${maximo.toFixed(2)}). Puede que parte ya se haya registrado: vuelve a calcular las deudas.`;
+  }
+  return null;
+}
+
 // ── GET /groups/:id/expenses ──────────────────────────────────────
 router.get('/', requireAuth, async (req, res, next) => {
   try {
@@ -130,6 +150,7 @@ router.get('/', requireAuth, async (req, res, next) => {
 
 // ── POST /groups/:id/expenses ─────────────────────────────────────
 router.post('/', requireAuth, async (req, res, next) => {
+  let candado = null;
   try {
     const isOwner = await ownsGroup(req.params.id, req.user.id);
     const member = await isMember(req.params.id, req.user.id);
@@ -152,6 +173,14 @@ router.post('/', requireAuth, async (req, res, next) => {
     if (!ticketValido(ticket)) return res.status(400).json({ error: 'Comprobante no válido o demasiado grande' });
 
     const amount_base = importeBase(req.body, amount, currency);
+
+    // Pagos: se comprueban y registran de uno en uno por grupo (bloqueo en la base de datos)
+    if (es_pago) {
+      candado = await db.pool.connect();
+      await candado.query('SELECT pg_advisory_lock($1)', [Number(req.params.id)]);
+      const error = await errorDePago(req.params.id, payer_name, involved[0], Number(amount_base));
+      if (error) return res.status(409).json({ error, pago_rechazado: true });
+    }
 
     const expRes = await db.query(`
       INSERT INTO expenses (group_id, description, amount, currency, amount_base, category, payer_name, expense_date, member_id, ticket, es_pago)
@@ -177,6 +206,12 @@ router.post('/', requireAuth, async (req, res, next) => {
       : `${quien} registró "${description}" · ${importe(amount, currency)} (pagó ${payer_name}) en "${grupo}"`);
     res.status(201).json(expense);
   } catch (err) { next(err); }
+  finally {
+    if (candado) {
+      await candado.query('SELECT pg_advisory_unlock($1)', [Number(req.params.id)]).catch(() => {});
+      candado.release();
+    }
+  }
 });
 
 // ── GET /groups/:id/expenses/:expId ──────────────────────────────
