@@ -3,7 +3,7 @@ const express  = require('express');
 const bcrypt   = require('bcryptjs');
 const { normalizarTelefono } = require('../utils/telefono');
 const db       = require('../db/database');
-const { signToken, requireAuth } = require('../middleware/auth');
+const { signToken, requireAuth, textoBloqueo } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -85,10 +85,13 @@ router.post('/login', async (req, res, next) => {
     if (user.login_fallos || user.login_bloqueado_hasta) {
       await db.query('UPDATE users SET login_fallos = 0, login_bloqueado_hasta = NULL WHERE id = $1', [user.id]);
     }
+    if (user.bloqueado) {
+      return res.status(403).json({ error: textoBloqueo(user.bloqueo_motivo), cuenta_bloqueada: true });
+    }
 
     const token = signToken(user);
     // No se devuelven datos internos (contraseña, códigos de recuperación, contadores)
-    const { password_hash, reset_otp, reset_otp_expires, reset_attempts, login_fallos, login_bloqueado_hasta, minutos_bloqueo, ...safeUser } = user;
+    const { password_hash, reset_otp, reset_otp_expires, reset_attempts, login_fallos, login_bloqueado_hasta, minutos_bloqueo, bloqueado, bloqueo_motivo, ...safeUser } = user;
     res.json({ token, user: safeUser });
   } catch (err) { next(err); }
 });
