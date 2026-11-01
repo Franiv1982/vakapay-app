@@ -658,6 +658,11 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparen
     <div id="debtList"><div class="no-items"><div class="ni">💸</div><div>Pulsa calcular para ver</div></div></div>
     <div style="height:10px"></div>
     <button class="btn btn-gold btn-full" onclick="calcDebts()">Calcular Deudas</button>
+    <div id="pagosRealizadosWrap" style="display:none">
+      <div class="dvd"></div>
+      <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:10px">Pagos realizados</div>
+      <div id="pagosRealizados"></div>
+    </div>
   </div>
 </div>
 
@@ -3100,6 +3105,7 @@ function calcDebts(){
     if(Math.abs(d[0][1])<0.01)d.shift();if(Math.abs(c[0][1])<0.01)c.shift();
   }
   _deudasActuales = txs;
+  renderPagosRealizados();
   const dl=document.getElementById('debtList');
   dl.innerHTML=txs.length===0
     ?'<div class="all-good">✅ ¡Todas las cuentas están cuadradas!</div>'
@@ -3112,18 +3118,16 @@ function calcDebts(){
         </div>
         <div style="display:flex;gap:6px;width:100%;justify-content:flex-end;align-items:center;">
           ${(() => {
+            // Solo el deudor puede pagar y solo el acreedor puede confirmar el cobro.
+            // El resto del grupo ve la deuda, sin botones.
             const g = groups[currentGroupIdx];
             const myName = miNombreEnGrupo(g);
-            const isDebtor = myName === t.from;
-            const isCreditor = myName === t.to;
-            if (isDebtor) return `<button class="btn btn-gold btn-sm" onclick="openPayModal(${i},'${t.from}','${t.to}',${t.amount})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Pagar</button>`;
-            if (isCreditor) return `<span style="display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--muted);font-weight:700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Pendiente de cobro</span>`;
-            return myName === null ? `<button class="btn btn-gold btn-sm" onclick="openPayModal(${i},'${t.from}','${t.to}',${t.amount})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Pagar</button>` : '';
+            const de = escaparHtml(t.from).replace(/'/g, '&#39;'), a = escaparHtml(t.to).replace(/'/g, '&#39;');
+            if (myName === t.from) return `<button class="btn btn-gold btn-sm" onclick="openPayModal(${i},'${de}','${a}',${t.amount})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Pagar</button>`;
+            if (myName === t.to) return `<span style="display:flex;align-items:center;gap:5px;font-size:.72rem;color:var(--muted);font-weight:700;margin-right:auto;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Pendiente de cobro</span>
+              <button class="btn btn-outline btn-sm" onclick="openProofModal(${i},'${de}','${a}',${t.amount})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg>Confirmar cobro</button>`;
+            return '';
           })()}
-          <button class="btn btn-outline btn-sm" onclick="openProofModal(${i},'${t.from}','${t.to}',${t.amount})">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            Comprobante
-          </button>
         </div>
       </div>`).join(''); 
   toast('Cálculo completado 🧮','i');
@@ -3148,6 +3152,36 @@ function pintarPagarTambien(idCont, datos, alCambiar) {
     datos.extras = [...el.querySelectorAll('input:checked')].map(c => otros[+c.dataset.i]);
     alCambiar();
   });
+}
+
+// ─── PAGOS REALIZADOS ───────────────────────────────────────────────
+// Historial de deudas saldadas, visible para todo el grupo, con el comprobante si lo hay
+function renderPagosRealizados() {
+  const g = groups[currentGroupIdx];
+  const wrap = document.getElementById('pagosRealizadosWrap');
+  if (!g || !wrap) return;
+  const nombrePorId = Object.fromEntries(Object.entries(g.memberIds || {}).map(([n, id]) => [String(id), n]));
+  const pagos = (g.expenses || []).map((e, i) => ({ e, i })).filter(x => x.e.es_pago)
+    .sort((a, b) => String(b.e.date).localeCompare(String(a.e.date)) || (b.e.id || 0) - (a.e.id || 0));
+  if (!pagos.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  const base = getBase();
+  document.getElementById('pagosRealizados').innerHTML = pagos.map(({ e, i }) => {
+    const para = (e.involved || [])[0] || '';
+    const pagoPor = (String(e.desc || '').match(/\(pagó ([^)]+)\)$/) || [])[1];
+    const quien = nombrePorId[String(e.member_id)];
+    const detalles = [fmtDate(e.date), pagoPor ? `pagó ${pagoPor}` : '', quien ? `registró ${quien}` : ''].filter(Boolean).join(' · ');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.82rem;color:var(--text);"><strong>${escaparHtml(e.payer)}</strong> → <strong>${escaparHtml(para)}</strong></div>
+        <div style="font-size:.66rem;color:var(--muted);margin-top:2px;">${escaparHtml(detalles)}</div>
+      </div>
+      <div style="font-weight:800;color:#28a745;font-size:.85rem;white-space:nowrap;">${formatAmountBase(Number(e.baseAmt) || 0, base)}</div>
+      ${e.has_ticket || e.ticket
+        ? `<button class="btn btn-outline btn-sm" style="padding:5px 8px;" title="Ver comprobante" onclick="verTicket(${i})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></button>`
+        : `<span style="font-size:.62rem;color:var(--muted2,#777);white-space:nowrap;">Sin comprobante</span>`}
+    </div>`;
+  }).join('');
 }
 
 // ─── PAY MODAL ──────────────────────────────────────────────────────
@@ -3392,19 +3426,14 @@ function confirmPayment(settle){
 let _proofData = null;
 function openProofModal(idx,from,to,amount){
   _proofData={idx,from,to,amount};
-  document.getElementById('proofTitle').textContent=`Pago: ${from} → ${to}`;
+  document.getElementById('proofTitle').textContent=`Confirmar cobro: ${from} → ${to}`;
   // Cualquier participante puede registrar el pago de otro (p. ej. alguien sin cuenta que pagó en efectivo).
   // Queda en la Actividad del grupo quién lo registró, y se puede anular.
-  const yo = miNombreEnGrupo(groups[currentGroupIdx]);
-  const subtitulo = () => {
-    const total = formatAmountBase(totalPago(_proofData), getBase());
-    const por = (_proofData.extras || []).length ? ` (también por ${_proofData.extras.map(x => x.from).join(', ')})` : '';
-    document.getElementById('proofSubtitulo').textContent = yo === from
-      ? `Registra que pagaste ${total} a ${to}${por}. El comprobante es opcional.`
-      : `Registra que ${from} pagó ${total} a ${to}${por}. Quedará en la Actividad que lo registraste tú.`;
-  };
-  pintarPagarTambien('proofTambien', _proofData, subtitulo);
-  subtitulo();
+  // Solo lo abre el acreedor: confirma que le han pagado (efectivo, alguien sin cuenta...)
+  _proofData.extras = [];
+  document.getElementById('proofTambien').style.display = 'none';
+  document.getElementById('proofSubtitulo').textContent =
+    `Confirma que ${from} te ha pagado ${formatAmountBase(amount, getBase())}. Puedes adjuntar una foto del pago (opcional).`;
   document.getElementById('proofThumbView').style.display='none';
   document.getElementById('proofFileInput').value='';
   document.getElementById('proofModal').style.display = '';
@@ -3857,6 +3886,7 @@ function renderBalances(){
   const g = groups[currentGroupIdx];
     
   updateBalances(); 
+  renderPagosRealizados();
 
   const bl = document.getElementById('balanceList');
   const mbs = Object.entries(g.members);
@@ -5826,7 +5856,7 @@ function cerrarModalSalir() {
       <img id="proofThumbView" class="proof-thumb" style="max-height:80px;">
     </div>
     <div style="margin-top:8px;">
-      <button class="btn btn-green btn-full" onclick="sendProof(true)">✅ Marcar como saldado</button>
+      <button class="btn btn-green btn-full" onclick="sendProof(true)">✅ Confirmar cobro</button>
       <button class="btn btn-outline btn-full" style="margin-top:8px;" onclick="closeProofModal()">Cancelar</button>
     </div>
   </div>
