@@ -8,11 +8,14 @@ const { agregarAmigoSiNoExiste, sincronizarAmigosGrupo } = require('../utils/con
 
 const router = express.Router();
 
+// Restos de redondeo de hasta 5 céntimos se consideran saldados
+const MARGEN_SALDO = 0.05;
+
 function computeDebts(members) {
   const pos = [], neg = [];
   members.forEach(m => {
-    if (m.balance > 0.005)  pos.push({ name: m.display_name, amt:  m.balance });
-    if (m.balance < -0.005) neg.push({ name: m.display_name, amt: -m.balance });
+    if (m.balance > MARGEN_SALDO)  pos.push({ name: m.display_name, amt:  m.balance });
+    if (m.balance < -MARGEN_SALDO) neg.push({ name: m.display_name, amt: -m.balance });
   });
   pos.sort((a, b) => b.amt - a.amt);
   neg.sort((a, b) => b.amt - a.amt);
@@ -23,8 +26,8 @@ function computeDebts(members) {
     const amt = Math.min(p.amt, n.amt);
     txns.push({ from: n.name, to: p.name, amount: +amt.toFixed(2) });
     p.amt -= amt; n.amt -= amt;
-    if (p.amt < 0.005) pi++;
-    if (n.amt < 0.005) ni++;
+    if (p.amt <= MARGEN_SALDO) pi++;
+    if (n.amt <= MARGEN_SALDO) ni++;
   }
   return txns;
 }
@@ -157,7 +160,7 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
     }
 
     const balance = parseFloat(memberRes.rows[0].balance);
-    if (Math.abs(balance) > 0.005) {
+    if (Math.abs(balance) > MARGEN_SALDO) {
       return res.status(422).json({
         error: balance > 0
           ? `Tienes un saldo positivo de ${balance.toFixed(2)}. Salda las cuentas antes de salir.`

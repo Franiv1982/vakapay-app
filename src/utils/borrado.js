@@ -29,7 +29,7 @@ async function analizarGrupos(userId, cliente = db) {
 
 function resumen(grupos) {
   const pendientes = grupos
-    .filter(g => g.compartido && Math.abs(g.balance) > 0.005)
+    .filter(g => g.compartido && Math.abs(g.balance) > 0.05)   // hasta 5 céntimos: redondeo
     .map(g => ({ id: g.id, name: g.name, balance: +g.balance.toFixed(2) }));
   return {
     pendientes,                                                       // bloquean el borrado
