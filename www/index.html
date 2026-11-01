@@ -5309,9 +5309,101 @@ async function verTicket(idx) {
   const t = await cargarTicket(idx);
   if (!t) { toast('No se pudo cargar el comprobante', 'e'); return; }
   document.getElementById('visorTicketImg').src = t;
+  reiniciarZoom(document.getElementById('visorTicketImg'));
   document.getElementById('visorTicketModal').dataset.idx = idx;
   document.getElementById('visorTicketModal').style.display = 'flex';
 }
+// ═══ ZOOM EN LOS VISORES DE IMAGEN (comprobantes y fotos del chat) ═══
+// Pellizcar con dos dedos amplía (hasta 5x), arrastrar con un dedo mueve la imagen
+// ampliada y un doble toque alterna entre 2,5x y el tamaño normal. En ordenador,
+// la rueda del ratón también amplía.
+function activarZoom(img) {
+  if (!img || img.__zoom) return;
+  const z = img.__zoom = { escala: 1, x: 0, y: 0, punteros: new Map(), inicio: null, ultimoToque: 0, movido: false };
+  img.style.touchAction = 'none';
+  img.style.transformOrigin = 'center center';
+  img.style.transition = 'transform .15s';
+  img.draggable = false;
+  const aplicar = () => { img.style.transform = `translate(${z.x}px, ${z.y}px) scale(${z.escala})`; };
+  const limitar = () => {
+    z.escala = Math.min(5, Math.max(1, z.escala));
+    if (z.escala === 1) { z.x = 0; z.y = 0; return; }
+    const mx = img.offsetWidth * (z.escala - 1) / 2, my = img.offsetHeight * (z.escala - 1) / 2;
+    z.x = Math.min(mx, Math.max(-mx, z.x));
+    z.y = Math.min(my, Math.max(-my, z.y));
+  };
+  const reanclar = () => {
+    const ps = [...z.punteros.values()];
+    if (ps.length >= 2) {
+      const [a, b] = ps;
+      z.inicio = { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, escala: z.escala, x: z.x, y: z.y, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2 };
+    } else if (ps.length === 1) {
+      z.inicio = { px: ps[0].x, py: ps[0].y, x: z.x, y: z.y };
+    } else z.inicio = null;
+  };
+  img.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    try { img.setPointerCapture(e.pointerId); } catch (_) {}
+    z.punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (z.punteros.size === 1) z.movido = false;
+    img.style.transition = 'none';
+    reanclar();
+  });
+  img.addEventListener('pointermove', e => {
+    if (!z.punteros.has(e.pointerId) || !z.inicio) return;
+    z.punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const ps = [...z.punteros.values()];
+    if (ps.length >= 2 && z.inicio.d) {
+      const [a, b] = ps;
+      z.escala = z.inicio.escala * Math.hypot(a.x - b.x, a.y - b.y) / z.inicio.d;
+      z.x = z.inicio.x + ((a.x + b.x) / 2 - z.inicio.cx);
+      z.y = z.inicio.y + ((a.y + b.y) / 2 - z.inicio.cy);
+      z.movido = true;
+    } else if (ps.length === 1 && z.escala > 1 && z.inicio.px !== undefined) {
+      z.x = z.inicio.x + (e.clientX - z.inicio.px);
+      z.y = z.inicio.y + (e.clientY - z.inicio.py);
+      if (Math.abs(e.clientX - z.inicio.px) + Math.abs(e.clientY - z.inicio.py) > 6) z.movido = true;
+    } else return;
+    limitar(); aplicar();
+  });
+  const soltar = e => {
+    const eraToque = z.punteros.size === 1 && !z.movido;
+    z.punteros.delete(e.pointerId);
+    img.style.transition = 'transform .15s';
+    reanclar();
+    if (e.type !== 'pointerup' || !eraToque) return;
+    const ahora = Date.now();
+    if (ahora - z.ultimoToque < 320) {          // doble toque: amplía donde se toca
+      if (z.escala > 1) { z.escala = 1; z.x = 0; z.y = 0; }
+      else {
+        const r = img.getBoundingClientRect();
+        z.escala = 2.5;
+        z.x = (r.left + r.width / 2 - e.clientX) * (z.escala - 1);
+        z.y = (r.top + r.height / 2 - e.clientY) * (z.escala - 1);
+        limitar();
+      }
+      aplicar(); z.ultimoToque = 0;
+    } else z.ultimoToque = ahora;
+  };
+  img.addEventListener('pointerup', soltar);
+  img.addEventListener('pointercancel', soltar);
+  img.addEventListener('wheel', e => {
+    e.preventDefault();
+    z.escala *= e.deltaY < 0 ? 1.15 : 1 / 1.15;
+    limitar(); aplicar();
+  }, { passive: false });
+}
+function reiniciarZoom(img) {
+  activarZoom(img);
+  const z = img.__zoom;
+  z.escala = 1; z.x = 0; z.y = 0; z.punteros.clear(); z.inicio = null;
+  img.style.transform = '';
+}
+document.addEventListener('DOMContentLoaded', () => {
+  activarZoom(document.getElementById('visorTicketImg'));
+  activarZoom(document.getElementById('chatVisorImg'));
+});
+
 function cerrarVisorTicket() {
   document.getElementById('visorTicketModal').style.display = 'none';
 }
@@ -6341,8 +6433,11 @@ function tocarBotonGrupos(btn) {
 </div>
 
 <!-- Visor del comprobante a pantalla completa -->
-<div id="visorTicketModal" onclick="if(event.target===this)cerrarVisorTicket()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:10001;flex-direction:column;align-items:center;justify-content:center;padding:16px;">
-  <img id="visorTicketImg" alt="Comprobante" style="max-width:100%;max-height:78vh;object-fit:contain;border-radius:10px;">
+<div id="visorTicketModal" onclick="if(event.target===this)cerrarVisorTicket()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:10001;flex-direction:column;align-items:center;justify-content:center;padding:16px;overflow:hidden;">
+  <div class="zoom-area" onclick="if(event.target===this)cerrarVisorTicket()">
+    <img id="visorTicketImg" alt="Comprobante">
+  </div>
+  <div class="zoom-pista">Pellizca o toca dos veces para ampliar</div>
   <div style="display:flex;gap:10px;margin-top:16px;width:100%;max-width:420px;">
     <button type="button" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="downloadTicket(+document.getElementById('visorTicketModal').dataset.idx)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -6467,6 +6562,12 @@ function tocarBotonGrupos(btn) {
 #chatFotoPrevia .enviar:disabled{opacity:.5}
 .chat-x{align-self:flex-start;background:none;border:none;color:#fff;padding:4px;margin-bottom:8px;cursor:pointer;display:flex}
 #chatVisor .botones{display:flex;gap:10px;margin-top:14px}
+/* Recuadro del visor: la imagen ampliada no se sale de él ni tapa los botones */
+.zoom-area{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:10px}
+.zoom-area img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px}
+#chatVisor .zoom-area img{flex:none;width:auto;height:auto}
+.zoom-pista{font-size:.68rem;color:#999;text-align:center;margin-top:10px;position:relative;z-index:2}
+#visorTicketModal{justify-content:flex-start!important;padding-top:calc(16px + env(safe-area-inset-top))!important}
 #chatGif{display:none;position:absolute;left:0;right:0;bottom:0;height:min(72%,480px);z-index:5;background:var(--dark2);border-top:1px solid var(--border);border-radius:18px 18px 0 0;flex-direction:column;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -8px 24px rgba(0,0,0,.45)}
 #chatGif .cab{display:flex;gap:8px;align-items:center;padding:10px 12px 6px}
 #chatGif .buscar{flex:1;display:flex;align-items:center;gap:8px;background:var(--dark3);border:1.5px solid rgba(255,255,255,.09);border-radius:20px;padding:0 12px;color:var(--muted)}
@@ -6520,7 +6621,10 @@ function tocarBotonGrupos(btn) {
     </div>
   </div>
   <div id="chatVisor" onclick="if(event.target===this)cerrarVisorChat()">
-    <img id="chatVisorImg" alt="Foto">
+    <div class="zoom-area" onclick="if(event.target===this)cerrarVisorChat()">
+      <img id="chatVisorImg" alt="Foto">
+    </div>
+    <div class="zoom-pista">Pellizca o toca dos veces para ampliar</div>
     <div class="botones">
       <button type="button" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="descargarFotoChat()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar</button>
       <button type="button" class="btn btn-gold" style="flex:1;" onclick="cerrarVisorChat()">Cerrar</button>
@@ -7011,6 +7115,7 @@ async function verFotoChat(id) {
   if (!src) { toast('No se pudo cargar la foto', 'e'); return; }
   _chatVisorId = id;
   document.getElementById('chatVisorImg').src = src;
+  reiniciarZoom(document.getElementById('chatVisorImg'));
   document.getElementById('chatVisor').style.display = 'flex';
 }
 function cerrarVisorChat() {
