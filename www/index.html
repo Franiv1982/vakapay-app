@@ -3145,15 +3145,16 @@ function calcDebts(){
   updateBalances();
   const g=groups[currentGroupIdx];
   const base=document.getElementById('baseCurrency')?.value||'EUR';
-  const d=Object.entries(g.members).filter(([,v])=>v<-0.01).map(([k,v])=>[k,v]);
-  const c=Object.entries(g.members).filter(([,v])=>v>0.01).map(([k,v])=>[k,v]);
+  // Restos de redondeo de hasta 5 céntimos se consideran saldados (igual que el servidor)
+  const d=Object.entries(g.members).filter(([,v])=>v<-0.05).map(([k,v])=>[k,v]);
+  const c=Object.entries(g.members).filter(([,v])=>v>0.05).map(([k,v])=>[k,v]);
   const txs=[];
   while(d.length&&c.length){
     d.sort((a,b)=>a[1]-b[1]);c.sort((a,b)=>b[1]-a[1]);
     const amt=Math.min(Math.abs(d[0][1]),c[0][1]);
     txs.push({from:d[0][0],to:c[0][0],amount:amt});
     d[0][1]=+(d[0][1]+amt).toFixed(2);c[0][1]=+(c[0][1]-amt).toFixed(2);
-    if(Math.abs(d[0][1])<0.01)d.shift();if(Math.abs(c[0][1])<0.01)c.shift();
+    if(Math.abs(d[0][1])<=0.05)d.shift();if(Math.abs(c[0][1])<=0.05)c.shift();
   }
   _deudasActuales = txs;
   renderPagosRealizados();
@@ -3881,58 +3882,36 @@ function renderExpenses() {
   }).join('');
 }
 
+// Saldos en céntimos exactos, igual que el servidor: cada gasto se reparte con las
+// partes que guardó el servidor (repartidas al céntimo; p. ej. 237,56 € entre 13 →
+// unos 18,27 y otros 18,28). Antes se dividía sin redondear y, tras saldar todo,
+// quedaban restos de 0,01-0,02 € en el servidor que impedían borrar el grupo.
+const _claveNombre = n => String(n || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+function repartirCentimos(totalCent, nombres) {
+  const cada = Math.floor(totalCent / nombres.length), resto = totalCent - cada * nombres.length;
+  return nombres.map((n, i) => [n, cada + (i < resto ? 1 : 0)]);
+}
 function updateBalances() {
   const g = groups[currentGroupIdx];
   if (!g || !g.members) return;
-
-  // 1. Resetear saldos a 0
-  const initialBalances = {};
-  Object.keys(g.members).forEach(member => {
-      initialBalances[member] = 0;
-  });
-  g.members = initialBalances;
-  console.log("Estructura de miembros tras el reset:", g.members);
-  if (g.expenses) {
-    g.expenses.forEach(e => {
-      const amt = Number(e.baseAmt || e.amount_base || e.amount) || 0;
-      const involved = [...new Set(e.involved || (e.splits ? e.splits.map(s => s.member_name) : []))];
-      
-      if (involved.length > 0) {
-        const uniqueInvolved = [...new Set(involved)];
-        const share = amt / (uniqueInvolved.length || 1);
-        const pagador = (e.payer || e.payer_name || "").trim();
-        
-        // --- BÚSQUEDA FLEXIBLE PARA EL PAGADOR ---
-        // En tu función updateBalances() dentro de VakaDataService
-        const pagadorKey = Object.keys(g.members).find(
-          m => m.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === 
-              pagador.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        );
-        
-        if (pagadorKey) {
-          g.members[pagadorKey] = +(g.members[pagadorKey] + amt).toFixed(2);
-        } else {
-          console.warn(`Pagador no encontrado: '${pagador}'`);
-        }
-        
-        // --- BÚSQUEDA FLEXIBLE PARA LOS INVOLUCRADOS ---
-        uniqueInvolved.forEach(n => {
-          const name = n.trim();
-          const memberKey = Object.keys(g.members).find(
-            m => m.trim().toLowerCase() === name.toLowerCase()
-          );
-          
-          if (memberKey) {
-            g.members[memberKey] = +(g.members[memberKey] - share).toFixed(2);
-          } else {
-            console.warn(`Participante no encontrado: '${name}'`);
-          }
-        });
-      } else {
-        console.warn("Gasto detectado sin participantes (ignorado en balance):", e.desc);
-      }
+  const cent = {};
+  const claves = {};
+  Object.keys(g.members).forEach(m => { cent[m] = 0; claves[_claveNombre(m)] = m; });
+  const miembro = n => claves[_claveNombre(n)];
+  (g.expenses || []).forEach(e => {
+    const totalCent = Math.round((Number(e.baseAmt || e.amount_base || e.amount) || 0) * 100);
+    const partes = (e.splits && e.splits.length)
+      ? e.splits.map(x => [x.member_name, Math.round(Number(x.share) * 100)])
+      : repartirCentimos(totalCent, [...new Set(e.involved || [])]);
+    if (!partes.length) { console.warn('Gasto sin participantes (ignorado en el balance):', e.desc); return; }
+    const pagador = miembro(e.payer || e.payer_name);
+    if (pagador) cent[pagador] += totalCent; else console.warn('Pagador no encontrado:', e.payer || e.payer_name);
+    partes.forEach(([n, c]) => {
+      const m = miembro(n);
+      if (m) cent[m] -= c; else console.warn('Participante no encontrado:', n);
     });
-  }
+  });
+  g.members = Object.fromEntries(Object.entries(cent).map(([m, c]) => [m, c / 100]));
 }
 function renderBalances(){
   const g = groups[currentGroupIdx];
@@ -4208,15 +4187,15 @@ function exportarPDF(){
   doc.setFontSize(9); sc(0,0,0);
   doc.text('QUIEN PAGA A QUIEN', pad, y);
   y += 5;
-  const d = Object.entries(g.members).filter(([,v])=>v<-0.01).map(([k,v])=>[k,+(v)]);
-  const c = Object.entries(g.members).filter(([,v])=>v>0.01).map(([k,v])=>[k,+(v)]);
+  const d = Object.entries(g.members).filter(([,v])=>v<-0.05).map(([k,v])=>[k,+(v)]);
+  const c = Object.entries(g.members).filter(([,v])=>v>0.05).map(([k,v])=>[k,+(v)]);
   const txsPDF = [];
   while(d.length&&c.length){
     d.sort((a,b)=>a[1]-b[1]); c.sort((a,b)=>b[1]-a[1]);
     const amt = Math.min(Math.abs(d[0][1]), c[0][1]);
     txsPDF.push({from:d[0][0], to:c[0][0], amount:amt});
     d[0][1] = +(d[0][1]+amt).toFixed(2); c[0][1] = +(c[0][1]-amt).toFixed(2);
-    if(Math.abs(d[0][1])<0.01) d.shift(); if(Math.abs(c[0][1])<0.01) c.shift();
+    if(Math.abs(d[0][1])<=0.05) d.shift(); if(Math.abs(c[0][1])<=0.05) c.shift();
   }
   if(!txsPDF.length){
     doc.setFont('helvetica','normal');
