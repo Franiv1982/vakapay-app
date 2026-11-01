@@ -99,6 +99,9 @@ input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparen
 /* Campos de fecha compactos: en móviles estrechos (o con letra grande) el año se cortaba */
 .field input[type="date"]{padding-left:10px;padding-right:26px;font-size:.84rem;letter-spacing:0;
   background-size:14px 14px;background-position:right 8px center}
+/* Selectores en dos columnas (categoría, quién pagó, divisa…): mismo ajuste que la fecha */
+.g2 .field select{padding-left:10px;padding-right:24px;font-size:.84rem;background-position:right 8px center;
+  text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
 input[type="date"]::-webkit-datetime-edit,
 input[type="date"]::-webkit-datetime-edit-fields-wrapper{padding:0}
 input[type="date"]::-webkit-datetime-edit-day-field,
