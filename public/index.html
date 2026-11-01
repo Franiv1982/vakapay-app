@@ -2253,8 +2253,13 @@ function openGasto(idx, origen) {
   const displaySym = SYMBOLS[e.currency || base] || '€';
 
   const icono = e.es_pago ? '💸' : (CAT_ICONS[e.cat] || '💡');
+  // Pagos: quién pagó por otro («Pagar también por…») y quién lo registró
+  const pagoPorPago = e.es_pago ? ((String(e.desc || '').match(/\(pagó ([^)]+)\)$/) || [])[1] || '') : '';
+  const registroPago = e.es_pago ? (Object.entries(g.memberIds || {}).find(([, id]) => Number(id) === Number(e.member_id)) || [])[0] || '' : '';
   document.getElementById('gastoTitle').textContent = icono + ' ' + e.desc;
-  document.getElementById('gastoMeta').textContent = fmtDate(e.date) + ' · Pagó ' + e.payer;
+  document.getElementById('gastoMeta').textContent = e.es_pago
+    ? `${fmtDate(e.date)} · ${e.payer} → ${(e.involved || [])[0] || ''}`
+    : fmtDate(e.date) + ' · Pagó ' + e.payer;
 
   const ticketHTML = e.ticket ? `
     <div style="margin-top:12px;">
@@ -2280,11 +2285,21 @@ function openGasto(idx, origen) {
         ${e.currency !== base ? `<div style="font-size:.65rem;color:var(--muted);">≈ ${sym}${Number(e.baseAmt).toFixed(2)}</div>` : ''}
       </div>
       <div class="card" style="padding:12px;text-align:center;">
-        <div style="font-size:1.1rem;font-weight:800;color:var(--text);">${e.payer}</div>
-        <div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Pagó</div>
+        <div style="font-size:1.1rem;font-weight:800;color:var(--text);">${e.es_pago ? `${escaparHtml(e.payer)} → ${escaparHtml((e.involved || [])[0] || '')}` : e.payer}</div>
+        <div style="font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">${e.es_pago ? (pagoPorPago ? 'Deuda' : 'Pagó → Cobró') : 'Pagó'}</div>
       </div>
     </div>
 
+${e.es_pago ? `
+    <div class="card" style="padding:12px;margin-bottom:16px;">
+      ${(pagoPorPago
+          ? [['Deuda de', e.payer], ['Pagó', pagoPorPago], ['Cobró', (e.involved || [])[0] || ''], ['Registró', registroPago]]
+          : [['Pagó', e.payer], ['Cobró', (e.involved || [])[0] || ''], ['Registró', registroPago]])
+        .filter(([, v]) => v)
+        .map(([k, v]) => `<div style="display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.84rem;"><span style="color:var(--muted);">${k}</span><strong style="color:var(--text);text-align:right;">${escaparHtml(v)}</strong></div>`).join('')}
+    </div>
+
+` : `
     <div class="card" style="padding:12px;margin-bottom:16px;">
       <div style="font-size:.65rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Participantes</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;">
@@ -2297,7 +2312,7 @@ function openGasto(idx, origen) {
       <div style="font-weight:700;">${CAT_ICONS[e.cat]} ${{food:'Comida',transport:'Transporte',hotel:'Alojamiento',activity:'Actividad',other:'Otro'}[e.cat]||e.cat}</div>
     </div>
 
-    <div class="card" style="padding:12px;margin-bottom:16px;">
+`}    <div class="card" style="padding:12px;margin-bottom:16px;">
       <div style="font-size:.65rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Comprobante</div>
       <div style="display:flex;gap:8px;align-items:center;background:var(--dark3);border:1px solid var(--border);border-radius:10px;padding:8px 12px;">
         ${puede ? `<button type="button" onclick="document.getElementById('gastoTicketFile').click()"
