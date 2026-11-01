@@ -176,6 +176,19 @@ router.post('/', requireAuth, async (req, res, next) => {
     // «Pagar también por…»: quién pagó de verdad esta deuda (solo para la actividad)
     const pagadoPor = es_pago && typeof req.body.pagado_por === 'string' ? req.body.pagado_por.trim().slice(0, 40) : '';
 
+    // Pagos: solo los registra quien paga (el deudor, o quien paga por él con
+    // «Pagar también por…») o quien cobra (el acreedor confirma el cobro)
+    if (es_pago) {
+      const yo = (await db.query('SELECT display_name FROM group_members WHERE group_id = $1 AND user_id = $2', [req.params.id, req.user.id])).rows[0];
+      const miNombre = yo && yo.display_name;
+      const permitido = miNombre && (pagadoPor
+        ? pagadoPor === miNombre
+        : (miNombre === payer_name || miNombre === involved[0]));
+      if (!permitido) {
+        return res.status(403).json({ error: 'Solo quien paga o quien cobra puede registrar este pago' });
+      }
+    }
+
     // Pagos: se comprueban y registran de uno en uno por grupo (bloqueo en la base de datos)
     if (es_pago) {
       candado = await db.pool.connect();
