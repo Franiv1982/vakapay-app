@@ -3171,14 +3171,14 @@ function renderPagosRealizados() {
     const pagoPor = (String(e.desc || '').match(/\(pagó ([^)]+)\)$/) || [])[1];
     const quien = nombrePorId[String(e.member_id)];
     const detalles = [fmtDate(e.date), pagoPor ? `pagó ${pagoPor}` : '', quien ? `registró ${quien}` : ''].filter(Boolean).join(' · ');
-    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);">
+    return `<div onclick="openGasto(${i})" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06);cursor:pointer;">
       <div style="flex:1;min-width:0;">
         <div style="font-size:.82rem;color:var(--text);"><strong>${escaparHtml(e.payer)}</strong> → <strong>${escaparHtml(para)}</strong></div>
         <div style="font-size:.66rem;color:var(--muted);margin-top:2px;">${escaparHtml(detalles)}</div>
       </div>
       <div style="font-weight:800;color:#28a745;font-size:.85rem;white-space:nowrap;">${formatAmountBase(Number(e.baseAmt) || 0, base)}</div>
       ${e.has_ticket || e.ticket
-        ? `<button class="btn btn-outline btn-sm" style="padding:5px 8px;" title="Ver comprobante" onclick="verTicket(${i})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></button>`
+        ? `<button class="btn btn-outline btn-sm" style="padding:5px 8px;" title="Ver comprobante" onclick="event.stopPropagation();verTicket(${i})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></button>`
         : `<span style="font-size:.62rem;color:var(--muted2,#777);white-space:nowrap;">Sin comprobante</span>`}
     </div>`;
   }).join('');
@@ -3768,7 +3768,8 @@ function renderExpenses() {
   const nGastos = g.expenses.filter(e => !e.es_pago).length;
   if (gc) gc.textContent = nGastos > 0 ? `(${nGastos})` : '';
 
-  if (g.expenses.length === 0) {
+  // Los pagos de deudas no se listan aquí: están en Cuentas finales → Pagos realizados
+  if (nGastos === 0) {
     el.innerHTML = '<div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div>Sin gastos registrados</div></div>';
     if (sg) sg.style.display = 'none';
     return;
@@ -3786,6 +3787,7 @@ function renderExpenses() {
   }
 
   el.innerHTML = g.expenses.map((e, i) => {
+    if (e.es_pago) return '';
     const displayCurrency = e.currency || base;
     const displaySym = SYMBOLS[displayCurrency] || '€';
     // Normalización de seguridad para evitar "undefined"
