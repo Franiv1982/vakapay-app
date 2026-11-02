@@ -7,7 +7,17 @@
 const jwt = require('jsonwebtoken');
 const db  = require('../db/database');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'vakapay_dev_secret_change_in_prod';
+// La clave de las sesiones tiene que venir de las variables de entorno.
+// En Vercel o en producción, sin ella el servidor no arranca: el repositorio es
+// público y una clave escrita aquí permitiría a cualquiera fabricar sesiones.
+// En local, si falta, se usa una aleatoria (las sesiones caducan al reiniciar).
+const JWT_SECRET = process.env.JWT_SECRET || (() => {
+  if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+    throw new Error('Falta la variable de entorno JWT_SECRET');
+  }
+  console.warn('⚠️  JWT_SECRET no definida: se usa una clave temporal solo para desarrollo local.');
+  return require('crypto').randomBytes(32).toString('hex');
+})();
 
 // Mensaje para una cuenta bloqueada (con el motivo, si se ha escrito en Supabase)
 function textoBloqueo(motivo) {
