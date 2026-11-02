@@ -51,46 +51,77 @@ router.post('/register', async (req, res, next) => {
 });
 
 // ── POST /auth/login ─────────────────────────────────────────────
-const MAX_FALLOS  = 5;   // intentos fallidos seguidos permitidos
-const BLOQUEO_MIN = 15;  // minutos de bloqueo después
+// Límite de intentos en dos niveles:
+//  · Por dispositivo/conexión (IP): 5 fallos seguidos → esa conexión espera 15 min.
+//    Así un desconocido que prueba tu email solo se bloquea a sí mismo, no a ti.
+//  · Por cuenta: 30 fallos seguidos desde cualquier sitio → la cuenta espera 15 min.
+//    Frena a quien pruebe contraseñas desde muchas conexiones distintas.
+const MAX_FALLOS        = 5;
+const MAX_FALLOS_CUENTA = 30;
+const BLOQUEO_MIN       = 15;
+// IP del cliente. En Vercel la pone la propia plataforma (no se puede falsificar)
+function ipCliente(req) {
+  const xff = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+  return String(req.headers['x-real-ip'] || xff || req.socket?.remoteAddress || 'desconocida').slice(0, 64);
+}
+const textoEspera = m => `Demasiados intentos fallidos. Vuelve a intentarlo en ${m} minuto${m === 1 ? '' : 's'} o restablece tu contraseña.`;
+
 router.post('/login', async (req, res, next) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
     }
+    const correo = normEmail(email);
+    const ip = ipCliente(req);
+
+    // ¿Esta conexión está esperando por fallos anteriores con este email?
+    const intento = (await db.query(
+      `SELECT fallos, GREATEST(0, CEIL(EXTRACT(EPOCH FROM (bloqueado_hasta - NOW())) / 60))::int AS minutos
+       FROM login_intentos WHERE email = $1 AND ip = $2`, [correo, ip])).rows[0];
+    if (intento && intento.minutos > 0) {
+      return res.status(429).json({ error: textoEspera(intento.minutos), minutos: intento.minutos });
+    }
 
     const result = await db.query(
       `SELECT *, GREATEST(0, CEIL(EXTRACT(EPOCH FROM (login_bloqueado_hasta - NOW())) / 60))::int AS minutos_bloqueo
-       FROM users WHERE LOWER(TRIM(email)) = LOWER(TRIM($1)) ORDER BY id LIMIT 1`, [email]);
+       FROM users WHERE LOWER(TRIM(email)) = $1 ORDER BY id LIMIT 1`, [correo]);
     const user   = result.rows[0];
 
-    if (!user) return res.status(401).json({ error: 'Credenciales incorrectas' });
-
-    // Límite de intentos: tras MAX_FALLOS contraseñas incorrectas seguidas,
-    // la cuenta queda bloqueada BLOQUEO_MIN minutos (evita probar contraseñas sin fin)
-    if (user.minutos_bloqueo > 0) {
-      return res.status(429).json({
-        error: `Demasiados intentos fallidos. Vuelve a intentarlo en ${user.minutos_bloqueo} minuto${user.minutos_bloqueo === 1 ? '' : 's'} o restablece tu contraseña.`,
-        minutos: user.minutos_bloqueo,
-      });
+    // Bloqueo de toda la cuenta (muchos fallos desde sitios distintos, o puesto a mano en Supabase)
+    if (user && user.minutos_bloqueo > 0) {
+      return res.status(429).json({ error: textoEspera(user.minutos_bloqueo), minutos: user.minutos_bloqueo });
     }
 
     // Una cuenta sin contraseña guardada no puede entrar con ninguna
-    const valid = !!user.password_hash && bcrypt.compareSync(String(password), user.password_hash);
+    const valid = !!user && !!user.password_hash && bcrypt.compareSync(String(password), user.password_hash);
     if (!valid) {
-      const fallos = (user.login_fallos || 0) + 1;
-      if (fallos >= MAX_FALLOS) {
-        await db.query(`UPDATE users SET login_fallos = 0, login_bloqueado_hasta = NOW() + INTERVAL '${BLOQUEO_MIN} minutes' WHERE id = $1`, [user.id]);
-        return res.status(429).json({
-          error: `Demasiados intentos fallidos. Vuelve a intentarlo en ${BLOQUEO_MIN} minutos o restablece tu contraseña.`,
-          minutos: BLOQUEO_MIN,
-        });
+      // Fallo de esta conexión (también si el email no existe: así no se distingue)
+      const r = await db.query(`
+        INSERT INTO login_intentos (email, ip, fallos, actualizado) VALUES ($1, $2, 1, NOW())
+        ON CONFLICT (email, ip) DO UPDATE SET
+          fallos = CASE WHEN login_intentos.bloqueado_hasta IS NOT NULL OR login_intentos.actualizado < NOW() - INTERVAL '1 day'
+                        THEN 1 ELSE login_intentos.fallos + 1 END,
+          bloqueado_hasta = NULL, actualizado = NOW()
+        RETURNING fallos`, [correo, ip]);
+      const fallos = r.rows[0].fallos;
+      if (user) {
+        const totales = (user.login_fallos || 0) + 1;
+        if (totales >= MAX_FALLOS_CUENTA) {
+          await db.query(`UPDATE users SET login_fallos = 0, login_bloqueado_hasta = NOW() + INTERVAL '${BLOQUEO_MIN} minutes' WHERE id = $1`, [user.id]);
+          return res.status(429).json({ error: textoEspera(BLOQUEO_MIN), minutos: BLOQUEO_MIN });
+        }
+        await db.query('UPDATE users SET login_fallos = $1 WHERE id = $2', [totales, user.id]);
       }
-      await db.query('UPDATE users SET login_fallos = $1 WHERE id = $2', [fallos, user.id]);
+      if (fallos >= MAX_FALLOS) {
+        await db.query(`UPDATE login_intentos SET bloqueado_hasta = NOW() + INTERVAL '${BLOQUEO_MIN} minutes' WHERE email = $1 AND ip = $2`, [correo, ip]);
+        return res.status(429).json({ error: textoEspera(BLOQUEO_MIN), minutos: BLOQUEO_MIN });
+      }
       return res.status(401).json({ error: 'Credenciales incorrectas', intentos_restantes: MAX_FALLOS - fallos });
     }
 
+    // Contraseña correcta: se olvidan los fallos de esta conexión y los de la cuenta
+    if (intento) await db.query('DELETE FROM login_intentos WHERE email = $1 AND ip = $2', [correo, ip]);
     if (user.login_fallos || user.login_bloqueado_hasta) {
       await db.query('UPDATE users SET login_fallos = 0, login_bloqueado_hasta = NULL WHERE id = $1', [user.id]);
     }
@@ -101,7 +132,7 @@ router.post('/login', async (req, res, next) => {
     const token = signToken(user);
     // No se devuelven datos internos (contraseña, códigos de recuperación, contadores)
     const { password_hash, reset_otp, reset_otp_expires, reset_attempts, login_fallos, login_bloqueado_hasta, minutos_bloqueo, bloqueado, bloqueo_motivo,
-            sesiones_desde, reset_pedidos, reset_pedidos_desde, ...safeUser } = user;
+            sesiones_desde, reset_pedidos, reset_pedidos_desde, ocr_usos, ocr_dia, ...safeUser } = user;
     res.json({ token, user: safeUser });
   } catch (err) { next(err); }
 });
@@ -299,6 +330,7 @@ router.post('/reset-password', async (req, res, next) => {
       'UPDATE users SET password_hash = $1, reset_otp = NULL, reset_otp_expires = NULL, reset_attempts = 0, login_fallos = 0, login_bloqueado_hasta = NULL, sesiones_desde = NOW() WHERE id = $2',
       [hash, user.id]
     );
+    await db.query('DELETE FROM login_intentos WHERE email = (SELECT LOWER(TRIM(email)) FROM users WHERE id = $1)', [user.id]);
     // Las sesiones abiertas antes del cambio dejan de valer (por si alguien entró con la contraseña antigua)
     olvidarEstado(user.id);
 

@@ -199,6 +199,17 @@ const initSchema = async () => {
       ALTER TABLE users ADD COLUMN IF NOT EXISTS sesiones_desde TIMESTAMPTZ;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_pedidos INTEGER NOT NULL DEFAULT 0;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_pedidos_desde TIMESTAMPTZ;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS ocr_usos INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS ocr_dia DATE;
+      CREATE TABLE IF NOT EXISTS login_intentos (
+        email           TEXT NOT NULL,
+        ip              TEXT NOT NULL,
+        fallos          INTEGER NOT NULL DEFAULT 0,
+        bloqueado_hasta TIMESTAMPTZ,
+        actualizado     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        PRIMARY KEY (email, ip)
+      );
+      DELETE FROM login_intentos WHERE actualizado < NOW() - INTERVAL '2 days';
       ALTER TABLE mensajes ADD COLUMN IF NOT EXISTS imagen TEXT;   -- foto (data:image/jpeg;base64,...)
       ALTER TABLE mensajes ADD COLUMN IF NOT EXISTS gif TEXT;      -- URL del GIF (GIPHY)
       CREATE TABLE IF NOT EXISTS reacciones (

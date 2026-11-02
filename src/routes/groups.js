@@ -322,6 +322,23 @@ router.post('/:id/share-link', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// ── POST /groups/:id/share-link/renovar ──────────────────────────
+// Crea un enlace nuevo y el anterior deja de funcionar (por si se ha
+// compartido donde no debía). Solo quien creó el grupo.
+router.post('/:id/share-link/renovar', requireAuth, async (req, res, next) => {
+  try {
+    if (!await ownsGroup(req.params.id, req.user.id)) {
+      return res.status(404).json({ error: 'Grupo no encontrado' });
+    }
+    const token = uuidv4().replace(/-/g, '');
+    await db.query('DELETE FROM share_tokens WHERE group_id = $1', [req.params.id]);
+    await db.query('INSERT INTO share_tokens (group_id, token) VALUES ($1, $2)', [req.params.id, token]);
+    const quien = await actorName(req.params.id, req.user.id);
+    await mensajeSistema(req.params.id, `🔗 ${quien} cambió el enlace de invitación. El anterior ya no funciona.`);
+    res.status(201).json({ token, url: `/shared/${token}` });
+  } catch (err) { next(err); }
+});
+
 // ── GET /shared/:token ────────────────────────────────────────────
 router.get('/shared/:token', async (req, res, next) => {
   try {

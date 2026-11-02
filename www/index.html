@@ -4032,6 +4032,9 @@ async function abrirInvitar() {
   caja.textContent = _enlaceInvitacion || 'Generando enlace…';
   document.getElementById('modal-invitar').style.display = 'flex';
   document.body.style.overflow = 'hidden';
+  const esCreador = !!(profile.id && g.owner_id && profile.id === g.owner_id);
+  document.getElementById('invitarRenovar').style.display = esCreador ? 'block' : 'none';
+  cancelarRenovarInvitacion();
   if (_enlaceInvitacion) return;
   try {
     const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/share-link`, {
@@ -4043,6 +4046,32 @@ async function abrirInvitar() {
     caja.textContent = _enlaceInvitacion;
   } catch (_) {
     caja.textContent = 'No se pudo generar el enlace. Revisa tu conexión.';
+  }
+}
+// Cambiar el enlace de invitación (solo quien creó el grupo)
+function pedirRenovarInvitacion() {
+  document.getElementById('invitarRenovarBtn').style.display = 'none';
+  document.getElementById('invitarRenovarConfirma').style.display = 'block';
+}
+function cancelarRenovarInvitacion() {
+  document.getElementById('invitarRenovarBtn').style.display = 'flex';
+  document.getElementById('invitarRenovarConfirma').style.display = 'none';
+}
+async function renovarInvitacion() {
+  const g = groups[currentGroupIdx];
+  const caja = document.getElementById('invitarEnlace');
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/share-link/renovar`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    const data = await res.json();
+    if (!res.ok || !data.token) throw new Error(data.error || '');
+    _enlaceInvitacion = `${API_BASE}/login.html?invite=${data.token}`;
+    caja.textContent = _enlaceInvitacion;
+    cancelarRenovarInvitacion();
+    toast('Enlace cambiado. El anterior ya no funciona.', 's');
+  } catch (e) {
+    toast(e.message || 'No se pudo cambiar el enlace. Revisa tu conexión.', 'e');
   }
 }
 function cerrarInvitar() {
@@ -7351,6 +7380,17 @@ async function enviarGifChat(btn) {
     <div style="display:flex; gap:10px; margin-bottom:12px;">
       <button type="button" onclick="whatsappInvitacion()" style="flex:1; padding:11px; border-radius:12px; border:1px solid #25D366; background:rgba(37,211,102,.1); color:#25D366; font-weight:800; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.6-1.3a.4.4 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg> WhatsApp</button>
       <button type="button" onclick="copiarInvitacion()" style="flex:1; padding:11px; border-radius:12px; border:1px solid #444; background:none; color:#F2F2F2; font-weight:800; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar</button>
+    </div>
+    <!-- Solo quien creó el grupo: cambiar el enlace (el anterior deja de funcionar) -->
+    <div id="invitarRenovar" style="display:none; border-top:1px solid #2a2a2a; padding-top:10px; margin-bottom:6px;">
+      <button type="button" id="invitarRenovarBtn" onclick="pedirRenovarInvitacion()" style="width:100%; padding:6px; background:none; border:none; color:#aaa; font-size:.78rem; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Cambiar enlace</button>
+      <div id="invitarRenovarConfirma" style="display:none; text-align:center;">
+        <p style="color:#ccc; font-size:.75rem; line-height:1.4; margin:2px 0 10px;">El enlace actual dejará de funcionar. Quien ya está en el grupo no se ve afectado.</p>
+        <div style="display:flex; gap:8px;">
+          <button type="button" onclick="cancelarRenovarInvitacion()" style="flex:1; padding:9px; border-radius:10px; border:1px solid #444; background:none; color:#F2F2F2; font-weight:700; font-size:.8rem; cursor:pointer;">Cancelar</button>
+          <button type="button" onclick="renovarInvitacion()" style="flex:1; padding:9px; border-radius:10px; border:none; background:#dc3545; color:#fff; font-weight:800; font-size:.8rem; cursor:pointer;">Cambiar enlace</button>
+        </div>
+      </div>
     </div>
     <button type="button" onclick="cerrarInvitar()" style="width:100%; padding:8px; background:none; border:none; color:#888; font-weight:700; cursor:pointer;">Cerrar</button>
   </div>
