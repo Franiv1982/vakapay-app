@@ -2,7 +2,8 @@
 const express = require('express');
 const db      = require('../db/database');
 const { requireAuth }  = require('../middleware/auth');
-const { logGroupActivity } = require('../utils/activity');
+const { logGroupActivity, mensajeSistema, actorName } = require('../utils/activity');
+const { DIAS_CONFIRMAR, porConfirmar, fechaCorta } = require('../utils/pagos');
 
 const router = express.Router({ mergeParams: true });
 
@@ -25,6 +26,8 @@ function ticketValido(t) {
   return t === null || (typeof t === 'string' && /^data:image\/(?!svg)[a-z0-9.+-]+;base64,/i.test(t) && t.length <= MAX_TICKET);
 }
 // Quita la imagen de la respuesta y deja solo si existe (los listados no la necesitan)
+// Añade por_confirmar (true si el pago espera a que quien cobra lo confirme)
+const conEstado = e => ({ ...e, por_confirmar: porConfirmar(e) });
 function sinTicket(row) {
   const { ticket, ...resto } = row;
   return { ...resto, has_ticket: !!ticket };
@@ -166,7 +169,7 @@ router.get('/', requireAuth, async (req, res, next) => {
       SELECT * FROM expenses WHERE group_id = $1 ORDER BY expense_date DESC, created_at DESC
     `, [req.params.id]);
 
-    const expenses = expensesRes.rows.map(sinTicket);
+    const expenses = expensesRes.rows.map(r => conEstado(sinTicket(r)));
     for (const ex of expenses) {
       const splits = await db.query('SELECT * FROM expense_splits WHERE expense_id = $1', [ex.id]);
       ex.splits = splits.rows;
@@ -218,6 +221,14 @@ router.post('/', requireAuth, async (req, res, next) => {
       }
     }
 
+    // Pago registrado por alguien que no es quien cobra: queda pendiente de que
+    // quien cobra lo confirme (si tiene cuenta; si no, nadie podría confirmarlo)
+    let pendiente = false;
+    if (es_pago) {
+      const cobra = (await db.query('SELECT user_id FROM group_members WHERE group_id = $1 AND display_name = $2', [req.params.id, involved[0]])).rows[0];
+      pendiente = !!(cobra && cobra.user_id && Number(cobra.user_id) !== Number(req.user.id));
+    }
+
     // Pagos: se comprueban y registran de uno en uno por grupo (bloqueo en la base de datos)
     if (es_pago) {
       candado = await db.pool.connect();
@@ -227,11 +238,14 @@ router.post('/', requireAuth, async (req, res, next) => {
     }
 
     const expRes = await db.query(`
-      INSERT INTO expenses (group_id, description, amount, currency, amount_base, category, payer_name, expense_date, member_id, ticket, es_pago)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *
-    `, [req.params.id, description, amount, currency, amount_base, category, payer_name, expense_date, req.user.id, ticket, es_pago]);
+      INSERT INTO expenses (group_id, description, amount, currency, amount_base, category, payer_name, expense_date, member_id, ticket, es_pago,
+                            pago_estado, pago_confirmar_antes)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *
+    `, [req.params.id, description, amount, currency, amount_base, category, payer_name, expense_date, req.user.id, ticket, es_pago,
+        es_pago ? (pendiente ? 'pendiente' : 'confirmado') : null,
+        pendiente ? new Date(Date.now() + DIAS_CONFIRMAR * 86400000) : null]);
 
-    const expense = sinTicket(expRes.rows[0]);
+    const expense = conEstado(sinTicket(expRes.rows[0]));
 
     for (const { nombre, share } of repartir(amount_base, involved)) {
       await db.query(
@@ -247,6 +261,7 @@ router.post('/', requireAuth, async (req, res, next) => {
 
     await logGroupActivity(req.params.id, req.user.id, es_pago ? 'payment' : 'expense', (quien, grupo) => es_pago
       ? `${quien} registró un pago: ${pagadoPor ? `${pagadoPor} pagó por ${payer_name}` : `${payer_name} pagó`} ${importe(amount, currency)} a ${involved[0]} en "${grupo}"${ticket ? ' (con comprobante)' : ''}`
+        + (pendiente ? `. ${involved[0]}, confírmalo en «Pagos realizados» antes del ${fechaCorta(expense.pago_confirmar_antes)}` : '')
       : `${quien} registró "${description}" · ${importe(amount, currency)} (pagó ${payer_name}) en "${grupo}"`);
     res.status(201).json(expense);
   } catch (err) { next(err); }
@@ -367,6 +382,44 @@ router.put('/:expId/ticket', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// ── POST /groups/:id/expenses/:expId/confirmar ───────────────────
+// Quien cobra confirma un pago pendiente. body.importe (opcional): lo que
+// recibió de verdad si fue menos; el pago queda por ese importe y el resto
+// sigue como deuda.
+router.post('/:expId/confirmar', requireAuth, async (req, res, next) => {
+  try {
+    const gasto = (await db.query('SELECT * FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id])).rows[0];
+    if (!gasto || !gasto.es_pago) return res.status(404).json({ error: 'Pago no encontrado' });
+    const para = (await db.query('SELECT member_name FROM expense_splits WHERE expense_id = $1 LIMIT 1', [gasto.id])).rows[0]?.member_name;
+    const yo = (await db.query('SELECT display_name FROM group_members WHERE group_id = $1 AND user_id = $2', [req.params.id, req.user.id])).rows[0];
+    if (!yo || yo.display_name !== para) return res.status(403).json({ error: 'Solo quien cobra puede confirmar este pago' });
+    if (!porConfirmar(gasto)) return res.status(409).json({ error: 'Este pago ya está confirmado' });
+
+    const total = Number(gasto.amount_base);
+    let recibido = total;
+    if (req.body.importe !== undefined && req.body.importe !== null && req.body.importe !== '') {
+      recibido = Math.round(Number(req.body.importe) * 100) / 100;
+      if (!Number.isFinite(recibido) || recibido <= 0) return res.status(400).json({ error: 'Escribe un importe mayor que cero. Si no recibiste nada, rechaza el pago.' });
+      if (recibido > total + 0.001) return res.status(400).json({ error: `El importe no puede ser mayor que el pago registrado (${total.toFixed(2)})` });
+    }
+    const parcial = recibido < total - 0.001;
+    // Importe en la divisa original, en proporción
+    const nuevoAmount = parcial ? Math.round(Number(gasto.amount) * (recibido / total) * 100) / 100 : Number(gasto.amount);
+    const r = await db.query(`
+      UPDATE expenses SET pago_estado = 'confirmado', amount = $1, amount_base = $2
+      WHERE id = $3 AND pago_estado = 'pendiente' RETURNING id`, [nuevoAmount, recibido, gasto.id]);
+    if (!r.rows[0]) return res.status(409).json({ error: 'Este pago ya está confirmado' });
+    if (parcial) {
+      await db.query('UPDATE expense_splits SET share = $1 WHERE expense_id = $2', [recibido, gasto.id]);
+      await recalcBalances(req.params.id);
+    }
+    await logGroupActivity(req.params.id, req.user.id, 'payment', (quien, grupo) => parcial
+      ? `${quien} confirmó que recibió ${importe(nuevoAmount, gasto.currency)} de ${gasto.payer_name} (registró ${importe(gasto.amount, gasto.currency)}) en "${grupo}". ${gasto.payer_name} sigue debiendo ${importe(Number(gasto.amount) - nuevoAmount, gasto.currency)}`
+      : `${quien} confirmó el pago de ${gasto.payer_name} (${importe(gasto.amount, gasto.currency)}) en "${grupo}"`);
+    res.json({ ok: true, importe: recibido, parcial });
+  } catch (err) { next(err); }
+});
+
 // ── DELETE /groups/:id/expenses/:expId ───────────────────────────
 router.delete('/:expId', requireAuth, async (req, res, next) => {
   try {
@@ -377,15 +430,17 @@ router.delete('/:expId', requireAuth, async (req, res, next) => {
     }
     const expRes = await db.query('SELECT * FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
     const borrado = expRes.rows[0];
+    const rechazo = borrado && porConfirmar(borrado);
     const textoBorrado = borrado && borrado.es_pago
-      ? (quien, grupo) => `${quien} anuló el pago de ${borrado.payer_name} (${importe(borrado.amount, borrado.currency)}) en "${grupo}"`
+      ? (quien, grupo) => `${quien} ${rechazo ? 'rechazó' : 'anuló'} el pago de ${borrado.payer_name} (${importe(borrado.amount, borrado.currency)}) en "${grupo}"`
+          + (rechazo ? `. La deuda vuelve a «Cuentas finales»` : '')
       : (quien, grupo) => `${quien} eliminó "${borrado.description}" · ${importe(borrado.amount, borrado.currency)} en "${grupo}"`;
     if (!borrado) return res.status(404).json({ error: 'Gasto no encontrado' });
     if (!await puedeGestionarPago(req.params.id, req.user.id, borrado)) return res.status(403).json({ error: NO_PUEDE_PAGO });
 
     await db.query('DELETE FROM expenses WHERE id = $1', [req.params.expId]);
     await recalcBalances(req.params.id);
-    await logGroupActivity(req.params.id, req.user.id, 'expense', textoBorrado);
+    await logGroupActivity(req.params.id, req.user.id, borrado.es_pago ? 'payment' : 'expense', textoBorrado);
     res.status(204).end();
   } catch (err) { next(err); }
 });

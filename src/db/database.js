@@ -199,6 +199,8 @@ const initSchema = async () => {
       ALTER TABLE users ADD COLUMN IF NOT EXISTS sesiones_desde TIMESTAMPTZ;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_pedidos INTEGER NOT NULL DEFAULT 0;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_pedidos_desde TIMESTAMPTZ;
+      ALTER TABLE expenses ADD COLUMN IF NOT EXISTS pago_estado TEXT;
+      ALTER TABLE expenses ADD COLUMN IF NOT EXISTS pago_confirmar_antes TIMESTAMPTZ;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS ocr_usos INTEGER NOT NULL DEFAULT 0;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS ocr_dia DATE;
       CREATE TABLE IF NOT EXISTS login_intentos (

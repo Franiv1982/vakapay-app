@@ -2417,7 +2417,7 @@ async function deleteGroup(idx) {
       });
       if (res.status === 422) {
         const data = await res.json();
-        toast(data.error, 'e');
+        mostrarAviso(data.titulo || 'Aún no puedes salir del grupo', data.error);
         return;
       }
       if (!res.ok && res.status !== 404) {
@@ -2619,7 +2619,8 @@ async function removeMember(n) {
   const getInvolved = e => e.involved || (e.splits ? e.splits.map(s => s.member_name) : []);
   const count = (g.expenses || []).filter(e => (e.payer || e.payer_name) === n || getInvolved(e).includes(n)).length;
   const saldo = Number(g.members[n]) || 0;
-  const pendiente = Math.abs(saldo) > 0.05;   // mismo margen de redondeo que en Cuentas finales
+  const pagoSinConfirmar = (g.expenses || []).find(e => e.es_pago && e.por_confirmar && e.payer === n);
+  const pendiente = Math.abs(saldo) > 0.05 || !!pagoSinConfirmar;   // mismo margen de redondeo que en Cuentas finales
 
   document.getElementById('del-miembro-avatar').textContent = n[0].toUpperCase();
   document.getElementById('del-miembro-name').textContent = n;
@@ -2630,7 +2631,13 @@ async function removeMember(n) {
   info.innerHTML = '';
   const linea = t => { const sp = document.createElement('span'); sp.textContent = t; info.appendChild(sp); };
 
-  if (pendiente) {
+  if (pendiente && Math.abs(saldo) <= 0.05) {
+    // Saldo a cero, pero con un pago que quien cobra aún no ha confirmado
+    const para = (pagoSinConfirmar.involved || [])[0] || '';
+    document.getElementById('del-miembro-msg').textContent =
+      `El pago de ${n} de ${formatAmountBase(Number(pagoSinConfirmar.baseAmt) || 0)} a ${para} está pendiente de que ${para} lo confirme.`;
+    linea(`⏳ Podrás eliminarlo cuando ${para} lo confirme, o el ${fechaDiaMes(pagoSinConfirmar.pago_confirmar_antes)} si no responde.`);
+  } else if (pendiente) {
     // Con saldo pendiente se perdería la deuda: primero hay que saldarla
     const importe = formatAmountBase(Math.abs(saldo));
     document.getElementById('del-miembro-msg').textContent = saldo < 0
@@ -3269,6 +3276,7 @@ function renderPagosRealizados() {
     const pagoPor = (String(e.desc || '').match(/\(pagó ([^)]+)\)$/) || [])[1];
     const quien = nombrePorId[String(e.member_id)];
     const detalles = [fmtDate(e.date), pagoPor ? `pagó ${pagoPor}` : '', quien ? `registró ${quien}` : ''].filter(Boolean).join(' · ');
+    if (e.por_confirmar) return tarjetaPagoPendiente(e, i, para, detalles, base);
     // Cada pago es una tarjeta (como en Lista de gastos): tocarla abre el detalle; 🧾 abre el comprobante
     return `<div class="group-card" onclick="openGasto(${i},'pagos')" style="gap:10px;padding:11px 12px;margin-bottom:8px;">
       <div style="width:34px;height:34px;border-radius:10px;background:rgba(61,186,111,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
@@ -3285,6 +3293,141 @@ function renderPagosRealizados() {
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
     </div>`;
   }).join('');
+}
+
+// ─── PAGOS PENDIENTES DE CONFIRMAR ──────────────────────────────────
+// Un pago registrado por quien paga espera a que quien cobra lo confirme
+// (5 días; después se confirma solo). Quien cobra: Confirmar / Recibí otro
+// importe / Rechazar. Quien pagó no puede salir del grupo mientras tanto.
+const fechaDiaMes = d => { const f = new Date(d); return `${String(f.getDate()).padStart(2, '0')}/${String(f.getMonth() + 1).padStart(2, '0')}`; };
+function tarjetaPagoPendiente(e, i, para, detalles, base) {
+  const g = groups[currentGroupIdx];
+  const yo = miNombreEnGrupo(g);
+  const hasta = fechaDiaMes(e.pago_confirmar_antes);
+  const imp = formatAmountBase(Number(e.baseAmt) || 0, base);
+  const etiqueta = yo === para ? `⏳ Pendiente de que confirmes · se confirma solo el ${hasta}`
+    : yo === e.payer ? `⏳ Esperando que ${para} lo confirme · solo el ${hasta}`
+    : `⏳ Pendiente de que ${para} lo confirme · solo el ${hasta}`;
+  const botones = yo === para ? `
+      <div style="display:flex;flex-direction:column;gap:7px;margin-top:10px;" onclick="event.stopPropagation()">
+        <button type="button" onclick="confirmarPagoPendiente(${i})" style="padding:10px;border-radius:10px;border:none;background:#28a745;color:#fff;font-weight:800;font-size:.8rem;cursor:pointer;">✓ Confirmar: recibí ${imp}</button>
+        <button type="button" onclick="abrirPagoPendiente(${i},'otro')" style="padding:10px;border-radius:10px;border:1px solid #555;background:none;color:var(--text);font-weight:800;font-size:.8rem;cursor:pointer;">Recibí otro importe</button>
+        <button type="button" onclick="abrirPagoPendiente(${i},'rechazar')" style="padding:10px;border-radius:10px;border:1px solid rgba(255,77,77,.6);background:none;color:var(--danger);font-weight:800;font-size:.8rem;cursor:pointer;">Rechazar: no he recibido nada</button>
+      </div>` : '';
+  return `<div onclick="openGasto(${i},'pagos')" style="border:1.5px solid rgba(245,200,0,.55);background:rgba(245,200,0,.05);border-radius:14px;margin-bottom:8px;padding:11px 12px;cursor:pointer;">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:34px;height:34px;border-radius:10px;background:rgba(245,200,0,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F5C800" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.84rem;color:var(--text);"><strong>${escaparHtml(e.payer)}</strong> → <strong>${escaparHtml(para)}</strong></div>
+        <div style="font-size:.66rem;color:var(--muted);margin-top:2px;">${escaparHtml(detalles)}</div>
+      </div>
+      <div style="font-weight:800;color:var(--gold);font-size:.85rem;white-space:nowrap;">${imp}</div>
+    </div>
+    <div style="display:inline-block;font-size:.66rem;font-weight:800;color:var(--gold);background:rgba(245,200,0,.12);border-radius:20px;padding:4px 10px;margin-top:8px;line-height:1.35;">${escaparHtml(etiqueta)}</div>
+    ${botones}
+  </div>`;
+}
+async function enviarConfirmacionPago(e, importe) {
+  const g = groups[currentGroupIdx];
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/expenses/${e.id}/confirmar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: JSON.stringify(importe === undefined ? {} : { importe })
+    });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) { toast(d.error || 'No se pudo confirmar el pago', 'e'); await recargarGrupoDelServidor(g); return false; }
+    toast(d.parcial ? `Pago confirmado por ${formatAmountBase(d.importe)}. El resto sigue pendiente.` : 'Pago confirmado', 's');
+    await recargarGrupoDelServidor(g);
+    refrescarActividad();
+    return true;
+  } catch (_) { toast('Sin conexión. Inténtalo de nuevo.', 'e'); return false; }
+}
+function confirmarPagoPendiente(i) {
+  const e = groups[currentGroupIdx].expenses[i];
+  if (e) enviarConfirmacionPago(e);
+}
+let _pagoPendiente = null;
+function abrirPagoPendiente(i, modo) {
+  const e = groups[currentGroupIdx].expenses[i];
+  if (!e) return;
+  _pagoPendiente = { e, modo };
+  const total = Number(e.baseAmt) || 0;
+  const otro = modo === 'otro';
+  document.getElementById('pp-titulo').textContent = otro ? `¿Cuánto recibiste de ${e.payer}?` : '¿Rechazar el pago?';
+  document.getElementById('pp-texto').textContent = otro
+    ? `${e.payer} registró un pago de ${formatAmountBase(total)}. Escribe lo que te llegó de verdad.`
+    : `Úsalo si no has recibido nada de ${e.payer}. El pago de ${formatAmountBase(total)} se anula y la deuda vuelve a «Cuentas finales».`;
+  document.getElementById('pp-importe-wrap').style.display = otro ? 'block' : 'none';
+  const inp = document.getElementById('pp-importe');
+  inp.value = ''; inp.max = total;
+  document.getElementById('pp-resumen').style.display = 'none';
+  const btn = document.getElementById('pp-aceptar');
+  btn.textContent = otro ? 'Confirmar' : 'Sí, rechazar';
+  btn.style.background = otro ? '#28a745' : '#dc3545';
+  btn.disabled = otro;
+  btn.style.opacity = otro ? '.5' : '1';
+  document.getElementById('modal-pago-pendiente').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  if (otro) setTimeout(() => inp.focus(), 50);
+}
+function actualizarPagoPendiente() {
+  if (!_pagoPendiente) return;
+  const total = Number(_pagoPendiente.e.baseAmt) || 0;
+  const v = Math.round(parseFloat(String(document.getElementById('pp-importe').value).replace(',', '.')) * 100) / 100;
+  const res = document.getElementById('pp-resumen');
+  const btn = document.getElementById('pp-aceptar');
+  const ok = Number.isFinite(v) && v > 0 && v <= total;
+  btn.disabled = !ok; btn.style.opacity = ok ? '1' : '.5';
+  if (!Number.isFinite(v) || v <= 0) { res.style.display = 'none'; btn.textContent = 'Confirmar'; return; }
+  res.style.display = 'block';
+  res.innerHTML = '';
+  const linea = t => { const d = document.createElement('div'); d.textContent = t; res.appendChild(d); };
+  if (v > total) { linea(`⚠️ No puede ser más de ${formatAmountBase(total)}, lo que registró ${_pagoPendiente.e.payer}.`); return; }
+  linea(`✅ Pago confirmado por ${formatAmountBase(v)}`);
+  if (total - v > 0.004) linea(`🔴 ${_pagoPendiente.e.payer} seguirá debiéndote ${formatAmountBase(total - v)} en «Cuentas finales»`);
+  btn.textContent = `Confirmar ${formatAmountBase(v)}`;
+}
+function cerrarPagoPendiente() {
+  document.getElementById('modal-pago-pendiente').style.display = 'none';
+  document.body.style.overflow = '';
+  _pagoPendiente = null;
+}
+async function aceptarPagoPendiente() {
+  if (!_pagoPendiente) return;
+  const { e, modo } = _pagoPendiente;
+  const g = groups[currentGroupIdx];
+  if (modo === 'otro') {
+    const v = Math.round(parseFloat(String(document.getElementById('pp-importe').value).replace(',', '.')) * 100) / 100;
+    if (!(v > 0)) return;
+    cerrarPagoPendiente();
+    await enviarConfirmacionPago(e, v);
+    return;
+  }
+  cerrarPagoPendiente();
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/expenses/${e.id}`, {
+      method: 'DELETE', headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    if (!res.ok) { const d = await res.json().catch(() => ({})); toast(d.error || 'No se pudo rechazar el pago', 'e'); return; }
+    toast('Pago rechazado. La deuda vuelve a «Cuentas finales».', 'i');
+    await recargarGrupoDelServidor(g);
+    refrescarActividad();
+  } catch (_) { toast('Sin conexión. Inténtalo de nuevo.', 'e'); }
+}
+
+// Aviso con título y texto (por ejemplo, por qué aún no puedes salir de un grupo)
+function mostrarAviso(titulo, texto) {
+  document.getElementById('aviso-titulo').textContent = titulo;
+  document.getElementById('aviso-texto').textContent = texto;
+  document.getElementById('modal-aviso').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function cerrarAviso() {
+  document.getElementById('modal-aviso').style.display = 'none';
+  document.body.style.overflow = '';
 }
 
 // ─── PAY MODAL ──────────────────────────────────────────────────────
@@ -5198,6 +5341,10 @@ function mostrarModalPendientes(pendientes, tipo) {
   document.getElementById('pendientes-lista').innerHTML = pendientes.map(p => {
     const debes = p.balance < 0;
     const importe = `${sym}${Math.abs(p.balance).toFixed(2)}`;
+    if (p.por_confirmar && Math.abs(p.balance) <= 0.05) return `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #333;">
+      <span style="color:white;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escaparHtml(p.name)}</span>
+      <span style="flex-shrink:0;font-weight:800;color:var(--gold);">⏳ ${escaparHtml(p.por_confirmar.para)} debe confirmar tu pago</span>
+    </div>`;
     return `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #333;">
       <span style="color:white;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>
       <span style="flex-shrink:0;font-weight:800;color:${debes ? '#ff4d4d' : '#3DBA6F'};">${debes ? 'Debes' : 'Te deben'} ${importe}</span>
@@ -7381,6 +7528,32 @@ async function enviarGifChat(btn) {
     <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:16px; opacity:0.8; text-align:center; line-height:1.4;">¿Quién eres en este grupo? Si ya te habían añadido, elige tu nombre: conservarás tus gastos y saldos.</p>
     <div id="quien-opciones" style="margin-bottom:18px;"></div>
     <button onclick="confirmarQuienEres()" style="width:100%; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:#000; background:#F5C800;">Continuar</button>
+  </div>
+</div>
+
+<!-- Modal: pago pendiente → «Recibí otro importe» o «Rechazar» -->
+<div class="modal-overlay" id="modal-pago-pendiente" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarPagoPendiente()">
+  <div style="background:#1e1e1e; width:90%; max-width:360px; padding:22px 18px; border-radius:22px; border:1px solid #333; box-sizing:border-box;">
+    <div id="pp-titulo" style="color:#F2F2F2; font-size:1.15rem; font-weight:800; text-align:center; margin-bottom:6px;"></div>
+    <p id="pp-texto" style="color:#bbb; font-size:.78rem; text-align:center; line-height:1.45; margin-bottom:14px;"></p>
+    <div id="pp-importe-wrap" style="display:none;">
+      <input id="pp-importe" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" oninput="actualizarPagoPendiente()"
+        style="width:100%; box-sizing:border-box; background:#141414; border:1.5px solid var(--gold); border-radius:12px; padding:12px; font-size:1.4rem; font-weight:800; text-align:center; color:var(--gold); margin-bottom:10px; outline:none;">
+    </div>
+    <div id="pp-resumen" style="display:none; background:#252525; border-radius:12px; padding:10px 12px; font-size:.75rem; line-height:1.6; margin-bottom:14px; color:#F2F2F2;"></div>
+    <div style="display:flex; gap:10px;">
+      <button type="button" onclick="cerrarPagoPendiente()" style="flex:1; padding:12px; border-radius:12px; border:1px solid #555; background:none; color:#F2F2F2; font-weight:800; cursor:pointer;">Cancelar</button>
+      <button type="button" id="pp-aceptar" onclick="aceptarPagoPendiente()" style="flex:1; padding:12px; border-radius:12px; border:none; color:#fff; font-weight:800; cursor:pointer;">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: aviso genérico (título + texto + Entendido) -->
+<div class="modal-overlay" id="modal-aviso" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarAviso()">
+  <div style="background:#1e1e1e; width:90%; max-width:360px; padding:22px 18px; border-radius:22px; border:1px solid #333; box-sizing:border-box; text-align:center;">
+    <div id="aviso-titulo" style="color:#F2F2F2; font-size:1.2rem; font-weight:800; margin-bottom:8px;"></div>
+    <p id="aviso-texto" style="color:#bbb; font-size:.8rem; line-height:1.5; margin-bottom:16px;"></p>
+    <button type="button" onclick="cerrarAviso()" style="width:100%; padding:12px; border-radius:12px; border:none; background:#28a745; color:#fff; font-weight:800; cursor:pointer;">Entendido</button>
   </div>
 </div>
 
