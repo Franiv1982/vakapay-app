@@ -11,11 +11,12 @@
 // Todo se hace en una transacción: o se completa entero o no cambia nada.
 // ================================================================
 const db = require('../db/database');
+const { pagosSinConfirmar } = require('./pagos');
 
 // Tus grupos, tu saldo en cada uno y si hay más personas con cuenta
 async function analizarGrupos(userId, cliente = db) {
   const r = await cliente.query(`
-    SELECT g.id, g.name, gm.balance,
+    SELECT g.id, g.name, gm.balance, gm.display_name,
       EXISTS (
         SELECT 1 FROM group_members o
         WHERE o.group_id = g.id AND o.user_id IS NOT NULL AND o.user_id <> $1
@@ -24,13 +25,20 @@ async function analizarGrupos(userId, cliente = db) {
     JOIN group_members gm ON gm.group_id = g.id AND gm.user_id = $1
     ORDER BY g.name
   `, [userId]);
-  return r.rows.map(x => ({ id: x.id, name: x.name, balance: Number(x.balance) || 0, compartido: x.compartido }));
+  const grupos = r.rows.map(x => ({ id: x.id, name: x.name, balance: Number(x.balance) || 0, compartido: x.compartido, display_name: x.display_name }));
+  // Pagos tuyos que quien cobra aún no ha confirmado (también impiden irse)
+  for (const g of grupos) {
+    if (!g.compartido) continue;
+    const p = await pagosSinConfirmar(g.id, g.display_name, cliente);
+    if (p.length) g.por_confirmar = { importe: p[0].importe, para: p[0].para, hasta: p[0].hasta };
+  }
+  return grupos;
 }
 
 function resumen(grupos) {
   const pendientes = grupos
-    .filter(g => g.compartido && Math.abs(g.balance) > 0.05)   // hasta 5 céntimos: redondeo
-    .map(g => ({ id: g.id, name: g.name, balance: +g.balance.toFixed(2) }));
+    .filter(g => g.compartido && (Math.abs(g.balance) > 0.05 || g.por_confirmar))   // hasta 5 céntimos: redondeo
+    .map(g => ({ id: g.id, name: g.name, balance: +g.balance.toFixed(2), ...(g.por_confirmar ? { por_confirmar: g.por_confirmar } : {}) }));
   return {
     pendientes,                                                       // bloquean el borrado
     grupos_a_borrar: grupos.filter(g => !g.compartido).map(g => g.name), // solo tuyos

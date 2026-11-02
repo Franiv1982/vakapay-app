@@ -6,6 +6,7 @@ const { requireAuth } = require('../middleware/auth');
 const { logActivity, registrarEnGrupo, actorName, mensajeSistema } = require('../utils/activity');
 const { agregarAmigoSiNoExiste, sincronizarAmigosGrupo } = require('../utils/contactos');
 const { recalcBalances } = require('./expenses');
+const { pagosSinConfirmar, textoPagoPendiente, porConfirmar } = require('../utils/pagos');
 
 const router = express.Router();
 
@@ -117,7 +118,7 @@ router.get('/:id', requireAuth, async (req, res, next) => {
 
     // La imagen del comprobante no se envía en el listado (pesa mucho): solo si existe.
     // Se descarga aparte, al abrir el gasto.
-    const expenses = expensesRes.rows.map(({ ticket, ...ex }) => ({ ...ex, has_ticket: !!ticket }));
+    const expenses = expensesRes.rows.map(({ ticket, ...ex }) => ({ ...ex, has_ticket: !!ticket, por_confirmar: porConfirmar(ex) }));
     for (const ex of expenses) {
       const splits = await db.query('SELECT * FROM expense_splits WHERE expense_id = $1', [ex.id]);
       ex.splits = splits.rows;
@@ -167,6 +168,11 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
           ? `Tienes un saldo positivo de ${balance.toFixed(2)}. Salda las cuentas antes de salir.`
           : `Tienes una deuda pendiente de ${Math.abs(balance).toFixed(2)}. Salda las cuentas antes de salir.`
       });
+    }
+    // Un pago tuyo que quien cobra aún no ha confirmado también impide salir
+    const sinConfirmar = await pagosSinConfirmar(req.params.id, memberRes.rows[0].display_name);
+    if (sinConfirmar.length) {
+      return res.status(422).json({ error: textoPagoPendiente(sinConfirmar[0]), pago_pendiente: true, titulo: 'Aún no puedes salir del grupo' });
     }
 
     await db.query(
@@ -283,6 +289,10 @@ router.delete('/:id/members/:name', requireAuth, async (req, res, next) => {
           : `A ${member.display_name} todavía le deben ${saldo.toFixed(2)}. Registra el pago en «Cuentas finales» antes de eliminarlo.`,
         saldo_pendiente: saldo,
       });
+    }
+    const sinConfirmar = await pagosSinConfirmar(req.params.id, member.display_name);
+    if (sinConfirmar.length) {
+      return res.status(422).json({ error: textoPagoPendiente(sinConfirmar[0], { quien: member.display_name }), pago_pendiente: true });
     }
     await db.query('DELETE FROM group_members WHERE id = $1', [member.id]);
     const quien = await actorName(req.params.id, req.user.id);
