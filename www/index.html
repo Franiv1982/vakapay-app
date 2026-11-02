@@ -668,7 +668,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
     <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:10px">Quién paga a quién</div>
     <div id="debtList"><div class="no-items"><div class="ni">💸</div><div>Pulsa calcular para ver</div></div></div>
     <div style="height:10px"></div>
-    <button class="btn btn-gold btn-full" onclick="calcDebts()">Calcular Deudas</button>
+    <button class="btn btn-gold btn-full" id="btnCalcularDeudas" onclick="calcDebts()">Calcular Deudas</button>
     <div id="pagosRealizadosWrap" style="display:none">
       <div class="dvd"></div>
       <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:10px">Pagos realizados</div>
@@ -3176,7 +3176,21 @@ async function saveEditExpense() {
   }
 }
 // ═══ DELETE EXPENSE ════════════════════════════════════════════════════
-function calcDebts(){
+// «Calcular Deudas»: primero descarga el grupo del servidor (pagos y gastos que
+// otros hayan registrado mientras tenías la app abierta) y después calcula.
+// Antes se calculaba con los datos cargados al abrir el grupo: si alguien había
+// confirmado un pago entretanto, ese pago no contaba y el deudor seguía apareciendo.
+async function calcDebts(opciones = {}) {
+  if (currentGroupIdx === null) return;
+  const g = groups[currentGroupIdx];
+  const btn = document.getElementById('btnCalcularDeudas');
+  if (btn) { btn.disabled = true; btn.textContent = 'Actualizando…'; }
+  const ok = await recargarGrupoDelServidor(g, { aviso: !opciones.silencioso });
+  if (btn) { btn.disabled = false; btn.textContent = 'Calcular Deudas'; }
+  if (!ok) toast('Sin conexión: se calcula con los últimos datos descargados', 'e');
+}
+
+function calcularDeudas(aviso = true){
   if(currentGroupIdx===null)return;
   updateBalances();
   const g=groups[currentGroupIdx];
@@ -3218,7 +3232,7 @@ function calcDebts(){
           })()}
         </div>
       </div>`).join(''); 
-  toast('Cálculo completado 🧮','i');
+  if (aviso) toast('Cálculo completado 🧮','i');
 }
 
 // ─── PAGAR TAMBIÉN POR… ─────────────────────────────────────────────
@@ -3487,7 +3501,8 @@ async function _registrarPago(g, { from, to, amount }, archivoComprobante) {
 }
 
 // Recarga el grupo desde el servidor (saldos oficiales) y recalcula las deudas
-async function recargarGrupoDelServidor(g) {
+async function recargarGrupoDelServidor(g, { aviso = false } = {}) {
+  let ok = false;
   try {
     const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
       headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
@@ -3499,9 +3514,11 @@ async function recargarGrupoDelServidor(g) {
         members: normalizeMembersField(fresh.members, groups[currentGroupIdx].members),
         expenses: normalizeExpensesField(fresh.expenses)
       };
+      ok = true;
     }
   } catch (_) {}
-  save(); renderAll(); calcDebts();
+  save(); renderAll(); calcularDeudas(aviso);
+  return ok;
 }
 
 function confirmPayment(settle){
@@ -3685,6 +3702,7 @@ function toggleCuentasSection() {
   const open = wrap.style.display === 'block';
   wrap.style.display = open ? 'none' : 'block';
   chevron.style.transform = open ? '' : 'rotate(180deg)';
+  if (!open) calcDebts({ silencioso: true });   // al abrir: datos al día y deudas calculadas
 }
 function toggleParticipantesSection() {
   const wrap = document.getElementById('participantesSectionWrap');
