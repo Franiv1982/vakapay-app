@@ -921,15 +921,14 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
       <small style="color:#888;font-size:.7rem;">Define cuántos pesos equivalen a 1 Euro</small>
     </div>
 
-    <div class="g2">
-      <div class="field">
-        <label>¿Quién pagó?</label>
-        <select id="editPayer"></select>
-      </div>
-      <div class="field">
-        <label>Fecha</label>
-        <input type="date" id="editDate" style="width:100%;">
-      </div>
+    <!-- Cada campo en su fila: en la ventana de edición, a dos columnas, el año de la fecha se cortaba -->
+    <div class="field">
+      <label>¿Quién pagó?</label>
+      <select id="editPayer"></select>
+    </div>
+    <div class="field">
+      <label>Fecha</label>
+      <input type="date" id="editDate" style="width:100%;">
     </div>
 
     <div class="field">
@@ -3305,9 +3304,9 @@ function tarjetaPagoPendiente(e, i, para, detalles, base) {
   const yo = miNombreEnGrupo(g);
   const hasta = fechaDiaMes(e.pago_confirmar_antes);
   const imp = formatAmountBase(Number(e.baseAmt) || 0, base);
-  const etiqueta = yo === para ? `⏳ Pendiente de que confirmes · se confirma solo el ${hasta}`
-    : yo === e.payer ? `⏳ Esperando que ${para} lo confirme · solo el ${hasta}`
-    : `⏳ Pendiente de que ${para} lo confirme · solo el ${hasta}`;
+  const etiqueta = yo === para ? `Confírmalo antes del ${hasta}. Si no respondes, se dará por recibido.`
+    : yo === e.payer ? `Esperando que ${para} lo confirme. Si no responde, se confirmará solo el ${hasta}.`
+    : `Pendiente de que ${para} lo confirme (como máximo hasta el ${hasta}).`;
   const botones = yo === para ? `
       <div style="display:flex;flex-direction:column;gap:7px;margin-top:10px;" onclick="event.stopPropagation()">
         <button type="button" onclick="confirmarPagoPendiente(${i})" style="padding:10px;border-radius:10px;border:none;background:#28a745;color:#fff;font-weight:800;font-size:.8rem;cursor:pointer;">✓ Confirmar: recibí ${imp}</button>
