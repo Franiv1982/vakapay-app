@@ -2612,22 +2612,44 @@ async function addMember() {
 }
 
 async function removeMember(n) {
-  const g = groups[currentGroupIdx];
+  let g = groups[currentGroupIdx];
+  // Saldo actualizado del servidor: si alguien acaba de pagar, que cuente
+  if (g.id) { await recargarGrupoDelServidor(g); g = groups[currentGroupIdx]; }
+  updateBalances();
   const getInvolved = e => e.involved || (e.splits ? e.splits.map(s => s.member_name) : []);
-  const hasExpenses = g.expenses.some(e => (e.payer || e.payer_name) === n || getInvolved(e).includes(n));
-  const count = hasExpenses ? g.expenses.filter(e => (e.payer || e.payer_name) === n || getInvolved(e).includes(n)).length : 0;
+  const count = (g.expenses || []).filter(e => (e.payer || e.payer_name) === n || getInvolved(e).includes(n)).length;
+  const saldo = Number(g.members[n]) || 0;
+  const pendiente = Math.abs(saldo) > 0.05;   // mismo margen de redondeo que en Cuentas finales
 
   document.getElementById('del-miembro-avatar').textContent = n[0].toUpperCase();
   document.getElementById('del-miembro-name').textContent = n;
-  document.getElementById('del-miembro-msg').textContent = hasExpenses
-    ? 'Este participante tiene gastos registrados. Al eliminarlo sus gastos serán actualizados.'
-    : 'Esta acción no se puede deshacer.';
-  document.getElementById('del-miembro-info').innerHTML = hasExpenses
-    ? `<span>🧾 ${count} gasto${count !== 1 ? 's' : ''} registrado${count !== 1 ? 's' : ''}</span><span>⚠️ Sus gastos serán reasignados</span>`
-    : `<span>⚠️ El participante será eliminado del grupo</span>`;
+  document.getElementById('del-miembro-titulo').textContent = pendiente ? 'Aún no se puede eliminar' : '¿Eliminar participante?';
+  document.getElementById('del-miembro-si').style.display = pendiente ? 'none' : '';
+  document.getElementById('del-miembro-volver').textContent = pendiente ? 'Entendido' : 'No, volver';
+  const info = document.getElementById('del-miembro-info');
+  info.innerHTML = '';
+  const linea = t => { const sp = document.createElement('span'); sp.textContent = t; info.appendChild(sp); };
+
+  if (pendiente) {
+    // Con saldo pendiente se perdería la deuda: primero hay que saldarla
+    const importe = formatAmountBase(Math.abs(saldo));
+    document.getElementById('del-miembro-msg').textContent = saldo < 0
+      ? `${n} todavía debe ${importe}. Si lo eliminas, esa deuda desaparecería y las cuentas del grupo no cuadrarían.`
+      : `A ${n} todavía le deben ${importe}. Si lo eliminas, ese dinero desaparecería y las cuentas del grupo no cuadrarían.`;
+    linea(saldo < 0 ? `🔴 Debe ${importe}` : `🟢 Le deben ${importe}`);
+    linea('💸 Primero registrad el pago en «Cuentas finales» (aunque se haya pagado fuera de la app). Con su saldo a cero ya podrás eliminarlo.');
+  } else {
+    document.getElementById('del-miembro-msg').textContent = 'Esta acción no se puede deshacer.';
+    if (count) {
+      linea(`🧾 ${count} gasto${count !== 1 ? 's' : ''} con su nombre: se mantienen en la lista`);
+      linea('✅ Sus cuentas están saldadas: los saldos del resto no cambian');
+    } else {
+      linea('⚠️ El participante será eliminado del grupo');
+    }
+  }
   document.getElementById('modal-borrar-miembro').style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  window._miembroABorrar = n;
+  window._miembroABorrar = pendiente ? null : n;
 }
 
 function cerrarModalBorrarMiembro() {
@@ -2640,29 +2662,22 @@ async function ejecutarBorradoMiembro() {
   const n = window._miembroABorrar;
   if (!n) return;
   const g = groups[currentGroupIdx];
-  // 1. Limpiar gastos del participante en memoria
-  g.expenses = g.expenses.filter(e => {
-    if ((e.payer || e.payer_name) === n && e.involved.length === 1) return false;
-    if (e.involved.includes(n)) e.involved = e.involved.filter(p => p !== n);
-    return true;
-  });
-  delete g.members[n];
-  updateBalances();
-  // 2. Llamar al backend
   try {
     const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/members/${encodeURIComponent(n)}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
     });
     if (!res.ok) {
-      toast('Error al eliminar el participante', 'e');
+      const d = await res.json().catch(() => ({}));
+      toast(d.error || 'Error al eliminar el participante', 'e');
       cerrarModalBorrarMiembro();
       return;
     }
-  } catch(err) { console.error('Error eliminando miembro:', err); return; }
-  save();
-  renderAll();
+  } catch (err) { console.error('Error eliminando miembro:', err); toast('Sin conexión. Inténtalo de nuevo.', 'e'); return; }
   cerrarModalBorrarMiembro();
+  // Los gastos se quedan como estaban: se recarga el grupo tal y como lo tiene el servidor
+  delete g.members[n];
+  await recargarGrupoDelServidor(groups[currentGroupIdx]);
   toast(`${n} eliminado del grupo`, 'i');
   refrescarActividad();
 }
@@ -6186,7 +6201,7 @@ function cerrarModalSalir() {
 <div class="modal-overlay" id="modal-borrar-miembro" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalBorrarMiembro()">
   <div style="background:#1e1e1e; width:90%; max-width:340px; padding:25px; border-radius:24px; border:1px solid #333; text-align:center;">
     
-    <div style="color:#F2F2F2; font-size:1.5rem; font-weight:bold; margin-bottom:10px;">¿Eliminar participante?</div>
+    <div id="del-miembro-titulo" style="color:#F2F2F2; font-size:1.5rem; font-weight:bold; margin-bottom:10px;">¿Eliminar participante?</div>
     <p id="del-miembro-msg" style="color:#F2F2F2; font-size:0.8rem; margin-bottom:20px; opacity:0.8;"></p>
 
     <div style="background:#2a2a2a; border-radius:16px; padding:15px; margin-bottom:25px; text-align:left;">
@@ -6198,11 +6213,11 @@ function cerrarModalSalir() {
     </div>
 
     <div style="display:flex; gap:12px; width:100%;">
-      <button onclick="cerrarModalBorrarMiembro()" 
+      <button id="del-miembro-volver" onclick="cerrarModalBorrarMiembro()" 
         style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#28a745;">
         No, volver
       </button>
-      <button onclick="ejecutarBorradoMiembro()" 
+      <button id="del-miembro-si" onclick="ejecutarBorradoMiembro()" 
         style="flex:1; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:white; background:#dc3545;">
         Sí, eliminar
       </button>

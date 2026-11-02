@@ -5,6 +5,7 @@ const db      = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
 const { logActivity, registrarEnGrupo, actorName, mensajeSistema } = require('../utils/activity');
 const { agregarAmigoSiNoExiste, sincronizarAmigosGrupo } = require('../utils/contactos');
+const { recalcBalances } = require('./expenses');
 
 const router = express.Router();
 
@@ -271,6 +272,18 @@ router.delete('/:id/members/:name', requireAuth, async (req, res, next) => {
     );
     const member = mRes.rows[0];
     if (!member) return res.status(404).json({ error: 'Participante no encontrado' });
+    // Con saldo pendiente no se puede quitar: su deuda (o lo que le deben) desaparecería
+    // y las cuentas del resto no cuadrarían. Primero hay que registrar el pago.
+    await recalcBalances(req.params.id);
+    const saldo = Number((await db.query('SELECT balance FROM group_members WHERE id = $1', [member.id])).rows[0]?.balance) || 0;
+    if (Math.abs(saldo) > MARGEN_SALDO) {
+      return res.status(422).json({
+        error: saldo < 0
+          ? `${member.display_name} todavía debe ${Math.abs(saldo).toFixed(2)}. Registra el pago en «Cuentas finales» antes de eliminarlo.`
+          : `A ${member.display_name} todavía le deben ${saldo.toFixed(2)}. Registra el pago en «Cuentas finales» antes de eliminarlo.`,
+        saldo_pendiente: saldo,
+      });
+    }
     await db.query('DELETE FROM group_members WHERE id = $1', [member.id]);
     const quien = await actorName(req.params.id, req.user.id);
     await registrarEnGrupo(req.params.id, 'member', (uid, nombreGrupo) => uid === req.user.id

@@ -391,3 +391,4 @@ router.delete('/:expId', requireAuth, async (req, res, next) => {
 });
 
 module.exports = router;
+module.exports.recalcBalances = recalcBalances;
