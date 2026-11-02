@@ -669,18 +669,27 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
     <div id="debtList"><div class="no-items"><div class="ni">💸</div><div>Pulsa calcular para ver</div></div></div>
     <div style="height:10px"></div>
     <button class="btn btn-gold btn-full" id="btnCalcularDeudas" onclick="calcDebts()">Calcular Deudas</button>
-    <div id="pagosRealizadosWrap" style="display:none">
-      <div class="dvd"></div>
-      <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:10px">Pagos realizados</div>
-      <div id="pagosRealizados"></div>
-    </div>
   </div>
 </div>
 
   <!-- Share -->
-  <div class="sec-title" id="sec6" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleResumenSection()">
+  <div class="sec-title" id="secPagos" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="togglePagosSection()">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">6</div>
+    <h2>Pagos realizados</h2>
+    <span id="pagosCounter" style="color:var(--gold);font-size:.9rem;font-weight:700;margin-left:4px"></span>
+  </div>
+  <svg id="pagosChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+</div>
+  <div id="pagosSectionWrap" style="display:none">
+  <div class="card">
+    <div id="pagosRealizados"></div>
+  </div>
+</div>
+
+  <div class="sec-title" id="sec6" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleResumenSection()">
+  <div style="display:flex;align-items:center;gap:8px">
+    <div class="num">7</div>
     <h2>Enviar Resumen</h2>
   </div>
   <svg id="resumenChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
@@ -730,7 +739,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 <!-- Chat del grupo -->
 <div class="sec-title" id="sec7" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="abrirChat()">
   <div style="display:flex;align-items:center;gap:8px">
-    <div class="num">7</div>
+    <div class="num">8</div>
     <h2>Chat del grupo</h2>
     <span id="chatBadge" style="display:none;background:var(--danger);color:#fff;font-size:.65rem;font-weight:900;border-radius:10px;padding:2px 8px;margin-left:2px;"></span>
   </div>
@@ -2232,7 +2241,7 @@ async function openGroup(idx){
   document.getElementById('hbadge').textContent = TYPE_ICONS[g.type]+' '+g.name;
   document.getElementById('hbadge').style.display = 'block';
   posicionarBadge();
-  ['sec2','sec3','sec4','sec5','sec6','sec7'].forEach(id=>document.getElementById(id).style.opacity='1');
+  ['sec2','sec3','sec4','sec5','secPagos','sec6','sec7'].forEach(id=>document.getElementById(id).style.opacity='1');
   if (typeof actualizarNoLeidos === 'function') actualizarNoLeidos();
   document.getElementById('linkBox').style.display = 'none';
 
@@ -2415,12 +2424,10 @@ function goBackToGroup() {
   const desdePagos = _origenDetalle === 'pagos';
   abrir('gastosListSectionWrap', 'gastosListChevron', !desdePagos);
   if (desdePagos) {
-    abrir('cuentasSectionWrap', 'cuentasChevron', true);
+    abrir('pagosSectionWrap', 'pagosChevron', true);
     renderPagosRealizados();
     requestAnimationFrame(() => {
-      const destino = document.getElementById('pagosRealizadosWrap');
-      if (destino && destino.style.display !== 'none') destino.scrollIntoView({ block: 'start', behavior: 'instant' });
-      else document.getElementById('sec5')?.scrollIntoView({ block: 'start', behavior: 'instant' });
+      document.getElementById('secPagos')?.scrollIntoView({ block: 'start', behavior: 'instant' });
       window.scrollBy(0, -150);   // que no quede debajo de la cabecera fija
     });
   }
@@ -3260,15 +3267,19 @@ function pintarPagarTambien(idCont, datos, alCambiar) {
 // Historial de deudas saldadas, visible para todo el grupo, con el comprobante si lo hay
 function renderPagosRealizados() {
   const g = groups[currentGroupIdx];
-  const wrap = document.getElementById('pagosRealizadosWrap');
-  if (!g || !wrap) return;
+  const cont = document.getElementById('pagosRealizados');
+  if (!g || !cont) return;
   const nombrePorId = Object.fromEntries(Object.entries(g.memberIds || {}).map(([n, id]) => [String(id), n]));
   const pagos = (g.expenses || []).map((e, i) => ({ e, i })).filter(x => x.e.es_pago)
     .sort((a, b) => String(b.e.date).localeCompare(String(a.e.date)) || (b.e.id || 0) - (a.e.id || 0));
-  if (!pagos.length) { wrap.style.display = 'none'; return; }
-  wrap.style.display = 'block';
+  const contador = document.getElementById('pagosCounter');
+  if (contador) contador.textContent = pagos.length ? `(${pagos.length})` : '';
+  if (!pagos.length) {
+    cont.innerHTML = '<div class="no-items"><div class="ni">💸</div><div>Aún no hay pagos registrados.<br>Aparecerán aquí cuando se salden deudas en «Cuentas finales».</div></div>';
+    return;
+  }
   const base = getBase();
-  document.getElementById('pagosRealizados').innerHTML = pagos.map(({ e, i }) => {
+  cont.innerHTML = pagos.map(({ e, i }) => {
     const para = (e.involved || [])[0] || '';
     const pagoPor = (String(e.desc || '').match(/\(pagó ([^)]+)\)$/) || [])[1];
     const quien = nombrePorId[String(e.member_id)];
@@ -3703,6 +3714,15 @@ function toggleCuentasSection() {
   wrap.style.display = open ? 'none' : 'block';
   chevron.style.transform = open ? '' : 'rotate(180deg)';
   if (!open) calcDebts({ silencioso: true });   // al abrir: datos al día y deudas calculadas
+}
+function togglePagosSection() {
+  const wrap = document.getElementById('pagosSectionWrap');
+  const chevron = document.getElementById('pagosChevron');
+  if (!wrap) return;
+  const open = wrap.style.display === 'block';
+  wrap.style.display = open ? 'none' : 'block';
+  chevron.style.transform = open ? '' : 'rotate(180deg)';
+  if (!open && currentGroupIdx !== null && groups[currentGroupIdx]) recargarGrupoDelServidor(groups[currentGroupIdx]);
 }
 function toggleParticipantesSection() {
   const wrap = document.getElementById('participantesSectionWrap');
