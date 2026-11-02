@@ -36,7 +36,14 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+// Solo fotos: un archivo de otro tipo (por ejemplo HTML) no se acepta
+const TIPOS_FOTO = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
+const upload = multer({
+  storage, limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => TIPOS_FOTO.includes(file.mimetype)
+    ? cb(null, true)
+    : cb(Object.assign(new Error('Solo se admiten fotos (JPG, PNG, WEBP o GIF)'), { status: 400 })),
+});
 
 
 // ── GET /users/me ────────────────────────────────────────────────
@@ -66,7 +73,17 @@ router.patch('/me', requireAuth, async (req, res, next) => {
     if (iban.valor  !== undefined) { fields.push(`pago_iban = $${i++}`);  values.push(iban.valor); }
     if (nombre   !== undefined) { fields.push(`nombre = $${i++}`);   values.push(nombre); }
     if (apellido !== undefined) { fields.push(`apellido = $${i++}`); values.push(apellido); }
-    if (email    !== undefined) { fields.push(`email = $${i++}`);    values.push(email); }
+    if (email !== undefined) {
+      // El email es con lo que se entra en la cuenta: válido y que no sea de otra persona
+      const nuevo = String(email || '').trim().toLowerCase();
+      const actual = (await db.query('SELECT email FROM users WHERE id = $1', [req.user.id])).rows[0];
+      if (nuevo !== String((actual && actual.email) || '').trim().toLowerCase()) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nuevo) || nuevo.length > 254) return res.status(400).json({ error: 'El email no es válido' });
+        const ocupado = await db.query('SELECT 1 FROM users WHERE LOWER(TRIM(email)) = $1 AND id <> $2', [nuevo, req.user.id]);
+        if (ocupado.rows[0]) return res.status(409).json({ error: 'Ese email ya está en uso' });
+        fields.push(`email = $${i++}`); values.push(nuevo);
+      }
+    }
     if (tel !== undefined) {
       // Solo se valida si cambia: la app reenvía el perfil completo al arrancar y
       // no debe fallar por teléfonos guardados antes de existir esta validación

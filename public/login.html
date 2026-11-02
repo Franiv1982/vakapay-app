@@ -764,8 +764,9 @@ async function handleRegistro() {
         try {
           await fetch(`https://vakapay-app.vercel.app/api/v1/auth/send-confirmation`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email, nombre: nombre })
+            // El servidor solo envía el correo de bienvenida al email de la cuenta con sesión
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (localStorage.getItem('vp_token') || '') },
+            body: JSON.stringify({})
           });
         } catch(_) {}
         const welcomeSpan = document.getElementById('user-name-welcome');

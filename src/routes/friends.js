@@ -36,7 +36,14 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+// Solo fotos: un archivo de otro tipo (por ejemplo HTML) no se acepta
+const TIPOS_FOTO = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/heic', 'image/heif'];
+const upload = multer({
+  storage, limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => TIPOS_FOTO.includes(file.mimetype)
+    ? cb(null, true)
+    : cb(Object.assign(new Error('Solo se admiten fotos (JPG, PNG, WEBP o GIF)'), { status: 400 })),
+});
 
 // ── GET /friends ──────────────────────────────────────────────────
 router.get('/', requireAuth, async (req, res, next) => {
@@ -99,7 +106,7 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
     }
     // La foto llega como imagen en texto (data:image/...); se guarda en la propia columna
     if (avatar_url !== undefined && avatar_url !== null) {
-      if (typeof avatar_url !== 'string' || !avatar_url.startsWith('data:image/') || avatar_url.length > 500000) {
+      if (typeof avatar_url !== 'string' || !/^data:image\/(?!svg)[a-z0-9.+-]+;base64,/i.test(avatar_url) || avatar_url.length > 500000) {
         return res.status(400).json({ error: 'Imagen no válida o demasiado grande' });
       }
     }

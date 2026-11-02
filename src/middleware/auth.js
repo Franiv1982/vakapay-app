@@ -31,8 +31,9 @@ const _estado = new Map();
 async function estadoCuenta(userId) {
   const c = _estado.get(userId);
   if (c && Date.now() - c.t < 20000) return c;
-  const r = await db.query('SELECT bloqueado, bloqueo_motivo FROM users WHERE id = $1', [userId]);
-  const e = { t: Date.now(), existe: !!r.rows[0], bloqueado: !!(r.rows[0] && r.rows[0].bloqueado), motivo: r.rows[0] && r.rows[0].bloqueo_motivo };
+  const r = await db.query('SELECT bloqueado, bloqueo_motivo, FLOOR(EXTRACT(EPOCH FROM sesiones_desde))::bigint AS desde FROM users WHERE id = $1', [userId]);
+  const e = { t: Date.now(), existe: !!r.rows[0], bloqueado: !!(r.rows[0] && r.rows[0].bloqueado), motivo: r.rows[0] && r.rows[0].bloqueo_motivo,
+              desde: r.rows[0] && r.rows[0].desde ? Number(r.rows[0].desde) : 0 };
   _estado.set(userId, e);
   return e;
 }
@@ -55,6 +56,8 @@ async function requireAuth(req, res, next) {
     const e = await estadoCuenta(payload.sub);
     if (!e.existe) return res.status(401).json({ error: 'Esta cuenta ya no existe.', sesion_invalida: true });
     if (e.bloqueado) return res.status(403).json({ error: textoBloqueo(e.motivo), cuenta_bloqueada: true });
+    // Sesiones anteriores a un cambio de contraseña ya no valen
+    if (e.desde && (payload.iat || 0) < e.desde) return res.status(401).json({ error: 'Tu sesión ha caducado. Vuelve a iniciar sesión.', sesion_invalida: true });
   } catch (err) {
     return next(err);
   }
@@ -70,4 +73,7 @@ function signToken(user) {
   );
 }
 
-module.exports = { requireAuth, signToken, textoBloqueo };
+// Olvida el estado guardado de una cuenta (tras cambiar la contraseña, por ejemplo)
+const olvidarEstado = userId => _estado.delete(userId);
+
+module.exports = { requireAuth, signToken, textoBloqueo, olvidarEstado };

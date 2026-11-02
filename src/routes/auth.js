@@ -3,23 +3,36 @@ const express  = require('express');
 const bcrypt   = require('bcryptjs');
 const { normalizarTelefono } = require('../utils/telefono');
 const db       = require('../db/database');
-const { signToken, requireAuth, textoBloqueo } = require('../middleware/auth');
+const crypto   = require('crypto');
+const { signToken, requireAuth, textoBloqueo, olvidarEstado } = require('../middleware/auth');
 
 const router = express.Router();
+
+// Emails siempre en minúsculas y sin espacios: "Ana@X.com " y "ana@x.com" son la misma cuenta
+const normEmail = e => String(e || '').trim().toLowerCase();
+const emailValido = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && e.length <= 254;
+// Mismo mínimo que pide la app al registrarse o cambiar la contraseña
+const MIN_PASSWORD = 8;
+const passwordValida = p => typeof p === 'string' && p.length >= MIN_PASSWORD && p.length <= 200;
+const ERROR_PASSWORD = `La contraseña debe tener al menos ${MIN_PASSWORD} caracteres`;
+const escHtml = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 // ── POST /auth/register ──────────────────────────────────────────
 router.post('/register', async (req, res, next) => {
   try {
-    const { nombre = '', apellido = '', email, password } = req.body;
+    const { nombre = '', apellido = '', password } = req.body;
+    const email = normEmail(req.body.email);
     if (!email || !password) {
       return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
     }
+    if (!emailValido(email)) return res.status(400).json({ error: 'El email no es válido' });
+    if (!passwordValida(password)) return res.status(400).json({ error: ERROR_PASSWORD });
     // Teléfono obligatorio, con prefijo y válido para su país
     const telefono = normalizarTelefono(req.body.tel);
     if (!telefono.ok) return res.status(400).json({ error: telefono.error, campo: 'tel' });
     const tel = telefono.valor;
 
-    const existing = await db.query('SELECT id FROM users WHERE email = $1', [email]);
+    const existing = await db.query('SELECT id FROM users WHERE LOWER(TRIM(email)) = $1', [email]);
     if (existing.rows.length > 0) {
       return res.status(409).json({ error: 'Ya existe una cuenta con ese email' });
     }
@@ -49,7 +62,7 @@ router.post('/login', async (req, res, next) => {
 
     const result = await db.query(
       `SELECT *, GREATEST(0, CEIL(EXTRACT(EPOCH FROM (login_bloqueado_hasta - NOW())) / 60))::int AS minutos_bloqueo
-       FROM users WHERE LOWER(email) = LOWER(TRIM($1))`, [email]);
+       FROM users WHERE LOWER(TRIM(email)) = LOWER(TRIM($1)) ORDER BY id LIMIT 1`, [email]);
     const user   = result.rows[0];
 
     if (!user) return res.status(401).json({ error: 'Credenciales incorrectas' });
@@ -63,12 +76,8 @@ router.post('/login', async (req, res, next) => {
       });
     }
 
-    let valid = false;
-    if (!user.password_hash) {
-      valid = process.env.NODE_ENV !== 'production';
-    } else {
-      valid = bcrypt.compareSync(password, user.password_hash);
-    }
+    // Una cuenta sin contraseña guardada no puede entrar con ninguna
+    const valid = !!user.password_hash && bcrypt.compareSync(String(password), user.password_hash);
     if (!valid) {
       const fallos = (user.login_fallos || 0) + 1;
       if (fallos >= MAX_FALLOS) {
@@ -91,7 +100,8 @@ router.post('/login', async (req, res, next) => {
 
     const token = signToken(user);
     // No se devuelven datos internos (contraseña, códigos de recuperación, contadores)
-    const { password_hash, reset_otp, reset_otp_expires, reset_attempts, login_fallos, login_bloqueado_hasta, minutos_bloqueo, bloqueado, bloqueo_motivo, ...safeUser } = user;
+    const { password_hash, reset_otp, reset_otp_expires, reset_attempts, login_fallos, login_bloqueado_hasta, minutos_bloqueo, bloqueado, bloqueo_motivo,
+            sesiones_desde, reset_pedidos, reset_pedidos_desde, ...safeUser } = user;
     res.json({ token, user: safeUser });
   } catch (err) { next(err); }
 });
@@ -102,10 +112,13 @@ router.post('/logout', requireAuth, (req, res) => {
 });
 
 // ── POST /auth/send-confirmation ────────────────────────────────
-router.post('/send-confirmation', async (req, res, next) => {
+// Solo con sesión iniciada y siempre al email de la propia cuenta: así nadie
+// puede usar VakaPay para enviar correos a quien quiera.
+router.post('/send-confirmation', requireAuth, async (req, res, next) => {
   try {
-    const { email, nombre } = req.body;
-    if (!email || !nombre) return res.status(400).json({ error: 'Email y nombre son obligatorios' });
+    const u = (await db.query('SELECT email, nombre FROM users WHERE id = $1', [req.user.id])).rows[0];
+    if (!u || !u.email) return res.status(404).json({ error: 'Usuario no encontrado' });
+    const email = u.email, nombre = escHtml(u.nombre || 'usuario');
 
     const { Resend } = require('resend');
     const resend = new Resend(process.env.RESEND_API_KEY);
@@ -125,7 +138,7 @@ router.post('/send-confirmation', async (req, res, next) => {
             <p style="color:#ccc;line-height:1.6;">Tu cuenta en VakaPay ha sido creada correctamente. Ya puedes empezar a crear grupos, registrar gastos y dividir cuentas con tus amigos.</p>
             <div style="background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:16px;margin:24px 0;text-align:center;">
               <p style="color:#aaa;font-size:.85rem;margin:0 0 4px;">Registrado con</p>
-              <p style="color:#F5C800;font-weight:bold;margin:0;">${email}</p>
+              <p style="color:#F5C800;font-weight:bold;margin:0;">${escHtml(email)}</p>
             </div>
             <p style="color:#ccc;line-height:1.6;">Si no has creado esta cuenta, puedes ignorar este mensaje.</p>
           </div>
@@ -143,24 +156,38 @@ router.post('/send-confirmation', async (req, res, next) => {
 // ── POST /auth/forgot-password ──────────────────────────────────
 router.post('/forgot-password', async (req, res, next) => {
   try {
-    const { email } = req.body;
+    const email = normEmail(req.body.email);
     if (!email) return res.status(400).json({ error: 'El email es obligatorio' });
 
     // 1. Verificar si el usuario existe
-    const result = await db.query('SELECT id, nombre FROM users WHERE email = $1', [email]);
+    const result = await db.query(
+      `SELECT id, nombre, email, reset_pedidos,
+              (reset_pedidos_desde IS NULL OR reset_pedidos_desde < NOW() - INTERVAL '1 hour') AS ventana_nueva
+       FROM users WHERE LOWER(TRIM(email)) = $1 ORDER BY id LIMIT 1`, [email]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'No existe una cuenta con ese correo' });
     }
 
     const user = result.rows[0];
-    
-    // 2. Generar un código OTP aleatorio de 6 dígitos
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    
+
+    // Máximo de códigos por hora. Sin este límite, alguien podría pedir códigos
+    // sin parar (cada uno con 5 intentos) hasta adivinar uno, y llenar de
+    // correos el buzón de la víctima.
+    const MAX_CODIGOS_HORA = 5;
+    if (!user.ventana_nueva && (user.reset_pedidos || 0) >= MAX_CODIGOS_HORA) {
+      return res.status(429).json({ error: 'Has pedido demasiados códigos. Espera una hora o usa el último que recibiste.' });
+    }
+
+    // 2. Generar un código aleatorio de 6 dígitos (generador seguro)
+    const otpCode = String(crypto.randomInt(100000, 1000000));
+
     // 3. Guardar el código en la base de datos con expiración
     await db.query(
-      'UPDATE users SET reset_otp = $1, reset_otp_expires = NOW() + INTERVAL \'3 minutes\', reset_attempts = 0 WHERE id = $2',
-      [otpCode, user.id]
+      `UPDATE users SET reset_otp = $1, reset_otp_expires = NOW() + INTERVAL '3 minutes', reset_attempts = 0,
+              reset_pedidos = CASE WHEN $3 THEN 1 ELSE reset_pedidos + 1 END,
+              reset_pedidos_desde = CASE WHEN $3 THEN NOW() ELSE reset_pedidos_desde END
+       WHERE id = $2`,
+      [otpCode, user.id, user.ventana_nueva]
     );
 
     // 4. Enviar el correo usando Resend 
@@ -172,7 +199,7 @@ router.post('/forgot-password', async (req, res, next) => {
       const resend = new Resend(process.env.RESEND_API_KEY);
       envio = await resend.emails.send({
       from: 'VakaPay <onboarding@resend.dev>',
-      to: email,
+      to: user.email,
       subject: 'Código de recuperación de contraseña - VakaPay',
       html: `
         <div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;background:#121212;color:#F2F2F2;border-radius:12px;overflow:hidden;">
@@ -181,7 +208,7 @@ router.post('/forgot-password', async (req, res, next) => {
             <p style="color:#aaa;font-size:.8rem;margin:4px 0 0;">Recuperación de acceso</p>
           </div>
           <div style="padding:32px 24px;text-align:center;">
-            <h2 style="color:#F2F2F2;margin-bottom:8px;">Hola, ${user.nombre || 'usuario'}</h2>
+            <h2 style="color:#F2F2F2;margin-bottom:8px;">Hola, ${escHtml(user.nombre || 'usuario')}</h2>
             <p style="color:#ccc;line-height:1.6;">Has solicitado restablecer tu contraseña. Utiliza el siguiente código de 6 dígitos:</p>
             <div style="background:#1e1e1e;border:1px solid #F5C800;border-radius:8px;padding:20px;margin:24px 0;">
               <span style="color:#F5C800;font-size:2rem;font-weight:bold;letter-spacing:6px;">${otpCode}</span>
@@ -219,8 +246,8 @@ router.post('/forgot-password', async (req, res, next) => {
 const MAX_INTENTOS_CODIGO = 5;
 async function comprobarCodigo(email, codigo) {
   const r = await db.query(
-    'SELECT id, reset_otp, reset_attempts, (reset_otp_expires > NOW()) AS vigente FROM users WHERE email = $1',
-    [email]
+    'SELECT id, reset_otp, reset_attempts, (reset_otp_expires > NOW()) AS vigente FROM users WHERE LOWER(TRIM(email)) = $1 ORDER BY id LIMIT 1',
+    [normEmail(email)]
   );
   const u = r.rows[0];
   if (!u || !u.reset_otp || !u.vigente) {
@@ -259,6 +286,7 @@ router.post('/reset-password', async (req, res, next) => {
     }
 
     // 1. Verificar nuevamente que el código sea válido y no haya expirado
+    if (!passwordValida(newPassword)) return res.status(400).json({ error: ERROR_PASSWORD });
     const check = await comprobarCodigo(email, codigo);
     if (check.error) return res.status(check.status).json({ error: check.error });
     const user = check.user;
@@ -268,9 +296,11 @@ router.post('/reset-password', async (req, res, next) => {
 
     // 3. Actualizar la contraseña en la base de datos y limpiar los campos de OTP
     await db.query(
-      'UPDATE users SET password_hash = $1, reset_otp = NULL, reset_otp_expires = NULL, reset_attempts = 0, login_fallos = 0, login_bloqueado_hasta = NULL WHERE id = $2',
+      'UPDATE users SET password_hash = $1, reset_otp = NULL, reset_otp_expires = NULL, reset_attempts = 0, login_fallos = 0, login_bloqueado_hasta = NULL, sesiones_desde = NOW() WHERE id = $2',
       [hash, user.id]
     );
+    // Las sesiones abiertas antes del cambio dejan de valer (por si alguien entró con la contraseña antigua)
+    olvidarEstado(user.id);
 
     res.json({ ok: true, message: 'Contraseña actualizada correctamente' });
   } catch (err) { next(err); }
