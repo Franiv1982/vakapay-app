@@ -41,6 +41,21 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+// Nombres, descripciones, etc. sin caracteres que puedan colar código en la app
+app.use(require('./utils/texto').textosSeguros);
+
+// Cabeceras de seguridad: el navegador no adivina tipos de archivo, la web no se
+// puede meter dentro de otra página (clickjacking) y no se envía la URL a terceros
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+  res.set({
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Strict-Transport-Security': 'max-age=31536000',
+  });
+  next();
+});
 
 // Servir avatares subidos
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));

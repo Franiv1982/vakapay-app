@@ -41,6 +41,41 @@ async function activarRLS() {
   }
 }
 
+// Una sola vez: quita de los datos ya guardados los caracteres que podrían colar
+// código en la app (mismo cambio que hace src/utils/texto.js con los datos nuevos)
+const COLUMNAS_TEXTO = {
+  users: ['nombre', 'apellido', 'bio'],
+  groups: ['name', 'type'],
+  group_members: ['display_name'],
+  expenses: ['description', 'payer_name', 'category', 'currency', 'pagado_por'],
+  expense_splits: ['member_name'],
+  friends: ['name', 'email', 'phone', 'notes'],
+  activity_log: ['message', 'group_name', 'type'],
+  mensajes: ['autor'],
+};
+async function limpiarTextosGuardados() {
+  try {
+    const r = await pool.query("INSERT INTO migraciones (nombre) VALUES ('textos_seguros_v1') ON CONFLICT DO NOTHING RETURNING nombre");
+    if (!r.rows[0]) return; // ya se hizo
+    const { DE, A } = require('../utils/texto');
+    let total = 0;
+    for (const [tabla, cols] of Object.entries(COLUMNAS_TEXTO)) {
+      for (const col of cols) {
+        try {
+          const u = await pool.query(
+            `UPDATE ${tabla} SET ${col} = translate(${col}, $1, $2) WHERE ${col} ~ $3`, [DE, A, '[<>"\'`\\\\&]']);
+          total += u.rowCount;
+        } catch (e) {
+          if (e.code !== '42703') console.error(`No se pudo limpiar ${tabla}.${col}:`, e.message); // 42703: la columna no existe
+        }
+      }
+    }
+    console.log(`🧹 Textos revisados: ${total} cambiados`);
+  } catch (err) {
+    console.error('❌ Error limpiando textos guardados:', err.message);
+  }
+}
+
 const initSchema = async () => {
   try {
     await pool.query(`
@@ -161,6 +196,9 @@ const initSchema = async () => {
       -- Bloqueo de cuentas: se marca a mano en Supabase (users → bloqueado = true)
       ALTER TABLE users ADD COLUMN IF NOT EXISTS bloqueado BOOLEAN NOT NULL DEFAULT FALSE;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS bloqueo_motivo TEXT;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS sesiones_desde TIMESTAMPTZ;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_pedidos INTEGER NOT NULL DEFAULT 0;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_pedidos_desde TIMESTAMPTZ;
       ALTER TABLE mensajes ADD COLUMN IF NOT EXISTS imagen TEXT;   -- foto (data:image/jpeg;base64,...)
       ALTER TABLE mensajes ADD COLUMN IF NOT EXISTS gif TEXT;      -- URL del GIF (GIPHY)
       CREATE TABLE IF NOT EXISTS reacciones (
@@ -179,6 +217,7 @@ const initSchema = async () => {
     `);
     console.log('✅ Schema PostgreSQL inicializado u optimizado');
     await activarRLS();
+    await limpiarTextosGuardados();
     // Se carga aquí (y no arriba) porque contactos.js usa este mismo módulo
     await require('../utils/contactos').migrarAmigosDeGrupos();
   } catch (err) {

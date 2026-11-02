@@ -22,12 +22,26 @@ function importeBase(body, amount, currency) {
 // Se guardan como imagen en texto (data:image/...) en la columna expenses.ticket.
 const MAX_TICKET = 2 * 1024 * 1024; // ~1,5 MB de imagen; la app la reduce antes de enviarla
 function ticketValido(t) {
-  return t === null || (typeof t === 'string' && t.startsWith('data:image/') && t.length <= MAX_TICKET);
+  return t === null || (typeof t === 'string' && /^data:image\/(?!svg)[a-z0-9.+-]+;base64,/i.test(t) && t.length <= MAX_TICKET);
 }
 // Quita la imagen de la respuesta y deja solo si existe (los listados no la necesitan)
 function sinTicket(row) {
   const { ticket, ...resto } = row;
   return { ...resto, has_ticket: !!ticket };
+}
+
+// Importe positivo y razonable, participantes como lista de nombres
+const MAX_IMPORTE = 10000000;
+function errorDeDatos({ amount, amount_base, involved, payer_name, description }) {
+  const n = Number(amount);
+  if (!Number.isFinite(n) || n <= 0 || n > MAX_IMPORTE) return 'El importe no es válido';
+  if (amount_base !== undefined && amount_base !== null && amount_base !== '') {
+    const b = Number(amount_base);
+    if (!Number.isFinite(b) || b <= 0 || b > MAX_IMPORTE) return 'El importe no es válido';
+  }
+  if (!Array.isArray(involved) || involved.length > 200 || involved.some(x => typeof x !== 'string' || !x.trim())) return 'Participantes no válidos';
+  if (typeof payer_name !== 'string' || typeof description !== 'string' || description.length > 500) return 'Datos no válidos';
+  return null;
 }
 
 // Reparte un importe entre varias personas sin perder céntimos:
@@ -183,6 +197,8 @@ router.post('/', requireAuth, async (req, res, next) => {
     if (!description || !amount || !payer_name || !expense_date || !involved?.length) {
       return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
+    const errDatos = errorDeDatos(req.body);
+    if (errDatos) return res.status(400).json({ error: errDatos });
     if (!ticketValido(ticket)) return res.status(400).json({ error: 'Comprobante no válido o demasiado grande' });
 
     const amount_base = importeBase(req.body, amount, currency);
@@ -280,6 +296,8 @@ router.put('/:expId', requireAuth, async (req, res, next) => {
     if (!description || !amount || !payer_name || !expense_date || !involved?.length) {
       return res.status(400).json({ error: 'Faltan campos obligatorios' });
     }
+    const errDatos = errorDeDatos(req.body);
+    if (errDatos) return res.status(400).json({ error: errDatos });
     // ticket: si no viene, se conserva el que hubiera; null lo elimina; una imagen lo sustituye
     const cambiaTicket = req.body.ticket !== undefined;
     if (cambiaTicket && !ticketValido(req.body.ticket)) {
