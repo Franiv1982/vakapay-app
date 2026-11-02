@@ -6,6 +6,7 @@
 // ================================================================
 const express = require('express');
 const { requireAuth } = require('../middleware/auth');
+const db = require('../db/database');
 
 const router = express.Router();
 
@@ -29,6 +30,18 @@ router.post('/', requireAuth, async (req, res, next) => {
     }
     if (image.length > MAX_BASE64) {
       return res.status(413).json({ error: 'La imagen es demasiado grande' });
+    }
+
+    // Límite diario por usuario: cada escaneo cuesta dinero en la API de Anthropic
+    const MAX_ESCANEOS_DIA = 30;
+    const uso = await db.query(`
+      UPDATE users SET
+        ocr_usos = CASE WHEN ocr_dia = CURRENT_DATE THEN ocr_usos + 1 ELSE 1 END,
+        ocr_dia = CURRENT_DATE
+      WHERE id = $1 AND (ocr_dia IS DISTINCT FROM CURRENT_DATE OR ocr_usos < $2)
+      RETURNING ocr_usos`, [req.user.id, MAX_ESCANEOS_DIA]);
+    if (!uso.rows[0]) {
+      return res.status(429).json({ error: `Has llegado al límite de ${MAX_ESCANEOS_DIA} escaneos por hoy. Escribe el importe a mano o inténtalo mañana.` });
     }
 
     const hoy = new Date().toISOString().split('T')[0];
