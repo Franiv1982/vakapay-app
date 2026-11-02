@@ -514,6 +514,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
         Manual
       </button>
     </div>
+    <button type="button" onclick="abrirInvitar()" style="width:100%;margin:0 0 10px;background:rgba(245,200,0,.1);border:1px solid rgba(245,200,0,.45);border-radius:8px;padding:11px;color:#F5C800;font-size:.8rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:'Nunito',sans-serif;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Invitar con enlace</button>
 
     <!-- Panel amigos -->
     <div id="friendPickerWrap" style="display:none;margin-bottom:10px;">
@@ -690,53 +691,22 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   <div class="sec-title" id="sec6" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleResumenSection()">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">7</div>
-    <h2>Enviar Resumen</h2>
+    <h2>Compartir resumen</h2>
   </div>
   <svg id="resumenChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
 </div>
   <div id="resumenSectionWrap" style="display:none">
   <div class="card">
-    <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:7px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Link del grupo</div>
-    <p style="font-size:.76rem;color:var(--muted);margin-bottom:9px">Genera un link cliqueable para que tus contactos accedan al grupo directamente.</p>
-    <button class="btn btn-gold" onclick="generateLink()" id="btnGenLink">Generar Link</button>
-    <div class="link-box" id="linkBox" style="display:none">
-      <input type="text" id="linkInput" readonly onclick="this.select()">
-      <button class="link-copy" onclick="copyLink()">Copiar</button>
+    <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px">Resumen de cuentas</div>
+    <div id="resumenVista" style="background:#141414;border:1px solid #333;border-radius:10px;padding:10px 12px;color:#bbb;font-size:.72rem;line-height:1.5;margin-bottom:14px;white-space:pre-line;max-height:180px;overflow:auto;"></div>
+    <button type="button" onclick="compartirResumen()" style="width:100%;padding:13px;border-radius:12px;border:none;background:#F5C800;color:#000;font-weight:800;font-family:'Nunito',sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;cursor:pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Compartir resumen</button>
+    <div style="display:flex;gap:10px">
+      <button type="button" onclick="abrirWhatsApp(textoResumen())" style="flex:1;padding:11px;border-radius:12px;border:1px solid #25D366;background:rgba(37,211,102,.1);color:#25D366;font-weight:800;font-family:'Nunito',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.6-1.3a.4.4 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg> WhatsApp</button>
+      <button type="button" onclick="exportarPDF()" style="flex:1;padding:11px;border-radius:12px;border:1px solid #444;background:none;color:#F2F2F2;font-weight:800;font-family:'Nunito',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PDF</button>
     </div>
-    <div class="dvd"></div>
-    
-    <div class="field" style="margin-bottom:12px">
-      <label><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.73a16 16 0 0 0 6.29 6.29l1.1-1.1a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Teléfono</label>
-      <div style="position:relative;width:100%">
-        <input type="tel" id="contactPhone" placeholder="+34 600 000 000" style="width:100%;box-sizing:border-box;padding-right:44px">
-        <button onclick="pickContactForShare()" style="position:absolute;right:5px;top:50%;transform:translateY(-50%);background:var(--dark3);border:1.5px solid var(--border);border-radius:8px;padding:6px 8px;cursor:pointer;color:var(--gold, #FFD700);display:flex;align-items:center" title="Seleccionar contacto">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        </button>
-      </div>
-    </div>
-    <div class="field">
-      <label><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> Email</label>
-      <input type="email" id="contactEmail" placeholder="amigo@email.com" style="width:100%;box-sizing:border-box">
-    </div>
-    <div style="display:flex;gap:24px;margin-top:13px;align-items:center;justify-content:center;">
-      <button onclick="shareWhatsApp()" style="background:none;border:none;cursor:pointer;padding:0;transition:transform .13s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">
-        <svg width="50" height="50" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#25D366"/><path d="M23.5 8.5C21.6 6.6 19.1 5.5 16.5 5.5C11.3 5.5 7 9.8 7 15C7 16.8 7.5 18.5 8.4 20L7 25L12.2 23.6C13.7 24.4 15.1 24.8 16.5 24.8C21.7 24.8 26 20.5 26 15.3C26 12.7 24.9 10.3 23.5 8.5ZM16.5 23.1C15.2 23.1 13.9 22.7 12.8 22L12.5 21.8L9.4 22.6L10.2 19.6L10 19.3C9.2 18.1 8.8 16.8 8.8 15.3C8.8 11 12.2 7.6 16.5 7.6C18.6 7.6 20.5 8.4 22 9.9C23.4 11.4 24.2 13.3 24.2 15.3C24.2 19.6 21 23.1 16.5 23.1ZM21 17.3C20.8 17.2 19.7 16.6 19.5 16.6C19.3 16.5 19.2 16.5 19 16.7C18.9 16.9 18.4 17.5 18.3 17.6C18.1 17.8 18 17.8 17.8 17.7C16.6 17.1 15.8 16.6 15 15.4C14.8 15.1 15.3 15.1 15.7 14.4C15.8 14.2 15.7 14.1 15.7 13.9C15.6 13.8 15.1 12.7 14.9 12.3C14.7 11.9 14.5 11.9 14.3 11.9H13.9C13.7 11.9 13.4 12 13.2 12.2C13 12.4 12.4 13 12.4 14.1C12.4 15.2 13.2 16.3 13.3 16.4C13.4 16.6 15.1 19.2 17.6 20.1C19.3 20.8 20 20.8 20.5 20.7C20.8 20.7 21.6 20.1 21.8 19.5C22 18.9 22 18.4 21.9 18.3C21.8 18.1 21.6 18 21 17.3Z" fill="white"/></svg>
-      </button>
-      <button onclick="shareEmail()" style="background:none;border:none;cursor:pointer;padding:0;transition:transform .13s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">
-        <svg width="50" height="50" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#EA4335"/><path d="M8 11.5V21.5C8 22.3 8.7 23 9.5 23H22.5C23.3 23 24 22.3 24 21.5V11.5L16 17L8 11.5Z" fill="white"/><path d="M24 10H8L16 15.5L24 10Z" fill="white"/></svg>
-      </button>
-      <button onclick="sharePhone()" style="background:none;border:none;cursor:pointer;padding:0;transition:transform .13s" onmousedown="this.style.transform='scale(.88)'" onmouseup="this.style.transform='scale(1)'">
-        <svg width="50" height="50" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="16" fill="#34C759"/><path d="M8 10C8 9.45 8.45 9 9 9H23C23.55 9 24 9.45 24 10V20C24 20.55 23.55 21 23 21H17L13 24V21H9C8.45 21 8 20.55 8 20V10Z" fill="white"/></svg>
-      </button>
-    </div>
-    <div class="dvd"></div>
-    <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Extracto PDF</div>
-    <p style="font-size:.76rem;color:var(--muted);margin-bottom:9px">Descarga un resumen completo del grupo con participantes, gastos y estadísticas.</p>
-    <button class="btn btn-gold btn-full" onclick="exportarPDF()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar PDF</button>
   </div>
 </div>
 
-<!-- Chat del grupo -->
 <div class="sec-title" id="sec7" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="abrirChat()">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">8</div>
@@ -2243,7 +2213,7 @@ async function openGroup(idx){
   posicionarBadge();
   ['sec2','sec3','sec4','sec5','secPagos','sec6','sec7'].forEach(id=>document.getElementById(id).style.opacity='1');
   if (typeof actualizarNoLeidos === 'function') actualizarNoLeidos();
-  document.getElementById('linkBox').style.display = 'none';
+  _enlaceInvitacion = null;   // cada grupo tiene su propio enlace
 
   // Cargar datos frescos del backend
   try {
@@ -3739,6 +3709,11 @@ function toggleResumenSection() {
   const open = wrap.style.display === 'block';
   wrap.style.display = open ? 'none' : 'block';
   chevron.style.transform = open ? '' : 'rotate(180deg)';
+  if (!open) {   // al abrir: datos al día y vista previa del mensaje
+    const pintar = () => { const v = document.getElementById('resumenVista'); if (v) v.textContent = textoResumen().replace(/[*_]/g, ''); };
+    pintar();
+    if (currentGroupIdx !== null && groups[currentGroupIdx]) recargarGrupoDelServidor(groups[currentGroupIdx]).then(pintar);
+  }
 }
 function toggleMemberList() {
   const wrap = document.getElementById('memberListWrap');
@@ -4019,33 +3994,6 @@ function renderBalances(){
 }
 
 // ═══ LINK GENERATION ════════════════════════════════════════════════
-async function generateLink(){
-  if(currentGroupIdx===null){toast('Abre un grupo primero','e');return;}
-  const g=groups[currentGroupIdx];
-  try {
-    const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/share-link`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` }
-    });
-    const data = await res.json();
-    if (!data.token) throw new Error('Sin token');
-    const url = `${API_BASE}/login.html?invite=${data.token}`;
-    const inp = document.getElementById('linkInput');
-    inp.value = url;
-    document.getElementById('linkBox').style.display='flex';
-    toast('¡Link de invitación generado! 🔗','s');
-  } catch(err) {
-    console.error('Error generando link:', err);
-    toast('Error al generar el link','e');
-  }
-}
-function copyLink(){
-  const inp=document.getElementById('linkInput');
-  inp.select();inp.setSelectionRange(0,99999);
-  navigator.clipboard.writeText(inp.value)
-    .then(()=>toast('Link copiado ✓','s'))
-    .catch(()=>{document.execCommand('copy');toast('Link copiado ✓','s');});
-}
 
 // ═══ LOAD FROM URL PARAM ════════════════════════════════════════════
 function loadFromHash(){
@@ -4068,30 +4016,104 @@ function loadFromHash(){
     setTimeout(()=>{openGroup(idx);toast('¡Grupo cargado desde el link!','s');},400);
   }catch(err){toast('Link inválido','e');}
 }
-function buildInviteText(){
-  if(currentGroupIdx===null) return '';
-  const g = groups[currentGroupIdx];
-  const link = document.getElementById('linkInput')?.value || '';
-  const sender = (profile.nombre || '').trim() || 'Alguien';
-  return `¡Hola! ${sender} te invita al grupo "${g.name}" en VakaPay.${link ? '\n\nAccede aquí: ' + link : ''}`;
-}
 
 // ═══ SHARE ══════════════════════════════════════════════════════════
-function buildText(){
-  if(currentGroupIdx===null)return'';
-  const g=groups[currentGroupIdx];
-  const pp=resumenPorPersona(g);
-  const sym=SYMBOLS[g.currency||'EUR']||'€';
-  const imp=e=>`${SYMBOLS[e.currency]||sym}${(Number(e.amount)||0).toFixed(2)}`;
-  let t=`💳 *VakaPay – ${g.name}* ${TYPE_ICONS[g.type]||''}\n📅 ${fmtDate(g.start)} → ${fmtDate(g.end)}\n\n`;
-  t+=`💰 Total: ${sym}${pp.total.toFixed(2)}  |  Por persona: ${sym}${pp.porPersona.toFixed(2)}`;
-  t+= pp.participantes && pp.participantes!==pp.miembros ? ` (entre ${pp.participantes} participantes)\n` : `\n`;
-  t+=`👥 ${Object.keys(g.members).join(', ')}\n\n`;
-  if(g.expenses.length>0){t+=`📋 Gastos:\n`;g.expenses.forEach(e=>{t+= e.es_pago ? `  • 💸 ${e.desc}: ${imp(e)}\n` : `  • ${e.desc}: ${imp(e)} (pagó ${e.payer})\n`;});}
-  const link=document.getElementById('linkInput').value;
-  if(link){t+=`\n🔗 Únete al grupo:\n${link}\n`;}
-  t+='\n_Generado con VakaPay_';return t;
+// ═══ INVITAR CON ENLACE (Participantes) ══════════════════════════════
+let _enlaceInvitacion = null;
+function textoInvitacion(g, enlace) {
+  const quien = (profile.nombre || '').trim() || 'Alguien';
+  return `¡Hola! ${quien} te invita al grupo «${g.name}» en VakaPay. Únete aquí: ${enlace}`;
 }
+async function abrirInvitar() {
+  const g = groups[currentGroupIdx];
+  if (!g || !g.id) { toast('Abre un grupo primero', 'e'); return; }
+  document.getElementById('invitarTitulo').textContent = `Invitar a «${g.name}»`;
+  const caja = document.getElementById('invitarEnlace');
+  caja.textContent = _enlaceInvitacion || 'Generando enlace…';
+  document.getElementById('modal-invitar').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  if (_enlaceInvitacion) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/v1/groups/${g.id}/share-link`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` }
+    });
+    const data = await res.json();
+    if (!data.token) throw new Error();
+    _enlaceInvitacion = `${API_BASE}/login.html?invite=${data.token}`;
+    caja.textContent = _enlaceInvitacion;
+  } catch (_) {
+    caja.textContent = 'No se pudo generar el enlace. Revisa tu conexión.';
+  }
+}
+function cerrarInvitar() {
+  document.getElementById('modal-invitar').style.display = 'none';
+  document.body.style.overflow = '';
+}
+function _invitacionLista() {
+  if (!_enlaceInvitacion) { toast('El enlace aún se está generando', 'i'); return null; }
+  return textoInvitacion(groups[currentGroupIdx], _enlaceInvitacion);
+}
+async function compartirInvitacion() {
+  const t = _invitacionLista(); if (!t) return;
+  await compartirTexto(t, 'Invitar al grupo');
+}
+function whatsappInvitacion() { const t = _invitacionLista(); if (t) abrirWhatsApp(t); }
+function copiarInvitacion() { if (_enlaceInvitacion) copiarTexto(_enlaceInvitacion); else toast('El enlace aún se está generando', 'i'); }
+
+// ═══ COMPARTIR (menú de compartir del móvil, WhatsApp o copiar) ══════
+async function compartirTexto(texto, titulo) {
+  const nativo = window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform() && Capacitor.Plugins && Capacitor.Plugins.Share;
+  try {
+    if (nativo) { await Capacitor.Plugins.Share.share({ title: titulo, text: texto, dialogTitle: titulo }); return; }
+    if (navigator.share) { await navigator.share({ title: titulo, text: texto }); return; }
+  } catch (err) {
+    if (/cancel|abort/i.test(err?.message || err?.name || '')) return;   // cerró el menú
+  }
+  copiarTexto(texto);   // sin menú de compartir (ordenador): se copia
+}
+function abrirWhatsApp(texto) {
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank');
+}
+
+// ═══ COMPARTIR RESUMEN (sección 7) ═══════════════════════════════════
+// Deudas pendientes con el mismo cálculo que «Cuentas finales»
+function deudasPendientes(g) {
+  updateBalances();
+  const d = Object.entries(g.members).filter(([, v]) => v < -0.05).map(([k, v]) => [k, v]);
+  const c = Object.entries(g.members).filter(([, v]) => v > 0.05).map(([k, v]) => [k, v]);
+  const txs = [];
+  while (d.length && c.length) {
+    d.sort((a, b) => a[1] - b[1]); c.sort((a, b) => b[1] - a[1]);
+    const amt = Math.min(Math.abs(d[0][1]), c[0][1]);
+    txs.push({ from: d[0][0], to: c[0][0], amount: amt });
+    d[0][1] = +(d[0][1] + amt).toFixed(2); c[0][1] = +(c[0][1] - amt).toFixed(2);
+    if (Math.abs(d[0][1]) <= 0.05) d.shift(); if (Math.abs(c[0][1]) <= 0.05) c.shift();
+  }
+  return txs;
+}
+function textoResumen() {
+  if (currentGroupIdx === null) return '';
+  const g = groups[currentGroupIdx];
+  const pp = resumenPorPersona(g);
+  const sym = SYMBOLS[g.currency || 'EUR'] || '€';
+  const imp = (n, cur) => `${SYMBOLS[cur] || sym}${(Number(n) || 0).toFixed(2)}`;
+  const gastos = g.expenses.filter(e => !e.es_pago);
+  let t = `💳 *VakaPay – ${g.name}* ${TYPE_ICONS[g.type] || ''}\n📅 ${fmtDate(g.start)} → ${fmtDate(g.end)}\n\n`;
+  t += `💰 Total: ${imp(pp.total)}  |  Por persona: ${imp(pp.porPersona)}`;
+  t += pp.participantes && pp.participantes !== pp.miembros ? ` (entre ${pp.participantes} participantes)\n` : `\n`;
+  if (gastos.length) { t += `\n📋 Gastos:\n`; gastos.forEach(e => { t += `  • ${e.desc}: ${imp(e.amount, e.currency)} (pagó ${e.payer})\n`; }); }
+  const deudas = deudasPendientes(g);
+  t += deudas.length
+    ? `\n💸 Pendiente de pagar:\n` + deudas.map(d => `  • ${d.from} → ${d.to}: ${imp(d.amount)}`).join('\n') + '\n'
+    : `\n✅ Todas las cuentas están saldadas\n`;
+  return t + '\n_Generado con VakaPay_';
+}
+async function compartirResumen() {
+  const g = groups[currentGroupIdx];
+  if (g) await recargarGrupoDelServidor(g);   // con los últimos pagos
+  await compartirTexto(textoResumen(), 'Resumen del grupo');
+}
+
 function exportarPDF(){
   const g = groups[currentGroupIdx];
   if(!g){ toast('Abre un grupo primero','e'); return; }
@@ -4355,49 +4377,7 @@ async function savePdfCrossPlatform(doc, fileName) {
   }
 }
 
-function shareWhatsApp(){
-  const phone = document.getElementById('contactPhone').value.replace(/\s+/g,'');
-  const text = encodeURIComponent(buildInviteText());
-  window.open(phone ? `https://wa.me/${phone.replace('+','')}?text=${text}` : `https://wa.me/?text=${text}`, '_blank');
-  document.getElementById('contactPhone').value = '';
 
-}
-function shareEmail(){
-  const email=document.getElementById('contactEmail').value.trim();
-  if(!email){toast('Introduce un email','e');return;}
-  const subj=encodeURIComponent(`VakaPay – ${currentGroupIdx!==null?groups[currentGroupIdx].name:'Grupo'}`);
-  const body=encodeURIComponent(buildText().replace(/\*/g,''));
-  window.location.href=`mailto:${email}?subject=${subj}&body=${body}`;
-  document.getElementById('contactEmail').value='';
-}
-function sharePhone(){
-  const phone=document.getElementById('contactPhone').value.replace(/\s+/g,'');
-  if(!phone){toast('Introduce un número de teléfono','e');return;}
-  const body=encodeURIComponent(buildInviteText());
-  window.location.href=`sms:${phone}?body=${body}`;
-  document.getElementById('contactPhone').value='';
-}
-
-async function pickContactForShare() {
-  if (!window.Capacitor || !Capacitor.isNativePlatform() || !Capacitor.Plugins.Contacts) {
-    toast('Tu navegador no soporta acceso a contactos', 'e'); return;
-  }
-  try {
-    const { Contacts } = Capacitor.Plugins;
-    const permission = await Contacts.requestPermissions();
-    if (permission.contacts !== 'granted') {
-      toast('Necesitas dar permiso de contactos', 'e');
-      return;
-    }
-    const result = await Contacts.pickContact({ projection: { phones: true } });
-    const tel = result.contact?.phones?.[0]?.number || '';
-    if (!tel) { toast('El contacto no tiene número de teléfono', 'e'); return; }
-    document.getElementById('contactPhone').value = tel;
-    toast(`Contacto cargado ✓`, 's');
-  } catch(err) {
-    toast('No se pudo acceder a los contactos', 'e');
-  }
-}
 
 // ═══ FRIENDS ════════════════════════════════════════════════════════
 function populateFriendGroupSelect(){
@@ -7357,6 +7337,22 @@ async function enviarGifChat(btn) {
     <p style="color:#F2F2F2; font-size:0.8rem; margin-bottom:16px; opacity:0.8; text-align:center; line-height:1.4;">¿Quién eres en este grupo? Si ya te habían añadido, elige tu nombre: conservarás tus gastos y saldos.</p>
     <div id="quien-opciones" style="margin-bottom:18px;"></div>
     <button onclick="confirmarQuienEres()" style="width:100%; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:#000; background:#F5C800;">Continuar</button>
+  </div>
+</div>
+
+<!-- Modal: invitar al grupo con un enlace (Participantes → Invitar con enlace) -->
+<div class="modal-overlay" id="modal-invitar" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarInvitar()">
+  <div style="background:#1e1e1e; width:90%; max-width:360px; padding:24px 20px; border-radius:24px; border:1px solid #333; box-sizing:border-box;">
+    <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:rgba(245,200,0,.12); display:flex; align-items:center; justify-content:center; color:#F5C800;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+    <div id="invitarTitulo" style="color:#F2F2F2; font-size:1.25rem; font-weight:800; text-align:center; margin-bottom:6px;"></div>
+    <p style="color:#bbb; font-size:.8rem; text-align:center; line-height:1.45; margin-bottom:16px;">Quien abra el enlace podrá registrarse y unirse. Si ya estaba apuntado, elegirá su nombre y conservará sus gastos.</p>
+    <div id="invitarEnlace" style="background:#141414; border:1px solid #333; border-radius:10px; padding:10px 12px; color:#ccc; font-size:.75rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:14px;"></div>
+    <button type="button" onclick="compartirInvitacion()" style="width:100%; padding:13px; border-radius:12px; border:none; background:#F5C800; color:#000; font-weight:800; font-size:.9rem; display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px; cursor:pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Compartir invitación</button>
+    <div style="display:flex; gap:10px; margin-bottom:12px;">
+      <button type="button" onclick="whatsappInvitacion()" style="flex:1; padding:11px; border-radius:12px; border:1px solid #25D366; background:rgba(37,211,102,.1); color:#25D366; font-weight:800; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.6-1.3a.4.4 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg> WhatsApp</button>
+      <button type="button" onclick="copiarInvitacion()" style="flex:1; padding:11px; border-radius:12px; border:1px solid #444; background:none; color:#F2F2F2; font-weight:800; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar</button>
+    </div>
+    <button type="button" onclick="cerrarInvitar()" style="width:100%; padding:8px; background:none; border:none; color:#888; font-weight:700; cursor:pointer;">Cerrar</button>
   </div>
 </div>
 
