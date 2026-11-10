@@ -7103,9 +7103,6 @@ function tocarBotonGrupos(btn) {
 .chat-picker{position:absolute;z-index:4;display:flex;gap:2px;background:var(--dark4);border:1px solid var(--border);border-radius:var(--r-xl);padding:4px 8px;box-shadow:var(--shadow)}
 .chat-picker button{font-size:1.35rem;background:none;border:none;padding:2px 4px;border-radius:50%;cursor:pointer}
 .chat-picker button.mia{background:rgba(245,200,0,.25)}
-/* Volver del chat: flecha «‹» como en el grupo; en escritorio el chat es un panel al lado, así que se cierra con «×» */
-.chat-volver .ico-escritorio{display:none}
-@media (min-width:1100px){.chat-volver .ico-movil{display:none}.chat-volver .ico-escritorio{display:block}}
 .chat-menu{position:absolute;z-index:4;background:var(--dark3);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow);overflow:hidden;font-size:var(--fs-base);min-width:170px}
 .chat-menu button{display:block;width:100%;text-align:left;padding:12px 14px;color:var(--text);background:none;border:none;border-bottom:1px solid var(--tint-1);font-family:var(--font);font-size:var(--fs-base);cursor:pointer}
 .chat-menu button.rojo{color:var(--danger)}
@@ -7162,7 +7159,7 @@ function tocarBotonGrupos(btn) {
 <!-- ═══ PANTALLA: CHAT DEL GRUPO ═══ -->
 <div id="page-chat">
   <div class="chat-top">
-    <button type="button" class="det-icono chat-volver" onclick="cerrarChat()" title="Volver al grupo" aria-label="Cerrar el chat y volver al grupo"><svg class="ico-movil" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg><svg class="ico-escritorio" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    <button type="button" class="det-icono chat-volver" onclick="cerrarChat()" title="Volver al grupo" aria-label="Cerrar el chat y volver al grupo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
     <div style="min-width:0;"><div class="t" id="chatTitulo">Chat</div><div class="s" id="chatMiembros"></div></div>
   </div>
   <div class="chat-list" id="chatLista"></div>
