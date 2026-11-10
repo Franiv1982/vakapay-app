@@ -1,0 +1,73 @@
+/* ================================================================
+   VakaPay — Tokens de diseño
+   ----------------------------------------------------------------
+   Única fuente de colores, tipografía, radios, sombras y espaciados.
+   La usan la app (index.html) y el inicio de sesión (login.html).
+   Para un estilo nuevo, usa siempre estas variables en lugar de
+   escribir el valor a mano: así toda la app se mantiene igual.
+   ================================================================ */
+:root {
+  /* ── Marca ── */
+  --gold:        #F5C800;                 /* amarillo VakaPay: acción principal, títulos */
+  --gold-light:  #FFE566;
+  --gold-dark:   #C49E00;                 /* hover / pulsado */
+  --gold-soft:   rgba(245,200,0,.12);     /* fondos suaves de marca */
+  --gold-line:   rgba(245,200,0,.25);     /* bordes de marca */
+  --border:      rgba(245,200,0,.16);     /* borde por defecto de tarjetas */
+
+  /* ── Fondos y superficies (de más oscuro a más claro) ── */
+  --dark:        #0E0E0E;                 /* fondo de la app */
+  --dark2:       #141414;                 /* campos, zonas hundidas */
+  --card:        #1A1A1A;                 /* tarjetas */
+  --dark3:       #1E1E1E;                 /* superficies, ventanas */
+  --dark4:       #252525;                 /* superficies elevadas, chips */
+
+  /* ── Líneas neutras ── */
+  --line:        #333333;                 /* separadores y bordes neutros */
+  --line-strong: #444444;
+
+  /* ── Texto ── */
+  --text:        #F2F2F2;                 /* texto principal */
+  --text2:       #BBBBBB;                 /* texto secundario */
+  --muted:       #888888;                 /* texto apagado (contraste AA sobre las superficies) */
+  --muted2:      #555555;                 /* deshabilitado */
+
+  /* ── Estados ── */
+  --success:        #3DBA6F;              /* importes positivos, «te deben» */
+  --success-strong: #28A745;              /* botones verdes con texto blanco */
+  --danger:         #FF4D4D;              /* importes negativos, errores */
+  --danger-strong:  #DC3545;              /* botones rojos con texto blanco */
+  --info:           #4DA6FF;
+  --whatsapp:       #25D366;              /* solo para el botón de WhatsApp */
+
+  /* ── Tipografía ── */
+  --font:         'Nunito', 'Segoe UI', Arial, sans-serif;
+  --font-display: 'Bebas Neue', Impact, 'Arial Narrow', Arial, sans-serif; /* títulos e importes */
+  --fs-2xs: .62rem;   /* menú inferior, insignias */
+  --fs-xs:  .68rem;   /* etiquetas */
+  --fs-sm:  .75rem;   /* texto secundario */
+  --fs-base:.85rem;   /* texto normal */
+  --fs-md:  .95rem;   /* texto destacado */
+  --fs-lg:  1.15rem;  /* títulos de sección */
+  --fs-xl:  1.5rem;   /* títulos de pantalla */
+  --fs-2xl: 2.4rem;   /* cifras grandes */
+  --fw-normal: 700; --fw-bold: 800; --fw-black: 900;
+
+  /* ── Bordes redondeados ── */
+  --r-sm:   8px;      /* chips, iconos */
+  --r-md:   12px;     /* botones, campos */
+  --r-lg:   18px;     /* tarjetas */
+  --r-xl:   24px;     /* ventanas */
+  --r-pill: 999px;
+  --radius: var(--r-lg);
+
+  /* ── Sombras ── */
+  --shadow-sm: 0 2px 8px rgba(0,0,0,.4);
+  --shadow-md: 0 8px 24px rgba(0,0,0,.55);
+  --shadow-lg: 0 16px 40px rgba(0,0,0,.7);
+  --shadow:    var(--shadow-md);
+  --glow-gold: 0 0 16px rgba(245,200,0,.3);
+
+  /* ── Espaciado: escala de 4 en 4 ── */
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px; --s-6: 24px; --s-8: 32px;
+}
