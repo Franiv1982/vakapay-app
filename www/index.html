@@ -2845,7 +2845,7 @@ async function ejecutarBorradoMiembro() {
   // Los gastos se quedan como estaban: se recarga el grupo tal y como lo tiene el servidor
   delete g.members[n];
   await recargarGrupoDelServidor(groups[currentGroupIdx]);
-  toast(`${n} eliminado del grupo`, 'i');
+  toast(`${n} eliminado del grupo`, 's');
   refrescarActividad();
 }
 function updateSelectAllBtn(){
@@ -2912,7 +2912,7 @@ async function toggleFriendInGroup(name, el) {
       if (!r.ok) { const d = await r.json().catch(() => ({})); throw Object.assign(new Error(d.error || ''), { status: r.status }); }
       delete g.members[name];
       save();
-      toast(`${name} quitado del grupo`, 'i');
+      toast(`${name} quitado del grupo`, 's');
     } catch (e) {
       toast(textoError(e, 'No se pudo quitar del grupo.'), 'e');
     }
@@ -3095,7 +3095,7 @@ async function deleteExpense(idx) {
     await refrescarActividad(); // el servidor ya registró el borrado para todo el grupo
     renderAll();
     if (typeof renderGroups === 'function') renderGroups();
-    toast('Gasto eliminado', 'i');
+    toast('Gasto eliminado', 's');
   } catch (err) {
     console.error("Error al eliminar:", err);
     toast(textoError(err, 'No se pudo eliminar el gasto.'), 'e');
@@ -3119,7 +3119,7 @@ async function renameGroup(idx) {
     
     // 4. Actualizamos la pantalla
     renderAll(); 
-    toast('Nombre actualizado', 'i');
+    toast('Nombre actualizado', 's');
   } catch (err) {
     console.error("Error al renombrar:", err);
     toast('No se pudo actualizar.', 'e');
@@ -3389,7 +3389,7 @@ function calcularDeudas(aviso = true){
           })()}
         </div>
       </div>`).join(''); 
-  if (aviso) toast('Cuentas actualizadas','i');
+  if (aviso) toast('Cuentas actualizadas','s');
 }
 
 // ─── PAGAR TAMBIÉN POR… ─────────────────────────────────────────────
@@ -3878,7 +3878,7 @@ function sendProof(settle){
   if(settle){
     const archivo = document.getElementById('proofFileInput')?.files?.[0] || null;
     registrarPago({ ..._proofData }, archivo, _proofData.extras); // el comprobante queda adjunto a cada pago
-  } else {toast('Comprobante enviado al acreedor','i');}
+  } else {toast('Comprobante enviado al acreedor','s');}
   closeProofModal();
 }
 /* ============================================================
@@ -5114,7 +5114,7 @@ async function toggleFriendGroupChip(el, friendName) {
       if (!r.ok) { toast('Solo quien creó el grupo puede quitar participantes', 'e'); return; }
       delete g.members[friendName];
       el.classList.remove('sel');
-      toast(`${friendName} quitado de "${g.name}"`, 'i');
+      toast(`${friendName} quitado de "${g.name}"`, 's');
     } else {
       const res = await agregarAmigoAGrupo(g, friendName, { email: f.email || '', phone: f.phone || '' });
       if (!res.ok) { toast(res.error || 'No se pudo añadir al grupo', 'e'); return; }
@@ -5237,7 +5237,7 @@ async function ejecutarBorradoAmigo() {
   updateStats();
   cerrarModalBorrarAmigo();
   closeFriendModal();
-  toast(`${name} eliminado`, 'i');
+  toast(`${name} eliminado`, 's');
   refrescarActividad();
 }
 
@@ -5618,7 +5618,7 @@ function clearAll(){
   groups=[];friends=[];activity=[];profile={};
   ['vp_groups','vp_friends','vp_activity','vp_profile'].forEach(k=>localStorage.removeItem(k));
   renderGroupsList();renderFriends();renderActivity();loadProfile();updateStats();
-  toast('Datos borrados','i');
+  toast('Datos borrados','s');
 }
 
 function cerrarModalBorrarDatos() {
@@ -6064,7 +6064,7 @@ async function confirmarQuitarComprobante() {
   try {
     await guardarTicketServidor(idx, null);
     openGasto(idx);
-    toast('Comprobante eliminado', 'i');
+    toast('Comprobante eliminado', 's');
     if (typeof refrescarActividad === 'function') refrescarActividad();
   } catch (err) {
     toast(textoError(err, 'No se pudo eliminar el comprobante'), 'e');
@@ -6408,7 +6408,7 @@ function toast(msg, type = 'i') {
   if (type === 'e') { mostrarError(msg); return; }
   const el = document.getElementById('toast');
   if (!el) return;
-  el.innerHTML = `<span class="t-ico">${icono(type === 's' ? 'check' : 'punto', type === 's' ? 15 : 8)}</span><span></span>`;
+  el.innerHTML = `<span class="t-ico">${icono(type === 's' ? 'check' : 'info', type === 's' ? 15 : 17)}</span><span></span>`;
   el.lastChild.textContent = msg;
   el.className = 'toast show ' + (type === 's' ? 'toast-s' : 'toast-i');
   clearTimeout(toastT);
