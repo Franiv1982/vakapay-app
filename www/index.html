@@ -6,6 +6,7 @@
 <title>VakaPay - Calculadora de Gastos</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="tokens.css">
+<script src="iconos.js"></script>
 <style>
 /* Colores, tipografía, radios, sombras y espaciados: tokens.css */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -130,6 +131,12 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}
 .btn-outline:hover{border-color:var(--gold);color:var(--gold)}
 .btn-danger{background:rgba(255,77,77,.1);border:1.5px solid rgba(255,77,77,.27);color:var(--danger)}
+/* Iconos SVG en línea con el texto */
+.icono{display:inline-block;vertical-align:-0.18em;flex-shrink:0}
+/* Iconos en el color del texto (blanco en oscuro, oscuro en claro); el amarillo
+   queda para lo seleccionado, las acciones y los importes */
+.gc-icon .icono,.exp-ico .icono,.ti .icono{color:var(--text)}
+.type-btn.active .ti .icono{color:var(--gold)}
 /* Botones (opción B): amarillo = acción principal · borde = cancelar/volver ·
    rojo relleno = confirmar algo que no se deshace · rojo suave = abrir una acción peligrosa */
 .btn-peligro{background:var(--danger-strong);color:#fff;border:none}
@@ -230,7 +237,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 .c-transport{background:rgba(100,180,255,.1);border-color:rgba(100,180,255,.28)}
 .c-hotel{background:rgba(180,100,255,.1);border-color:rgba(180,100,255,.28)}
 .c-activity{background:rgba(80,220,150,.1);border-color:rgba(80,220,150,.28)}
-.c-other{background:rgba(245,200,0,.08);border-color:rgba(245,200,0,.18)}
+.c-other{background:var(--dark4);border-color:var(--line)}
 
 /* ── GROUPS LIST (home) ── */
 .sk{background:linear-gradient(90deg,var(--card) 25%,var(--dark4) 50%,var(--card) 75%);background-size:200% 100%;animation:skBrillo 1.3s ease-in-out infinite;border-radius:var(--r-sm)}
@@ -241,7 +248,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 .group-card{display:flex;align-items:center;gap:12px;padding:14px;background:var(--dark3);border-radius:var(--r-md);border:1px solid var(--border);margin-bottom:8px;cursor:pointer;transition:border-color .2s,transform .14s}
 .group-card:active{transform:scale(.98)}
 .group-card:hover{border-color:rgba(245,200,0,.3)}
-.gc-icon{width:44px;height:44px;border-radius:var(--r-md);background:rgba(245,200,0,.1);border:1px solid rgba(245,200,0,.2);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.gc-icon{width:44px;height:44px;border-radius:var(--r-md);background:var(--dark4);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
 .gc-info{flex:1;min-width:0}
 .gc-name{font-weight:800;font-size:var(--fs-md);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gc-meta{font-size:var(--fs-xs);color:var(--muted);margin-top:2px}
@@ -411,7 +418,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 <div id="groupDropdown">
   <div id="groupDropdownList"></div>
   <div class="gdrop-divider"></div>
-  <div class="gdrop-back" onclick="closeGroupDropdown();goBack()">← Ver todos los grupos</div>
+  <div class="gdrop-back" onclick="closeGroupDropdown();goBack()"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Ver todos los grupos</div>
 </div>
 
 
@@ -439,10 +446,10 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 <!-- Saved groups list -->
 <div id="groupsListWrap" style="display:block">
   <div id="groupsList">
-    <div class="no-items"><div class="ni">📂</div><div>No tienes grupos creados aún</div></div>
+    <div class="no-items"><div class="ni"><svg class="icono" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><div>No tienes grupos creados aún</div></div>
   </div>
 </div>
-<button class="btn btn-gold btn-full" style="margin:14px 0 10px" onclick="showNewGroupForm()">＋ Crear Nuevo Grupo</button>
+<button class="btn btn-gold btn-full" style="margin:14px 0 10px" onclick="showNewGroupForm()"><svg class="icono" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Crear nuevo grupo</button>
 <button class="btn btn-outline btn-full" style="margin:0 0 26px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="abrirUnirseConEnlace()">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
   Unirse con un enlace
@@ -451,16 +458,16 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   <!-- New group form (hidden initially) -->
   <div id="newGroupForm" style="display:none">
     <div class="sec-title" style="margin-top:0">
-      <div class="num">✦</div><h2>Nuevo Grupo</h2>
+      <div class="num"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><h2>Nuevo grupo</h2>
     </div>
     <div class="card">
       <div class="field" style="margin-bottom:16px">
         <label>Tipo de grupo</label>
         <div class="type-grid">
-          <div class="type-btn active" data-type="viaje" onclick="selectType(this)"><span class="ti">✈️</span><span class="tl">Viaje</span></div>
-          <div class="type-btn" data-type="casa" onclick="selectType(this)"><span class="ti">🏠</span><span class="tl">Casa</span></div>
-          <div class="type-btn" data-type="pareja" onclick="selectType(this)"><span class="ti">💑</span><span class="tl">Pareja</span></div>
-          <div class="type-btn" data-type="otros" onclick="selectType(this)"><span class="ti">🎯</span><span class="tl">Otros</span></div>
+          <div class="type-btn active" data-type="viaje" onclick="selectType(this)"><span class="ti"><svg class="icono" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span><span class="tl">Viaje</span></div>
+          <div class="type-btn" data-type="casa" onclick="selectType(this)"><span class="ti"><svg class="icono" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span><span class="tl">Casa</span></div>
+          <div class="type-btn" data-type="pareja" onclick="selectType(this)"><span class="ti"><svg class="icono" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg></span><span class="tl">Pareja</span></div>
+          <div class="type-btn" data-type="otros" onclick="selectType(this)"><span class="ti"><svg class="icono" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span><span class="tl">Otros</span></div>
         </div>
       </div>
       <div class="g2">
@@ -582,7 +589,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   <div class="g2">
     <div class="field span2">
       <label>Descripción</label>
-      <input type="text" id="expDesc" placeholder="ej: Cena en restaurante 🍽️">
+      <input type="text" id="expDesc" placeholder="ej: Cena en restaurante">
     </div>
     <div class="field">
       <label>Monto</label>
@@ -607,11 +614,11 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
     <div class="field">
       <label>Categoría</label>
       <select id="expCat">
-        <option value="food">🍔 Comida</option>
-        <option value="transport">🚗 Transporte</option>
-        <option value="hotel">🏨 Alojamiento</option>
-        <option value="activity">🎭 Actividad</option>
-        <option value="other">💡 Otro</option>
+        <option value="food">Comida</option>
+        <option value="transport">Transporte</option>
+        <option value="hotel">Alojamiento</option>
+        <option value="activity">Actividad</option>
+        <option value="other">Otro</option>
       </select>
     </div>
     <div class="field">
@@ -639,13 +646,13 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
             <img id="ocrPreview" style="width:36px;height:36px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border);flex-shrink:0;">
             <div style="flex:1;min-width:0;">
               <div id="ocrFileName" style="color:var(--text);font-size:var(--fs-xs);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-              <div id="ocrLoading" style="display:none;color:var(--gold);font-size:var(--fs-2xs);">⏳ Extrayendo...</div>
-              <div id="ocrSuccess" style="display:none;color:var(--success);font-size:var(--fs-2xs);">✅ Datos extraídos</div>
+              <div id="ocrLoading" style="display:none;color:var(--gold);font-size:var(--fs-2xs);"><span class="ocr-spinner" style="display:inline-block;width:10px;height:10px;vertical-align:-1px;"></span> Extrayendo...</div>
+              <div id="ocrSuccess" style="display:none;color:var(--success);font-size:var(--fs-2xs);"><svg class="icono" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Datos extraídos</div>
             </div>
-            <button onclick="clearOCR()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:var(--fs-base);flex-shrink:0;" title="Quitar">🗑️</button>
+            <button onclick="clearOCR()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:var(--fs-base);flex-shrink:0;" title="Quitar" aria-label="Quitar"><svg class="icono" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
           </div>
           <button onclick="document.getElementById('ocrFile').click()" style="width:100%;margin-top:8px;background:rgba(245,200,0,.08);border:1px solid rgba(245,200,0,.2);border-radius:var(--r-sm);padding:4px;color:var(--gold);font-size:var(--fs-xs);cursor:pointer;font-weight:700;">
-            🔄 Cambiar archivo
+            <svg class="icono" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Cambiar archivo
           </button>
         </div>
       </div>
@@ -655,7 +662,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   <div class="field">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <label style="margin-bottom:0">¿Para quiénes?</label>
-      <button class="btn btn-sm btn-outline" onclick="toggleSelectAll()" id="btnSelectAll" style="font-size:var(--fs-xs);padding:4px 10px">☑ Todos</button>
+      <button class="btn btn-sm btn-outline" onclick="toggleSelectAll()" id="btnSelectAll" style="font-size:var(--fs-xs);padding:4px 10px"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Todos</button>
     </div>
     <div class="chips" id="involvedChips" style="margin-top:4px">
       <span style="color:var(--muted);font-size:var(--fs-sm)">Primero añade participantes</span>
@@ -702,9 +709,9 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
     <div id="balanceList"><div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div>Sin datos</div></div></div>
     <div class="dvd"></div>
     <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:10px">Quién paga a quién</div>
-    <div id="debtList"><div class="no-items"><div class="ni">💸</div><div>Pulsa calcular para ver</div></div></div>
+    <div id="debtList"><div class="no-items"><div class="ni"><svg class="icono" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg></div><div>Pulsa calcular para ver</div></div></div>
     <div style="height:10px"></div>
-    <button class="btn btn-outline btn-full" id="btnCalcularDeudas" onclick="calcDebts()">↻ Actualizar cuentas</button>
+    <button class="btn btn-outline btn-full" id="btnCalcularDeudas" onclick="calcDebts()"><svg class="icono" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Actualizar cuentas</button>
   </div>
 </div>
 
@@ -758,7 +765,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   <div class="det-bar">
     <div style="flex:1;max-width:660px;margin:0 auto;width:100%;padding:0 14px;box-sizing:border-box;">
       <div style="display:flex;align-items:center;gap:8px;padding-right:125px;">
-        <button class="btn btn-sm btn-outline" onclick="goBackToGroup()" style="flex-shrink:0;font-size:var(--fs-xs);padding:4px 8px;">← Volver</button>
+        <button class="btn btn-sm btn-outline" onclick="goBackToGroup()" style="flex-shrink:0;font-size:var(--fs-xs);padding:4px 8px;"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Volver</button>
         <div style="overflow:hidden;">
           <div class="pg-header" id="gastoTitle" style="margin-bottom:0;font-size:var(--fs-lg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
           <div style="font-size:var(--fs-xs);color:var(--muted)" id="gastoMeta"></div>
@@ -781,7 +788,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 <main>
   <div class="card" style="margin-bottom:14px">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">
-      <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;">➕ Nuevo amigo</div>
+      <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;"><svg class="icono" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg> Nuevo amigo</div>
       <button type="button" id="btnAmigoContactos" onclick="rellenarAmigoDesdeContactos()" style="display:none;background:var(--dark3);border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 12px;color:var(--text);font-size:var(--fs-sm);cursor:pointer;align-items:center;gap:6px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Contactos
@@ -829,8 +836,8 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 <main>
   <div class="profile-hero">
     <div class="avatar-wrap">
-      <div id="avatarDisplay" class="avatar-placeholder">👤</div>
-      <div class="avatar-edit" onclick="document.getElementById('avatarFile').click()">✏️</div>
+      <div id="avatarDisplay" class="avatar-placeholder"><svg class="icono" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div class="avatar-edit" onclick="document.getElementById('avatarFile').click()" aria-label="Cambiar foto"><svg class="icono" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></div>
       <input type="file" id="avatarFile" accept="image/*" onchange="handleAvatarChange(event)">
     </div>
     <div class="profile-name" id="profileDisplayName">Tu Nombre</div>
@@ -917,7 +924,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 <div class="modal-overlay" id="editModal" onclick="if(event.target===this)closeEditModal()">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <button class="modal-close" onclick="closeEditModal()" style="color:var(--text);">✕ Cerrar</button>
+    <button class="modal-close" onclick="closeEditModal()" style="color:var(--text);"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar</button>
     <div class="modal-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar Gasto</div>
 
     <div class="field">
@@ -933,11 +940,11 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
       <div class="field">
         <label>Categoría</label>
         <select id="editCat">
-          <option value="food">🍔 Comida</option>
-          <option value="transport">🚗 Transporte</option>
-          <option value="hotel">🏨 Alojamiento</option>
-          <option value="activity">🎭 Actividad</option>
-          <option value="other">💡 Otro</option>
+          <option value="food">Comida</option>
+          <option value="transport">Transporte</option>
+          <option value="hotel">Alojamiento</option>
+          <option value="activity">Actividad</option>
+          <option value="other">Otro</option>
         </select>
       </div>
     </div>
@@ -980,18 +987,18 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
         <input type="file" id="editOcrFile" accept="image/*" style="display:none" onchange="handleEditOCRFile(event)">
         <div id="editOcrFileInfo" style="flex:1;overflow:hidden;">
           <div id="editOcrFileName" style="color:var(--muted);font-size:var(--fs-xs);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Sin comprobante</div>
-          <div id="editOcrLoading" style="display:none;color:var(--gold);font-size:var(--fs-2xs);">⏳ Extrayendo...</div>
-          <div id="editOcrSuccess" style="display:none;color:var(--success);font-size:var(--fs-2xs);">✅ Extraído</div>
+          <div id="editOcrLoading" style="display:none;color:var(--gold);font-size:var(--fs-2xs);"><span class="ocr-spinner" style="display:inline-block;width:10px;height:10px;vertical-align:-1px;"></span> Extrayendo...</div>
+          <div id="editOcrSuccess" style="display:none;color:var(--success);font-size:var(--fs-2xs);"><svg class="icono" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Extraído</div>
         </div>
         <img id="editOcrPreview" style="display:none;width:32px;height:32px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border);flex-shrink:0;">
-        <button onclick="clearEditOCR()" id="editOcrClearBtn" style="display:none;background:none;border:none;color:var(--muted);cursor:pointer;font-size:var(--fs-sm);flex-shrink:0;padding:2px 4px;border:1px solid var(--border);border-radius:var(--r-sm);" title="Quitar">✕</button>
+        <button onclick="clearEditOCR()" id="editOcrClearBtn" style="display:none;background:none;border:none;color:var(--muted);cursor:pointer;font-size:var(--fs-sm);flex-shrink:0;padding:2px 4px;border:1px solid var(--border);border-radius:var(--r-sm);" title="Quitar"><svg class="icono" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
     </div>
 
     <div class="field">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <label style="margin-bottom:0">¿Para quiénes?</label>
-        <button class="btn btn-sm btn-outline" onclick="toggleEditSelectAll()" id="btnEditSelectAll" style="font-size:var(--fs-xs);padding:4px 10px">☑ Todos</button>
+        <button class="btn btn-sm btn-outline" onclick="toggleEditSelectAll()" id="btnEditSelectAll" style="font-size:var(--fs-xs);padding:4px 10px"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Todos</button>
       </div>
       <div class="modal-chips" id="editInvolvedChips"></div>
     </div>
@@ -1009,13 +1016,13 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 <div class="modal-overlay" id="friendModal" onclick="if(event.target===this)closeFriendModal()">
   <div class="modal-sheet" style="max-height:85vh;overflow-y:auto;">
     <div class="modal-handle"></div>
-    <button class="modal-close" onclick="closeFriendModal()" style="color:var(--text);">✕ Cerrar</button>
+    <button class="modal-close" onclick="closeFriendModal()" style="color:var(--text);"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar</button>
     <div class="modal-title" id="friendModalTitle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar Amigo</div>
 
     <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:18px">
       <div class="avatar-wrap" style="width:74px;height:74px">
         <div id="friendModalAvatar" style="width:74px;height:74px;border-radius:50%;background:var(--dark3);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--muted);overflow:hidden;cursor:pointer" onclick="document.getElementById('friendAvatarFile').click()"></div>
-        <div class="avatar-edit" style="width:22px;height:22px;font-size:var(--fs-xs)" onclick="document.getElementById('friendAvatarFile').click()">✏️</div>
+        <div class="avatar-edit" style="width:22px;height:22px;font-size:var(--fs-xs)" onclick="document.getElementById('friendAvatarFile').click()" aria-label="Cambiar foto"><svg class="icono" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></div>
       </div>
       <input type="file" id="friendAvatarFile" accept="image/*" onchange="handleFriendAvatarChange(event)" style="display:none">
       <div style="font-size:var(--fs-xs);color:var(--muted)">Toca para cambiar foto</div>
@@ -1063,7 +1070,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 
   <!-- Donut por categoría -->
   <div class="card" style="margin-bottom:12px">
-    <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px">🍩 Por categoría</div>
+    <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px"><svg class="icono" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg> Por categoría</div>
     <div class="donut-wrap" id="donutWrap">
       <svg class="donut-svg" id="donutSvg" width="160" height="160" viewBox="0 0 160 160"></svg>
       <div class="donut-label"><div class="dv" id="donutCenter">€0</div><div class="dl">Total</div></div>
@@ -1123,7 +1130,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
     <div id="user-nav-wrapper" style="width: 28px; height: 28px; border-radius: 50%; overflow: hidden; border: 1.5px solid currentColor; margin: 0 auto 4px auto; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1);">
         <img id="user-nav-photo" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;" onerror="this.style.display='none';document.getElementById('user-nav-initials').style.display='block';">
         <span id="user-nav-initials" style="font-size: var(--fs-base); font-weight: 700; line-height: 1;">
-            👤
+            <svg class="icono" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </span>
     </div>
     CUENTA
@@ -2037,7 +2044,7 @@ if (groupsChevron) groupsChevron.style.transform = 'rotate(180deg)';
       if (sub) sub.textContent = 'Resumen de todos tus grupos';
     } else {
       const g = groups[currentGroupIdx];
-      badge.textContent = (TYPE_ICONS[g.type] || '📂') + ' ' + g.name;
+      badge.innerHTML = iconoTipo(g.type, 13) + ' ' + escaparHtml(g.name);
       badge.style.display = 'block';
       if (sub) sub.textContent = g.expenses?.length + ' gastos · ' + fmtDate(g.start) + ' → ' + fmtDate(g.end);
     }
@@ -2052,7 +2059,7 @@ if (groupsChevron) groupsChevron.style.transform = 'rotate(180deg)';
       badge.style.display = 'block';
     } else {
       const g = groups[currentGroupIdx];
-      badge.textContent = (TYPE_ICONS[g.type] || '📂') + ' ' + g.name;
+      badge.innerHTML = iconoTipo(g.type, 13) + ' ' + escaparHtml(g.name);
       badge.style.display = 'block';
     }
     renderActivity();
@@ -2090,9 +2097,9 @@ function openGroupDropdown() {
   const list = document.getElementById('groupDropdownList');
   list.innerHTML = groups.map((g, i) => `
     <div class="gdrop-item ${i === currentGroupIdx ? 'active' : ''}" onclick="closeGroupDropdown();switchGroupFromDropdown(${i})">
-      <span>${TYPE_ICONS[g.type] || '📂'}</span>
+      <span>${iconoTipo(g.type, 16)}</span>
       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.name}</span>
-      ${i === currentGroupIdx ? '<span style="margin-left:auto;font-size:var(--fs-xs)">✓</span>' : ''}
+      ${i === currentGroupIdx ? '<span style="margin-left:auto;display:flex">'+icono('check',14)+'</span>' : ''}
     </div>`).join('');
   document.getElementById('groupDropdown').classList.add('open');
   // Cerrar al tocar fuera
@@ -2120,11 +2127,11 @@ function switchGroupFromDropdown(idx) {
   updateBalances();
 
   // Actualizar badge (texto y visibilidad ahora; la posición se ajusta al final)
-  document.getElementById('hbadge').textContent = TYPE_ICONS[g.type] + ' ' + g.name;
+  document.getElementById('hbadge').innerHTML = iconoTipo(g.type, 13) + ' ' + escaparHtml(g.name);
   document.getElementById('hbadge').style.display = 'block';
 
   // Actualizar título y meta del detalle
-  document.getElementById('detTitle').textContent = TYPE_ICONS[g.type] + ' ' + g.name;
+  document.getElementById('detTitle').innerHTML = iconoTipo(g.type, 18) + ' ' + escaparHtml(g.name);
   document.getElementById('detMeta').textContent = fmtDate(g.start) + ' → ' + fmtDate(g.end);
 
   if (currentPage === 'page-stats') {
@@ -2246,7 +2253,7 @@ function renderGroupsList() {
     else counter.textContent = `(${groups.length})`;
   }
   if (groups.length === 0) {
-    el.innerHTML = cargandoInicial ? skGrupos() : '<div class="no-items"><div class="ni">📂</div><div>No tienes grupos creados aún</div></div>';
+    el.innerHTML = cargandoInicial ? skGrupos() : '<div class="no-items"><div class="ni">'+icono('carpeta', 28)+'</div><div>No tienes grupos creados aún</div></div>';
     return;
   }
 
@@ -2261,7 +2268,7 @@ function renderGroupsList() {
 
     return `
       <div class="group-card" data-gid="${g.id}" onclick="openGroup(${i})">
-        <div class="gc-icon" style="position:relative;">${TYPE_ICONS[g.type] || '📂'}<span class="chat-dot" title="Mensajes nuevos en el chat" style="display:${(typeof chatNoLeidos !== 'undefined' && chatNoLeidos[g.id] > 0) ? 'block' : 'none'}"></span></div>
+        <div class="gc-icon" style="position:relative;">${iconoTipo(g.type, 22)}<span class="chat-dot" title="Mensajes nuevos en el chat" style="display:${(typeof chatNoLeidos !== 'undefined' && chatNoLeidos[g.id] > 0) ? 'block' : 'none'}"></span></div>
         <div class="gc-info">
           <div class="gc-name">${g.name}</div>
           <div class="gc-meta">${nm} participante${nm !== 1 ? 's' : ''} · total ${sym0}${Number(total || 0).toFixed(2)}</div>
@@ -2273,7 +2280,7 @@ function renderGroupsList() {
           if (!yo) return '';
           if (sd > 0.05) return `<div class="gc-saldo"><small>Te deben</small><b class="verde">${sym0}${sd.toFixed(2)}</b></div>`;
           if (sd < -0.05) return `<div class="gc-saldo"><small>Debes</small><b class="rojo">${sym0}${Math.abs(sd).toFixed(2)}</b></div>`;
-          return `<div class="gc-saldo"><small>Al día</small><b class="gris">✓</b></div>`;
+          return `<div class="gc-saldo"><small>Al día</small><b class="gris">${icono('check',18)}</b></div>`;
         })()}
         <svg class="gc-flecha" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>`;
@@ -2287,9 +2294,9 @@ async function openGroup(idx){
   resetMemberAccordions();
   const g = groups[idx];
 
-  document.getElementById('detTitle').textContent = TYPE_ICONS[g.type]+' '+g.name;
+  document.getElementById('detTitle').innerHTML = iconoTipo(g.type, 18) + ' ' + escaparHtml(g.name);
   document.getElementById('detMeta').textContent = fmtDate(g.start)+' → '+fmtDate(g.end);
-  document.getElementById('hbadge').textContent = TYPE_ICONS[g.type]+' '+g.name;
+  document.getElementById('hbadge').innerHTML = iconoTipo(g.type, 13) + ' ' + escaparHtml(g.name);
   document.getElementById('hbadge').style.display = 'block';
   posicionarBadge();
   ['sec2','sec3','sec4','sec5','secPagos','sec6','sec7'].forEach(id=>document.getElementById(id).style.opacity='1');
@@ -2359,11 +2366,11 @@ function openGasto(idx, origen) {
   const sym = SYMBOLS[base] || '€';
   const displaySym = SYMBOLS[e.currency || base] || '€';
 
-  const icono = e.es_pago ? '💸' : (CAT_ICONS[e.cat] || '💡');
+  const iconoGasto = e.es_pago ? iconoCat('pago', 20) : iconoCat(e.cat, 20);
   // Pagos: quién pagó por otro («Pagar también por…») y quién lo registró
   const pagoPorPago = e.es_pago ? ((String(e.desc || '').match(/\(pagó ([^)]+)\)$/) || [])[1] || '') : '';
   const registroPago = e.es_pago ? (Object.entries(g.memberIds || {}).find(([, id]) => Number(id) === Number(e.member_id)) || [])[0] || '' : '';
-  document.getElementById('gastoTitle').textContent = icono + ' ' + e.desc;
+  document.getElementById('gastoTitle').innerHTML = iconoGasto + ' ' + escaparHtml(e.desc);
   document.getElementById('gastoMeta').textContent = e.es_pago
     ? `${fmtDate(e.date)} · ${e.payer} → ${(e.involved || [])[0] || ''}`
     : fmtDate(e.date) + ' · Pagó ' + e.payer;
@@ -2372,13 +2379,13 @@ function openGasto(idx, origen) {
     <div style="margin-top:12px;">
       <img src="${e.ticket}" style="width:100%;max-height:200px;object-fit:contain;border-radius:var(--r-md);border:1px solid var(--border);">
       <button onclick="downloadTicket(${idx})" class="btn btn-outline btn-full" style="margin-top:8px;color:var(--gold);border-color:var(--gold);">
-        ⬇️ Descargar comprobante
+        <svg class="icono" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar comprobante
       </button>
     </div>` : '';
 
   document.getElementById('gastoDetail').innerHTML = `
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
-      <div class="exp-ico ${e.es_pago ? 'c-other' : CAT_CSS[e.cat]}" style="width:52px;height:52px;font-size:1.6rem;">${icono}</div>
+      <div class="exp-ico ${e.es_pago ? 'c-other' : CAT_CSS[e.cat]}" style="width:52px;height:52px;">${e.es_pago ? iconoCat('pago', 26) : iconoCat(e.cat, 26)}</div>
       <div>
         <div style="font-size:var(--fs-lg);font-weight:800;color:var(--text);">${e.desc}</div>
         <div style="font-size:var(--fs-sm);color:var(--muted);">${fmtDate(e.date)}</div>
@@ -2416,7 +2423,7 @@ ${e.es_pago ? `
 
     <div class="card" style="padding:12px;margin-bottom:16px;">
       <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Categoría</div>
-      <div style="font-weight:700;">${CAT_ICONS[e.cat]} ${{food:'Comida',transport:'Transporte',hotel:'Alojamiento',activity:'Actividad',other:'Otro'}[e.cat]||e.cat}</div>
+      <div style="font-weight:700;">${iconoCat(e.cat, 15)} ${{food:'Comida',transport:'Transporte',hotel:'Alojamiento',activity:'Actividad',other:'Otro'}[e.cat]||e.cat}</div>
     </div>
 
 `}    <div class="card" style="padding:12px;margin-bottom:16px;">
@@ -2431,11 +2438,11 @@ ${e.es_pago ? `
           <div style="color:var(--muted);font-size:var(--fs-xs);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
             ${tieneTicket ? 'Comprobante adjunto · toca la imagen para verlo' : 'Sin comprobante'}
           </div>
-          ${tieneTicket ? `<div style="font-size:var(--fs-2xs);color:var(--success);">✅ Guardado</div>` : ''}
+          ${tieneTicket ? `<div style="font-size:var(--fs-2xs);color:var(--success);">${icono('ok',12)} Guardado</div>` : ''}
         </div>
         ${tieneTicket ? `
           <img id="gastoTicketThumb" src="${e.ticket || ''}" style="width:40px;height:40px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border);flex-shrink:0;cursor:pointer;background:var(--dark4);" onclick="verTicket(${idx})" title="Ver comprobante">
-          ${puede ? `<button onclick="removeGastoTicket(${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:var(--fs-sm);flex-shrink:0;padding:2px 4px;border:1px solid var(--border);border-radius:var(--r-sm);" title="Quitar comprobante">✕</button>` : ''}
+          ${puede ? `<button onclick="removeGastoTicket(${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:var(--fs-sm);flex-shrink:0;padding:2px 4px;border:1px solid var(--border);border-radius:var(--r-sm);" title="Quitar comprobante" aria-label="Quitar comprobante">${icono('cerrar',12)}</button>` : ''}
         ` : ''}
       </div>
     </div>
@@ -2542,7 +2549,7 @@ function openDeleteGroupModal(idx) {
     
     // Rellenamos el modal con nombre e icono
     document.getElementById('delete-group-name').textContent = g.name;
-    document.getElementById('delete-group-icon').textContent = TYPE_ICONS[g.type] || '📂';  
+    document.getElementById('delete-group-icon').innerHTML = iconoTipo(g.type, 26);  
     document.getElementById('modal-borrar-grupo').style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
@@ -2582,7 +2589,7 @@ function openDeleteExpenseModal(idx) {
   const sym = SYMBOLS[e.currency] || '€';
   const symBase = SYMBOLS[base] || '€';
 
-  document.getElementById('del-gasto-icon').textContent = CAT_ICONS[e.cat] || '💡';
+  document.getElementById('del-gasto-icon').innerHTML = e.es_pago ? iconoCat('pago', 24) : iconoCat(e.cat, 24);
   document.getElementById('del-gasto-desc').textContent = e.desc;
   document.getElementById('del-gasto-amount').textContent = 
     e.currency !== base 
@@ -2645,7 +2652,7 @@ async function addMemberFromFriend(friendName) {
     console.error("Error refrescando tras añadir:", err);
   }
   
-  toast(`${friendName} añadido ✓`, 's');
+  toast(`${friendName} añadido`, 's');
   refrescarActividad();
 }
 
@@ -2679,7 +2686,7 @@ async function addMember() {
 
   // 3. Lista de amigos actualizada desde el servidor
   try { friends = await vakaData.getFriends() || friends; renderFriends(); renderFriendPicker(); updateStats(); } catch (_) {}
-  toast(eraAmigo ? `${n} añadido ✓` : `${n} añadido al grupo y a tus amigos ✓`, 's');
+  toast(eraAmigo ? `${n} añadido` : `${n} añadido al grupo y a tus amigos`, 's');
   refrescarActividad();
 
   // 4. Refresco final
@@ -2714,29 +2721,29 @@ async function removeMember(n) {
   if (pendiente) volver.textContent = 'Entendido'; else volver.innerHTML = volver.dataset.html;
   const info = document.getElementById('del-miembro-info');
   info.innerHTML = '';
-  const linea = t => { const sp = document.createElement('span'); sp.textContent = t; info.appendChild(sp); };
+  const linea = (t, ic, color) => { const sp = document.createElement('span'); if (ic) { const i = document.createElement('span'); i.innerHTML = icono(ic, 14) + ' '; if (color) i.style.color = color; sp.appendChild(i); } sp.appendChild(document.createTextNode(t)); info.appendChild(sp); };
 
   if (pendiente && Math.abs(saldo) <= 0.05) {
     // Saldo a cero, pero con un pago que quien cobra aún no ha confirmado
     const para = (pagoSinConfirmar.involved || [])[0] || '';
     document.getElementById('del-miembro-msg').textContent =
       `El pago de ${n} de ${formatAmountBase(Number(pagoSinConfirmar.baseAmt) || 0)} a ${para} está pendiente de que ${para} lo confirme.`;
-    linea(`⏳ Podrás eliminarlo cuando ${para} lo confirme, o el ${fechaDiaMes(pagoSinConfirmar.pago_confirmar_antes)} si no responde.`);
+    linea(`Podrás eliminarlo cuando ${para} lo confirme, o el ${fechaDiaMes(pagoSinConfirmar.pago_confirmar_antes)} si no responde.`, 'reloj', 'var(--gold)');
   } else if (pendiente) {
     // Con saldo pendiente se perdería la deuda: primero hay que saldarla
     const importe = formatAmountBase(Math.abs(saldo));
     document.getElementById('del-miembro-msg').textContent = saldo < 0
       ? `${n} todavía debe ${importe}. Si lo eliminas, esa deuda desaparecería y las cuentas del grupo no cuadrarían.`
       : `A ${n} todavía le deben ${importe}. Si lo eliminas, ese dinero desaparecería y las cuentas del grupo no cuadrarían.`;
-    linea(saldo < 0 ? `🔴 Debe ${importe}` : `🟢 Le deben ${importe}`);
-    linea('💸 Primero registrad el pago en «Cuentas finales» (aunque se haya pagado fuera de la app). Con su saldo a cero ya podrás eliminarlo.');
+    linea(saldo < 0 ? `Debe ${importe}` : `Le deben ${importe}`, 'punto', saldo < 0 ? 'var(--danger)' : 'var(--success)');
+    linea('Primero registrad el pago en «Cuentas finales» (aunque se haya pagado fuera de la app). Con su saldo a cero ya podrás eliminarlo.', 'billete', 'var(--gold)');
   } else {
     document.getElementById('del-miembro-msg').textContent = 'Esta acción no se puede deshacer.';
     if (count) {
-      linea(`🧾 ${count} gasto${count !== 1 ? 's' : ''} con su nombre: se mantienen en la lista`);
-      linea('✅ Sus cuentas están saldadas: los saldos del resto no cambian');
+      linea(`${count} gasto${count !== 1 ? 's' : ''} con su nombre: se mantienen en la lista`, 'ticket', 'var(--gold)');
+      linea('Sus cuentas están saldadas: los saldos del resto no cambian', 'ok', 'var(--success)');
     } else {
-      linea('⚠️ El participante será eliminado del grupo');
+      linea('El participante será eliminado del grupo', 'alerta', 'var(--gold)');
     }
   }
   document.getElementById('modal-borrar-miembro').style.display = 'flex';
@@ -2777,13 +2784,13 @@ function updateSelectAllBtn(){
   const chips=document.querySelectorAll('#involvedChips .chip');
   const allSel=[...chips].every(c=>c.classList.contains('sel'));
   const btn=document.getElementById('btnSelectAll');
-  if(btn) btn.textContent=allSel?'☐ Ninguno':'☑ Todos';
+  if(btn) btn.innerHTML=allSel?icono('casilla',13)+' Ninguno':icono('casillaOk',13)+' Todos';
 }
 function toggleSelectAll(){
   const chips=document.querySelectorAll('#involvedChips .chip');
   const allSel=[...chips].every(c=>c.classList.contains('sel'));
   chips.forEach(c=>c.classList.toggle('sel',!allSel));
-  document.getElementById('btnSelectAll').textContent=allSel?'☑ Todos':'☐ Ninguno';
+  document.getElementById('btnSelectAll').innerHTML=allSel?icono('casillaOk',13)+' Todos':icono('casilla',13)+' Ninguno';
 }
 function renderFriendPicker() {
   const el = document.getElementById('friendPickerChips');
@@ -2812,7 +2819,7 @@ function renderFriendPicker() {
     
     return `<div class="chip friend-pick ${inGroup ? 'sel' : ''}" data-name="${name}" onclick="toggleFriendInGroup('${name}',this)">
       <div class="av">${name[0].toUpperCase()}</div>${name}
-      ${inGroup ? '<span style="color:var(--gold);font-size:var(--fs-sm)">✓</span>' : '<span style="color:var(--muted);font-size:var(--fs-sm)">+</span>'}
+      ${inGroup ? '<span style="color:var(--gold);display:flex">'+icono('check',15)+'</span>' : '<span style="color:var(--muted);font-size:var(--fs-sm)">+</span>'}
     </div>`;
   }).join('');
 }
@@ -2855,7 +2862,7 @@ async function toggleFriendInGroup(name, el) {
         },
         body: JSON.stringify({ display_name: name })
       });
-      toast(`${name} añadido ✓`, 's');
+      toast(`${name} añadido`, 's');
       refrescarActividad();
     } catch (e) {
       console.error("Error sincronizando miembro:", e);
@@ -2998,7 +3005,7 @@ async function addExpense() {
     renderGroups();
     await refrescarActividad(); // el servidor ya registró el gasto para todo el grupo
     clearOCR();
-    toast('Gasto registrado ✓', 's');
+    toast('Gasto registrado', 's');
     } catch (err) {
     toast('Error al guardar', 'e');
   } finally {
@@ -3127,7 +3134,7 @@ function openEditModal(idx) {
     document.getElementById('editOcrDot').style.display = 'block';
     document.getElementById('editOcrClearBtn').style.display = 'block';
     document.getElementById('editOcrBtn').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Cambiar <span id="editOcrDot" style="display:none;position:absolute;top:3px;right:3px;width:7px;height:7px;background:var(--success);border-radius:50%;border:1.5px solid var(--dark);"></span>';
-    document.getElementById('editOcrSuccess').textContent = '✅ Guardado';
+    document.getElementById('editOcrSuccess').innerHTML = icono('ok',12) + ' Guardado';
     document.getElementById('editOcrSuccess').style.display = 'block';
   }
   // 7. Actualizar estado visual y abrir modal
@@ -3152,7 +3159,7 @@ function closeEditModal(){
 function updateEditSelectAllBtn(){
   const chips=document.querySelectorAll('#editInvolvedChips .modal-chip');
   const allSel=[...chips].every(c=>c.classList.contains('sel'));
-  document.getElementById('btnEditSelectAll').textContent=allSel?'☐ Ninguno':'☑ Todos';
+  document.getElementById('btnEditSelectAll').innerHTML=allSel?icono('casilla',13)+' Ninguno':icono('casillaOk',13)+' Todos';
 }
 
 function toggleEditSelectAll(){
@@ -3240,7 +3247,7 @@ async function saveEditExpense() {
     renderGroups();
     document.getElementById('editModal').classList.remove('open');
     document.body.style.overflow = '';
-        toast('Gasto actualizado ✓', 's');
+        toast('Gasto actualizado', 's');
     await refrescarActividad(); // el servidor ya registró la edición para todo el grupo
 
     // Si la ficha del gasto está abierta, se vuelve a dibujar con los datos nuevos
@@ -3268,7 +3275,7 @@ async function calcDebts(opciones = {}) {
   const btn = document.getElementById('btnCalcularDeudas');
   if (btn) { btn.disabled = true; btn.textContent = 'Actualizando…'; }
   const ok = await recargarGrupoDelServidor(g, { aviso: !opciones.silencioso });
-  if (btn) { btn.disabled = false; btn.textContent = '↻ Actualizar cuentas'; }
+  if (btn) { btn.disabled = false; btn.innerHTML = icono('recargar',14) + ' Actualizar cuentas'; }
   if (!ok) toast('Sin conexión: se calcula con los últimos datos descargados', 'e');
 }
 
@@ -3292,7 +3299,7 @@ function calcularDeudas(aviso = true){
   renderPagosRealizados();
   const dl=document.getElementById('debtList');
   dl.innerHTML=txs.length===0
-    ?'<div class="all-good">✅ ¡Todas las cuentas están cuadradas!</div>'
+    ?'<div class="all-good">'+icono('ok',18)+' ¡Todas las cuentas están cuadradas!</div>'
    :txs.map((t,i)=>`
       <div class="debt-item" id="debt-${i}" style="flex-wrap:wrap;gap:8px;">
         <div style="display:flex;align-items:center;gap:8px;width:100%;">
@@ -3314,7 +3321,7 @@ function calcularDeudas(aviso = true){
           })()}
         </div>
       </div>`).join(''); 
-  if (aviso) toast('Cálculo completado 🧮','i');
+  if (aviso) toast('Cuentas actualizadas','i');
 }
 
 // ─── PAGAR TAMBIÉN POR… ─────────────────────────────────────────────
@@ -3350,7 +3357,7 @@ function renderPagosRealizados() {
   const contador = document.getElementById('pagosCounter');
   if (contador) contador.textContent = pagos.length ? `(${pagos.length})` : '';
   if (!pagos.length) {
-    cont.innerHTML = '<div class="no-items"><div class="ni">💸</div><div>Aún no hay pagos registrados.<br>Aparecerán aquí cuando se salden deudas en «Cuentas finales».</div></div>';
+    cont.innerHTML = '<div class="no-items"><div class="ni"><svg class="icono" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg></div><div>Aún no hay pagos registrados.<br>Aparecerán aquí cuando se salden deudas en «Cuentas finales».</div></div>';
     return;
   }
   const base = getBase();
@@ -3467,10 +3474,10 @@ function actualizarPagoPendiente() {
   if (!Number.isFinite(v) || v <= 0) { res.style.display = 'none'; btn.textContent = 'Confirmar'; return; }
   res.style.display = 'block';
   res.innerHTML = '';
-  const linea = t => { const d = document.createElement('div'); d.textContent = t; res.appendChild(d); };
-  if (v > total) { linea(`⚠️ No puede ser más de ${formatAmountBase(total)}, lo que registró ${_pagoPendiente.e.payer}.`); return; }
-  linea(`✅ Pago confirmado por ${formatAmountBase(v)}`);
-  if (total - v > 0.004) linea(`🔴 ${_pagoPendiente.e.payer} seguirá debiéndote ${formatAmountBase(total - v)} en «Cuentas finales»`);
+  const linea = (t, ic, color) => { const d = document.createElement('div'); if (ic) { const i = document.createElement('span'); i.innerHTML = icono(ic, 14) + ' '; if (color) i.style.color = color; d.appendChild(i); } d.appendChild(document.createTextNode(t)); res.appendChild(d); };
+  if (v > total) { linea(`No puede ser más de ${formatAmountBase(total)}, lo que registró ${_pagoPendiente.e.payer}.`, 'alerta', 'var(--gold)'); return; }
+  linea(`Pago confirmado por ${formatAmountBase(v)}`, 'ok', 'var(--success)');
+  if (total - v > 0.004) linea(`${_pagoPendiente.e.payer} seguirá debiéndote ${formatAmountBase(total - v)} en «Cuentas finales»`, 'punto', 'var(--danger)');
   btn.textContent = `Confirmar ${formatAmountBase(v)}`;
 }
 function cerrarPagoPendiente() {
@@ -3606,7 +3613,7 @@ async function copiarTexto(texto) {
     try { document.execCommand('copy'); } catch (__) {}
     ta.remove();
   }
-  toast('Copiado ✓', 's');
+  toast('Copiado', 's');
 }
 
 function formatearIban(iban) {
@@ -3658,7 +3665,7 @@ async function registrarPago({ from, to, amount }, archivoComprobante, extras = 
       mostrarModalInfo(hechos.length ? 'Algunos pagos no se registraron' : 'Pago no registrado',
         (hechos.length ? `Registrados: ${hechos.map(p => p.from).join(', ')}.\n\n` : '') + rechazados.join('\n'));
     } else {
-      toast(`✅ ${from} saldó ${formatAmountBase(pagos.reduce((s, p) => s + Number(p.amount), 0), getBase())} a ${to} (${pagos.map(p => p.from).join(', ')})`, 's');
+      toast(`${from} saldó ${formatAmountBase(pagos.reduce((s, p) => s + Number(p.amount), 0), getBase())} a ${to} (${pagos.map(p => p.from).join(', ')})`, 's');
     }
   } finally { _registrandoPago = false; }
 }
@@ -3719,7 +3726,7 @@ async function _registrarPago(g, { from, to, amount }, archivoComprobante) {
   }
   await recargarGrupoDelServidor(g);
   if (typeof refrescarActividad === 'function') refrescarActividad();
-  toast(`✅ Pago de ${from} a ${to} registrado`, 's');
+  toast(`Pago de ${from} a ${to} registrado`, 's');
 }
 
 // Recarga el grupo desde el servidor (saldos oficiales) y recalcula las deudas
@@ -3749,7 +3756,7 @@ function confirmPayment(settle){
     const archivo = document.getElementById('pmProofFile')?.files?.[0] || null;
     registrarPago({ ..._payData }, archivo, _payData.extras);
   } else {
-    toast('Pago registrado, pendiente de confirmación 📨','i');
+    toast('Pago registrado, pendiente de confirmación','i');
   }
   closePayModal();
 }
@@ -3803,7 +3810,7 @@ function sendProof(settle){
   if(settle){
     const archivo = document.getElementById('proofFileInput')?.files?.[0] || null;
     registrarPago({ ..._proofData }, archivo, _proofData.extras); // el comprobante queda adjunto a cada pago
-  } else {toast('Comprobante enviado al acreedor 📨','i');}
+  } else {toast('Comprobante enviado al acreedor','i');}
   closeProofModal();
 }
 /* ============================================================
@@ -3885,7 +3892,7 @@ function pintarResumenSaldo() {
   const total = (g.expenses || []).filter(e => !e.es_pago).reduce((s, e) => s + (Number(e.baseAmt) || 0), 0);
   const lista = arr => arr.map(t => `${escaparHtml(t.from === yo ? t.to : t.from)} ${importeEs(t.amount)}`).join(' · ');
   let estado, cifra, detalle, botones;
-  const btnGasto = (clase) => `<button type="button" class="btn ${clase}" onclick="irARegistrarGasto()">＋ Añadir gasto</button>`;
+  const btnGasto = (clase) => `<button type="button" class="btn ${clase}" onclick="irARegistrarGasto()">${icono('mas',15)} Añadir gasto</button>`;
   if (!yo) {
     estado = 'Total del grupo'; cifra = `<span>${importeEs(total)}</span>`; detalle = `${nGastos} gasto${nGastos !== 1 ? 's' : ''}`;
     botones = btnGasto('btn-gold');
@@ -3900,7 +3907,7 @@ function pintarResumenSaldo() {
     detalle = lista(meDeben);
     botones = btnGasto('btn-gold') + `<button type="button" class="btn btn-outline" onclick="irASeccion('sec5', toggleCuentasSection, 'cuentasSectionWrap')">Ver cuentas</button>`;
   } else {
-    estado = 'Estás al día'; cifra = `<span class="verde">✓</span>`;
+    estado = 'Estás al día'; cifra = `<span class="verde">${icono('ok',34)}</span>`;
     detalle = nGastos ? `${nGastos} gasto${nGastos !== 1 ? 's' : ''} · total ${importeEs(total)}` : 'Aún no hay gastos';
     botones = btnGasto('btn-gold');
   }
@@ -4097,7 +4104,7 @@ function renderMembers() {
               <div class="av">${m[0].toUpperCase()}</div>
               ${m}
               ${editBtn}
-              <span class="chip-x" onclick="event.stopPropagation();removeMember('${m}')">✕</span>
+              <span class="chip-x" onclick="event.stopPropagation();removeMember('${m}')">${icono('cerrar',11)}</span>
             </div>`;
   }).join('');
   
@@ -4166,7 +4173,7 @@ async function ejecutarRenombrarMiembro() {
   cerrarModalRenombrarMiembro();
   renderMembers();
   renderExpenses();
-  toast(`"${oldName}" renombrado a "${trimmed}" ✓`, 's');
+  toast(`"${oldName}" renombrado a "${trimmed}"`, 's');
 }
 
 function renderExpenses() {
@@ -4209,19 +4216,19 @@ function renderExpenses() {
     if (e.es_pago) {
       const destino = (e.involved && e.involved[0]) || (e.splits && e.splits[0] && e.splits[0].member_name) || '';
       return `<div class="group-card" onclick="openGasto(${i},'gastos')" style="cursor:pointer;border-style:dashed;">
-      <div class="exp-ico c-other">💸</div>
+      <div class="exp-ico c-other">${iconoCat('pago', 18)}</div>
       <div class="gc-info">
         <div class="gc-name">Pago a ${destino}</div>
         <div class="gc-meta"><strong>${payer}</strong> saldó deuda · ${fmtDate(date)}</div>
       </div>
       <div style="text-align:right;">
         <div class="exp-amt" style="color:var(--success);">${displaySym}${amount.toFixed(2)}</div>
-        ${(e.ticket || e.has_ticket) ? '<div style="font-size:var(--fs-xs);color:var(--gold);">🧾</div>' : ''}
+        ${(e.ticket || e.has_ticket) ? '<div style="color:var(--text2);line-height:1;" title="Con comprobante">'+icono('ticket',13)+'</div>' : ''}
       </div>
     </div>`;
     }
     return `<div class="group-card" onclick="openGasto(${i},'gastos')" style="cursor:pointer;">
-      <div class="exp-ico ${CAT_CSS[e.cat] || 'c-other'}">${CAT_ICONS[e.cat] || '💡'}</div>
+      <div class="exp-ico ${CAT_CSS[e.cat] || 'c-other'}">${iconoCat(e.cat, 18)}</div>
       <div class="gc-info">
         <div class="gc-name">${desc}</div>
         <div class="gc-meta">Pagó <strong>${payer}</strong> · ${fmtDate(date)}</div>
@@ -4229,7 +4236,7 @@ function renderExpenses() {
       <div style="text-align:right;">
         <div class="exp-amt">${displaySym}${amount.toFixed(2)}</div>
         ${displayCurrency !== base ? `<div style="font-size:var(--fs-xs);color:var(--muted);">≈ ${sym}${(Number(e.baseAmt)||0).toFixed(2)}</div>` : ''}
-        ${(e.ticket || e.has_ticket) ? '<div style="font-size:var(--fs-xs);color:var(--gold);">🧾</div>' : ''}
+        ${(e.ticket || e.has_ticket) ? '<div style="color:var(--text2);line-height:1;" title="Con comprobante">'+icono('ticket',13)+'</div>' : ''}
       </div>
     </div>`;
   }).join('');
@@ -4294,7 +4301,7 @@ function renderBalances(){
       </span>
     </div>`).join('');
     
-  document.getElementById('debtList').innerHTML = '<div class="no-items"><div class="ni">💸</div><div>Pulsa «Actualizar cuentas» para verlas</div></div>';
+  document.getElementById('debtList').innerHTML = '<div class="no-items"><div class="ni"><svg class="icono" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg></div><div>Pulsa «Actualizar cuentas» para verlas</div></div>';
 }
 
 // ═══ LINK GENERATION ════════════════════════════════════════════════
@@ -4718,7 +4725,7 @@ function populateFriendGroupSelect(){
   if(!sel)return;
   const prev=sel.value;
   sel.innerHTML='<option value="">— Sin vincular —</option>'+
-    groups.map(g=>`<option value="${g.id}">${TYPE_ICONS[g.type]||'📂'} ${g.name}</option>`).join('');
+    groups.map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
   if(prev)sel.value=prev;
 }
 // ── Detección de contactos duplicados ────────────────────────────
@@ -4788,8 +4795,8 @@ async function addFriend(){
     if(document.getElementById('friendEmail')) document.getElementById('friendEmail').value='';
     if(document.getElementById('friendPhone')) document.getElementById('friendPhone').value='';
     document.getElementById('friendGroupLink').value='';
-    if (!gSel) toast(`${fullName} añadido como amigo ✓`,'s');
-    else if (vinculado) toast(`${fullName} añadido como amigo y a "${gSel.name}" ✓`,'s');
+    if (!gSel) toast(`${fullName} añadido como amigo`,'s');
+    else if (vinculado) toast(`${fullName} añadido como amigo y a "${gSel.name}"`,'s');
     saveActivity();renderActivity();
   } catch(err) {
     // 409: el servidor detectó que ya existe (p. ej. añadido desde otro dispositivo o por invitación)
@@ -4848,7 +4855,7 @@ function renderFriends(){
   if(friends.length===0&&cargandoInicial){el.innerHTML=skFilas(4,true);return;}
   if(friends.length===0){el.innerHTML='<div class="no-items"><div class="ni"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F2F2F2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div>Sin amigos añadidos aún</div></div>';return;}
   el.innerHTML=friends.map((f,i)=>{
-    const inGroups=groups.filter(g=>g.members.hasOwnProperty(f.name)).map(g=>TYPE_ICONS[g.type]+' '+g.name);
+    const inGroups=groups.filter(g=>g.members.hasOwnProperty(f.name)).map(g=>iconoTipo(g.type, 12)+' '+escaparHtml(g.name));
     const avatarContent=f.avatar
       ?`<img src="${f.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
       :`<span style="font-size:var(--fs-md);font-weight:900;color:var(--gold)">${f.name[0].toUpperCase()}</span>`;
@@ -4892,7 +4899,7 @@ function openFriendModal(idx){
   else{gc.innerHTML=groups.map((g,gi)=>{
     const inGroup=g.members.hasOwnProperty(f.name);
     return`<div class="modal-chip ${inGroup?'sel':''}" data-gidx="${gi}" onclick="toggleFriendGroupChip(this,'${f.name.replace(/'/g,'\\\'')}')">`+
-      `<span style="font-size:var(--fs-md)">${TYPE_ICONS[g.type]||'📂'}</span>${g.name}</div>`;
+      `<span style="font-size:var(--fs-md)">${iconoTipo(g.type, 14)}</span>${g.name}</div>`;
   }).join('');}
   document.getElementById('friendModal').style.display = '';
   document.getElementById('friendModal').classList.add('open');
@@ -5031,7 +5038,7 @@ async function toggleFriendGroupChip(el, friendName) {
       const res = await agregarAmigoAGrupo(g, friendName, { email: f.email || '', phone: f.phone || '' });
       if (!res.ok) { toast(res.error || 'No se pudo añadir al grupo', 'e'); return; }
       el.classList.add('sel');
-      toast(res.yaEstaba ? `${friendName} ya estaba en "${g.name}"` : `${friendName} añadido a "${g.name}" ✓`, 's');
+      toast(res.yaEstaba ? `${friendName} ya estaba en "${g.name}"` : `${friendName} añadido a "${g.name}"`, 's');
     }
     await refrescarGruposYAmigos();
   } catch (_) {
@@ -5093,7 +5100,7 @@ async function saveEditFriend(){
   if (f.id) { try { await vakaData.updateFriend(f.id, cambiosAmigo); } catch(_) { toast('No se pudo guardar en el servidor','e'); } }
 saveFriends();logActivity(`Amigo "${newName}" actualizado`);saveActivity();renderActivity();
   closeFriendModal();renderFriends();renderFriendPicker();updateStats();
-  toast('Amigo actualizado ✓','s');
+  toast('Amigo actualizado','s');
 }
 
 // ─── MODAL BORRAR AMIGO ──────────────────────────────────────────
@@ -5201,7 +5208,7 @@ async function guardarCambiosGrupo() {
 
   if (typeof renderGroupsList === 'function') renderGroupsList();
   cerrarModalEditar();
-  toast("Grupo actualizado ✓", "s");
+  toast("Grupo actualizado", "s");
 }
 
 // ═══ ACTIVITY ════════════════════════════════════════════════════════
@@ -5313,7 +5320,7 @@ function loadProfile(){
   // Avatar
   const wrap = document.getElementById('avatarDisplay');
   if (wrap) {
-    const inicial = profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤';
+    const inicial = profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '';
     if (profile.avatar) {
       const img = document.createElement('img');
       img.id = 'avatarDisplay'; img.className = 'avatar-img';
@@ -5322,14 +5329,14 @@ function loadProfile(){
         profile.avatar = null;
         const ph = document.createElement('div');
         ph.id = 'avatarDisplay'; ph.className = 'avatar-placeholder';
-        ph.textContent = inicial;
+        if (inicial) ph.textContent = inicial; else ph.innerHTML = icono('usuario', 40);
         if (this.parentNode) this.parentNode.replaceChild(ph, this);
       };
       if (wrap.parentNode) wrap.parentNode.replaceChild(img, wrap);
     } else {
       const ph = document.createElement('div');
       ph.id = 'avatarDisplay'; ph.className = 'avatar-placeholder';
-      ph.textContent = inicial;
+      if (inicial) ph.textContent = inicial; else ph.innerHTML = icono('usuario', 40);
       if (wrap.parentNode) wrap.parentNode.replaceChild(ph, wrap);
     }
   }
@@ -5338,7 +5345,7 @@ function loadProfile(){
   const navImg = document.getElementById('user-nav-photo');
   const navInitials = document.getElementById('user-nav-initials');
   if (navImg && navInitials) {
-    navInitials.textContent = profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤';
+    if (profile.nombre) navInitials.textContent = profile.nombre.charAt(0).toUpperCase(); else navInitials.innerHTML = icono('usuario', 15);
     if (profile.avatar) {
       navImg.src = profile.avatar;
       navImg.style.display = 'block';
@@ -5346,7 +5353,7 @@ function loadProfile(){
     } else {
       navImg.style.display = 'none';
       navInitials.style.display = 'block';
-      navInitials.textContent = profile.nombre ? profile.nombre.charAt(0).toUpperCase() : '👤';
+      if (profile.nombre) navInitials.textContent = profile.nombre.charAt(0).toUpperCase(); else navInitials.innerHTML = icono('usuario', 15);
     }
   }
 
@@ -5369,7 +5376,7 @@ function toggleEditProfile() {
   } else {
     readMode.style.display = 'none';
     editMode.style.display = 'block';
-    btn.textContent = '✕ Cancelar';
+    btn.innerHTML = icono('cerrar',13) + ' Cancelar';
   }
 }
 
@@ -5395,7 +5402,7 @@ async function saveProfile() {
     pago_iban: (document.getElementById('profIban')?.value || '').replace(/\s+/g, '').toUpperCase(),
     avatar: profile.avatar || null
   };
-  if (data.nombre.length < 3) return toast('El nombre debe tener al menos 3 caracteres ⚠️', 'e');
+  if (data.nombre.length < 3) return toast('El nombre debe tener al menos 3 caracteres', 'e');
   // Teléfono obligatorio, con prefijo y válido para su país (se guarda como "+34 608534056")
   if (!data.tel) return toast('Escribe tu teléfono con el prefijo del país (ej: +34 600 000 000)', 'e');
   if (!data.tel.startsWith('+')) return toast('Añade el prefijo del país al teléfono (ej: +34)', 'e');
@@ -5413,9 +5420,9 @@ async function saveProfile() {
     toggleEditProfile();
     await logActivity('Perfil actualizado');
     renderActivity();
-    toast('Perfil guardado ✓', 's');
+    toast('Perfil guardado', 's');
   } catch (error) {
-    toast(error.status === 400 && error.message ? error.message : 'Error al guardar el perfil ❌', 'e');
+    toast(error.status === 400 && error.message ? error.message : 'Error al guardar el perfil', 'e');
     console.error("Error en saveProfile:", error);
   }
 }
@@ -5433,7 +5440,7 @@ function updateProfilePreview() {
   const navInitials = document.getElementById('user-nav-initials');
   
     if (navImg && navInitials) {
-    navInitials.textContent = n ? n.charAt(0).toUpperCase() : '👤';
+    if (n) navInitials.textContent = n.charAt(0).toUpperCase(); else navInitials.innerHTML = icono('usuario', 15);
     if (profile.avatar) {
       navImg.src = profile.avatar;
       navImg.style.display = 'block';
@@ -5441,7 +5448,7 @@ function updateProfilePreview() {
     } else {
       navImg.style.display = 'none';
       navInitials.style.display = 'block';
-      navInitials.textContent = n ? n.charAt(0).toUpperCase() : '👤';
+      if (n) navInitials.textContent = n.charAt(0).toUpperCase(); else navInitials.innerHTML = icono('usuario', 15);
     }
   }
 }
@@ -5502,7 +5509,7 @@ async function handleAvatarChange(ev) {
     if (data.avatar_url) {
       profile.avatar = data.avatar_url;
       await vakaData.saveProfile(profile);
-      toast('Foto actualizada ✓', 's');
+      toast('Foto actualizada', 's');
     }
   } catch(err) {
     console.error('Error subiendo avatar:', err);
@@ -5574,7 +5581,7 @@ function mostrarModalPendientes(pendientes, tipo) {
     const importe = `${sym}${Math.abs(p.balance).toFixed(2)}`;
     if (p.por_confirmar && Math.abs(p.balance) <= 0.05) return `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">
       <span style="color:white;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escaparHtml(p.name)}</span>
-      <span style="flex-shrink:0;font-weight:800;color:var(--gold);">⏳ ${escaparHtml(p.por_confirmar.para)} debe confirmar tu pago</span>
+      <span style="flex-shrink:0;font-weight:800;color:var(--gold);">${icono('reloj',13)} ${escaparHtml(p.por_confirmar.para)} debe confirmar tu pago</span>
     </div>`;
     return `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">
       <span style="color:white;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>
@@ -5936,7 +5943,7 @@ async function attachGastoTicket(ev, idx) {
     const ticket = 'data:image/jpeg;base64,' + await fileToBase64(file);
     await guardarTicketServidor(idx, ticket);
     openGasto(idx); // refrescar la pantalla
-    toast('Comprobante guardado ✓', 's');
+    toast('Comprobante guardado', 's');
     if (typeof refrescarActividad === 'function') refrescarActividad();
   } catch (err) {
     toast(err.message || 'No se pudo guardar el comprobante', 'e');
@@ -6036,7 +6043,7 @@ async function processEditOCRFile(file) {
     toast('No se pudo leer el importe; el comprobante se guardará igualmente', 'i');
   }
   if (loading) loading.style.display = 'none';
-  if (success) { success.textContent = '✅ Se guarda al pulsar Guardar'; success.style.display = 'block'; }
+  if (success) { success.innerHTML = icono('ok',12) + ' Se guarda al pulsar Guardar'; success.style.display = 'block'; }
 }
 
 function clearEditOCR() {
@@ -6273,7 +6280,7 @@ function renderDonut(catMap, total, sym) {
       const pct = amt/total;
       const dashLen = pct * circumference;
       const color = CAT_COLORS[cat] || '#F5C800';
-      const icon = (window.CAT_ICONS||{food:'🍔',transport:'🚗',hotel:'🏨',activity:'🎭',other:'💡'})[cat] || '💡';
+      const icon = iconoCat(cat, 14);
       svgContent += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${strokeW}" stroke-dasharray="${dashLen} ${circumference-dashLen}" stroke-dashoffset="${-offset}" stroke-linecap="butt" style="transform:rotate(-90deg);transform-origin:${cx}px ${cy}px"/>`;
       offset += dashLen;
       const catNames={food:'Comida',transport:'Transporte',hotel:'Alojamiento',activity:'Actividad',other:'Otro'};
@@ -6401,7 +6408,7 @@ function cerrarModalSalir() {
 <div class="modal-overlay" id="payModal" onclick="if(event.target===this)closePayModal()">
   <div class="modal-sheet" style="max-width:380px;">
     <div class="modal-handle"></div>
-    <button class="modal-close" onclick="closePayModal()">✕ Cerrar</button>
+    <button class="modal-close" onclick="closePayModal()"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar</button>
     <div class="modal-title" id="pmTitle">Pagar deuda</div>
     <div style="text-align:center;margin-bottom:10px">
       <div style="font-size:var(--fs-xs);color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px">Importe</div>
@@ -6418,7 +6425,7 @@ function cerrarModalSalir() {
     <div style="font-size:var(--fs-xs);color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:6px;margin-top:8px">Adjuntar comprobante (opcional)</div>
     <div class="proof-area" onclick="document.getElementById('pmProofFile').click()" style="padding:8px;margin-top:0;display:flex;align-items:center;gap:10px;text-align:left">
       <input type="file" id="pmProofFile" accept="image/*" onchange="handleProofUpload(event)">
-      <span style="font-size:var(--fs-lg);flex-shrink:0">📎</span>
+      <span style="flex-shrink:0;color:var(--text2);display:flex"><svg class="icono" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></span>
       <div style="font-size:var(--fs-sm);color:var(--muted);font-weight:700">Subir captura de pago</div>
       <img id="pmProofThumb" class="proof-thumb" style="max-height:32px;margin-left:auto">
     </div>
@@ -6443,13 +6450,13 @@ function cerrarModalSalir() {
 <div class="modal-overlay" id="proofModal" onclick="if(event.target===this)closeProofModal()">
   <div class="modal-sheet" style="max-width:380px;">
     <div class="modal-handle"></div>
-    <button class="modal-close" onclick="closeProofModal()">✕ Cerrar</button>
+    <button class="modal-close" onclick="closeProofModal()"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar</button>
     <div class="modal-title" id="proofTitle">Comprobante de pago</div>
     <div id="proofSubtitulo" style="font-size:var(--fs-sm);color:var(--muted);margin:-4px 0 12px;line-height:1.4;"></div>
     <div id="proofTambien" class="pagar-tambien" style="display:none"></div>
     <div class="proof-area" onclick="document.getElementById('proofFileInput').click()" style="padding:10px;margin-bottom:10px;">
       <input type="file" id="proofFileInput" accept="image/*" onchange="handleProofModalFile(event)">
-      <span style="font-size:var(--fs-lg)">🧾</span>
+      <span style="color:var(--text2);display:flex;justify-content:center"><svg class="icono" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg></span>
       <div style="font-size:var(--fs-sm);color:var(--muted);margin-top:4px;font-weight:700">Sube la captura del pago</div>
       <div style="font-size:var(--fs-2xs);color:var(--muted2);margin-top:2px">Bizum, transferencia, screenshot…</div>
       <img id="proofThumbView" class="proof-thumb" style="max-height:80px;">
@@ -6799,10 +6806,10 @@ function volverAlGrupoActual() {
   const g = groups[currentGroupIdx];
   if (!g) return;
   switchPage('page-detalle', document.querySelector('.nav-btn[data-page="page-grupos"]'));
-  document.getElementById('detTitle').textContent = (TYPE_ICONS[g.type] || '📂') + ' ' + g.name;
+  document.getElementById('detTitle').innerHTML = iconoTipo(g.type, 18) + ' ' + escaparHtml(g.name);
   document.getElementById('detMeta').textContent = fmtDate(g.start) + ' → ' + fmtDate(g.end);
   const badge = document.getElementById('hbadge');
-  badge.textContent = (TYPE_ICONS[g.type] || '📂') + ' ' + g.name;
+  badge.innerHTML = iconoTipo(g.type, 13) + ' ' + escaparHtml(g.name);
   badge.style.display = 'block';
   renderAll();
   requestAnimationFrame(posicionarBadge);
@@ -7001,13 +7008,13 @@ function tocarBotonGrupos(btn) {
 <!-- ═══ PANTALLA: CHAT DEL GRUPO ═══ -->
 <div id="page-chat">
   <div class="chat-top">
-    <button class="btn btn-sm btn-outline" style="font-size:var(--fs-xs);padding:4px 10px;flex-shrink:0;" onclick="cerrarChat()">← Volver</button>
+    <button class="btn btn-sm btn-outline" style="font-size:var(--fs-xs);padding:4px 10px;flex-shrink:0;" onclick="cerrarChat()"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Volver</button>
     <div style="min-width:0;"><div class="t" id="chatTitulo">Chat</div><div class="s" id="chatMiembros"></div></div>
   </div>
   <div class="chat-list" id="chatLista"></div>
   <div id="chatRespondiendo">
     <div class="cita"><span class="c-autor" id="chatRespAutor"></span><span class="c-texto" id="chatRespTexto"></span></div>
-    <button type="button" onclick="cancelarRespuestaChat()" title="Cancelar respuesta">✕</button>
+    <button type="button" onclick="cancelarRespuestaChat()" title="Cancelar respuesta" aria-label="Cancelar respuesta"><svg class="icono" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
   </div>
   <div class="chat-input">
     <button id="chatMas" type="button" onclick="alternarAdjuntosChat()" title="Adjuntar foto o GIF"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
@@ -7102,7 +7109,7 @@ function abrirChat() {
   const g = groups[currentGroupIdx];
   if (!g || !g.id) { toast('Abre un grupo primero', 'e'); return; }
   _chatGrupoId = g.id; _chatFirma = ''; _chatMensajes = [];
-  document.getElementById('chatTitulo').textContent = `${TYPE_ICONS[g.type] || '📂'} ${g.name} · Chat`;
+  document.getElementById('chatTitulo').innerHTML = `${iconoTipo(g.type, 16)} ${escaparHtml(g.name)} · Chat`;
   document.getElementById('chatMiembros').textContent = Object.keys(g.members || {}).join(', ');
   document.getElementById('chatLista').innerHTML = skChat();
   document.getElementById('page-chat').classList.add('active');
@@ -7177,7 +7184,7 @@ function pintarChat(alFinal = false) {
   const lista = document.getElementById('chatLista');
   const cercaDelFinal = lista.scrollHeight - lista.scrollTop - lista.clientHeight < 80;
   if (!_chatMensajes.length) {
-    lista.innerHTML = '<div class="chat-vacio">Todavía no hay mensajes.<br>Escribe el primero 👋<br><br>Aquí aparecerán también los gastos y pagos del grupo.</div>';
+    lista.innerHTML = '<div class="chat-vacio">Todavía no hay mensajes.<br>Escribe el primero.<br><br>Aquí aparecerán también los gastos y pagos del grupo.</div>';
     return;
   }
   let html = '', diaAnterior = '', autorAnterior = '';
@@ -7191,7 +7198,7 @@ function pintarChat(alFinal = false) {
       ? `<span class="cita" onclick="event.stopPropagation();irAMensajeChat(${m.respuesta.id})"><span class="c-autor">${escaparHtml(m.respuesta.autor)}</span><span class="c-texto">${escaparHtml(m.respuesta.texto)}</span></span>`
       : '';
     if (m.tipo === 'sistema') {
-      html += `<div class="chat-sis" data-id="${m.id}">${escaparHtml(m.texto)}<span class="hora">${horaChat(m.created_at)}</span></div>${bloqueReacc ? `<div style="align-self:center;">${bloqueReacc}</div>` : ''}`;
+      html += `<div class="chat-sis" data-id="${m.id}">${(() => { const x = iconoDeMensaje(m.texto); return x.icono + (x.icono ? ' ' : '') + escaparHtml(x.resto); })()}<span class="hora">${horaChat(m.created_at)}</span></div>${bloqueReacc ? `<div style="align-self:center;">${bloqueReacc}</div>` : ''}`;
       autorAnterior = '';
       continue;
     }
@@ -7321,7 +7328,7 @@ function responderMensajeChat(id) {
   if (!m) return;
   _chatRespuestaA = id;
   document.getElementById('chatRespAutor').textContent = m.tipo === 'sistema' ? 'VakaPay' : (m.mio ? 'Tú' : (m.autor || 'Alguien'));
-  document.getElementById('chatRespTexto').textContent = m.texto || (m.imagen ? '📷 Foto' : m.gif ? 'GIF' : '');
+  document.getElementById('chatRespTexto').innerHTML = m.texto ? escaparHtml(m.texto) : (m.imagen ? icono('camara',13) + ' Foto' : m.gif ? 'GIF' : '');
   document.getElementById('chatRespondiendo').style.display = 'flex';
   document.getElementById('chatTexto').focus();
 }
