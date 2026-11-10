@@ -80,6 +80,10 @@
   --gold-off-line: #4A4000;
   --press:       rgba(255,255,255,.10);   /* sombreado al tocar algo */
 
+  /* ── Alturas de botones y campos (zona táctil mínima recomendada: 44 px) ── */
+  --alto-control: 44px;   /* botones normales y campos de formulario */
+  --alto-sm:      32px;   /* botones pequeños */
+
   /* ── Espaciado: escala de 4 en 4 ── */
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px; --s-6: 24px; --s-8: 32px;
 }
