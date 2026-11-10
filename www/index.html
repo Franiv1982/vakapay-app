@@ -807,8 +807,8 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 <div class="page" id="page-gasto">
   <div class="det-bar">
     <div style="flex:1;max-width:660px;margin:0 auto;width:100%;padding:0 14px;box-sizing:border-box;">
-      <div style="display:flex;align-items:center;gap:8px;padding-right:125px;">
-        <button class="btn btn-sm btn-outline" onclick="goBackToGroup()" style="flex-shrink:0;font-size:var(--fs-xs);padding:4px 8px;"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Volver</button>
+      <div style="display:flex;align-items:center;gap:6px;padding-right:125px;">
+        <button type="button" class="det-icono" onclick="goBackToGroup()" title="Volver al grupo" aria-label="Volver al grupo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
         <div style="overflow:hidden;">
           <div class="pg-header" id="gastoTitle" style="margin-bottom:0;font-size:var(--fs-lg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
           <div style="font-size:var(--fs-xs);color:var(--muted)" id="gastoMeta"></div>
@@ -7964,7 +7964,7 @@ body:has(#page-detalle.active) .header-text p, body:has(#page-gasto.active) .hea
 body:has(#page-detalle.active) #groupDropdown{left:52px;right:auto;top:calc(var(--header-h,52px) + 54px);max-width:min(320px, calc(100vw - 70px));min-width:220px}
 /* Barra del grupo en una línea */
 .det-fila{display:flex;align-items:center;gap:6px}
-.det-icono{flex-shrink:0;width:38px;height:38px;border-radius:var(--r-md);border:none;background:transparent;color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.det-icono{flex-shrink:0;width:var(--alto-control);height:var(--alto-control);border-radius:var(--r-md);border:none;background:transparent;color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .det-icono:active{background:var(--tint-2)}
 /* Solo ocupa lo que mide la pastilla y sus fechas: el hueco hasta ⋯ ya no cambia de grupo */
 .det-titulo{flex:0 1 auto;margin-right:auto;min-width:0;max-width:100%;background:none;border:none;text-align:left;cursor:pointer;padding:2px 4px;color:inherit;font:inherit}
