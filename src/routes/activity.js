@@ -20,7 +20,7 @@ router.get('/', requireAuth, async (req, res, next) => {
 router.post('/', requireAuth, async (req, res, next) => {
   try {
     const { message, type = 'other', group_name = null } = req.body;
-    if (!message) return res.status(400).json({ error: 'message required' });
+    if (!message) return res.status(400).json({ error: 'Escribe un mensaje' });
     const result = await db.query(
       `INSERT INTO activity_log (user_id, message, type, group_name, created_at)
        VALUES ($1, $2, $3, $4, NOW())

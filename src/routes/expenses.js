@@ -43,7 +43,7 @@ function errorDeDatos({ amount, amount_base, involved, payer_name, description }
     if (!Number.isFinite(b) || b <= 0 || b > MAX_IMPORTE) return 'El importe no es válido';
   }
   if (!Array.isArray(involved) || involved.length > 200 || involved.some(x => typeof x !== 'string' || !x.trim())) return 'Participantes no válidos';
-  if (typeof payer_name !== 'string' || typeof description !== 'string' || description.length > 500) return 'Datos no válidos';
+  if (typeof payer_name !== 'string' || typeof description !== 'string' || description.length > 500) return 'Algún dato no es válido. Revísalo e inténtalo de nuevo.';
   return null;
 }
 

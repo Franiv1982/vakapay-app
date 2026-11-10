@@ -57,7 +57,7 @@ router.get('/', requireAuth, async (req, res, next) => {
 router.post('/', requireAuth, async (req, res, next) => {
   try {
     const { name, email = '', phone = '', notes = '' } = req.body;
-    if (!name) return res.status(400).json({ error: 'name es obligatorio' });
+    if (!name) return res.status(400).json({ error: 'Escribe un nombre' });
 
     // Evita duplicados: mismo email, teléfono o nombre que un amigo ya guardado
     const dup = await buscarAmigoDuplicado(req.user.id, { name, email, phone });
