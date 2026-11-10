@@ -68,6 +68,47 @@
   --shadow:    var(--shadow-md);
   --glow-gold: 0 0 16px rgba(245,200,0,.3);
 
+  /* ── Para que el tema claro funcione ── */
+  --gold-text:  var(--gold);              /* amarillo usado como TEXTO (en claro, dorado oscuro) */
+  --on-gold:    #111111;                  /* texto sobre fondos amarillos */
+  --tint-1:     rgba(255,255,255,.05);    /* velos y separadores muy suaves */
+  --tint-2:     rgba(255,255,255,.08);
+  --tint-3:     rgba(255,255,255,.14);
+  --bar-bg:     rgba(14,14,14,.96);       /* cabecera y menú con transparencia */
+  --gold-off-bg:   #3A3000;               /* botón amarillo desactivado */
+  --gold-off-text: #6B5800;
+  --gold-off-line: #4A4000;
+
   /* ── Espaciado: escala de 4 en 4 ── */
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px; --s-6: 24px; --s-8: 32px;
 }
+
+/* ================================================================
+   Tema claro — se activa con <html data-theme="light">
+   (Cuenta → Apariencia: Automático / Oscuro / Claro)
+   ================================================================ */
+:root[data-theme="light"] {
+  --gold-text:  #8A6A00;                  /* dorado oscuro: legible sobre blanco */
+  --gold-light: #8A6A00;                  /* como texto, también dorado oscuro */
+  --gold-soft:  rgba(245,200,0,.18);
+  --gold-line:  rgba(176,138,0,.45);
+  --border:     rgba(176,138,0,.22);
+
+  --dark:  #F6F4EF;  --dark2: #EFECE5;  --card: #FFFFFF;  --dark3: #FFFFFF;  --dark4: #F1EEE7;
+  --line:  #E3DED3;  --line-strong: #CFC8BA;
+
+  --text:  #1C1B19;  --text2: #55524C;  --muted: #6F6B63;  --muted2: #A8A39A;
+
+  --success: #1E8E4E;  --danger: #D93636;
+
+  --shadow-sm: 0 1px 4px rgba(0,0,0,.08);
+  --shadow-md: 0 6px 18px rgba(0,0,0,.10);
+  --shadow-lg: 0 14px 34px rgba(0,0,0,.16);
+  --glow-gold: 0 4px 14px rgba(196,158,0,.25);
+
+  --tint-1: rgba(0,0,0,.035);  --tint-2: rgba(0,0,0,.06);  --tint-3: rgba(0,0,0,.10);
+  --bar-bg: rgba(246,244,239,.96);
+  --gold-off-bg: #F3ECCD;  --gold-off-text: #A3955E;  --gold-off-line: #E4D7A0;
+  color-scheme: light;
+}
+:root:not([data-theme="light"]) { color-scheme: dark; }
