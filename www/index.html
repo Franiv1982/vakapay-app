@@ -15,7 +15,16 @@
   --radius:18px;--shadow:0 8px 32px rgba(0,0,0,.6);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;overscroll-behavior-y:contain}
+/* ── Deslizar hacia abajo para actualizar ── */
+#ptr{position:fixed;top:0;left:50%;z-index:3000;width:40px;height:40px;margin-left:-20px;border-radius:50%;
+  background:#1E1E1E;border:1px solid rgba(245,200,0,.35);box-shadow:0 4px 14px rgba(0,0,0,.5);
+  display:flex;align-items:center;justify-content:center;transform:translateY(-60px);opacity:0;pointer-events:none}
+#ptr svg{transition:none}
+#ptr.listo svg{color:var(--gold)}
+#ptr.vuelve{transition:transform .25s ease,opacity .25s ease}
+#ptr.cargando svg{animation:ptrGira .8s linear infinite}
+@keyframes ptrGira{to{transform:rotate(360deg)}}
 body{background:var(--dark);color:var(--text);font-family:'Nunito','Segoe UI','SF Pro Display',Arial,sans-serif;min-height:100vh;overflow-x:hidden;padding-bottom:80px}
 body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(rgba(245,200,0,.045) 1px,transparent 1px);background-size:26px 26px;pointer-events:none;z-index:0}
 
@@ -399,6 +408,9 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 
 
 <!-- ═══════════════════════════════════ PAGE: GRUPOS ═══ -->
+<!-- Indicador de «deslizar hacia abajo para actualizar» -->
+<div id="ptr" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color:#aaa"><polyline points="23 4 23 10 17 10" stroke="currentColor"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" stroke="currentColor"/></svg></div>
+
 <div class="page active" id="page-grupos">
   <div class="det-bar">
     <div style="flex:1;max-width:660px;margin:0 auto;width:100%;padding:0 14px;box-sizing:border-box;">
@@ -4767,6 +4779,89 @@ async function agregarAmigoAGrupo(g, nombre, { email = '', phone = '' } = {}) {
   g.members[nombre] = 0;
   return { ok: true };
 }
+// ─── DESLIZAR HACIA ABAJO PARA ACTUALIZAR ───────────────────────────
+// Con la pantalla arriba del todo, arrastrar hacia abajo y soltar vuelve a
+// pedir los datos al servidor: el grupo abierto o, si no hay ninguno, la
+// lista de grupos, amigos y actividad. No actúa con una ventana abierta ni
+// en el chat (que se actualiza solo).
+(function () {
+  const UMBRAL = 70, MAX = 110;
+  let y0 = null, x0 = 0, tirando = false, dist = 0, ocupado = false;
+  const ind = () => document.getElementById('ptr');
+  const hayVentanaAbierta = () => {
+    if (document.body.style.overflow === 'hidden') return true;                 // las ventanas bloquean el scroll
+    const chat = document.getElementById('page-chat');
+    if (chat && getComputedStyle(chat).display !== 'none') return true;
+    return [...document.querySelectorAll('.modal-overlay')].some(m => getComputedStyle(m).display !== 'none');
+  };
+  // ¿El dedo está sobre algo con su propio scroll que no está arriba del todo?
+  const dentroDeScroll = el => {
+    for (; el && el !== document.body; el = el.parentElement) {
+      if (el.scrollTop > 0) return true;
+      if (el.classList && el.classList.contains('zoom-area')) return true;
+    }
+    return false;
+  };
+  const pintar = d => {
+    const p = ind(); if (!p) return;
+    const prog = Math.min(d / UMBRAL, 1);
+    p.style.transform = `translateY(${d - 50}px)`;
+    p.style.opacity = String(Math.min(1, d / 40));
+    p.querySelector('svg').style.transform = `rotate(${prog * 270}deg)`;
+    p.classList.toggle('listo', d >= UMBRAL);
+  };
+  const esconder = () => {
+    const p = ind(); if (!p) return;
+    p.classList.add('vuelve'); p.classList.remove('cargando', 'listo');
+    p.style.transform = 'translateY(-60px)'; p.style.opacity = '0';
+    setTimeout(() => p.classList.remove('vuelve'), 260);
+  };
+  document.addEventListener('touchstart', e => {
+    y0 = null; tirando = false; dist = 0;
+    if (ocupado || e.touches.length !== 1) return;
+    if ((document.scrollingElement || document.documentElement).scrollTop > 0) return;
+    if (hayVentanaAbierta() || dentroDeScroll(e.target)) return;
+    y0 = e.touches[0].clientY; x0 = e.touches[0].clientX;
+  }, { passive: true });
+  document.addEventListener('touchmove', e => {
+    if (y0 === null) return;
+    const dy = e.touches[0].clientY - y0, dx = Math.abs(e.touches[0].clientX - x0);
+    if (!tirando) {
+      if (dy < 10) { if (dy < 0 || dx > 10) y0 = null; return; }   // hacia arriba o de lado: no es este gesto
+      if (dx > dy) { y0 = null; return; }
+      tirando = true;
+    }
+    if ((document.scrollingElement || document.documentElement).scrollTop > 0) { y0 = null; esconder(); return; }
+    dist = Math.min(MAX, (dy - 10) * 0.5);
+    pintar(dist);
+  }, { passive: true });
+  document.addEventListener('touchend', async () => {
+    if (y0 === null || !tirando) { y0 = null; return; }
+    y0 = null; tirando = false;
+    if (dist < UMBRAL) { esconder(); return; }
+    const p = ind();
+    p.classList.add('vuelve', 'cargando'); p.style.transform = 'translateY(14px)'; p.style.opacity = '1';
+    ocupado = true;
+    try { await actualizarDesdeServidor(); }
+    finally { ocupado = false; esconder(); }
+  });
+  document.addEventListener('touchcancel', () => { if (tirando) esconder(); y0 = null; tirando = false; });
+})();
+
+async function actualizarDesdeServidor() {
+  if (!navigator.onLine) { toast('Sin conexión. Inténtalo cuando vuelvas a tener internet.', 'e'); return; }
+  const pagina = document.querySelector('.page.active')?.id;
+  const g = currentGroupIdx !== null ? groups[currentGroupIdx] : null;
+  if (g && g.id && (pagina === 'page-detalle' || pagina === 'page-gasto')) {
+    const ok = await recargarGrupoDelServidor(g);
+    if (ok === false) { toast('No se pudo actualizar. Revisa tu conexión.', 'e'); return; }
+    refrescarActividad();
+  } else {
+    await refrescarGruposYAmigos();
+  }
+  toast('Actualizado', 's');
+}
+
 async function refrescarGruposYAmigos() {
   try { groups = await vakaData.getGroups() || groups; } catch (_) {}
   try { friends = await vakaData.getFriends() || friends; } catch (_) {}
