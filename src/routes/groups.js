@@ -180,8 +180,10 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
       [req.params.id, req.user.id]
     );
 
+    // Solo cuentan las personas con cuenta: si quedan únicamente participantes
+    // añadidos a mano, nadie podría volver a abrir el grupo y se elimina.
     const remaining = await db.query(
-      'SELECT COUNT(*) FROM group_members WHERE group_id = $1',
+      'SELECT COUNT(*) FROM group_members WHERE group_id = $1 AND user_id IS NOT NULL',
       [req.params.id]
     );
     if (parseInt(remaining.rows[0].count) === 0) {
