@@ -78,6 +78,7 @@
   --gold-off-bg:   #3A3000;               /* botón amarillo desactivado */
   --gold-off-text: #6B5800;
   --gold-off-line: #4A4000;
+  --press:       rgba(255,255,255,.10);   /* sombreado al tocar algo */
 
   /* ── Espaciado: escala de 4 en 4 ── */
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 20px; --s-6: 24px; --s-8: 32px;
@@ -109,6 +110,7 @@
   --tint-1: rgba(0,0,0,.035);  --tint-2: rgba(0,0,0,.06);  --tint-3: rgba(0,0,0,.10);
   --bar-bg: rgba(246,244,239,.96);
   --gold-off-bg: #F3ECCD;  --gold-off-text: #A3955E;  --gold-off-line: #E4D7A0;
+  --press: rgba(0,0,0,.07);
   color-scheme: light;
 }
 :root:not([data-theme="light"]) { color-scheme: dark; }
@@ -127,3 +129,48 @@
     transition-duration: .01ms !important; scroll-behavior: auto !important;
   }
 }
+
+/* ================================================================
+   Estados de interacción comunes (botones, enlaces, menús, campos)
+   ----------------------------------------------------------------
+   · Pulsado (active): un sombreado breve en todo lo que se toca, para
+     saber que el toque se ha registrado (la app quita el destello gris
+     de Android). Los botones principales además se encogen un poco.
+   · Hover: solo en dispositivos con ratón (@media (hover:hover)); en el
+     móvil se quedaría «pegado» después de tocar.
+   · Foco: contorno dorado con teclado; los campos, borde dorado y brillo.
+   · Desactivado: apagado y sin respuesta.
+   Usan :where() para no pisar los estilos propios de cada componente.
+   ================================================================ */
+:where(button, [role="button"], a[href], summary, label[for], .nav-btn, .chip, .gdrop-item, .gdrop-back) {
+  transition: background-color .15s, filter .15s, transform .12s;
+}
+:where(button, [role="button"], a[href], summary, label[for], .nav-btn, .chip, .gdrop-item, .gdrop-back):not(:disabled):not([aria-disabled="true"]):active {
+  background-image: linear-gradient(var(--press), var(--press)) !important;   /* !important: muchos botones llevan «background» en línea */
+}
+:where(.nav-btn, .menu-grupo button, .chat-menu button, .sec-title, .det-icono, .modal-close, .enlace-peligro):not(:disabled):active {
+  transform: scale(.97);
+}
+
+@media (hover:hover) {
+  :where(.menu-grupo button, .chat-menu button, .sec-title, .modal-close, .det-icono, .chip[role="button"], .country-item):hover {
+    background-color: var(--tint-1);
+  }
+  :where(.enlace-peligro, a[href]):hover { filter: brightness(1.15); }
+}
+
+/* Campos: el mismo foco en toda la app (también en el inicio de sesión) */
+:where(input, select, textarea):focus-visible { outline: none; }
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea):not(.input-error):not([aria-invalid="true"]):focus {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 3px var(--gold-soft);
+}
+
+/* Desactivado: apagado y sin respuesta (los botones con estilo propio lo conservan) */
+:where(button, input, select, textarea):disabled, [aria-disabled="true"] {
+  cursor: not-allowed;
+}
+:where(input, select, textarea):disabled, :where(button:not(.btn-primary)):disabled, [aria-disabled="true"] {
+  opacity: .5;
+}
+[aria-disabled="true"] { pointer-events: none; }
