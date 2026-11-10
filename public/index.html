@@ -426,14 +426,14 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   <div class="sec-title" onclick="toggleGroupsList()" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">1</div>
-    <h2>TUS GRUPOS ACTIVOS Y PASADOS</h2>
+    <h2>Mis grupos</h2>
     <span id="groupsCounter" style="color:var(--gold);font-size:.9rem;font-weight:700;margin-left:4px">(0)</span>
   </div>
-  <svg id="groupsChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+  <svg id="groupsChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0;transform:rotate(180deg)"><polyline points="6 9 12 15 18 9"/></svg>
 </div>
 
 <!-- Saved groups list -->
-<div id="groupsListWrap" style="display:none">
+<div id="groupsListWrap" style="display:block">
   <div id="groupsList">
     <div class="no-items"><div class="ni">📂</div><div>No tienes grupos creados aún</div></div>
   </div>
@@ -477,14 +477,24 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 <div class="page" id="page-detalle" style="min-height:100vh;">
   <div class="det-bar">
     <div style="flex:1;max-width:660px;margin:0 auto;width:100%;padding:0 14px;box-sizing:border-box;">
-      <div style="padding-right:125px;">
-        <div class="pg-header" id="detTitle" style="margin-bottom:0;font-size:1.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-        <div style="font-size:.65rem;color:var(--muted);margin-bottom:4px;" id="detMeta"></div>
-        <button class="btn btn-sm btn-outline" onclick="goBack()" style="font-size:.7rem;padding:3px 10px;">← Volver</button>
+      <!-- Una sola línea: volver, nombre del grupo (toca para cambiar de grupo) y menú del grupo -->
+      <div class="det-fila">
+        <button type="button" class="det-icono" onclick="goBack()" title="Volver a mis grupos" aria-label="Volver"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button type="button" class="det-titulo" onclick="toggleGroupDropdown()" title="Cambiar de grupo">
+          <span class="pg-header" id="detTitle"></span>
+          <span id="detMeta"></span>
+        </button>
+        <button type="button" class="det-icono" onclick="abrirMenuGrupo(event)" title="Opciones del grupo" aria-label="Opciones del grupo"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
       </div>
     </div>
   </div>
+  <div id="menuGrupo" class="menu-grupo" style="display:none">
+    <button type="button" onclick="cerrarMenuGrupo();openEditGroupModal(currentGroupIdx)">Editar grupo</button>
+    <button type="button" class="peligro" onclick="cerrarMenuGrupo();openDeleteGroupModal(currentGroupIdx)">Eliminar o salir del grupo</button>
+  </div>
 <main>
+<!-- Lo primero que se ve: tu saldo en este grupo y la acción principal -->
+<div id="resumenSaldo" class="resumen-saldo"></div>
 <!-- En escritorio el grupo va en dos columnas; en móvil estos contenedores no cambian nada (display:contents) -->
 <div class="det-col det-col-a">
 
@@ -558,7 +568,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 <div class="sec-title" id="sec3" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleGastoSection()">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">3</div>
-    <h2>Registrar Gasto</h2>
+    <h2>Registrar gasto</h2>
   </div>
   <svg id="gastoChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
 </div>
@@ -657,7 +667,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   <div class="sec-title" id="sec4" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleGastosListSection()">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">4</div>
-    <h2>Lista de Gastos</h2>
+    <h2>Lista de gastos</h2>
     <span id="gastosCounter" style="color:var(--gold);font-size:.9rem;font-weight:700;margin-left:4px"></span>
   </div>
   <svg id="gastosListChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
@@ -678,7 +688,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   <div class="sec-title" id="sec5" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleCuentasSection()">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">5</div>
-    <h2>Cuentas Finales</h2>
+    <h2>Cuentas finales</h2>
   </div>
   <svg id="cuentasChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
 </div>
@@ -690,7 +700,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
     <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:10px">Quién paga a quién</div>
     <div id="debtList"><div class="no-items"><div class="ni">💸</div><div>Pulsa calcular para ver</div></div></div>
     <div style="height:10px"></div>
-    <button class="btn btn-gold btn-full" id="btnCalcularDeudas" onclick="calcDebts()">Calcular Deudas</button>
+    <button class="btn btn-outline btn-full" id="btnCalcularDeudas" onclick="calcDebts()">↻ Actualizar cuentas</button>
   </div>
 </div>
 
@@ -890,9 +900,11 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 
   <div class="card" style="margin-top:13px">
     <div style="font-size:.7rem;color:#F2F2F2;text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:5px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Opciones</div>
-    <button class="btn btn-danger btn-full" onclick="abrirBorrado('datos')" style="margin-bottom:10px;">Borrar todos mis datos</button>
-    <button class="btn btn-full" onclick="handleLogout()" style="background:none;border:1px solid #ff4d4d;color:#ff4d4d;border-radius:10px;padding:12px;font-weight:bold;font-size:.8rem;cursor:pointer;">Cerrar Sesión</button>
-    <button class="btn btn-full" onclick="abrirBorrado('cuenta')" style="background:none;border:1px solid #990000;color:#990000;border-radius:10px;padding:12px;font-weight:bold;font-size:.8rem;cursor:pointer;margin-top:8px;">Eliminar mi cuenta</button>
+    <button class="btn btn-outline btn-full" onclick="handleLogout()">Cerrar sesión</button>
+    <div style="display:flex;justify-content:center;gap:18px;margin-top:16px;">
+      <button type="button" class="enlace-peligro" onclick="abrirBorrado('datos')">Borrar mis datos</button>
+      <button type="button" class="enlace-peligro" onclick="abrirBorrado('cuenta')">Eliminar mi cuenta</button>
+    </div>
   </div>
 </main>
 </div>
@@ -1990,8 +2002,8 @@ resetMemberAccordions();
 if (typeof hideNewGroupForm === 'function') hideNewGroupForm();
 const groupsWrap = document.getElementById('groupsListWrap');
 const groupsChevron = document.getElementById('groupsChevron');
-if (groupsWrap) groupsWrap.style.display = 'none';
-if (groupsChevron) groupsChevron.style.transform = '';
+if (groupsWrap) groupsWrap.style.display = 'block';
+if (groupsChevron) groupsChevron.style.transform = 'rotate(180deg)';
 
   // 2. LÓGICA DE SALIDA DE GRUPO (Al volver a la lista general)
   if (id === 'page-grupos') {
@@ -2255,17 +2267,18 @@ function renderGroupsList() {
         <div class="gc-icon" style="position:relative;">${TYPE_ICONS[g.type] || '📂'}<span class="chat-dot" title="Mensajes nuevos en el chat" style="display:${(typeof chatNoLeidos !== 'undefined' && chatNoLeidos[g.id] > 0) ? 'block' : 'none'}"></span></div>
         <div class="gc-info">
           <div class="gc-name">${g.name}</div>
-          <div class="gc-meta">${nm} participante${nm !== 1 ? 's' : ''} · ${fmtDate(g.start)} → ${fmtDate(g.end)}</div>
+          <div class="gc-meta">${nm} participante${nm !== 1 ? 's' : ''} · total ${sym0}${Number(total || 0).toFixed(2)}</div>
         </div>
-        <div class="gc-total">${sym0}${Number(total || 0).toFixed(2)}</div>
-        <div class="gc-actions">
-          <button class="btn btn-outline btn-sm" onclick="event.stopPropagation(); openEditGroupModal(${i})" title="Editar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="event.stopPropagation(); openDeleteGroupModal(${i})" title="Eliminar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-          </button>
-        </div>
+        ${(() => {
+          // Lo que le importa a cada uno: su saldo en el grupo
+          const yo = miNombreEnGrupo(g);
+          const sd = yo ? Number((g.members || {})[yo]) || 0 : 0;
+          if (!yo) return '';
+          if (sd > 0.05) return `<div class="gc-saldo"><small>Te deben</small><b class="verde">${sym0}${sd.toFixed(2)}</b></div>`;
+          if (sd < -0.05) return `<div class="gc-saldo"><small>Debes</small><b class="rojo">${sym0}${Math.abs(sd).toFixed(2)}</b></div>`;
+          return `<div class="gc-saldo"><small>Al día</small><b class="gris">✓</b></div>`;
+        })()}
+        <svg class="gc-flecha" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </div>`;
   }).join('');
 }
@@ -3256,7 +3269,7 @@ async function calcDebts(opciones = {}) {
   const btn = document.getElementById('btnCalcularDeudas');
   if (btn) { btn.disabled = true; btn.textContent = 'Actualizando…'; }
   const ok = await recargarGrupoDelServidor(g, { aviso: !opciones.silencioso });
-  if (btn) { btn.disabled = false; btn.textContent = 'Calcular Deudas'; }
+  if (btn) { btn.disabled = false; btn.textContent = '↻ Actualizar cuentas'; }
   if (!ok) toast('Sin conexión: se calcula con los últimos datos descargados', 'e');
 }
 
@@ -3853,8 +3866,71 @@ function renderAll() {
   renderMembers();
   renderExpenses();
   renderBalances();
+  pintarResumenSaldo();
   if (typeof renderGroupsList === 'function') renderGroupsList();
 }
+
+// ─── RESUMEN DEL GRUPO: tu saldo y la acción principal ───────────────
+// Mismo formato de importes que el resto de la app
+const importeEs = n => formatAmountBase(Math.abs(n));
+function pintarResumenSaldo() {
+  const el = document.getElementById('resumenSaldo');
+  const g = currentGroupIdx !== null ? groups[currentGroupIdx] : null;
+  if (!el || !g) return;
+  const yo = miNombreEnGrupo(g);
+  const txs = deudasPendientes(g);
+  const saldo = yo ? Number(g.members[yo]) || 0 : 0;
+  const debo = txs.map((t, i) => ({ ...t, i })).filter(t => t.from === yo);
+  const meDeben = txs.filter(t => t.to === yo);
+  const nGastos = (g.expenses || []).filter(e => !e.es_pago).length;
+  const total = (g.expenses || []).filter(e => !e.es_pago).reduce((s, e) => s + (Number(e.baseAmt) || 0), 0);
+  const lista = arr => arr.map(t => `${escaparHtml(t.from === yo ? t.to : t.from)} ${importeEs(t.amount)}`).join(' · ');
+  let estado, cifra, detalle, botones;
+  const btnGasto = (clase) => `<button type="button" class="btn ${clase}" onclick="irARegistrarGasto()">＋ Añadir gasto</button>`;
+  if (!yo) {
+    estado = 'Total del grupo'; cifra = `<span>${importeEs(total)}</span>`; detalle = `${nGastos} gasto${nGastos !== 1 ? 's' : ''}`;
+    botones = btnGasto('btn-gold');
+  } else if (debo.length) {
+    const t = debo[0];
+    const de = escaparHtml(t.from).replace(/'/g, '&#39;'), a = escaparHtml(t.to).replace(/'/g, '&#39;');
+    estado = 'Debes'; cifra = `<span class="rojo">${importeEs(-saldo)}</span>`;
+    detalle = debo.length === 1 ? `a ${escaparHtml(t.to)}` : `a ${lista(debo)}`;
+    botones = `<button type="button" class="btn btn-gold" onclick="openPayModal(${t.i},'${de}','${a}',${t.amount})">Pagar a ${escaparHtml(t.to)}</button>${btnGasto('btn-outline')}`;
+  } else if (meDeben.length) {
+    estado = 'Te deben'; cifra = `<span class="verde">${importeEs(saldo)}</span>`;
+    detalle = lista(meDeben);
+    botones = btnGasto('btn-gold') + `<button type="button" class="btn btn-outline" onclick="irASeccion('sec5', toggleCuentasSection, 'cuentasSectionWrap')">Ver cuentas</button>`;
+  } else {
+    estado = 'Estás al día'; cifra = `<span class="verde">✓</span>`;
+    detalle = nGastos ? `${nGastos} gasto${nGastos !== 1 ? 's' : ''} · total ${importeEs(total)}` : 'Aún no hay gastos';
+    botones = btnGasto('btn-gold');
+  }
+  el.innerHTML = `
+    <div class="rs-arriba">
+      <div class="rs-estado">${estado}</div>
+      <div class="rs-cifra">${cifra}</div>
+      <div class="rs-detalle">${detalle}</div>
+    </div>
+    <div class="rs-botones">${botones}</div>`;
+}
+// Abre una sección (si está cerrada) y la lleva a la vista
+function irASeccion(idTitulo, abrir, idWrap) {
+  const w = document.getElementById(idWrap);
+  if (w && w.style.display !== 'block') abrir();
+  document.getElementById(idTitulo)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function irARegistrarGasto() {
+  irASeccion('sec3', toggleGastoSection, 'gastoSectionWrap');
+  setTimeout(() => document.getElementById('expDesc')?.focus({ preventScroll: true }), 350);
+}
+// Menú «⋯» del grupo (editar / eliminar), que antes estaba en cada tarjeta del inicio
+function abrirMenuGrupo(e) {
+  e.stopPropagation();
+  const m = document.getElementById('menuGrupo');
+  m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+function cerrarMenuGrupo() { const m = document.getElementById('menuGrupo'); if (m) m.style.display = 'none'; }
+document.addEventListener('click', e => { if (!e.target.closest('#menuGrupo')) cerrarMenuGrupo(); });
 
 function resetMemberAccordions() {
   const memberWrap = document.getElementById('memberListWrap');
@@ -7773,6 +7849,47 @@ async function enviarGifChat(btn) {
     <button id="inv-res-cerrar" onclick="cerrarResultadoInvitacion()">Entendido</button>
   </div>
 </div>
+<style id="jerarquia">
+/* ═══ JERARQUÍA VISUAL ═══ */
+/* Cabecera compacta: el lema solo en el inicio */
+header{padding-top:7px;padding-bottom:7px}
+header .logo-wrap{width:36px;height:36px;border-width:2px;box-shadow:none}
+.header-text h1{font-size:1.35rem}
+.header-text p{display:none}
+/* Barra del grupo en una línea */
+.det-fila{display:flex;align-items:center;gap:6px}
+.det-icono{flex-shrink:0;width:38px;height:38px;border-radius:12px;border:none;background:transparent;color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.det-icono:active{background:rgba(255,255,255,.08)}
+.det-titulo{flex:1;min-width:0;background:none;border:none;text-align:left;cursor:pointer;padding:2px 4px;color:inherit;font:inherit}
+.det-titulo .pg-header{display:block;margin:0;font-size:1.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.det-titulo .pg-header::after{content:' ▾';font-size:.7rem;opacity:.6}
+#detMeta{display:block;font-size:.66rem;color:var(--muted)}
+body:has(#page-detalle.active) .hbadge{display:none !important}
+.menu-grupo{position:fixed;top:calc(var(--header-h,52px) + 50px);right:12px;z-index:9000;background:#1e1e1e;border:1px solid #333;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.6);overflow:hidden;min-width:220px}
+.menu-grupo button{display:block;width:100%;text-align:left;padding:13px 16px;background:none;border:none;color:var(--text);font-weight:700;font-size:.85rem;cursor:pointer}
+.menu-grupo button + button{border-top:1px solid #2a2a2a}
+.menu-grupo .peligro{color:var(--danger)}
+/* Resumen del grupo */
+.resumen-saldo{background:linear-gradient(160deg,#1f1f1f,#181818);border:1px solid rgba(245,200,0,.25);border-radius:18px;padding:16px;margin:14px 0 6px}
+.resumen-saldo:empty{display:none}
+.rs-estado{font-size:.78rem;font-weight:800;color:var(--muted)}
+.rs-cifra{font-family:'Bebas Neue',Impact,'Arial Narrow',Arial,sans-serif;font-size:2.4rem;line-height:1.05;letter-spacing:1px;color:var(--text)}
+.rs-detalle{font-size:.8rem;color:#ccc;margin-top:2px}
+.rs-botones{display:flex;gap:8px;margin-top:14px}
+.rs-botones .btn{flex:1;padding:11px 8px;font-size:.82rem}
+.verde{color:var(--success)} .rojo{color:var(--danger)} .gris{color:var(--muted)}
+/* Secciones: menos peso, sin mayúsculas */
+.sec-title{margin:14px 0 8px;padding:12px 2px;border-bottom:1px solid rgba(255,255,255,.06);scroll-margin-top:calc(var(--header-h,52px) + 70px)}
+.sec-title .num{background:transparent;border:1.5px solid #444;color:#888;width:22px;height:22px;font-size:.7rem}
+.sec-title h2{font-size:.95rem;font-weight:800;letter-spacing:.2px;text-transform:none}
+/* Tarjeta de grupo: nombre, datos y tu saldo */
+.gc-saldo{text-align:right;flex-shrink:0;line-height:1.15}
+.gc-saldo small{display:block;font-size:.62rem;color:var(--muted);font-weight:800}
+.gc-saldo b{font-family:'Bebas Neue',Impact,'Arial Narrow',Arial,sans-serif;font-size:1.2rem;letter-spacing:.5px;font-weight:400}
+.gc-flecha{color:#555;flex-shrink:0}
+/* Enlaces de acciones peligrosas: visibles pero discretos */
+.enlace-peligro{background:none;border:none;color:#b55;font-size:.75rem;font-weight:700;text-decoration:underline;cursor:pointer;padding:4px}
+</style>
 <style id="estilos-adaptables">
 /* ════════════════════════════════════════════════════════════════════
    DISEÑO ADAPTABLE — el móvil no cambia; tablet y escritorio aprovechan el ancho
@@ -7819,6 +7936,9 @@ async function enviarGifChat(btn) {
      a la derecha cuentas finales, pagos, resumen y chat */
   #page-detalle main{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:0 32px;align-items:start}
   #page-detalle .det-col{display:block;min-width:0}
+  #resumenSaldo{grid-column:1/-1}
+  #page-detalle main{align-content:start}
+  .rs-botones{max-width:520px}
   /* Grupos en dos columnas */
   #groupsList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   #groupsList > .group-card, #groupsList > .sk-card{margin-bottom:0}
