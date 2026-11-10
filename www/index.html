@@ -1384,7 +1384,6 @@ class VakaDataService {
         ticket: ticket || null    // comprobante (imagen reducida), visible para todo el grupo
       });
       
-      console.log("☁️ Sincronizado correctamente con el servidor");
       const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
         headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
       });
@@ -1564,7 +1563,6 @@ async logActivity(msg, groupName = null) {
     try {
       if (g.id) {
         await this.#req('PATCH', `/groups/${g.id}`, { name: newName });
-        console.log("☁️ Nombre actualizado en servidor");
       }
     } catch (e) {
       console.warn("⚠️ Actualización solo local:", e.message);
@@ -1727,7 +1725,6 @@ try {
   groupName: a.groupName || a.group_name || null
 }));
     try {
-      console.log('📋 Perfil del backend:', me);
       if (me && !me.error) {
         profile = {
   id: me.id || null,
@@ -1759,7 +1756,6 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
     cargandoInicial = false;
     renderGroupsList();
     renderActivity();
-    console.log('🚀 Aplicación inicializada con', groups.length, 'grupos');
 
   } catch(err) {
     console.error('❌ Error en la inicialización:', err);
@@ -1776,8 +1772,6 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
     const urlInvite = urlParams.get('invite');
     if (urlInvite) localStorage.setItem('vp_pending_invite', urlInvite);
     const pendingInvite = localStorage.getItem('vp_pending_invite');
-    console.log('🔑 Invite pendiente:', pendingInvite);
-    console.log('🔑 Token usuario:', vakaData.getToken() ? 'existe' : 'no existe');
     if (pendingInvite) await procesarInvitacion(pendingInvite);
 	loadFromHash();
 })();
@@ -1962,7 +1956,6 @@ async function save() {
     await vakaData.saveGroups(groups);
     // 2. Respaldo manual (QA check)
     localStorage.setItem('vaka_groups', JSON.stringify(groups));
-    console.log("✅ Guardado de grupos exitoso");
   } catch (err) {
     console.error("❌ Error al guardar grupos:", err);
   }
@@ -3049,7 +3042,6 @@ editingExpenseIdx = null;
 
 function openEditModal(idx) {
   editingExpenseIdx = idx;
-  console.log("DEBUG: Modal abierto con editingExpenseIdx =", editingExpenseIdx);
   if (currentGroupIdx === null) return;
   const g = groups[currentGroupIdx];
   const e = g.expenses[idx];
@@ -3157,7 +3149,6 @@ function toggleEditSelectAll(){
 }
 
 async function saveEditExpense() {
-  console.log("Guardando gasto...");
   if (currentGroupIdx === null || editingExpenseIdx === null) return;
   
   // 1. Bloqueo de UI para evitar múltiples clics
