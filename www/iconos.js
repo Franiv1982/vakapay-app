@@ -53,6 +53,7 @@
     salir:     '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
     quedarse:  '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="14 7 9 12 14 17"/><line x1="21" y1="12" x2="9" y2="12"/>',
     deshacer:  '<polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>',
+    info:      '<rect x="10.5" y="10" width="3" height="9" rx="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="5.8" r="1.9" fill="currentColor" stroke="none"/>',
     volver:    '<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>',
     check:     '<polyline points="20 6 9 17 4 12"/>',
     punto:     '<circle cx="12" cy="12" r="6" fill="currentColor" stroke="none"/>',
