@@ -56,8 +56,8 @@ header{position:sticky;top:0;z-index:200;background:var(--bar-bg);backdrop-filte
 .hbadge:after{content:'';position:absolute;right:8px;top:50%;width:14px;height:14px;transform:translateY(-50%);transition:transform .2s;background:var(--gold-text);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") center/contain no-repeat}
 .hbadge[aria-expanded="true"]:after{transform:translateY(-50%) rotate(180deg)}
 /* La etiqueta solo tiene sentido en Estadísticas y Actividad (para elegir de qué grupo ver los datos).
-   En Grupos, Amigos y Cuenta no se muestra nunca, venga de donde venga la navegación. */
-body:has(#page-grupos.active) .hbadge, body:has(#page-amigos.active) .hbadge, body:has(#page-cuenta.active) .hbadge{display:none !important}
+   En Grupos, Amigos, Cuenta y la ficha de un gasto o pago no se muestra nunca, venga de donde venga la navegación. */
+body:has(#page-grupos.active) .hbadge, body:has(#page-amigos.active) .hbadge, body:has(#page-cuenta.active) .hbadge, body:has(#page-gasto.active) .hbadge{display:none !important}
 #ocrPopover{animation:fadeIn .15s ease;}
 #ocrBtn.has-file{background:rgba(61,186,111,.15);border-color:rgba(61,186,111,.4);color:var(--success);}
 
@@ -807,7 +807,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 <div class="page" id="page-gasto">
   <div class="det-bar">
     <div style="flex:1;max-width:660px;margin:0 auto;width:100%;padding:0 14px;box-sizing:border-box;">
-      <div style="display:flex;align-items:center;gap:6px;padding-right:125px;">
+      <div style="display:flex;align-items:center;gap:6px;">
         <button type="button" class="det-icono" onclick="goBackToGroup()" title="Volver al grupo" aria-label="Volver al grupo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
         <div style="overflow:hidden;">
           <div class="pg-header" id="gastoTitle" style="margin-bottom:0;font-size:var(--fs-lg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
