@@ -2110,7 +2110,7 @@ function closeGroupDropdown() {
 function closeOnOutsideClick(e) {
   const dd = document.getElementById('groupDropdown');
   const badge = document.getElementById('hbadge');
-  if (!dd.contains(e.target) && !badge.contains(e.target)) {
+  if (!dd.contains(e.target) && !badge.contains(e.target) && !e.target.closest('.det-titulo')) {
     closeGroupDropdown();
   }
 }
@@ -7855,7 +7855,12 @@ async function enviarGifChat(btn) {
 header{padding-top:7px;padding-bottom:7px}
 header .logo-wrap{width:36px;height:36px;border-width:2px;box-shadow:none}
 .header-text h1{font-size:1.35rem}
-.header-text p{display:none}
+/* El lema se mantiene en toda la app, en una línea discreta bajo el nombre;
+   solo se oculta dentro de un grupo y en el detalle de un gasto, donde cada línea cuenta */
+.header-text p{font-size:.6rem;letter-spacing:.8px;margin-top:4px;line-height:1.1;color:#cfcfcf}
+body:has(#page-detalle.active) .header-text p, body:has(#page-gasto.active) .header-text p{display:none}
+/* Lista de grupos para cambiar de grupo: se abre bajo el nombre del grupo */
+body:has(#page-detalle.active) #groupDropdown{left:52px;right:auto;top:calc(var(--header-h,52px) + 54px);max-width:min(320px, calc(100vw - 70px));min-width:220px}
 /* Barra del grupo en una línea */
 .det-fila{display:flex;align-items:center;gap:6px}
 .det-icono{flex-shrink:0;width:38px;height:38px;border-radius:12px;border:none;background:transparent;color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -7930,7 +7935,8 @@ body:has(#page-detalle.active) .hbadge{display:none !important}
   header{position:fixed;top:0;left:0;width:var(--menu);padding:20px 18px !important;background:none;backdrop-filter:none;border:none;z-index:1100;box-sizing:border-box}
   header .logo-wrap{width:40px;height:40px}
   .header-text h1{font-size:1.45rem}
-  .header-text p{font-size:.56rem;letter-spacing:.5px}
+  .header-text p{font-size:.56rem;letter-spacing:.5px;display:block !important}
+  body:has(#page-detalle.active) #groupDropdown{left:calc(var(--menu) + 70px);top:54px}
   .det-bar{top:0 !important}
   /* Grupo en dos columnas: a la izquierda participantes, registrar y lista;
      a la derecha cuentas finales, pagos, resumen y chat */
