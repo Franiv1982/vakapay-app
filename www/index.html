@@ -130,6 +130,16 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 .btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}
 .btn-outline:hover{border-color:var(--gold);color:var(--gold)}
 .btn-danger{background:rgba(255,77,77,.1);border:1.5px solid rgba(255,77,77,.27);color:var(--danger)}
+/* Botones (opción B): amarillo = acción principal · borde = cancelar/volver ·
+   rojo relleno = confirmar algo que no se deshace · rojo suave = abrir una acción peligrosa */
+.btn-peligro{background:var(--danger-strong);color:#fff;border:none}
+/* Ventana emergente (diálogo): todas con el mismo marco */
+.ventana{background:var(--dark3);width:90%;max-width:360px;padding:24px 20px;border-radius:var(--r-xl);border:1px solid var(--line);box-shadow:var(--shadow-lg);box-sizing:border-box}
+.ventana .btn{padding:12px 10px}
+.btn-peligro:hover{filter:brightness(1.08)}
+.btn-outline{border-color:var(--line-strong)}
+.btn svg{flex-shrink:0}
+.btn:disabled{opacity:.5;cursor:not-allowed}
 .btn-green{background:rgba(61,186,111,.1);border:1.5px solid rgba(61,186,111,.28);color:var(--success)}
 .btn-sm{padding:6px 12px;font-size:var(--fs-sm);border-radius:var(--r-sm)}
 .btn-full{width:100%}
@@ -990,7 +1000,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   <!-- Se asegura la llamada a la función de confirmación -->
   <button type="button" class="btn btn-danger" onclick="openDeleteFromEdit()" style="flex:1">Eliminar</button>
   <!-- Se añade type="button" para evitar comportamiento de formulario accidental -->
-  <button type="button" class="btn btn-gold" onclick="saveEditExpense()" style="flex:1">Guardar Cambios</button>
+  <button type="button" class="btn btn-gold" onclick="saveEditExpense()" style="flex:1">Guardar cambios</button>
 </div>
   </div>
 </div>
@@ -1025,8 +1035,8 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
     </div>
 
     <div style="display:flex;gap:8px;margin-top:6px">
-      <button class="btn" onclick="confirmDeleteFriend()" style="flex:1;background:var(--danger-strong);color:white;border:none;">Eliminar</button>
-      <button class="btn" onclick="saveEditFriend()" style="flex:1;background:var(--success-strong);color:white;border:none;">Guardar</button>
+      <button onclick="confirmDeleteFriend()" class="btn btn-danger" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Eliminar</button>
+      <button onclick="saveEditFriend()" class="btn btn-gold" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Guardar</button>
     </div>
   </div>
 </div>
@@ -1141,7 +1151,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
         <div style="color:var(--text);font-size:1.3rem;font-weight:800;margin-bottom:10px;"></div>
         <p style="color:var(--text);opacity:.8;font-size:var(--fs-base);line-height:1.45;margin-bottom:22px;"></p>
-        <button style="width:100%;padding:14px;border-radius:var(--r-md);border:none;font-weight:800;background:var(--gold);color:#000;cursor:pointer;">Entendido</button></div>`;
+        <button class="btn btn-gold" style="width:100%"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button></div>`;
     caja.querySelector('div > div:nth-child(2)').textContent = titulo;
     caja.querySelector('p').textContent = texto;
     caja.querySelector('button').onclick = () => { window.location.href = 'login.html'; };
@@ -2431,9 +2441,9 @@ ${e.es_pago ? `
     </div>
 
     <div style="display:flex;gap:10px;margin-top:18px;">
-      ${e.es_pago ? '' : `<button class="btn btn-full" onclick="openEditModal(${idx})" style="flex:1;background:var(--success-strong);color:white;border:none;">Editar</button>`}
+      ${e.es_pago ? '' : `<button onclick="openEditModal(${idx})" class="btn btn-gold" style="flex:1">Editar</button>`}
       ${puede
-        ? `<button class="btn btn-full" onclick="openDeleteExpenseModal(${idx})" style="flex:1;background:var(--danger-strong);color:white;border:none;">${e.es_pago ? 'Anular pago' : 'Eliminar'}</button>`
+        ? `<button onclick="openDeleteExpenseModal(${idx})" class="btn btn-danger" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> ${e.es_pago ? 'Anular pago' : 'Eliminar'}</button>`
         : `<div style="flex:1;text-align:center;font-size:var(--fs-sm);color:var(--muted);line-height:1.4;">Solo ${escaparHtml(e.payer)} o ${escaparHtml((e.involved || [])[0] || '')} pueden anular este pago.</div>`}
     </div>
   `;
@@ -2697,7 +2707,11 @@ async function removeMember(n) {
   document.getElementById('del-miembro-name').textContent = n;
   document.getElementById('del-miembro-titulo').textContent = pendiente ? 'Aún no se puede eliminar' : '¿Eliminar participante?';
   document.getElementById('del-miembro-si').style.display = pendiente ? 'none' : '';
-  document.getElementById('del-miembro-volver').textContent = pendiente ? 'Entendido' : 'No, volver';
+  // Si no se puede eliminar, «Entendido» es la única acción (principal); si se puede, «No, volver» es la opción segura (borde)
+  const volver = document.getElementById('del-miembro-volver');
+  if (!volver.dataset.html) volver.dataset.html = volver.innerHTML;
+  volver.className = pendiente ? 'btn btn-gold' : 'btn btn-outline';
+  if (pendiente) volver.textContent = 'Entendido'; else volver.innerHTML = volver.dataset.html;
   const info = document.getElementById('del-miembro-info');
   info.innerHTML = '';
   const linea = t => { const sp = document.createElement('span'); sp.textContent = t; info.appendChild(sp); };
@@ -3379,9 +3393,9 @@ function tarjetaPagoPendiente(e, i, para, detalles, base) {
     : `Pendiente de que ${para} lo confirme (como máximo hasta el ${hasta}).`;
   const botones = yo === para ? `
       <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;" onclick="event.stopPropagation()">
-        <button type="button" onclick="confirmarPagoPendiente(${i})" style="padding:10px;border-radius:var(--r-md);border:none;background:var(--success-strong);color:#fff;font-weight:800;font-size:var(--fs-base);cursor:pointer;">✓ Confirmar: recibí ${imp}</button>
-        <button type="button" onclick="abrirPagoPendiente(${i},'otro')" style="padding:10px;border-radius:var(--r-md);border:1px solid var(--line-strong);background:none;color:var(--text);font-weight:800;font-size:var(--fs-base);cursor:pointer;">Recibí otro importe</button>
-        <button type="button" onclick="abrirPagoPendiente(${i},'rechazar')" style="padding:10px;border-radius:var(--r-md);border:1px solid rgba(255,77,77,.6);background:none;color:var(--danger);font-weight:800;font-size:var(--fs-base);cursor:pointer;">Rechazar: no he recibido nada</button>
+        <button type="button" class="btn btn-gold" onclick="confirmarPagoPendiente(${i})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Confirmar: recibí ${imp}</button>
+        <button type="button" class="btn btn-outline" onclick="abrirPagoPendiente(${i},'otro')">Recibí otro importe</button>
+        <button type="button" class="btn btn-danger" onclick="abrirPagoPendiente(${i},'rechazar')">Rechazar: no he recibido nada</button>
       </div>` : '';
   return `<div onclick="openGasto(${i},'pagos')" style="border:1.5px solid rgba(245,200,0,.55);background:rgba(245,200,0,.05);border-radius:var(--r-md);margin-bottom:8px;padding:12px 12px;cursor:pointer;">
     <div style="display:flex;align-items:center;gap:10px;">
@@ -3435,7 +3449,7 @@ function abrirPagoPendiente(i, modo) {
   document.getElementById('pp-resumen').style.display = 'none';
   const btn = document.getElementById('pp-aceptar');
   btn.textContent = otro ? 'Confirmar' : 'Sí, rechazar';
-  btn.style.background = otro ? 'var(--success-strong)' : 'var(--danger-strong)';
+  btn.className = otro ? 'btn btn-gold' : 'btn btn-peligro';
   btn.disabled = otro;
   btn.style.opacity = otro ? '.5' : '1';
   document.getElementById('modal-pago-pendiente').style.display = 'flex';
@@ -6410,7 +6424,7 @@ function cerrarModalSalir() {
     </div>
     <div style="display:flex;gap:8px;margin-top:12px">
       <button class="btn btn-outline" onclick="closePayModal()" style="flex:1;font-size:var(--fs-sm)">Cancelar</button>
-      <button class="btn btn-outline btn-green" onclick="confirmPayment(true)" style="flex:1;font-size:var(--fs-sm)">✅ Marcar saldado</button>
+      <button class="btn btn-gold" onclick="confirmPayment(true)" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Marcar saldado</button>
     </div>
   </div>
 </div>
@@ -6441,7 +6455,7 @@ function cerrarModalSalir() {
       <img id="proofThumbView" class="proof-thumb" style="max-height:80px;">
     </div>
     <div style="margin-top:8px;">
-      <button class="btn btn-green btn-full" onclick="sendProof(true)">✅ Confirmar cobro</button>
+      <button class="btn btn-gold btn-full" onclick="sendProof(true)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Confirmar cobro</button>
       <button class="btn btn-outline btn-full" style="margin-top:8px;" onclick="closeProofModal()">Cancelar</button>
     </div>
   </div>
@@ -6449,7 +6463,7 @@ function cerrarModalSalir() {
 
 <!-- Modal Edición de Grupo --> 
 <div class="modal-overlay" id="modal-editar-grupo" style="display: none;" onclick="if(event.target===this)cerrarModalEditar()">
-  <div style="background: var(--dark3); width: 90%; max-width: 340px; padding: 24px; border-radius: var(--r-xl); border: 1px solid var(--line); text-align: center;">
+  <div class="ventana" style="text-align: center">
     
     <!-- Título en blanco para neutralidad -->
     <div style="color: var(--text); font-size: var(--fs-xl); font-weight: 700; margin-bottom: 20px;">Editar grupo</div>
@@ -6464,16 +6478,10 @@ function cerrarModalSalir() {
     <div style="display: flex; gap: 12px; width: 100%; margin-top: 24px;">
       
       <!-- BOTÓN CANCELAR: Gris Neutro -->
-      <button onclick="cerrarModalEditar()" 
-        style="flex: 1; margin: 0; padding: 14px; border-radius: var(--r-md); font-weight: 700; cursor: pointer; border: none; color: var(--text2); background: var(--line); outline: none;">
-        Cancelar
-      </button>
+      <button onclick="cerrarModalEditar()" class="btn btn-outline" style="flex: 1;margin: 0">Cancelar</button>
       
       <!-- BOTÓN GUARDAR: Verde Sólido (Éxito) -->
-      <button onclick="guardarCambiosGrupo()" 
-        style="flex: 1; margin: 0; padding: 14px; border-radius: var(--r-md); font-weight: 700; cursor: pointer; border: none; background: var(--success-strong); color: white; outline: none;">
-        Guardar
-      </button>
+      <button onclick="guardarCambiosGrupo()" class="btn btn-gold" style="flex: 1;margin: 0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Guardar</button>
 
     </div>
   </div>
@@ -6481,7 +6489,7 @@ function cerrarModalSalir() {
 
 <!-- Modal Confirmar Borrado de Grupo -->
 <div class="modal-overlay" id="modal-borrar-grupo" style="display: none;" onclick="if(event.target===this)cerrarModalBorrar()">
-  <div style="background: var(--dark3); width: 90%; max-width: 340px; padding: 24px; border-radius: var(--r-xl); border: 1px solid var(--line); text-align: center;">
+  <div class="ventana" style="text-align: center">
     
     <div style="color: var(--text); font-size: var(--fs-xl); font-weight: 700; margin-bottom: 10px;">¿Borrar grupo?</div>
     <p style="color: var(--text); font-size: var(--fs-base); margin-bottom: 20px; opacity: 0.8;">Esta acción no se puede deshacer.</p>
@@ -6495,23 +6503,17 @@ function cerrarModalSalir() {
     <!-- Botones con colores sólidos (Consistencia QA) -->
     <div style="display: flex; gap: 12px; width: 100%;">
       <!-- BOTÓN VOLVER (Verde sólido) -->
-      <button onclick="cerrarModalBorrar()" 
-        style="flex: 1; padding: 14px; border-radius: var(--r-md); font-weight: 700; cursor: pointer; border: none; color: white; background: var(--success-strong); outline: none;">
-        No, volver
-      </button>
+      <button onclick="cerrarModalBorrar()" class="btn btn-outline" style="flex: 1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
       
       <!-- BOTÓN BORRAR (Rojo sólido) -->
-      <button onclick="ejecutarBorradoFinal()" 
-        style="flex: 1; padding: 14px; border-radius: var(--r-md); font-weight: 700; cursor: pointer; border: none; color: white; background: var(--danger-strong); outline: none;">
-        Sí, borrar
-      </button>
+      <button onclick="ejecutarBorradoFinal()" class="btn btn-peligro" style="flex: 1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
     </div>
   </div>
 </div>
 
 <!-- Modal de Confirmación de Borrar Gasto -->
 	<div class="modal-overlay" id="modal-borrar-gasto" style="display: none; z-index:9999;" onclick="if(event.target===this)cerrarModalBorrarGasto()">
-	<div style="background: var(--dark3); width: 90%; max-width: 340px; padding: 24px; border-radius: var(--r-xl); border: 1px solid var(--line); text-align: center;">
+	<div class="ventana" style="text-align: center">
     
     <div style="color: var(--text); font-size: var(--fs-xl); font-weight: 700; margin-bottom: 10px;">¿Borrar gasto?</div>
     <p style="color: var(--text); font-size: var(--fs-base); margin-bottom: 20px; opacity: 0.8;">Esta acción no se puede deshacer.</p>
@@ -6529,21 +6531,15 @@ function cerrarModalSalir() {
     </div>
 
     <div style="display: flex; gap: 12px; width: 100%;">
-      <button onclick="cerrarModalBorrarGasto()" 
-        style="flex: 1; padding: 14px; border-radius: var(--r-md); font-weight: 700; cursor: pointer; border: none; color: white; background: var(--success-strong);">
-        No, volver
-      </button>
-      <button onclick="ejecutarBorradoGasto()" 
-        style="flex: 1; padding: 14px; border-radius: var(--r-md); font-weight: 700; cursor: pointer; border: none; color: white; background: var(--danger-strong);">
-        Sí, borrar
-      </button>
+      <button onclick="cerrarModalBorrarGasto()" class="btn btn-outline" style="flex: 1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button onclick="ejecutarBorradoGasto()" class="btn btn-peligro" style="flex: 1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
     </div>
   </div>
 </div>
 
 <!-- Modal de Confirmación de Borrar Amigo -->
 <div class="modal-overlay" id="modal-borrar-amigo" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalBorrarAmigo()">
-  <div style="background:var(--dark3); width:90%; max-width:340px; padding:24px; border-radius:var(--r-xl); border:1px solid var(--line); text-align:center;">
+  <div class="ventana" style="text-align:center">
     
     <div style="color:var(--text); font-size:var(--fs-xl); font-weight:700; margin-bottom:10px;">¿Borrar amigo?</div>
     <p style="color:var(--text); font-size:var(--fs-base); margin-bottom:20px; opacity:0.8;">Esta acción no se puede deshacer.</p>
@@ -6560,14 +6556,8 @@ function cerrarModalSalir() {
     </div>
 
     <div style="display:flex; gap:12px; width:100%;">
-      <button onclick="cerrarModalBorrarAmigo()" 
-        style="flex:1; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:white; background:var(--success-strong);">
-        No, volver
-      </button>
-      <button onclick="ejecutarBorradoAmigo()" 
-        style="flex:1; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:white; background:var(--danger-strong);">
-        Sí, borrar
-      </button>
+      <button onclick="cerrarModalBorrarAmigo()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button onclick="ejecutarBorradoAmigo()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
     </div>
   </div>
 </div>
@@ -6580,19 +6570,15 @@ function cerrarModalSalir() {
     <p id="logoutMessage" style="color:var(--text); font-size:var(--fs-md); margin-bottom:24px; opacity:0.9;"></p>
     
     <div style="display:flex; gap:10px;">
-      <button onclick="closeLogoutModal()" style="flex:1; background:var(--success-strong); color:white; border:none; padding:12px; border-radius:var(--r-sm); cursor:pointer; font-weight:700; transition: 0.3s;">
-          Volver
-      </button>
-      <button onclick="confirmLogout()" style="flex:1; background:var(--danger-strong); color:white; border:none; padding:12px; border-radius:var(--r-sm); cursor:pointer; font-weight:700; transition: 0.3s;">
-          Cerrar Sesión
-      </button>
+      <button onclick="closeLogoutModal()" class="btn btn-outline" style="flex:1;transition: 0.3s"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button onclick="confirmLogout()" class="btn btn-peligro" style="flex:1;transition: 0.3s"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sí, cerrar sesión</button>
     </div>
   </div>
 </div>
 
 <!-- Modal Eliminar Participante con Gastos -->
 <div class="modal-overlay" id="modal-borrar-miembro" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalBorrarMiembro()">
-  <div style="background:var(--dark3); width:90%; max-width:340px; padding:24px; border-radius:var(--r-xl); border:1px solid var(--line); text-align:center;">
+  <div class="ventana" style="text-align:center">
     
     <div id="del-miembro-titulo" style="color:var(--text); font-size:var(--fs-xl); font-weight:700; margin-bottom:10px;">¿Eliminar participante?</div>
     <p id="del-miembro-msg" style="color:var(--text); font-size:var(--fs-base); margin-bottom:20px; opacity:0.8;"></p>
@@ -6606,58 +6592,40 @@ function cerrarModalSalir() {
     </div>
 
     <div style="display:flex; gap:12px; width:100%;">
-      <button id="del-miembro-volver" onclick="cerrarModalBorrarMiembro()" 
-        style="flex:1; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:white; background:var(--success-strong);">
-        No, volver
-      </button>
-      <button id="del-miembro-si" onclick="ejecutarBorradoMiembro()" 
-        style="flex:1; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:white; background:var(--danger-strong);">
-        Sí, eliminar
-      </button>
+      <button id="del-miembro-volver" onclick="cerrarModalBorrarMiembro()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button id="del-miembro-si" onclick="ejecutarBorradoMiembro()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, eliminar</button>
     </div>
   </div>
 </div>
 
 <!-- Modal Borrar Todos los Datos -->
 <div class="modal-overlay" id="modal-borrar-datos" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalBorrarDatos()">
-  <div style="background:var(--dark3); width:90%; max-width:340px; padding:24px; border-radius:var(--r-xl); border:1px solid var(--line); text-align:center;">
+  <div class="ventana" style="text-align:center">
     
     <div style="width:56px;height:56px;margin:0 auto 10px;border-radius:50%;background:rgba(255,77,77,.12);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></div>
     <div style="color:var(--text); font-size:var(--fs-xl); font-weight:700; margin-bottom:10px;">¿Borrar todo?</div>
     <p id="borrar-datos-resumen" style="color:var(--text); font-size:var(--fs-base); margin-bottom:20px; opacity:0.8; line-height:1.4;">Se eliminarán todos tus grupos, gastos, amigos y actividad. Esta acción no se puede deshacer.</p>
 
     <div style="display:flex; gap:12px; width:100%;">
-      <button onclick="cerrarModalBorrarDatos()" 
-        style="flex:1; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:white; background:var(--success-strong);">
-        No, volver
-      </button>
-      <button onclick="ejecutarBorradoDatos()" 
-        style="flex:1; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:white; background:var(--danger-strong);">
-        Sí, borrar
-      </button>
+      <button onclick="cerrarModalBorrarDatos()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button onclick="ejecutarBorradoDatos()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
     </div>
   </div>
 </div>
 
 <div class="modal-overlay" id="modal-eliminar-cuenta" style="display:none; z-index:9999;" onclick="if(event.target===this)document.getElementById('modal-eliminar-cuenta').style.display='none'">
-  <div style="background:var(--dark3); width:90%; max-width:340px; padding:24px; border-radius:var(--r-xl); border:1px solid var(--danger-strong); text-align:center;">
+  <div class="ventana" style="text-align:center">
     <div style="width:56px;height:56px;margin:0 auto 10px;border-radius:50%;background:rgba(255,77,77,.12);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="8" x2="22" y2="13"/><line x1="22" y1="8" x2="17" y2="13"/></svg></div>
     <div style="color:var(--danger); font-size:var(--fs-xl); font-weight:700; margin-bottom:10px;">Eliminar cuenta</div>
     <p id="eliminar-cuenta-resumen" style="color:var(--text); font-size:var(--fs-base); margin-bottom:20px; opacity:0.8; line-height:1.4;">Se eliminarán permanentemente tu cuenta, grupos, gastos, amigos y toda tu actividad. Esta acción <strong>no se puede deshacer</strong>.</p>
     <div style="display:flex; gap:12px; width:100%;">
-      <button onclick="document.getElementById('modal-eliminar-cuenta').style.display='none';document.body.style.overflow=''"
-        style="flex:1; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:white; background:var(--success-strong);">
-        No, volver
-      </button>
-      <button onclick="ejecutarEliminarCuenta()"
-        style="flex:1; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:white; background:var(--danger-strong);">
-        Sí, eliminar
-      </button>
+      <button onclick="document.getElementById('modal-eliminar-cuenta').style.display='none';document.body.style.overflow=''" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button onclick="ejecutarEliminarCuenta()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, eliminar</button>
     </div>
   </div>
 </div>
 <div class="modal-overlay" id="modal-renombrar-miembro" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalRenombrarMiembro()">
-  <div style="background:var(--dark3); width:90%; max-width:340px; padding:24px; border-radius:var(--r-xl); border:1px solid var(--line); text-align:center;">
+  <div class="ventana" style="text-align:center">
     <div style="color:var(--text); font-size:var(--fs-xl); font-weight:700; margin-bottom:10px;">Renombrar participante</div>
     <p style="color:var(--text); font-size:var(--fs-base); margin-bottom:20px; opacity:0.8;">Introduce el nuevo nombre para este participante.</p>
     <div style="background:var(--dark4); border-radius:var(--r-lg); padding:16px; margin-bottom:20px; text-align:left;">
@@ -6669,30 +6637,20 @@ function cerrarModalSalir() {
         style="width:100%; padding:10px 12px; border-radius:var(--r-md); border:1.5px solid var(--line-strong); background:var(--card); color:white; font-size:var(--fs-md); box-sizing:border-box; outline:none;"/>
     </div>
     <div style="display:flex; gap:12px; width:100%;">
-      <button onclick="cerrarModalRenombrarMiembro()"
-        style="flex:1; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:white; background:var(--line-strong);">
-        Cancelar
-      </button>
-      <button onclick="ejecutarRenombrarMiembro()"
-        style="flex:1; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:white; background:var(--success-strong);">
-        Guardar
-      </button>
+      <button onclick="cerrarModalRenombrarMiembro()" class="btn btn-outline" style="flex:1">Cancelar</button>
+      <button onclick="ejecutarRenombrarMiembro()" class="btn btn-gold" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Guardar</button>
     </div>
   </div>
 </div>
 <!-- Modal Confirmar Salida de App -->
 <div class="modal-overlay" id="modal-salir-app" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalSalir()">
-  <div style="background:var(--dark3); width:90%; max-width:300px; padding:24px; border-radius:var(--r-xl); border:1px solid var(--line); text-align:center;">
+  <div class="ventana" style="text-align:center">
     <div style="width:56px;height:56px;margin:0 auto 10px;border-radius:50%;background:rgba(245,200,0,.12);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F5C800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
     <div style="color:var(--text); font-size:1.3rem; font-weight:700; margin-bottom:20px;">¿Deseas salir?</div>
     
     <div style="display:flex; gap:12px; width:100%;">
-      <button onclick="cerrarModalSalir()" style="flex:1; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:white; background:var(--line-strong);">
-        No
-      </button>
-      <button onclick="if(window.Capacitor && Capacitor.Plugins.App) Capacitor.Plugins.App.exitApp()" style="flex:1; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:white; background:var(--danger-strong);">
-        Sí, salir
-      </button>
+      <button onclick="cerrarModalSalir()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button onclick="if(window.Capacitor && Capacitor.Plugins.App) Capacitor.Plugins.App.exitApp()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sí, salir</button>
     </div>
   </div>
 </div>
@@ -6901,7 +6859,7 @@ function tocarBotonGrupos(btn) {
 
 <!-- Modal de confirmación: quitar comprobante -->
 <div class="modal-overlay" id="modal-quitar-comprobante" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalQuitarComprobante()">
-  <div style="background:var(--dark3); width:90%; max-width:340px; padding:24px; border-radius:var(--r-xl); border:1px solid var(--line); text-align:center; box-sizing:border-box;">
+  <div class="ventana" style="text-align:center">
     <div style="color:var(--text); font-size:var(--fs-xl); font-weight:700; margin-bottom:10px;">¿Quitar comprobante?</div>
     <p style="color:var(--text); font-size:var(--fs-base); margin-bottom:20px; opacity:0.8;">El gasto se mantiene; solo se elimina la imagen adjunta para todo el grupo.</p>
     <div style="background:var(--dark4); border-radius:var(--r-lg); padding:12px; margin-bottom:24px; display:flex; align-items:center; gap:12px; text-align:left;">
@@ -6912,15 +6870,15 @@ function tocarBotonGrupos(btn) {
       </div>
     </div>
     <div style="display:flex; gap:12px; width:100%;">
-      <button onclick="cerrarModalQuitarComprobante()" style="flex:1; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:white; background:var(--success-strong);">No, volver</button>
-      <button onclick="confirmarQuitarComprobante()" style="flex:1; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:white; background:var(--danger-strong);">Sí, quitar</button>
+      <button onclick="cerrarModalQuitarComprobante()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button onclick="confirmarQuitarComprobante()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, quitar</button>
     </div>
   </div>
 </div>
 
 <!-- Modal: contacto o participante duplicado -->
 <div class="modal-overlay" id="modal-duplicado" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalDuplicado()">
-  <div style="background:var(--dark3); width:90%; max-width:340px; padding:24px; border-radius:var(--r-xl); border:1px solid var(--line); text-align:center; box-sizing:border-box;">
+  <div class="ventana" style="text-align:center">
     <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:rgba(245,200,0,.12); display:flex; align-items:center; justify-content:center;">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F5C800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
     </div>
@@ -6930,20 +6888,20 @@ function tocarBotonGrupos(btn) {
       <div id="dup-nombre" style="color:white; font-weight:800; font-size:1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
       <div id="dup-motivo" style="color:var(--text2); font-size:var(--fs-base); margin-top:4px; word-break:break-word;"></div>
     </div>
-    <button onclick="cerrarModalDuplicado()" style="width:100%; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:#000; background:var(--gold);">Entendido</button>
+    <button onclick="cerrarModalDuplicado()" class="btn btn-gold" style="width:100%"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button>
   </div>
 </div>
 
 <!-- Modal: saldos pendientes que impiden borrar datos o eliminar la cuenta -->
 <div class="modal-overlay" id="modal-pendientes" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalPendientes()">
-  <div style="background:var(--dark3); width:90%; max-width:340px; padding:24px; border-radius:var(--r-xl); border:1px solid var(--line); text-align:center; box-sizing:border-box;">
+  <div class="ventana" style="text-align:center">
     <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:rgba(255,77,77,.12); display:flex; align-items:center; justify-content:center;">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     </div>
     <div style="color:var(--text); font-size:1.4rem; font-weight:700; margin-bottom:10px;">Primero salda tus cuentas</div>
     <p id="pendientes-intro" style="color:var(--text); font-size:var(--fs-base); margin-bottom:16px; opacity:0.8; line-height:1.4;"></p>
     <div id="pendientes-lista" style="background:var(--dark4); border-radius:var(--r-lg); padding:6px 14px; margin-bottom:22px; text-align:left; font-size:var(--fs-base); max-height:40vh; overflow-y:auto;"></div>
-    <button onclick="cerrarModalPendientes()" style="width:100%; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:#000; background:var(--gold);">Entendido</button>
+    <button onclick="cerrarModalPendientes()" class="btn btn-gold" style="width:100%"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button>
   </div>
 </div>
 
@@ -7403,15 +7361,15 @@ function verReaccionesChat(id) {
     `<div style="display:flex;gap:10px;align-items:flex-start;text-align:left;padding:8px 0;border-bottom:1px solid var(--line);">
        <span style="font-size:var(--fs-lg);">${emoji}</span><span style="color:var(--text);font-size:var(--fs-base);line-height:1.5;">${nombres.map(escaparHtml).join(', ')}</span></div>`).join('');
   abrirDialogoChat(`<div style="color:var(--text);font-size:var(--fs-lg);font-weight:700;margin-bottom:10px;">Reacciones</div>${filas}
-    <button onclick="cerrarDialogoChat()" style="width:100%;margin-top:16px;padding:12px;border-radius:var(--r-md);font-weight:700;border:none;background:var(--gold);color:#000;cursor:pointer;">Cerrar</button>`);
+    <button onclick="cerrarDialogoChat()" class="btn btn-gold" style="width:100%;margin-top:16px">Cerrar</button>`);
 }
 function confirmarBorrarChat(id) {
   cerrarMenuChat();
   abrirDialogoChat(`<div style="color:var(--text);font-size:1.3rem;font-weight:700;margin-bottom:8px;">¿Borrar mensaje?</div>
     <p style="color:var(--text);font-size:var(--fs-base);opacity:.8;margin-bottom:20px;">Se mostrará como «Mensaje eliminado» para todo el grupo.</p>
     <div style="display:flex;gap:12px;">
-      <button onclick="cerrarDialogoChat()" style="flex:1;padding:12px;border-radius:var(--r-md);font-weight:700;border:none;color:#fff;background:var(--success-strong);cursor:pointer;">No, volver</button>
-      <button onclick="borrarMensajeChat(${id})" style="flex:1;padding:12px;border-radius:var(--r-md);font-weight:700;border:none;color:#fff;background:var(--danger-strong);cursor:pointer;">Sí, borrar</button>
+      <button onclick="cerrarDialogoChat()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button onclick="borrarMensajeChat(${id})" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
     </div>`);
 }
 async function borrarMensajeChat(id) {
@@ -7744,17 +7702,17 @@ async function enviarGifChat(btn) {
 
 <!-- Modal: ¿Quién eres en este grupo? (invitaciones) -->
 <div class="modal-overlay" id="modal-quien-eres" style="display:none; z-index:9999;">
-  <div style="background:var(--dark3); width:90%; max-width:360px; padding:24px; border-radius:var(--r-xl); border:1px solid var(--line); box-sizing:border-box; max-height:85vh; overflow-y:auto;">
+  <div class="ventana" style="max-height:85vh;overflow-y:auto">
     <div id="quien-titulo" style="color:var(--text); font-size:1.25rem; font-weight:700; margin-bottom:8px; text-align:center;"></div>
     <p style="color:var(--text); font-size:var(--fs-base); margin-bottom:16px; opacity:0.8; text-align:center; line-height:1.4;">¿Quién eres en este grupo? Si ya te habían añadido, elige tu nombre: conservarás tus gastos y saldos.</p>
     <div id="quien-opciones" style="margin-bottom:18px;"></div>
-    <button onclick="confirmarQuienEres()" style="width:100%; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:#000; background:var(--gold);">Continuar</button>
+    <button onclick="confirmarQuienEres()" class="btn btn-gold" style="width:100%">Continuar</button>
   </div>
 </div>
 
 <!-- Modal: pago pendiente → «Recibí otro importe» o «Rechazar» -->
 <div class="modal-overlay" id="modal-pago-pendiente" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarPagoPendiente()">
-  <div style="background:var(--dark3); width:90%; max-width:360px; padding:22px 18px; border-radius:var(--r-lg); border:1px solid var(--line); box-sizing:border-box;">
+  <div class="ventana">
     <div id="pp-titulo" style="color:var(--text); font-size:var(--fs-lg); font-weight:800; text-align:center; margin-bottom:6px;"></div>
     <p id="pp-texto" style="color:var(--text2); font-size:var(--fs-sm); text-align:center; line-height:1.45; margin-bottom:14px;"></p>
     <div id="pp-importe-wrap" style="display:none;">
@@ -7763,24 +7721,24 @@ async function enviarGifChat(btn) {
     </div>
     <div id="pp-resumen" style="display:none; background:var(--dark4); border-radius:var(--r-md); padding:10px 12px; font-size:var(--fs-sm); line-height:1.6; margin-bottom:14px; color:var(--text);"></div>
     <div style="display:flex; gap:10px;">
-      <button type="button" onclick="cerrarPagoPendiente()" style="flex:1; padding:12px; border-radius:var(--r-md); border:1px solid var(--line-strong); background:none; color:var(--text); font-weight:800; cursor:pointer;">Cancelar</button>
-      <button type="button" id="pp-aceptar" onclick="aceptarPagoPendiente()" style="flex:1; padding:12px; border-radius:var(--r-md); border:none; color:#fff; font-weight:800; cursor:pointer;">Confirmar</button>
+      <button type="button" onclick="cerrarPagoPendiente()" class="btn btn-outline" style="flex:1">Cancelar</button>
+      <button type="button" id="pp-aceptar" class="btn btn-gold" onclick="aceptarPagoPendiente()" style="flex:1">Confirmar</button>
     </div>
   </div>
 </div>
 
 <!-- Modal: aviso genérico (título + texto + Entendido) -->
 <div class="modal-overlay" id="modal-aviso" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarAviso()">
-  <div style="background:var(--dark3); width:90%; max-width:360px; padding:22px 18px; border-radius:var(--r-lg); border:1px solid var(--line); box-sizing:border-box; text-align:center;">
+  <div class="ventana" style="text-align:center">
     <div id="aviso-titulo" style="color:var(--text); font-size:var(--fs-lg); font-weight:800; margin-bottom:8px;"></div>
     <p id="aviso-texto" style="color:var(--text2); font-size:var(--fs-base); line-height:1.5; margin-bottom:16px;"></p>
-    <button type="button" onclick="cerrarAviso()" style="width:100%; padding:12px; border-radius:var(--r-md); border:none; background:var(--success-strong); color:#fff; font-weight:800; cursor:pointer;">Entendido</button>
+    <button type="button" onclick="cerrarAviso()" class="btn btn-gold" style="width:100%"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button>
   </div>
 </div>
 
 <!-- Modal: invitar al grupo con un enlace (Participantes → Invitar con enlace) -->
 <div class="modal-overlay" id="modal-invitar" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarInvitar()">
-  <div style="background:var(--dark3); width:90%; max-width:360px; padding:24px 20px; border-radius:var(--r-xl); border:1px solid var(--line); box-sizing:border-box;">
+  <div class="ventana">
     <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:rgba(245,200,0,.12); display:flex; align-items:center; justify-content:center; color:var(--gold);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
     <div id="invitarTitulo" style="color:var(--text); font-size:1.25rem; font-weight:800; text-align:center; margin-bottom:6px;"></div>
     <p style="color:var(--text2); font-size:var(--fs-base); text-align:center; line-height:1.45; margin-bottom:16px;">Quien abra el enlace podrá registrarse y unirse. Si ya estaba apuntado, elegirá su nombre y conservará sus gastos.</p>
@@ -7796,8 +7754,8 @@ async function enviarGifChat(btn) {
       <div id="invitarRenovarConfirma" style="display:none; text-align:center;">
         <p style="color:var(--text2); font-size:var(--fs-sm); line-height:1.4; margin:2px 0 10px;">El enlace actual dejará de funcionar. Quien ya está en el grupo no se ve afectado.</p>
         <div style="display:flex; gap:8px;">
-          <button type="button" onclick="cancelarRenovarInvitacion()" style="flex:1; padding:8px; border-radius:var(--r-md); border:1px solid var(--line-strong); background:none; color:var(--text); font-weight:700; font-size:var(--fs-base); cursor:pointer;">Cancelar</button>
-          <button type="button" onclick="renovarInvitacion()" style="flex:1; padding:8px; border-radius:var(--r-md); border:none; background:var(--danger-strong); color:#fff; font-weight:800; font-size:var(--fs-base); cursor:pointer;">Cambiar enlace</button>
+          <button type="button" onclick="cancelarRenovarInvitacion()" class="btn btn-outline" style="flex:1">Cancelar</button>
+          <button type="button" onclick="renovarInvitacion()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Cambiar enlace</button>
         </div>
       </div>
     </div>
@@ -7807,7 +7765,7 @@ async function enviarGifChat(btn) {
 
 <!-- Modal: unirse a un grupo pegando el enlace de invitación -->
 <div class="modal-overlay" id="modal-unirse-enlace" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarUnirseConEnlace()">
-  <div style="background:var(--dark3); width:90%; max-width:360px; padding:24px; border-radius:var(--r-xl); border:1px solid var(--line); box-sizing:border-box;">
+  <div class="ventana">
     <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:rgba(245,200,0,.12); display:flex; align-items:center; justify-content:center;">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F5C800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
     </div>
@@ -7818,19 +7776,19 @@ async function enviarGifChat(btn) {
     </div>
     <div id="unirse-enlace-error" style="display:none; color:var(--danger); font-size:var(--fs-sm); margin-bottom:10px; line-height:1.4;"></div>
     <div style="display:flex; gap:12px; margin-top:6px;">
-      <button onclick="cerrarUnirseConEnlace()" style="flex:1; padding:12px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:1px solid var(--line-strong); color:var(--text); background:none;">Cancelar</button>
-      <button onclick="unirseConEnlace()" style="flex:1; padding:12px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:#000; background:var(--gold);">Unirse</button>
+      <button onclick="cerrarUnirseConEnlace()" class="btn btn-outline" style="flex:1">Cancelar</button>
+      <button onclick="unirseConEnlace()" class="btn btn-gold" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Unirse</button>
     </div>
   </div>
 </div>
 
 <!-- Modal: resultado de unirse a un grupo -->
 <div class="modal-overlay" id="modal-invitacion-resultado" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarResultadoInvitacion()">
-  <div style="background:var(--dark3); width:90%; max-width:340px; padding:26px 22px; border-radius:var(--r-xl); border:1px solid var(--line); text-align:center; box-sizing:border-box;">
+  <div class="ventana" style="text-align:center">
     <div id="inv-res-icono" style="margin-bottom:14px;"></div>
     <div id="inv-res-titulo" style="color:var(--text); font-size:1.35rem; font-weight:700; margin-bottom:10px;"></div>
     <p id="inv-res-texto" style="color:var(--text); font-size:var(--fs-base); margin-bottom:22px; opacity:0.8; line-height:1.45;"></p>
-    <button id="inv-res-ir" onclick="irAlGrupoInvitado()" style="width:100%; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:#000; background:var(--gold);">Ir al grupo</button>
+    <button id="inv-res-ir" onclick="irAlGrupoInvitado()" class="btn btn-gold" style="width:100%">Ir al grupo</button>
     <button id="inv-res-cerrar" onclick="cerrarResultadoInvitacion()">Entendido</button>
   </div>
 </div>
