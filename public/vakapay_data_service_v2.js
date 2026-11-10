@@ -85,7 +85,6 @@ class VakaDataService {
         this.#enqueue(op); // re-encolar si falla
       }
     }
-    console.log('[VakaDataService] Cola sincronizada');
   }
 
   getPendingQueue() { return [...this.#queue]; }

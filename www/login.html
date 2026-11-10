@@ -500,7 +500,6 @@ async function enviarCodigoRecuperacion() {
     try {
         await vakaData.forgotPassword({ email });
 
-        console.log('Código OTP enviado con éxito a:', email);
         
         // AQUÍ APLICAMOS EL ENMASCARAMIENTO
         document.getElementById('codigo-email-destino').textContent = enmascararEmail(email);
@@ -597,7 +596,6 @@ async function verificarCodigo() {
         // Llamada centralizada al servicio para validar el OTP
         await vakaData.verifyResetCode({ email, codigo });
         
-        console.log('Código verificado correctamente para:', email);
         codigoVerificadoTemp = codigo; // Guardamos el código para enviarlo en el paso final
         
         // Limpiamos los campos de la pantalla de nueva contraseña por seguridad
@@ -762,7 +760,6 @@ async function handleRegistro() {
 
     try {
         await vakaData.register(datosUsuario);
-        console.log("✅ Usuario registrado correctamente");
         try {
           await fetch(`https://vakapay-app.vercel.app/api/v1/auth/send-confirmation`, {
             method: 'POST',
@@ -804,7 +801,6 @@ function cerrarModalYEntrar() {
     // 3. Redirigimos a la pantalla de inicio de sesión
     switchPage('page-login-formulario'); 
 
-    console.log("Flujo completado: Campos limpios y usuario redirigido al Login.");
 }
 
 function cerrarModalLoginError() {
@@ -1136,7 +1132,6 @@ async function iniciarSesion() {
     const email = emailInput.value.trim();
     const pass = passInput.value;
 
-    console.log("Intentando conectar con:", email);
 
     try {
         const response = await vakaData.login({ 
@@ -1144,7 +1139,6 @@ async function iniciarSesion() {
             password: pass 
         });
         
-        console.log("✅ Acceso concedido:", response);
         
         if (response && response.token) {
             localStorage.setItem('token', response.token);
