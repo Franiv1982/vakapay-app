@@ -4,20 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vakapay - Acceso</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="tokens.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; }
-        :root { --accent: #FFD700; }
+        :root { --accent: var(--gold); } /* mismo amarillo que la app */
         
         body { 
-			background: #121212; 
-			color: #F2F2F2; 
-			font-family: 'Segoe UI', sans-serif; 
+			background: var(--dark); 
+			color: var(--text); 
+			font-family: var(--font); 
 			margin: 0; 
 			display: flex; 
 			justify-content: center; 
 			align-items: center; 
 			min-height: 100vh; 
-			padding: 15px;
+			padding: 16px;
 			box-sizing: border-box;
 		}
 
@@ -32,8 +34,8 @@
 
         .auth-box {
 			text-align: center;
-			background: #121212;
-			padding: 40px 25px;
+			background: var(--dark);
+			padding: 40px 24px;
 			border-radius: 0;
 			width: 100%;
 			max-width: 100%;
@@ -53,17 +55,17 @@
 			object-fit: cover; 
 			border-radius: 50%; 
 			display: block;
-			margin: 10px auto 15px auto;
+			margin: 10px auto 16px auto;
 			border: 2px solid var(--accent); 
 		}
-        h1 { letter-spacing: 2px; margin: 10px 0; font-weight: bold; font-size: 2rem; }
+        h1 { letter-spacing: 2px; margin: 10px 0; font-weight: 700; font-size: 2rem; }
 		.auth-subtitle { 
-			color: #F2F2F2 !important; 
-			font-size: 0.9rem; 
+			color: var(--text) !important; 
+			font-size: var(--fs-md); 
 			letter-spacing: 1.3px; 
 			text-transform: uppercase; 
 			font-weight: 700; 
-			margin-bottom: 25px;
+			margin-bottom: 24px;
 			display: block; 
 		}
         
@@ -71,27 +73,27 @@
         /* --- BOTONES --- */
         .btn-primary { 
             background: var(--accent); color: black; border: none; padding: 14px; width: 100%; 
-            border-radius: 8px; font-weight: bold; margin-bottom: 12px; cursor: pointer; 
-            transition: 0.3s; font-size: 1.1rem; 
+            border-radius: var(--r-sm); font-weight: 700; margin-bottom: 12px; cursor: pointer; 
+            transition: 0.3s; font-size: var(--fs-lg); 
         }
-        .btn-primary:hover { background: #e6c200; transform: translateY(-1px); }
+        .btn-primary:hover { background: var(--gold-dark); transform: translateY(-1px); }
         .btn-primary:disabled { background: #3a3000; color: #6b5800; border: 1px solid #4a4000; cursor: not-allowed; transform: none; }
 
         .btn-primary.btn-activo { background: var(--accent) !important; color: black !important; border: none !important; cursor: pointer !important; }
         .btn-outline { 
             background: transparent; color: var(--accent); border: 1px solid var(--accent); 
-            padding: 14px; width: 100%; border-radius: 8px; margin-bottom: 5px; 
+            padding: 14px; width: 100%; border-radius: var(--r-sm); margin-bottom: 4px; 
             cursor: pointer; transition: 0.3s; font-size: 1rem; 
         }
-        .btn-outline:hover { background: rgba(255, 215, 0, 0.1); }
+        .btn-outline:hover { background: rgba(245,200,0, 0.1); }
         
-        .separator { margin: 25px 0; color: #F2F2F2; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; }
-        .separator::before, .separator::after { content: ""; flex: 1; height: 1px; background: #333; margin: 0 10px; }
+        .separator { margin: 24px 0; color: var(--text); font-size: var(--fs-base); display: flex; align-items: center; justify-content: center; }
+        .separator::before, .separator::after { content: ""; flex: 1; height: 1px; background: var(--line); margin: 0 10px; }
 
         .btn-google { 
             background: white; color: #444; border: none; padding: 14px; width: 100%; 
-            border-radius: 8px; display: flex; align-items: center; justify-content: center; 
-            gap: 10px; font-weight: bold; cursor: pointer; margin-top: 5px; transition: 0.3s; 
+            border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; 
+            gap: 10px; font-weight: 700; cursor: pointer; margin-top: 4px; transition: 0.3s; 
         }
         .btn-google:hover { background: #f1f1f1; }
         .btn-google img { width: 20px; height: 20px; object-fit: contain; }
@@ -99,10 +101,10 @@
         /* --- FORMULARIOS E INPUTS --- */
 		.auth-input { 
 			width: 100%; 
-			background: #121212; 
-			border: 1px solid #333; 
+			background: var(--dark); 
+			border: 1px solid var(--line); 
 			padding: 14px; 
-			border-radius: 8px; 
+			border-radius: var(--r-sm); 
 			color: #fff; 			
 			margin-bottom: 0 !important; 
 			box-sizing: border-box; 
@@ -115,16 +117,16 @@
 		.input-group {
 			position: relative;
 			width: 100%;
-			margin-bottom: 25px !important; /* Volvemos a un margen amplio */
+			margin-bottom: 24px !important; /* Volvemos a un margen amplio */
 		}
         
 		/* --- SISTEMA DE ERRORES --- */
         .error-message {
 			position: absolute;
 			top: 45px;
-			color: #ff4d4d !important;
-			font-size: 0.65rem !important;
-			font-weight: bold;
+			color: var(--danger) !important;
+			font-size: var(--fs-xs) !important;
+			font-weight: 700;
 			text-align: left;
 			margin-top: 2px; 
 			display: none; 
@@ -136,14 +138,14 @@
 		.error-message.active {
 			visibility: visible;
 		}
-        .auth-input.input-error { border-color: #ff4d4d !important; }
-        .prefix-btn.input-error { border-color: #ff4d4d !important; }
+        .auth-input.input-error { border-color: var(--danger) !important; }
+        .prefix-btn.input-error { border-color: var(--danger) !important; }
 
         /* --- PASSWORD WRAPPER & TOGGLE --- */
 		.password-wrapper {
 			position: relative !important;
 			width: 100%;
-			margin-bottom: 15px;
+			margin-bottom: 16px;
 			display: block;
 		}
 
@@ -160,7 +162,7 @@
 			align-items: center;
 			justify-content: center;
 			cursor: pointer;
-			color: #888;
+			color: var(--muted);
 			z-index: 5;
 		}
 		
@@ -205,7 +207,7 @@
 			border: 1.5px solid rgba(255, 255, 255, 0.2); /* Borde más visible */
 			border-radius: 50%;
 			color: #fff;
-			font-size: 1.2rem;
+			font-size: var(--fs-lg);
 			transition: all 0.3s ease;
 			line-height: 0; /* Evita que el navegador empuje el texto hacia arriba */
 			padding-bottom: 2px; /* Ajuste óptico fino para centrar la flecha ← */
@@ -215,15 +217,15 @@
 			border-color: var(--accent);
 			color: var(--accent);
 			transform: translateX(-4px);
-			background: rgba(255, 215, 0, 0.1);
-			box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+			background: rgba(245,200,0, 0.1);
+			box-shadow: var(--glow-gold);
 		}
 
 		.back-btn:hover .back-circle {
 			border-color: var(--accent);
 			color: var(--accent);
 			transform: translateX(-4px);
-			background: rgba(255, 215, 0, 0.05);
+			background: rgba(245,200,0, 0.05);
 		}
 
 		/* Estilo para el fondo oscuro del modal */
@@ -243,33 +245,33 @@
 
 		/* Estilo para la caja del mensaje */
 		.modal-content {
-			background: #1e1e1e; /* Fondo oscuro acorde a VakaPay */
+			background: var(--dark3); /* Fondo oscuro acorde a VakaPay */
 			padding: 30px;
-			border-radius: 20px;
+			border-radius: var(--r-lg);
 			text-align: center;
 			max-width: 400px;
 			width: 90%;
-			border: 1px solid #333;
-			box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+			border: 1px solid var(--line);
+			box-shadow: var(--shadow-lg);
 			color: white;
 		}
     .phone-row { display:flex; gap:8px; width:100%; }
-    .prefix-btn { display:flex; align-items:center; gap:6px; background:#1a1a1a; border:1px solid #333; border-radius:8px; padding:0 12px; cursor:pointer; white-space:nowrap; color:#F2F2F2; font-size:.9rem; min-width:90px; height:50px; }
-    .prefix-btn:hover { border-color:#FFD700; }
+    .prefix-btn { display:flex; align-items:center; gap:6px; background:var(--card); border:1px solid var(--line); border-radius:var(--r-sm); padding:0 12px; cursor:pointer; white-space:nowrap; color:var(--text); font-size:var(--fs-md); min-width:90px; height:50px; }
+    .prefix-btn:hover { border-color:var(--gold); }
     .phone-input { flex:1; }
     .country-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:9999; align-items:flex-end; justify-content:center; }
     .country-modal.open { display:flex; }
-    .country-sheet { background:#1a1a1a; width:100%; max-width:460px; border-radius:20px 20px 0 0; max-height:75vh; display:flex; flex-direction:column; }
-    .country-search { padding:14px 16px; border-bottom:1px solid #333; }
-    .country-search input { width:100%; background:#121212; border:1px solid #444; border-radius:8px; padding:10px 14px; color:#F2F2F2; font-size:.9rem; box-sizing:border-box; }
+    .country-sheet { background:var(--card); width:100%; max-width:460px; border-radius:20px 20px 0 0; max-height:75vh; display:flex; flex-direction:column; }
+    .country-search { padding:14px 16px; border-bottom:1px solid var(--line); }
+    .country-search input { width:100%; background:var(--dark); border:1px solid var(--line-strong); border-radius:var(--r-sm); padding:10px 14px; color:var(--text); font-size:var(--fs-md); box-sizing:border-box; }
     .country-list { overflow-y:auto; flex:1; }
-    .country-item { display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; border-bottom:1px solid #1e1e1e; }
-    .country-item:hover { background:#222; }
+    .country-item { display:flex; align-items:center; gap:12px; padding:12px 16px; cursor:pointer; border-bottom:1px solid var(--dark3); }
+    .country-item:hover { background:var(--dark4); }
     .country-flag { font-size:1.4rem; }
-    .country-name { flex:1; color:#F2F2F2; font-size:.9rem; }
+    .country-name { flex:1; color:var(--text); font-size:var(--fs-md); }
     .otp-input { width: 46px; text-align: center; font-size: 1.3rem; padding: 12px 0; }
     #enlace-reenviar.deshabilitado { color: #6b5800; pointer-events: none; cursor: not-allowed; opacity: .6; }
-    .country-code { color:#FFD700; font-size:.85rem; font-weight:bold; }
+    .country-code { color:var(--gold); font-size:var(--fs-base); font-weight:700; }
     </style>
 </head>
 <body>
@@ -292,54 +294,54 @@
 	<!-- ═══ PÁGINA: FORMULARIO DE LOGIN ═══ -->
 <div class="page" id="page-login-formulario">
     <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
-        <h2 style="margin:0 0 8px 0; color:#fff; font-size:1.5rem; text-align:center;">Inicia sesión</h2>
+        <h2 style="margin:0 0 8px 0; color:#fff; font-size:var(--fs-xl); text-align:center;">Inicia sesión</h2>
         <p class="auth-sub">Introduce tus credenciales para entrar.</p>
         <div class="auth-form" style="display:flex; flex-direction:column;">
-            <div style="margin-bottom: 15px;">
+            <div style="margin-bottom: 16px;">
                 <input type="email" id="login-email" placeholder="ej: tu.email@gmail.com" class="auth-input" style="margin-bottom:0;" oninput="checkLoginFields()">
             </div>
-            <div class="password-wrapper" style="position: relative; width: 100%; margin-bottom: 15px;">
+            <div class="password-wrapper" style="position: relative; width: 100%; margin-bottom: 16px;">
                 <input type="password" id="login-pass" placeholder="Contraseña" class="auth-input" style="width: 100%; margin-bottom:0;" oninput="checkLoginFields()">
                 <span class="toggle-password" onclick="togglePass('login-pass', this)" 
                       style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; height: 100%;">
                     👁️
                 </span>
             </div>
-            <div style="text-align:right; margin-bottom:15px;">
+            <div style="text-align:right; margin-bottom:16px;">
                 <a onclick="switchPage('page-recuperar-password')" 
-                   style="color:#FFD700; font-size:.82rem; cursor:pointer; opacity:.85;">
+                   style="color:var(--gold); font-size:var(--fs-base); cursor:pointer; opacity:.85;">
                    ¿Olvidaste tu contraseña?
                 </a>
             </div>
         </div>
         <button id="btnEntrar" onclick="iniciarSesion()" class="btn-primary" style="margin-top:10px;background:#3a3000;color:#6b5800;border:1px solid #4a4000;cursor:not-allowed;" disabled>Entrar</button>
-        <button onclick="switchPage('page-login-inicio')" style="background:none;border:1px solid #FFD700;color:#FFD700;font-size:.85rem;margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:8px;display:block;margin-left:auto;margin-right:auto;">Volver al inicio</button>
+        <button onclick="switchPage('page-login-inicio')" style="background:none;border:1px solid var(--gold);color:var(--gold);font-size:var(--fs-base);margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:var(--r-sm);display:block;margin-left:auto;margin-right:auto;">Volver al inicio</button>
     </div></div>
 </div>
 
 <!-- ═══ PÁGINA: RECUPERAR CONTRASEÑA (paso 1: correo) ═══ -->
 <div class="page" id="page-recuperar-password">
     <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
-        <h2 style="margin:0 0 8px 0; color:#fff; font-size:1.5rem; text-align:center;">Restablece tu contraseña</h2>
+        <h2 style="margin:0 0 8px 0; color:#fff; font-size:var(--fs-xl); text-align:center;">Restablece tu contraseña</h2>
         <p class="auth-sub" style="text-align:center;">Para proteger tu información, necesitamos verificar tu correo electrónico.</p>
-        <div class="auth-form" style="display:flex; flex-direction:column; margin-top:15px;">
-            <div style="margin-bottom: 15px;">
+        <div class="auth-form" style="display:flex; flex-direction:column; margin-top:16px;">
+            <div style="margin-bottom: 16px;">
                 <input type="email" id="recuperar-email" placeholder="ej: tu.email@gmail.com" class="auth-input" style="margin-bottom:0;" oninput="checkRecuperarFields()">
             </div>
         </div>
         <button id="btnContinuarRecuperar" onclick="enviarCodigoRecuperacion()" class="btn-primary" style="margin-top:10px;background:#3a3000;color:#6b5800;border:1px solid #4a4000;cursor:not-allowed;" disabled>Continuar</button>
-        <button onclick="switchPage('page-login-formulario')" style="background:none;border:1px solid #FFD700;color:#FFD700;font-size:.85rem;margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:8px;display:block;margin-left:auto;margin-right:auto;">Volver</button>
+        <button onclick="switchPage('page-login-formulario')" style="background:none;border:1px solid var(--gold);color:var(--gold);font-size:var(--fs-base);margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:var(--r-sm);display:block;margin-left:auto;margin-right:auto;">Volver</button>
     </div></div>
 </div>
 
 <!-- ═══ PÁGINA: RECUPERAR CONTRASEÑA (paso 2: código OTP) ═══ -->
 <div class="page" id="page-verificar-codigo">
     <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
-        <h2 style="margin:0 0 8px 0; color:#fff; font-size:1.5rem; text-align:center;">Verifica tu código</h2>
+        <h2 style="margin:0 0 8px 0; color:#fff; font-size:var(--fs-xl); text-align:center;">Verifica tu código</h2>
         <p class="auth-sub" id="codigo-sub-soporte" style="text-align:center; display:none;">Escribe el código de 6 dígitos que te ha facilitado soporte.</p>
-        <p class="auth-sub" id="codigo-sub-correo" style="text-align:center;">Enviamos un código de 6 dígitos a <span id="codigo-email-destino" style="color:#FFD700;font-weight:bold;">tu correo</span></p>
+        <p class="auth-sub" id="codigo-sub-correo" style="text-align:center;">Enviamos un código de 6 dígitos a <span id="codigo-email-destino" style="color:var(--gold);font-weight:700;">tu correo</span></p>
 
-        <div style="display:flex; gap:8px; justify-content:center; margin:25px 0 10px;">
+        <div style="display:flex; gap:8px; justify-content:center; margin:24px 0 10px;">
             <input type="text" maxlength="1" inputmode="numeric" class="auth-input otp-input" id="otp-1" oninput="moverAlSiguiente(this,'otp-2')" onkeydown="moverAlAnterior(event,this,null)">
             <input type="text" maxlength="1" inputmode="numeric" class="auth-input otp-input" id="otp-2" oninput="moverAlSiguiente(this,'otp-3')" onkeydown="moverAlAnterior(event,this,'otp-1')">
             <input type="text" maxlength="1" inputmode="numeric" class="auth-input otp-input" id="otp-3" oninput="moverAlSiguiente(this,'otp-4')" onkeydown="moverAlAnterior(event,this,'otp-2')">
@@ -348,32 +350,32 @@
             <input type="text" maxlength="1" inputmode="numeric" class="auth-input otp-input" id="otp-6" oninput="moverAlSiguiente(this,null)" onkeydown="moverAlAnterior(event,this,'otp-5')">
         </div>
 
-        <div style="text-align:center; margin-bottom:20px; font-size:.85rem;">
-            <span id="contador-reenvio" style="color:#888;">3:00</span>
-            <a id="enlace-reenviar" onclick="reenviarCodigo()" class="deshabilitado" style="color:#FFD700; cursor:pointer; margin-left:6px;">Reenviar código</a>
+        <div style="text-align:center; margin-bottom:20px; font-size:var(--fs-base);">
+            <span id="contador-reenvio" style="color:var(--muted);">3:00</span>
+            <a id="enlace-reenviar" onclick="reenviarCodigo()" class="deshabilitado" style="color:var(--gold); cursor:pointer; margin-left:6px;">Reenviar código</a>
         </div>
 
         <button id="btnVerificarCodigo" onclick="verificarCodigo()" class="btn-primary" style="margin-top:0;background:#3a3000;color:#6b5800;border:1px solid #4a4000;cursor:not-allowed;" disabled>Verificar</button>
-        <button onclick="switchPage('page-recuperar-password')" style="background:none;border:1px solid #FFD700;color:#FFD700;font-size:.85rem;margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:8px;display:block;margin-left:auto;margin-right:auto;">Volver</button>
+        <button onclick="switchPage('page-recuperar-password')" style="background:none;border:1px solid var(--gold);color:var(--gold);font-size:var(--fs-base);margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:var(--r-sm);display:block;margin-left:auto;margin-right:auto;">Volver</button>
     </div></div>
 </div>
 
 <!-- ═══ PÁGINA: NUEVA CONTRASEÑA ═══ -->
 <div class="page" id="page-nueva-password">
     <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
-        <h2 style="margin:0 0 8px 0; color:#fff; font-size:1.5rem; text-align:center;">Restablece tu contraseña</h2>
+        <h2 style="margin:0 0 8px 0; color:#fff; font-size:var(--fs-xl); text-align:center;">Restablece tu contraseña</h2>
         <p class="auth-sub" style="text-align:center;">A continuación crea una contraseña segura.</p>
         
-        <div class="auth-form" style="display:flex; flex-direction:column; margin-top:15px;">
+        <div class="auth-form" style="display:flex; flex-direction:column; margin-top:16px;">
             <div class="input-group">
                 <input type="password" id="new-pass" placeholder="Nueva contraseña (mín. 8 caracteres)" class="auth-input" autocomplete="new-password" oninput="checkNewPassFields()">
                 <span class="toggle-password" onclick="togglePass('new-pass', this)">👁️</span>
                 <div id="new-pass-rules" style="margin-top:8px;text-align:left;display:none;">
-                    <div id="new-rule-len" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Mínimo 8 caracteres</div>
-                    <div id="new-rule-upper" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Una mayúscula</div>
-                    <div id="new-rule-lower" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Una minúscula</div>
-                    <div id="new-rule-num" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Un número</div>
-                    <div id="new-rule-sym" style="font-size:.72rem;color:#ff4d4d;">✗ Un símbolo (!@#$...)</div>
+                    <div id="new-rule-len" style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Mínimo 8 caracteres</div>
+                    <div id="new-rule-upper" style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Una mayúscula</div>
+                    <div id="new-rule-lower" style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Una minúscula</div>
+                    <div id="new-rule-num" style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Un número</div>
+                    <div id="new-rule-sym" style="font-size:var(--fs-sm);color:var(--danger);">✗ Un símbolo (!@#$...)</div>
                 </div>
             </div>
             
@@ -384,13 +386,13 @@
         </div>
 
         <button id="btnGuardarPassword" onclick="guardarNuevaPassword()" class="btn-primary" style="margin-top:10px;background:#3a3000;color:#6b5800;border:1px solid #4a4000;cursor:not-allowed;" disabled>Continuar</button>
-        <button onclick="switchPage('page-verificar-codigo')" style="background:none;border:1px solid #FFD700;color:#FFD700;font-size:.85rem;margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:8px;display:block;margin-left:auto;margin-right:auto;">Volver</button>
+        <button onclick="switchPage('page-verificar-codigo')" style="background:none;border:1px solid var(--gold);color:var(--gold);font-size:var(--fs-base);margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:var(--r-sm);display:block;margin-left:auto;margin-right:auto;">Volver</button>
     </div></div>
 </div>
     <!-- ═══ PÁGINA: REGISTRO ═══ -->
 <div class="page" id="page-registro">
     <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
-        <h2 style="margin:0 0 8px 0; color:#fff; font-size:1.5rem; text-align:center;">Crea tu cuenta</h2>
+        <h2 style="margin:0 0 8px 0; color:#fff; font-size:var(--fs-xl); text-align:center;">Crea tu cuenta</h2>
         <p class="auth-sub">Únete a Vakapay y empieza a dividir gastos.</p>
         <div class="auth-form" style="display:flex; flex-direction:column;">
             <div class="input-group">
@@ -401,7 +403,7 @@
                 <input type="email" id="reg-email" placeholder="ej: tu.email@gmail.com" class="auth-input" autocomplete="email" inputmode="email" oninput="checkRegistroFields()">
                 <span id="err-email" class="error-message"></span>
             </div>
-            <div class="input-group" style="margin-bottom:25px;">
+            <div class="input-group" style="margin-bottom:24px;">
                 <div class="phone-row">
                     <button type="button" class="prefix-btn" onclick="abrirSelectorPais()" id="prefixBtn">
                         <span id="prefixFlag">🌍</span>
@@ -416,11 +418,11 @@
                 <span class="toggle-password" onclick="togglePass('reg-pass', this)">👁️</span>
                 <span id="err-pass" class="error-message"></span>
                 <div id="pass-rules" style="margin-top:8px;text-align:left;display:none;">
-                    <div id="rule-len"  style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Mínimo 8 caracteres</div>
-                    <div id="rule-upper" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Una mayúscula</div>
-                    <div id="rule-lower" style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Una minúscula</div>
-                    <div id="rule-num"  style="font-size:.72rem;color:#ff4d4d;margin-bottom:3px;">✗ Un número</div>
-                    <div id="rule-sym"  style="font-size:.72rem;color:#ff4d4d;">✗ Un símbolo (!@#$...)</div>
+                    <div id="rule-len"  style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Mínimo 8 caracteres</div>
+                    <div id="rule-upper" style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Una mayúscula</div>
+                    <div id="rule-lower" style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Una minúscula</div>
+                    <div id="rule-num"  style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Un número</div>
+                    <div id="rule-sym"  style="font-size:var(--fs-sm);color:var(--danger);">✗ Un símbolo (!@#$...)</div>
                 </div>
             </div>
             <div class="input-group">
@@ -429,7 +431,7 @@
                 <span id="err-pass-confirm" class="error-message"></span>
             </div>
             <button id="btnRegistrarse" class="btn-primary" onclick="handleRegistro()" style="margin-top:10px;background:#3a3000;color:#6b5800;border:1px solid #4a4000;cursor:not-allowed;" disabled>Registrarse</button>
-            <button onclick="safeBack()" style="background:none;border:1px solid #FFD700;color:#FFD700;font-size:.85rem;margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:8px;display:block;margin-left:auto;margin-right:auto;">Volver al inicio</button>
+            <button onclick="safeBack()" style="background:none;border:1px solid var(--gold);color:var(--gold);font-size:var(--fs-base);margin-top:14px;cursor:pointer;opacity:.8;letter-spacing:.4px;padding:8px 24px;border-radius:var(--r-sm);display:block;margin-left:auto;margin-right:auto;">Volver al inicio</button>
         </div>
     </div></div>
 </div>
@@ -831,7 +833,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const check = (id, ok) => {
                 const el = document.getElementById(id);
-                el.style.color = ok ? '#28a745' : '#ff4d4d';
+                el.style.color = ok ? 'var(--success)' : 'var(--danger)';
                 el.textContent = (ok ? '✓ ' : '✗ ') + el.textContent.slice(2);
             };
             check('rule-len',   v.length >= 8);
@@ -884,7 +886,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const check = (id, ok) => {
                 const el = document.getElementById(id);
                 if(el) {
-                    el.style.color = ok ? '#28a745' : '#ff4d4d';
+                    el.style.color = ok ? 'var(--success)' : 'var(--danger)';
                     el.textContent = (ok ? '✓ ' : '✗ ') + el.textContent.slice(2);
                 }
             };
@@ -903,44 +905,44 @@ document.addEventListener('DOMContentLoaded', () => {
 <div id="modal-exito" class="modal-overlay">
     <div class="modal-content">
         <div class="success-icon">
-            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#FFD700" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#F5C800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
         </div>
         <h2>¡Registro completado!</h2>
-        <p>¡Te damos la bienvenida a Vakapay, <span id="user-name-welcome" style="color: #FFD700; font-weight: bold;"></span>. Tu cuenta ha sido creada con éxito.</p>
+        <p>¡Te damos la bienvenida a Vakapay, <span id="user-name-welcome" style="color: var(--gold); font-weight: 700;"></span>. Tu cuenta ha sido creada con éxito.</p>
         <button class="btn-primary" onclick="cerrarModalYEntrar()">Comenzar</button>
     </div>
 </div>
 
 <!-- Modal de Éxito: Contraseña Actualizada -->
 <div id="modal-password-exito" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;">
-    <div class="modal-content" style="background:#1e1e1e;border-radius:20px;padding:30px;max-width:360px;width:90%;text-align:center;border:1px solid #333;">
-        <div style="width:56px;height:56px;margin:0 auto 15px;border-radius:50%;background:rgba(61,186,111,.12);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3DBA6F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-        <h2 style="color:#FFD700; margin-bottom:10px; font-size:1.4rem;">¡Listo!</h2>
-        <p style="color:#F2F2F2; font-size:.9rem; margin-bottom:25px; line-height:1.4;">Tu contraseña fue actualizada con éxito. Recuerda no compartirla con nadie.</p>
+    <div class="modal-content" style="background:var(--dark3);border-radius:var(--r-lg);padding:30px;max-width:360px;width:90%;text-align:center;border:1px solid var(--line);">
+        <div style="width:56px;height:56px;margin:0 auto 16px;border-radius:50%;background:rgba(61,186,111,.12);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#3DBA6F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <h2 style="color:var(--gold); margin-bottom:10px; font-size:1.4rem;">¡Listo!</h2>
+        <p style="color:var(--text); font-size:var(--fs-md); margin-bottom:24px; line-height:1.4;">Tu contraseña fue actualizada con éxito. Recuerda no compartirla con nadie.</p>
         <button onclick="irAlLoginDespuesDeCambio()" class="btn-primary btn-activo" style="width:100%;">Entendido</button>
     </div>
 </div>
 
 <!-- Modal de Confirmación para Salir (LOGIN/REGISTRO) -->
 <div id="modal-confirm-exit" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center;">
-    <div class="modal-content" style="background: #1e1e1e; width: 90%; max-width: 340px; padding: 25px; border-radius: 24px; border: 1px solid #333; text-align: center;">
+    <div class="modal-content" style="background: var(--dark3); width: 90%; max-width: 340px; padding: 24px; border-radius: var(--r-xl); border: 1px solid var(--line); text-align: center;">
         
-        <h2 style="color: #F2F2F2; margin-bottom: 10px; font-size: 1.5rem;">¿Abandonar registro?</h2>
-        <p style="color: #F2F2F2; margin-bottom: 25px; font-size: 0.85rem; opacity: 0.8;">Si vuelves atrás ahora, se borrarán todos los datos que has escrito.</p>
+        <h2 style="color: var(--text); margin-bottom: 10px; font-size: var(--fs-xl);">¿Abandonar registro?</h2>
+        <p style="color: var(--text); margin-bottom: 24px; font-size: var(--fs-base); opacity: 0.8;">Si vuelves atrás ahora, se borrarán todos los datos que has escrito.</p>
         
         <div style="display: flex; gap: 12px; width: 100%; margin-top: 10px;">
             <!-- BOTÓN CANCELAR (VERDE SÓLIDO - LA OPCIÓN SEGURA PARA QUEDARSE) -->
             <button onclick="cerrarModalAbandono()" 
-                style="flex: 1; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; border: none; color: white; background: #28a745; outline: none;">
+                style="flex: 1; padding: 14px; border-radius: var(--r-md); font-weight: 700; cursor: pointer; border: none; color: white; background: var(--success-strong); outline: none;">
                 Cancelar
             </button>
             
             <!-- BOTÓN SÍ, SALIR (ROJO SÓLIDO - LA OPCIÓN QUE BORRA DATOS) -->
             <button onclick="confirmarSalida()" 
-                style="flex: 1; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; border: none; color: white; background: #dc3545; outline: none;">
+                style="flex: 1; padding: 14px; border-radius: var(--r-md); font-weight: 700; cursor: pointer; border: none; color: white; background: var(--danger-strong); outline: none;">
                 Sí, salir
             </button>
         </div>
@@ -949,15 +951,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- Modal Error de Inicio de Sesión -->
 <div id="modal-login-error" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center;">
-        <div style="background: #1e1e1e; width: calc(100% - 48px); max-width: 340px; padding: 28px 22px; border-radius: 24px; border: 1px solid #333; text-align: center;">
+        <div style="background: var(--dark3); width: calc(100% - 48px); max-width: 340px; padding: 28px 22px; border-radius: var(--r-xl); border: 1px solid var(--line); text-align: center;">
         
-        <div style="width:56px;height:56px;margin:0 auto 15px;border-radius:50%;background:rgba(255,77,77,.12);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><line x1="12" y1="15" x2="12" y2="18"/></svg></div>
-        <h2 style="color: #F2F2F2; margin-bottom: 10px; font-size: 1.4rem;">Acceso denegado</h2>
-        <p id="login-error-texto" style="color: #F2F2F2; margin-bottom: 25px; font-size: 0.85rem; opacity: 0.8;">El correo electrónico o la contraseña son incorrectos. Por favor, verifica tus datos e inténtalo de nuevo.</p>
+        <div style="width:56px;height:56px;margin:0 auto 16px;border-radius:50%;background:rgba(255,77,77,.12);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ff4d4d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><line x1="12" y1="15" x2="12" y2="18"/></svg></div>
+        <h2 style="color: var(--text); margin-bottom: 10px; font-size: 1.4rem;">Acceso denegado</h2>
+        <p id="login-error-texto" style="color: var(--text); margin-bottom: 24px; font-size: var(--fs-base); opacity: 0.8;">El correo electrónico o la contraseña son incorrectos. Por favor, verifica tus datos e inténtalo de nuevo.</p>
         
         <!-- BOTÓN ACEPTAR (VERDE SÓLIDO - CONTINUIDAD) -->
         <button onclick="cerrarModalLoginError()" 
-            style="width: 100%; padding: 14px; border-radius: 12px; font-weight: bold; cursor: pointer; border: none; color: white; background: #28a745; outline: none;">
+            style="width: 100%; padding: 14px; border-radius: var(--r-md); font-weight: 700; cursor: pointer; border: none; color: white; background: var(--success-strong); outline: none;">
             Aceptar
         </button>
     </div>
@@ -1172,12 +1174,12 @@ async function iniciarSesion() {
 </script>
 
 <div id="modal-cuenta-existente" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;">
-  <div style="background:#1e1e1e;border-radius:14px;padding:28px 24px;max-width:320px;width:90%;text-align:center;border:1px solid #333;">
+  <div style="background:var(--dark3);border-radius:var(--r-md);padding:28px 24px;max-width:320px;width:90%;text-align:center;border:1px solid var(--line);">
     <div style="width:56px;height:56px;margin:0 auto 12px;border-radius:50%;background:rgba(245,200,0,.12);display:flex;align-items:center;justify-content:center;"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F5C800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="12"/><line x1="19" y1="15" x2="19.01" y2="15"/></svg></div>
-    <div style="font-size:1.1rem;font-weight:bold;color:#F5C800;letter-spacing:1px;margin-bottom:10px;">CUENTA EXISTENTE</div>
-    <p style="color:#F2F2F2;font-size:.88rem;margin-bottom:20px;">Ya existe una cuenta registrada con ese email. Intenta iniciar sesión.</p>
-    <button onclick="document.getElementById('modal-cuenta-existente').style.display='none';switchPage('page-login-formulario')" style="background:#F5C800;color:black;border:none;padding:12px 24px;border-radius:8px;font-weight:bold;cursor:pointer;width:100%;margin-bottom:8px;">Ir a iniciar sesión</button>
-    <button onclick="document.getElementById('modal-cuenta-existente').style.display='none'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:.85rem;">Volver al registro</button>
+    <div style="font-size:var(--fs-lg);font-weight:700;color:var(--gold);letter-spacing:1px;margin-bottom:10px;">CUENTA EXISTENTE</div>
+    <p style="color:var(--text);font-size:var(--fs-base);margin-bottom:20px;">Ya existe una cuenta registrada con ese email. Intenta iniciar sesión.</p>
+    <button onclick="document.getElementById('modal-cuenta-existente').style.display='none';switchPage('page-login-formulario')" style="background:var(--gold);color:black;border:none;padding:12px 24px;border-radius:var(--r-sm);font-weight:700;cursor:pointer;width:100%;margin-bottom:8px;">Ir a iniciar sesión</button>
+    <button onclick="document.getElementById('modal-cuenta-existente').style.display='none'" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:var(--fs-base);">Volver al registro</button>
   </div>
 </div>
 
@@ -1323,12 +1325,12 @@ function validarTelefonoRegistro() {
 
 <!-- Modal de aviso de la app (sustituye a los alert() del sistema) -->
 <div id="modal-aviso-login" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center;" onclick="if(event.target===this)cerrarAvisoLogin()">
-    <div style="background:#1e1e1e; width:calc(100% - 48px); max-width:340px; padding:28px 22px; border-radius:24px; border:1px solid #333; text-align:center;">
-        <div id="aviso-login-icono" style="margin-bottom:15px;"></div>
-        <h2 id="aviso-login-titulo" style="color:#F2F2F2; margin-bottom:10px; font-size:1.4rem;"></h2>
-        <p id="aviso-login-texto" style="color:#F2F2F2; margin-bottom:25px; font-size:0.85rem; opacity:0.8; line-height:1.4;"></p>
-        <button id="aviso-login-accion" style="display:none; width:100%; padding:14px; margin-bottom:10px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:#000; background:#FFD700;"></button>
-        <button id="aviso-login-entendido" onclick="cerrarAvisoLogin()" style="width:100%; padding:14px; border-radius:12px; font-weight:bold; cursor:pointer; border:none; color:#000; background:#FFD700;">Entendido</button>
+    <div style="background:var(--dark3); width:calc(100% - 48px); max-width:340px; padding:28px 22px; border-radius:var(--r-xl); border:1px solid var(--line); text-align:center;">
+        <div id="aviso-login-icono" style="margin-bottom:16px;"></div>
+        <h2 id="aviso-login-titulo" style="color:var(--text); margin-bottom:10px; font-size:1.4rem;"></h2>
+        <p id="aviso-login-texto" style="color:var(--text); margin-bottom:24px; font-size:var(--fs-base); opacity:0.8; line-height:1.4;"></p>
+        <button id="aviso-login-accion" style="display:none; width:100%; padding:14px; margin-bottom:10px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:#000; background:var(--gold);"></button>
+        <button id="aviso-login-entendido" onclick="cerrarAvisoLogin()" style="width:100%; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:#000; background:var(--gold);">Entendido</button>
     </div>
 </div>
 <script>
@@ -1358,10 +1360,10 @@ function mostrarAvisoLogin(titulo, texto, icono, accion) {
         btnAccion.textContent = accion.texto;
         btnAccion.onclick = () => { cerrarAvisoLogin(); accion.fn(); };
         btnAccion.style.display = 'block';
-        btnOk.style.background = 'none'; btnOk.style.color = '#F2F2F2'; btnOk.style.border = '1px solid #444';
+        btnOk.style.background = 'none'; btnOk.style.color = 'var(--text)'; btnOk.style.border = '1px solid #444';
     } else {
         btnAccion.style.display = 'none';
-        btnOk.style.background = '#FFD700'; btnOk.style.color = '#000'; btnOk.style.border = 'none';
+        btnOk.style.background = 'var(--gold)'; btnOk.style.color = '#000'; btnOk.style.border = 'none';
     }
     document.getElementById('aviso-login-icono').innerHTML = iconoModalSvg(icono);
     document.getElementById('aviso-login-titulo').textContent = titulo;
