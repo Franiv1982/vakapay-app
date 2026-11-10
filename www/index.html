@@ -7942,7 +7942,8 @@ body:has(#page-detalle.active) #groupDropdown{left:52px;right:auto;top:calc(var(
 .det-fila{display:flex;align-items:center;gap:6px}
 .det-icono{flex-shrink:0;width:38px;height:38px;border-radius:var(--r-md);border:none;background:transparent;color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer}
 .det-icono:active{background:var(--tint-2)}
-.det-titulo{flex:1;min-width:0;background:none;border:none;text-align:left;cursor:pointer;padding:2px 4px;color:inherit;font:inherit}
+/* Solo ocupa lo que mide la pastilla y sus fechas: el hueco hasta ⋯ ya no cambia de grupo */
+.det-titulo{flex:0 1 auto;margin-right:auto;min-width:0;max-width:100%;background:none;border:none;text-align:left;cursor:pointer;padding:2px 4px;color:inherit;font:inherit}
 /* Nombre del grupo en forma de «pastilla» con flecha: se entiende que se puede tocar para cambiar de grupo */
 .det-titulo .pg-header{display:inline-flex;align-items:center;gap:6px;max-width:100%;margin:0;font-size:var(--fs-md);white-space:nowrap;
   border:1.5px solid var(--gold-line);background:var(--gold-soft);border-radius:var(--r-pill);padding:3px 8px 3px 12px}
