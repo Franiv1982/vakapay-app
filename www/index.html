@@ -543,8 +543,8 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
     </div>
   </div>
   <div id="menuGrupo" class="menu-grupo" style="display:none">
-    <button type="button" onclick="cerrarMenuGrupo();openEditGroupModal(currentGroupIdx)">Editar grupo</button>
-    <button type="button" class="peligro" onclick="cerrarMenuGrupo();openDeleteGroupModal(currentGroupIdx)">Eliminar o salir del grupo</button>
+    <button type="button" id="menuGrupoEditar" onclick="cerrarMenuGrupo();openEditGroupModal(currentGroupIdx)">Editar grupo</button>
+    <button type="button" id="menuGrupoSalir" class="peligro" onclick="cerrarMenuGrupo();openDeleteGroupModal(currentGroupIdx)">Salir del grupo</button>
   </div>
 <main>
 <!-- Lo primero que se ve: tu saldo en este grupo y la acción principal -->
@@ -2580,7 +2580,7 @@ async function deleteGroup(idx) {
     updateStats();
 
     await logActivity(`Saliste del grupo "${g.name}"`);
-    toast('Has salido del grupo', 'i');
+    toast(window._grupoSaliendo ? 'Has salido del grupo' : 'Grupo eliminado', 's');
 
     if (currentGroupIdx === idx) {
       goBack();
@@ -2608,7 +2608,16 @@ function openDeleteGroupModal(idx) {
     
     // Rellenamos el modal con nombre e icono
     document.getElementById('delete-group-name').textContent = g.name;
-    document.getElementById('delete-group-icon').innerHTML = iconoTipo(g.type, 26);  
+    document.getElementById('delete-group-icon').innerHTML = iconoTipo(g.type, 26);
+    // Misma ventana para los dos casos, con el texto y los iconos de lo que de verdad pasa
+    const salir = otrosConCuenta(g) > 0;
+    document.getElementById('del-grupo-titulo').textContent = salir ? '¿Salir del grupo?' : '¿Eliminar grupo?';
+    document.getElementById('del-grupo-texto').textContent = salir
+      ? 'El grupo seguirá existiendo para los demás. Podrán volver a invitarte.'
+      : 'Eres la única persona del grupo: se eliminará con todos sus gastos. Esta acción no se puede deshacer.';
+    document.getElementById('del-grupo-volver').innerHTML = icono(salir ? 'quedarse' : 'deshacer', 15) + ' No, volver';
+    document.getElementById('del-grupo-ok').innerHTML = icono(salir ? 'salir' : 'papelera', 15) + (salir ? ' Sí, salir' : ' Sí, eliminar');
+    window._grupoSaliendo = salir;
     document.getElementById('modal-borrar-grupo').style.display = 'flex';
     document.body.style.overflow = 'hidden';
 }
@@ -3989,8 +3998,21 @@ function irARegistrarGasto() {
   setTimeout(() => document.getElementById('expDesc')?.focus({ preventScroll: true }), 350);
 }
 // Menú «⋯» del grupo (editar / eliminar), que antes estaba en cada tarjeta del inicio
+// Salir o eliminar: si en el grupo hay más personas con cuenta, tú solo sales y el
+// grupo sigue para ellas; si eres la única, el grupo se elimina.
+function otrosConCuenta(g) {
+  return Object.values((g && g.memberIds) || {}).filter(id => String(id) !== String(profile.id)).length;
+}
+function esCreadorDelGrupo(g) {
+  return !!(g && profile.id && g.owner_id && String(profile.id) === String(g.owner_id));
+}
 function abrirMenuGrupo(e) {
   e.stopPropagation();
+  const g = groups[currentGroupIdx];
+  // El menú dice exactamente lo que va a pasar
+  document.getElementById('menuGrupoSalir').textContent = otrosConCuenta(g) ? 'Salir del grupo' : 'Eliminar grupo';
+  // Solo quien creó el grupo puede editarlo (el servidor rechaza a los demás)
+  document.getElementById('menuGrupoEditar').style.display = esCreadorDelGrupo(g) ? '' : 'none';
   const m = document.getElementById('menuGrupo');
   m.style.display = m.style.display === 'none' ? 'block' : 'none';
 }
@@ -6630,22 +6652,19 @@ function cerrarModalSalir() {
 <div class="modal-overlay" id="modal-borrar-grupo" style="display: none;" onclick="if(event.target===this)cerrarModalBorrar()">
   <div class="ventana" style="text-align: center">
     
-    <div style="color: var(--text); font-size: var(--fs-xl); font-weight: 700; margin-bottom: 10px;">¿Borrar grupo?</div>
-    <p style="color: var(--text); font-size: var(--fs-base); margin-bottom: 20px; opacity: 0.8;">Esta acción no se puede deshacer.</p>
+    <div id="del-grupo-titulo" style="color: var(--text); font-size: var(--fs-xl); font-weight: 700; margin-bottom: 10px;">¿Eliminar grupo?</div>
+    <p id="del-grupo-texto" style="color: var(--text2); font-size: var(--fs-base); margin-bottom: 20px; line-height:1.45;">Esta acción no se puede deshacer.</p>
 
     <!-- Contenedor del Info del Grupo -->
     <div style="background: var(--dark4); border-radius: var(--r-lg); padding: 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; justify-content: center;">
-      <div id="delete-group-icon" style="font-size: 1.8rem;"></div>
-      <div id="delete-group-name" style="color: var(--text); font-weight: 800; font-size: 1rem;"></div>
+      <div id="delete-group-icon" style="color: var(--text); display:flex;"></div>
+      <div id="delete-group-name" style="color: var(--text); font-weight: 800; font-size: var(--fs-md);"></div>
     </div>
 
-    <!-- Botones con colores sólidos (Consistencia QA) -->
+    <!-- Volver: contorno (opción segura). Salir/Eliminar: rojo. Texto e iconos los pone openDeleteGroupModal -->
     <div style="display: flex; gap: 12px; width: 100%;">
-      <!-- BOTÓN VOLVER (Verde sólido) -->
-      <button onclick="cerrarModalBorrar()" class="btn btn-outline" style="flex: 1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
-      
-      <!-- BOTÓN BORRAR (Rojo sólido) -->
-      <button onclick="ejecutarBorradoFinal()" class="btn btn-peligro" style="flex: 1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
+      <button type="button" id="del-grupo-volver" onclick="cerrarModalBorrar()" class="btn btn-outline" style="flex: 1">No, volver</button>
+      <button type="button" id="del-grupo-ok" onclick="ejecutarBorradoFinal()" class="btn btn-peligro" style="flex: 1">Sí, eliminar</button>
     </div>
   </div>
 </div>
