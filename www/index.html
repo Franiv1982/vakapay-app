@@ -95,7 +95,7 @@ main{flex:1;max-width:660px;margin:0 auto;padding:18px 14px 90px 14px;position:r
 .field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
 .field label{font-size:var(--fs-xs);font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.9px}
 .field input,.field select,.field textarea{
-  width:100%;background:var(--dark3);border:1.5px solid var(--tint-2);
+  width:100%;min-height:var(--alto-control);background:var(--dark3);border:1.5px solid var(--tint-2);
   border-radius:var(--r-md);padding:10px 12px;color:var(--text);
   font-family:var(--font);font-size:var(--fs-base);font-weight:700;
   outline:none;transition:border-color .2s,box-shadow .2s;
@@ -146,7 +146,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 .type-btn.active .tl{color:var(--gold-text)}
 
 /* ── BUTTONS ── */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:var(--r-md);border:none;font-family:var(--font);font-weight:800;font-size:var(--fs-base);cursor:pointer;transition:transform .14s,filter .14s;letter-spacing:.4px;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:var(--alto-control);padding:10px 16px;border-radius:var(--r-md);border:none;font-family:var(--font);font-weight:800;font-size:var(--fs-base);cursor:pointer;transition:transform .14s,filter .14s;letter-spacing:.4px;white-space:nowrap}
 .btn:active{transform:scale(.95)}
 .btn-gold{background:var(--gold);color:var(--on-gold);box-shadow:var(--glow-gold)}
 @media (hover:hover){.btn-gold:hover{filter:brightness(1.08)}}
@@ -174,7 +174,9 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 .btn svg{flex-shrink:0}
 .btn:disabled{opacity:.5;cursor:not-allowed}
 .btn-green{background:rgba(61,186,111,.1);border:1.5px solid rgba(61,186,111,.28);color:var(--success)}
-.btn-sm{padding:6px 12px;font-size:var(--fs-sm);border-radius:var(--r-sm)}
+.btn-sm{padding:6px 12px;font-size:var(--fs-sm);border-radius:var(--r-sm);min-height:var(--alto-sm)}
+.btn-whatsapp{background:color-mix(in srgb,var(--whatsapp) 12%,transparent);border:1.5px solid var(--whatsapp);color:var(--whatsapp)}
+.btn-metodo{flex:1;font-size:var(--fs-sm);padding:8px 6px;gap:6px}
 .btn-full{width:100%}
 
 /* ── ADD-ROW ── */
@@ -205,7 +207,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 /* ── Estadisticas ── */
 .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
 .stat-box{background:var(--dark3);border-radius:var(--r-md);padding:12px;border:1px solid var(--border);text-align:center}
-.stat-v{font-family:var(--font-display);font-size:1.65rem;color:var(--gold-text);letter-spacing:1px;line-height:1}
+.stat-v{font-family:var(--font-display);font-size:var(--fs-xl);color:var(--gold-text);letter-spacing:1px;line-height:1}
 .stat-l{font-size:var(--fs-2xs);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-top:4px}
 
 /* ── BALANCE ── */
@@ -220,7 +222,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 .debt-item{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--dark3);border-radius:var(--r-md);margin-bottom:8px;border-left:3px solid var(--gold)}
 .debt-txt{flex:1;font-size:var(--fs-base);font-weight:700}
 .debt-txt em{color:var(--gold-text);font-style:normal}
-.debt-amt{font-family:var(--font-display);font-size:1rem;color:var(--gold-light);white-space:nowrap}
+.debt-amt{font-family:var(--font-display);font-size:var(--fs-md);color:var(--gold-light);white-space:nowrap}
 .all-good{text-align:center;padding:14px;color:var(--success);font-weight:800;font-size:var(--fs-base)}
 
 /* ── SHARE ── */
@@ -317,7 +319,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 .avatar-edit{position:absolute;bottom:2px;right:2px;width:26px;height:26px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:var(--fs-base);border:2px solid var(--dark);transition:filter .15s}
 @media (hover:hover){.avatar-edit:hover{filter:brightness(1.1)}}
 #avatarFile{display:none}
-.profile-name{font-family:var(--font-display);font-size:1.6rem;letter-spacing:2px;color:var(--gold-text);text-align:center;line-height:1}
+.profile-name{font-family:var(--font-display);font-size:var(--fs-xl);letter-spacing:2px;color:var(--gold-text);text-align:center;line-height:1}
 .profile-email{font-size:var(--fs-sm);color:var(--muted);text-align:center}
 
 /* ── FRIENDS LIST ── */
@@ -338,7 +340,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 .act-time{font-size:var(--fs-xs);color:var(--muted);white-space:nowrap;margin-top:2px}
 
 /* ── PAGE HEADER ── */
-.pg-header{font-family:var(--font-display);font-size:1.6rem;letter-spacing:2.5px;color:var(--gold-text);margin-bottom:4px}
+.pg-header{font-family:var(--font-display);font-size:var(--fs-xl);letter-spacing:2.5px;color:var(--gold-text);margin-bottom:4px}
 .pg-sub{font-size:var(--fs-sm);color:var(--muted);margin-bottom:18px}
 
 /* ── TOAST ── */
@@ -390,7 +392,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 .donut-wrap{position:relative;display:flex;justify-content:center;align-items:center;margin:10px 0}
 .donut-svg{overflow:visible}
 .donut-label{position:absolute;text-align:center;pointer-events:none}
-.donut-label .dv{font-family:var(--font-display);font-size:1.4rem;color:var(--gold-text);line-height:1}
+.donut-label .dv{font-family:var(--font-display);font-size:var(--fs-xl);color:var(--gold-text);line-height:1}
 .donut-label .dl{font-size:var(--fs-2xs);color:var(--muted);font-weight:700;text-transform:uppercase}
 .legend-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:var(--fs-sm);font-weight:700;border-bottom:1px solid var(--tint-1)}
 .legend-item:last-child{border:none}
@@ -577,20 +579,20 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
       Añadir participante
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <button onclick="toggleFriendPicker()" style="flex:1;background:var(--dark3);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px;color:var(--text);font-size:var(--fs-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+      <button type="button" class="btn btn-outline btn-metodo" onclick="toggleFriendPicker()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Mis amigos
       </button>
-      <button onclick="addFromContacts()" id="btnContacts" style="flex:1;background:var(--dark3);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px;color:var(--text);font-size:var(--fs-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+      <button type="button" class="btn btn-outline btn-metodo" onclick="addFromContacts()" id="btnContacts">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Contactos
       </button>
-      <button onclick="toggleManualAdd()" style="flex:1;background:var(--dark3);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px;color:var(--text);font-size:var(--fs-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">
+      <button type="button" class="btn btn-outline btn-metodo" onclick="toggleManualAdd()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Manual
       </button>
     </div>
-    <button type="button" onclick="abrirInvitar()" style="width:100%;margin:0 0 10px;background:rgba(245,200,0,.1);border:1px solid rgba(245,200,0,.45);border-radius:var(--r-sm);padding:12px;color:var(--gold-text);font-size:var(--fs-base);font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:var(--font);"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Invitar con enlace</button>
+    <button type="button" class="btn btn-outline btn-full" style="margin:0 0 10px" onclick="abrirInvitar()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Invitar con enlace</button>
 
     <!-- Panel amigos -->
     <div id="friendPickerWrap" style="display:none;margin-bottom:10px;">
@@ -670,7 +672,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
       <div style="display:flex;align-items:center;justify-content:center;position:relative;">
         <button type="button" id="ocrBtn" onclick="toggleOcrPopover()"
           title="Adjuntar ticket"
-          style="position:relative;width:100%;background:rgba(245,200,0,.1);border:1px solid rgba(245,200,0,.3);border-radius:var(--r-md);padding:10px;cursor:pointer;color:var(--gold-text);transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px;">
+          style="position:relative;width:100%;min-height:var(--alto-control);background:rgba(245,200,0,.1);border:1px solid rgba(245,200,0,.3);border-radius:var(--r-md);padding:10px;cursor:pointer;color:var(--gold-text);transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
           <span style="font-size:var(--fs-sm);font-weight:700;">Adjuntar</span>
           <span id="ocrDot" style="display:none;position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--success);border-radius:50%;border:1.5px solid var(--dark);"></span>
@@ -777,10 +779,10 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   <div class="card">
     <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px">Resumen de cuentas</div>
     <div id="resumenVista" style="background:var(--dark2);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px;color:var(--text2);font-size:var(--fs-sm);line-height:1.5;margin-bottom:14px;white-space:pre-line;max-height:180px;overflow:auto;"></div>
-    <button type="button" onclick="compartirResumen()" style="width:100%;padding:12px;border-radius:var(--r-md);border:none;background:var(--gold);color:#000;font-weight:800;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;cursor:pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Compartir resumen</button>
+    <button type="button" class="btn btn-gold btn-full" style="margin-bottom:10px" onclick="compartirResumen()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Compartir resumen</button>
     <div style="display:flex;gap:10px">
-      <button type="button" onclick="abrirWhatsApp(textoResumen())" style="flex:1;padding:12px;border-radius:var(--r-md);border:1px solid var(--whatsapp);background:rgba(37,211,102,.1);color:var(--whatsapp);font-weight:800;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.6-1.3a.4.4 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg> WhatsApp</button>
-      <button type="button" onclick="exportarPDF()" style="flex:1;padding:12px;border-radius:var(--r-md);border:1px solid var(--line-strong);background:none;color:var(--text);font-weight:800;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PDF</button>
+      <button type="button" class="btn btn-whatsapp" style="flex:1" onclick="abrirWhatsApp(textoResumen())"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.6-1.3a.4.4 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg> WhatsApp</button>
+      <button type="button" class="btn btn-outline" style="flex:1" onclick="exportarPDF()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PDF</button>
     </div>
   </div>
 </div>
@@ -1202,7 +1204,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
     caja.innerHTML = `<div style="background:var(--dark3);border:1px solid var(--line);border-radius:var(--r-xl);padding:26px 22px;max-width:340px;width:100%;text-align:center;">
         <div style="width:56px;height:56px;margin:0 auto 14px;border-radius:50%;background:rgba(255,77,77,.12);display:flex;align-items:center;justify-content:center;">
           <svg style="color:var(--danger)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-        <div style="color:var(--text);font-size:1.3rem;font-weight:800;margin-bottom:10px;"></div>
+        <div style="color:var(--text);font-size:var(--fs-lg);font-weight:800;margin-bottom:10px;"></div>
         <p style="color:var(--text);opacity:.8;font-size:var(--fs-base);line-height:1.45;margin-bottom:22px;"></p>
         <button class="btn btn-gold" style="width:100%"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button></div>`;
     caja.querySelector('div > div:nth-child(2)').textContent = titulo;
@@ -2438,7 +2440,7 @@ function openGasto(idx, origen) {
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
       <div class="card" style="padding:12px;text-align:center;">
-        <div style="font-size:1.3rem;font-weight:800;color:var(--gold-text);">${displaySym}${Number(e.amount).toFixed(2)}</div>
+        <div style="font-size:var(--fs-xl);font-weight:800;color:var(--gold-text);">${displaySym}${Number(e.amount).toFixed(2)}</div>
         <div style="font-size:var(--fs-2xs);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Monto</div>
         ${e.currency !== base ? `<div style="font-size:var(--fs-xs);color:var(--muted);">≈ ${sym}${Number(e.baseAmt).toFixed(2)}</div>` : ''}
       </div>
@@ -6770,7 +6772,7 @@ function cerrarModalSalir() {
 <div class="modal-overlay" id="modal-salir-app" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalSalir()">
   <div class="ventana" style="text-align:center">
     <div style="width:56px;height:56px;margin:0 auto 10px;border-radius:50%;background:rgba(245,200,0,.12);display:flex;align-items:center;justify-content:center;"><svg style="color:var(--gold-text)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
-    <div style="color:var(--text); font-size:1.3rem; font-weight:700; margin-bottom:20px;">¿Deseas salir?</div>
+    <div style="color:var(--text); font-size:var(--fs-lg); font-weight:700; margin-bottom:20px;">¿Deseas salir?</div>
     
     <div style="display:flex; gap:12px; width:100%;">
       <button onclick="cerrarModalSalir()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
@@ -7489,7 +7491,7 @@ function verReaccionesChat(id) {
 }
 function confirmarBorrarChat(id) {
   cerrarMenuChat();
-  abrirDialogoChat(`<div style="color:var(--text);font-size:1.3rem;font-weight:700;margin-bottom:8px;">¿Borrar mensaje?</div>
+  abrirDialogoChat(`<div style="color:var(--text);font-size:var(--fs-lg);font-weight:700;margin-bottom:8px;">¿Borrar mensaje?</div>
     <p style="color:var(--text);font-size:var(--fs-base);opacity:.8;margin-bottom:20px;">Se mostrará como «Mensaje eliminado» para todo el grupo.</p>
     <div style="display:flex;gap:12px;">
       <button onclick="cerrarDialogoChat()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
@@ -7893,7 +7895,7 @@ async function enviarGifChat(btn) {
     <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:rgba(245,200,0,.12); display:flex; align-items:center; justify-content:center;">
       <svg style="color:var(--gold-text)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
     </div>
-    <div style="color:var(--text); font-size:1.3rem; font-weight:700; margin-bottom:8px; text-align:center;">Unirse a un grupo</div>
+    <div style="color:var(--text); font-size:var(--fs-lg); font-weight:700; margin-bottom:8px; text-align:center;">Unirse a un grupo</div>
     <p style="color:var(--text); font-size:var(--fs-base); margin-bottom:16px; opacity:0.8; text-align:center; line-height:1.4;">Copia el enlace de invitación que te enviaron (por WhatsApp, email…) y pégalo en el campo.</p>
     <div class="field" style="margin-bottom:10px;">
       <input type="text" id="unirse-enlace-input" placeholder="https://vakapay-app.vercel.app/login.html?invite=…" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="document.getElementById('unirse-enlace-error').style.display='none'" onkeydown="if(event.key==='Enter')unirseConEnlace()">
