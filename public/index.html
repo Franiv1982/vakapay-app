@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VakaPay - Calculadora de Gastos</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="tokens.css">
@@ -28,6 +28,7 @@
 })();
 </script>
 <script src="iconos.js"></script>
+<script src="accesible.js"></script>
 <style>
 /* Colores, tipografía, radios, sombras y espaciados: tokens.css */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -439,7 +440,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   
 </header>
 
-<div class="hbadge" id="hbadge" onclick="toggleGroupDropdown()"></div>
+<div class="hbadge" id="hbadge" onclick="toggleGroupDropdown()" data-controla="groupDropdown"></div>
 <div id="groupDropdown">
   <div id="groupDropdownList"></div>
   <div class="gdrop-divider"></div>
@@ -459,7 +460,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
     </div>
   </div>
 <main>
-  <div class="sec-title" onclick="toggleGroupsList()" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between">
+  <div class="sec-title" onclick="toggleGroupsList()" data-controla="groupsListWrap" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">1</div>
     <h2>Mis grupos</h2>
@@ -516,7 +517,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
       <!-- Una sola línea: volver, nombre del grupo (toca para cambiar de grupo) y menú del grupo -->
       <div class="det-fila">
         <button type="button" class="det-icono" onclick="goBack()" title="Volver a mis grupos" aria-label="Volver"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <button type="button" class="det-titulo" onclick="toggleGroupDropdown()" title="Cambiar de grupo">
+        <button type="button" class="det-titulo" onclick="toggleGroupDropdown()" data-controla="groupDropdown" title="Cambiar de grupo">
           <span class="pg-header" id="detTitle"></span>
           <span id="detMeta"></span>
         </button>
@@ -535,7 +536,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 <div class="det-col det-col-a">
 
   <!-- Participants -->
-  <div class="sec-title" id="sec2" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleParticipantesSection()">
+  <div class="sec-title" id="sec2" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleParticipantesSection()" data-controla="participantesSectionWrap">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">2</div>
     <h2>Participantes</h2>
@@ -547,7 +548,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   <div class="card">
 
     <!-- En este grupo - desplegable -->
-    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:8px;" onclick="toggleMemberList()">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:8px;" onclick="toggleMemberList()" data-controla="memberListWrap">
       <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
         En este grupo <span id="memberCount" style="color:var(--gold-text);margin-left:4px;"></span>
@@ -601,7 +602,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 </div>
 
   <!-- Registrar Gasto -->
-<div class="sec-title" id="sec3" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleGastoSection()">
+<div class="sec-title" id="sec3" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleGastoSection()" data-controla="gastoSectionWrap">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">3</div>
     <h2>Registrar gasto</h2>
@@ -668,7 +669,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
         <!-- Popover -->
         <div id="ocrPopover" style="display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:8000;background:var(--dark3);border:1px solid var(--border);border-radius:var(--r-md);padding:10px;width:220px;max-width:calc(100vw - 32px);box-sizing:border-box;box-shadow:var(--shadow);">
           <div style="display:flex;align-items:center;gap:8px;">
-            <img id="ocrPreview" style="width:36px;height:36px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border);flex-shrink:0;">
+            <img id="ocrPreview" alt="Foto del ticket" style="width:36px;height:36px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border);flex-shrink:0;">
             <div style="flex:1;min-width:0;">
               <div id="ocrFileName" style="color:var(--text);font-size:var(--fs-xs);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
               <div id="ocrLoading" style="display:none;color:var(--gold-text);font-size:var(--fs-2xs);"><span class="ocr-spinner" style="display:inline-block;width:10px;height:10px;vertical-align:-1px;"></span> Extrayendo...</div>
@@ -700,7 +701,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 </div>
 
   <!-- Expense list -->
-  <div class="sec-title" id="sec4" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleGastosListSection()">
+  <div class="sec-title" id="sec4" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleGastosListSection()" data-controla="gastosListSectionWrap">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">4</div>
     <h2>Lista de gastos</h2>
@@ -721,7 +722,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 </div><!-- /det-col-a -->
 <div class="det-col det-col-b">
   <!-- Settlement -->
-  <div class="sec-title" id="sec5" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleCuentasSection()">
+  <div class="sec-title" id="sec5" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleCuentasSection()" data-controla="cuentasSectionWrap">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">5</div>
     <h2>Cuentas finales</h2>
@@ -741,7 +742,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 </div>
 
   <!-- Share -->
-  <div class="sec-title" id="secPagos" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="togglePagosSection()">
+  <div class="sec-title" id="secPagos" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="togglePagosSection()" data-controla="pagosSectionWrap">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">6</div>
     <h2>Pagos realizados</h2>
@@ -755,7 +756,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   </div>
 </div>
 
-  <div class="sec-title" id="sec6" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleResumenSection()">
+  <div class="sec-title" id="sec6" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleResumenSection()" data-controla="resumenSectionWrap">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">7</div>
     <h2>Compartir resumen</h2>
@@ -778,7 +779,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">8</div>
     <h2>Chat del grupo</h2>
-    <span id="chatBadge" style="display:none;background:var(--danger);color:#fff;font-size:var(--fs-xs);font-weight:900;border-radius:var(--r-md);padding:2px 8px;margin-left:2px;"></span>
+    <span id="chatBadge" style="display:none;background:var(--danger-strong);color:#fff;font-size:var(--fs-xs);font-weight:900;border-radius:var(--r-md);padding:2px 8px;margin-left:2px;"></span>
   </div>
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
 </div>
@@ -1025,7 +1026,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
           <div id="editOcrLoading" style="display:none;color:var(--gold-text);font-size:var(--fs-2xs);"><span class="ocr-spinner" style="display:inline-block;width:10px;height:10px;vertical-align:-1px;"></span> Extrayendo...</div>
           <div id="editOcrSuccess" style="display:none;color:var(--success);font-size:var(--fs-2xs);"><svg class="icono" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Extraído</div>
         </div>
-        <img id="editOcrPreview" style="display:none;width:32px;height:32px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border);flex-shrink:0;">
+        <img id="editOcrPreview" alt="Foto del ticket" style="display:none;width:32px;height:32px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border);flex-shrink:0;">
         <button onclick="clearEditOCR()" id="editOcrClearBtn" style="display:none;background:none;border:none;color:var(--muted);cursor:pointer;font-size:var(--fs-sm);flex-shrink:0;padding:2px 4px;border:1px solid var(--border);border-radius:var(--r-sm);" title="Quitar"><svg class="icono" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
     </div>
@@ -1163,7 +1164,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   <button class="nav-btn" data-page="page-cuenta" onclick="switchPage('page-cuenta',this)">
     <!-- Contenedor circular para la foto o inicial -->
     <div id="user-nav-wrapper" style="width: 28px; height: 28px; border-radius: 50%; overflow: hidden; border: 1.5px solid currentColor; margin: 0 auto 4px auto; display: flex; align-items: center; justify-content: center; background: var(--tint-2);">
-        <img id="user-nav-photo" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;" onerror="this.style.display='none';document.getElementById('user-nav-initials').style.display='block';">
+        <img id="user-nav-photo" alt="" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;" onerror="this.style.display='none';document.getElementById('user-nav-initials').style.display='block';">
         <span id="user-nav-initials" style="font-size: var(--fs-base); font-weight: 700; line-height: 1;">
             <svg class="icono" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </span>
@@ -1172,7 +1173,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 </button>
 </nav>
 
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script src="jspdf.umd.min.js"></script>
 <script src="libphonenumber-min.js"></script>
@@ -2413,7 +2414,7 @@ function openGasto(idx, origen) {
 
   const ticketHTML = e.ticket ? `
     <div style="margin-top:12px;">
-      <img src="${e.ticket}" style="width:100%;max-height:200px;object-fit:contain;border-radius:var(--r-md);border:1px solid var(--border);">
+      <img src="${e.ticket}" alt="Foto del ticket" style="width:100%;max-height:200px;object-fit:contain;border-radius:var(--r-md);border:1px solid var(--border);">
       <button onclick="downloadTicket(${idx})" class="btn btn-outline btn-full" style="margin-top:8px;color:var(--gold-text);border-color:var(--gold);">
         <svg class="icono" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar comprobante
       </button>
@@ -2477,7 +2478,7 @@ ${e.es_pago ? `
           ${tieneTicket ? `<div style="font-size:var(--fs-2xs);color:var(--success);">${icono('ok',12)} Guardado</div>` : ''}
         </div>
         ${tieneTicket ? `
-          <img id="gastoTicketThumb" src="${e.ticket || ''}" style="width:40px;height:40px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border);flex-shrink:0;cursor:pointer;background:var(--dark4);" onclick="verTicket(${idx})" title="Ver comprobante">
+          <img id="gastoTicketThumb" alt="Ver ticket" src="${e.ticket || ''}" style="width:40px;height:40px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border);flex-shrink:0;cursor:pointer;background:var(--dark4);" onclick="verTicket(${idx})" title="Ver comprobante">
           ${puede ? `<button onclick="removeGastoTicket(${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:var(--fs-sm);flex-shrink:0;padding:2px 4px;border:1px solid var(--border);border-radius:var(--r-sm);" title="Quitar comprobante" aria-label="Quitar comprobante">${icono('cerrar',12)}</button>` : ''}
         ` : ''}
       </div>
@@ -4133,14 +4134,14 @@ function renderMembers() {
   ? '<span style="color:var(--muted);font-size:var(--fs-sm)">Sin participantes aún...</span>'
   : mbs.map(m => {
     const isOwner = profile.id && g.owner_id && profile.id === g.owner_id;
-    const editBtn = isOwner ? `<span class="chip-edit" onclick="event.stopPropagation();openRenameMember('${m}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>` : '';
+    const editBtn = isOwner ? `<span class="chip-edit" aria-label="Cambiar el nombre de ${m}" onclick="event.stopPropagation();openRenameMember('${m}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>` : '';
 
     // Sin importes: el saldo de cada uno está en «Cuentas finales»
     return `<div class="chip" data-name="${m}">
               <div class="av">${m[0].toUpperCase()}</div>
               ${m}
               ${editBtn}
-              <span class="chip-x" onclick="event.stopPropagation();removeMember('${m}')">${icono('cerrar',11)}</span>
+              <span class="chip-x" aria-label="Quitar a ${m}" onclick="event.stopPropagation();removeMember('${m}')">${icono('cerrar',11)}</span>
             </div>`;
   }).join('');
   
@@ -4893,7 +4894,7 @@ function renderFriends(){
   el.innerHTML=friends.map((f,i)=>{
     const inGroups=groups.filter(g=>g.members.hasOwnProperty(f.name)).map(g=>iconoTipo(g.type, 12)+' '+escaparHtml(g.name));
     const avatarContent=f.avatar
-      ?`<img src="${f.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
+      ?`<img src="${f.avatar}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
       :`<span style="font-size:var(--fs-md);font-weight:900;color:var(--gold-text)">${f.name[0].toUpperCase()}</span>`;
     return`<div class="friend-item">
       <div class="fi-av">${avatarContent}</div>
@@ -4929,7 +4930,7 @@ function openFriendModal(idx){
   document.getElementById('editFriendNotes').value=f.notes||'';
   document.getElementById('friendModalTitle').innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar: '+f.name;
   const av=document.getElementById('friendModalAvatar');
-  av.innerHTML=f.avatar?`<img src="${f.avatar}" style="width:100%;height:100%;object-fit:cover">`:f.name[0].toUpperCase();
+  av.innerHTML=f.avatar?`<img src="${f.avatar}" alt="" style="width:100%;height:100%;object-fit:cover">`:f.name[0].toUpperCase();
   const gc=document.getElementById('editFriendGroups');
   if(groups.length===0){gc.innerHTML='<span style="color:var(--muted);font-size:var(--fs-sm)">No hay grupos creados aún</span>';}
   else{gc.innerHTML=groups.map((g,gi)=>{
@@ -5095,7 +5096,7 @@ function handleFriendAvatarChange(ev){
       canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
       canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
       const data=canvas.toDataURL('image/jpeg',0.8);
-      document.getElementById('friendModalAvatar').innerHTML=`<img src="${data}" style="width:100%;height:100%;object-fit:cover">`;
+      document.getElementById('friendModalAvatar').innerHTML=`<img src="${data}" alt="" style="width:100%;height:100%;object-fit:cover">`;
       if(editingFriendIdx!==null)friends[editingFriendIdx]._tmpAvatar=data;
     };
     img.src=e.target.result;
@@ -5307,7 +5308,7 @@ function renderActivity() {
     const id = 'actDay_' + idx;
     const isHoy = fecha === 'Hoy';
     return `
-    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin:14px 0 6px 0;" onclick="toggleActDay('${id}')">
+    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin:14px 0 6px 0;" onclick="toggleActDay('${id}')" data-controla="${id}">
       <div style="font-size:var(--fs-xs);color:var(--gold-text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;">${fecha} <span style="color:var(--muted);font-weight:400">(${items.length})</span></div>
       <svg id="${id}_chv" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;transform:${isHoy ? 'rotate(180deg)' : ''}"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
@@ -6463,7 +6464,7 @@ function cerrarModalSalir() {
       <input type="file" id="pmProofFile" accept="image/*" onchange="handleProofUpload(event)">
       <span style="flex-shrink:0;color:var(--text2);display:flex"><svg class="icono" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></span>
       <div style="font-size:var(--fs-sm);color:var(--muted);font-weight:700">Subir captura de pago</div>
-      <img id="pmProofThumb" class="proof-thumb" style="max-height:32px;margin-left:auto">
+      <img id="pmProofThumb" alt="Justificante del pago" class="proof-thumb" style="max-height:32px;margin-left:auto">
     </div>
     <div style="display:flex;gap:8px;margin-top:12px">
       <button class="btn btn-outline" onclick="closePayModal()" style="flex:1;font-size:var(--fs-sm)">Cancelar</button>
@@ -6495,7 +6496,7 @@ function cerrarModalSalir() {
       <span style="color:var(--text2);display:flex;justify-content:center"><svg class="icono" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg></span>
       <div style="font-size:var(--fs-sm);color:var(--muted);margin-top:4px;font-weight:700">Sube la captura del pago</div>
       <div style="font-size:var(--fs-2xs);color:var(--muted2);margin-top:2px">Bizum, transferencia, screenshot…</div>
-      <img id="proofThumbView" class="proof-thumb" style="max-height:80px;">
+      <img id="proofThumbView" alt="Justificante del pago" class="proof-thumb" style="max-height:80px;">
     </div>
     <div style="margin-top:8px;">
       <button class="btn btn-gold btn-full" onclick="sendProof(true)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Confirmar cobro</button>
@@ -7089,7 +7090,7 @@ function tocarBotonGrupos(btn) {
       <button type="button" onclick="cerrarGifChat()" title="Cerrar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div id="chatGifChips"></div>
-    <div id="chatGifCuerpo"><div id="chatGifRejilla"></div><div id="chatGifAviso"></div></div>
+    <div id="chatGifCuerpo"><div id="chatGifRejilla"></div><div id="chatGifAviso" aria-live="polite"></div></div>
     <div class="giphy">POWERED BY GIPHY</div>
   </div>
   <div id="chatDialogo" onclick="if(event.target===this)cerrarDialogoChat()"><div class="caja" id="chatDialogoCaja"></div></div>
@@ -7879,7 +7880,7 @@ body:has(#page-detalle.active) .hbadge{display:none !important}
 .gc-saldo b{font-family:var(--font-display);font-size:var(--fs-lg);letter-spacing:.5px;font-weight:400}
 .gc-flecha{color:var(--muted2);flex-shrink:0}
 /* Enlaces de acciones peligrosas: visibles pero discretos */
-.enlace-peligro{background:none;border:none;color:#b55;font-size:var(--fs-sm);font-weight:700;text-decoration:underline;cursor:pointer;padding:4px}
+.enlace-peligro{background:none;border:none;color:var(--danger);font-size:var(--fs-sm);font-weight:700;text-decoration:underline;cursor:pointer;padding:4px}
 </style>
 <style id="estilos-adaptables">
 /* ════════════════════════════════════════════════════════════════════

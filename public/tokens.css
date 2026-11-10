@@ -29,13 +29,13 @@
   /* ── Texto ── */
   --text:        #F2F2F2;                 /* texto principal */
   --text2:       #BBBBBB;                 /* texto secundario */
-  --muted:       #888888;                 /* texto apagado (contraste AA sobre las superficies) */
+  --muted:       #939393;                 /* texto apagado (contraste AA sobre todas las superficies) */
   --muted2:      #555555;                 /* deshabilitado */
 
   /* ── Estados ── */
   --success:        #3DBA6F;              /* importes positivos, «te deben» */
   --success-strong: #28A745;              /* botones verdes con texto blanco */
-  --danger:         #FF4D4D;              /* importes negativos, errores */
+  --danger:         #FF6363;              /* importes negativos, errores */
   --danger-strong:  #DC3545;              /* botones rojos con texto blanco */
   --info:           #4DA6FF;
   --whatsapp:       #25D366;              /* solo para el botón de WhatsApp */
@@ -88,8 +88,8 @@
    (Cuenta → Apariencia: Automático / Oscuro / Claro)
    ================================================================ */
 :root[data-theme="light"] {
-  --gold-text:  #8A6A00;                  /* dorado oscuro: legible sobre blanco */
-  --gold-light: #8A6A00;                  /* como texto, también dorado oscuro */
+  --gold-text:  #7D6000;                  /* dorado oscuro: legible sobre blanco y sobre fondos dorados */
+  --gold-light: #7D6000;                  /* como texto, también dorado oscuro */
   --gold-soft:  rgba(245,200,0,.18);
   --gold-line:  rgba(176,138,0,.45);
   --border:     rgba(176,138,0,.22);
@@ -99,7 +99,7 @@
 
   --text:  #1C1B19;  --text2: #55524C;  --muted: #6F6B63;  --muted2: #A8A39A;
 
-  --success: #1E8E4E;  --danger: #D93636;
+  --success: #1A7F45;  --danger: #C62828;  --danger-strong: #C62828;
 
   --shadow-sm: 0 1px 4px rgba(0,0,0,.08);
   --shadow-md: 0 6px 18px rgba(0,0,0,.10);
@@ -112,3 +112,18 @@
   color-scheme: light;
 }
 :root:not([data-theme="light"]) { color-scheme: dark; }
+
+/* ================================================================
+   Accesibilidad
+   ================================================================ */
+/* Foco visible al moverse con teclado (no aparece al tocar con el dedo) */
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+[role="dialog"]:focus, [role="dialog"]:focus-visible { outline: none; }
+
+/* «Reducir animaciones» activado en el móvil: sin movimientos */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important; scroll-behavior: auto !important;
+  }
+}
