@@ -6267,7 +6267,6 @@ function renderStats() {
         <p style="color:var(--text);">${groups.length
           ? 'Abre uno de tus grupos y vuelve aquí para ver en qué se va el dinero.'
           : 'Cuando crees un grupo y apuntes gastos, aquí verás en qué se va el dinero.'}</p>
-        ${groups.length ? '' : `<button type="button" class="btn btn-gold" style="margin-top:14px" onclick="switchPage('page-grupos', document.querySelector('[data-page=page-grupos]'));showNewGroupForm()">${icono('mas',16)} Crear un grupo</button>`}
       `;
     }
     warning.style.display = 'block';
