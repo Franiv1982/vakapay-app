@@ -341,11 +341,20 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 .pg-sub{font-size:var(--fs-sm);color:var(--muted);margin-bottom:18px}
 
 /* ── TOAST ── */
-#toast{position:fixed;bottom:82px;left:50%;transform:translateX(-50%) translateY(50px);background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);padding:10px 20px;font-size:var(--fs-base);font-weight:700;box-shadow:var(--shadow);z-index:9999;transition:transform .3s,opacity .3s;opacity:0;pointer-events:none;white-space:normal;width:max-content;max-width:calc(100vw - 32px);text-align:center}
+#toast{position:fixed;bottom:82px;left:50%;transform:translateX(-50%) translateY(50px);background:var(--card);border:1px solid var(--line-strong);border-radius:var(--r-md);padding:10px 16px 10px 12px;font-size:var(--fs-base);font-weight:700;color:var(--text);box-shadow:var(--shadow);z-index:9999;transition:transform .3s,opacity .3s;opacity:0;pointer-events:none;white-space:normal;width:max-content;max-width:calc(100vw - 32px);display:flex;align-items:center;gap:10px;text-align:left}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
-#toast.s{border-color:var(--success);color:var(--success)}
-#toast.e{border-color:var(--danger);color:var(--danger)}
-#toast.i{border-color:var(--gold);color:var(--gold-text)}
+#toast .t-ico{flex-shrink:0;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff}
+#toast.toast-s{border-color:var(--success)} #toast.toast-s .t-ico{background:var(--success)}
+#toast.toast-i{border-color:var(--gold-line)} #toast.toast-i .t-ico{background:var(--gold);color:var(--on-gold)}
+/* Ventana de error: un error no puede pasar desapercibido */
+#modal-error .me-ico{width:54px;height:54px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger)}
+#modal-error .me-titulo{color:var(--text);font-size:var(--fs-lg);font-weight:800;text-align:center;margin-bottom:6px}
+#modal-error .me-texto{color:var(--text2);font-size:var(--fs-base);text-align:center;line-height:1.5;margin-bottom:18px}
+/* Grupos: no se pudieron cargar */
+.no-items.sin-conexion{display:flex;flex-direction:column;align-items:center;gap:6px}
+.no-items.sin-conexion .ni{color:var(--danger)}
+.no-items.sin-conexion .sc-titulo{color:var(--text);font-weight:800;font-size:var(--fs-md)}
+.no-items.sin-conexion .btn{margin-top:8px;display:inline-flex;align-items:center;gap:6px}
 
 /* ── CURRENCY SELECTOR ── */
 .currency-row{display:flex;gap:8px;align-items:flex-end;margin-bottom:12px}
@@ -503,7 +512,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
       </div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-outline" onclick="hideNewGroupForm()" style="flex:1">Cancelar</button>
-        <button class="btn btn-gold" onclick="createGroup()" style="flex:1">Crear Grupo</button>
+        <button class="btn btn-gold" id="btnCrearGrupo" onclick="createGroup()" style="flex:1">Crear Grupo</button>
       </div>
     </div>
   </div>
@@ -1346,8 +1355,10 @@ class VakaDataService {
       const detailed = await Promise.all(data.map(g => this.#req('GET', `/groups/${g.id}`).catch(() => g)));
       const normalized = detailed.map(g => this.#normalize(g));
       this.#write(this.#KEYS.groups, normalized);
+      this.cargaFallida = false;
       return normalized;
     } catch(_) {
+      this.cargaFallida = true;   // sin conexión: se usa lo guardado en el móvil
       return this.#read(this.#KEYS.groups) ?? [];
     }
   }
@@ -1371,12 +1382,10 @@ class VakaDataService {
       this.#write(this.#KEYS.groups, gs);
       return g;
     } catch(err) {
+      // Si el servidor no lo confirma, NO se crea un grupo solo en el móvil:
+      // nunca llegaría a los demás y desaparecería al volver la conexión.
       console.error("❌ Error servidor:", err.message);
-      const g = { id: Date.now(), name: data.name, type: data.type, start: data.start, end: data.end, members: {}, expenses: [], createdAt: new Date().toISOString() };
-      const gs = this.#read(this.#KEYS.groups) ?? [];
-      gs.unshift(g);
-      this.#write(this.#KEYS.groups, gs);
-      return g;
+      throw err;
     }
   }
 
@@ -1415,17 +1424,10 @@ class VakaDataService {
     const ba = Number(baseAmt || amount);
     const newExp = {desc, amount: Number(amount), cat, payer, date, involved, currency: currency || 'EUR', baseAmt: ba, ticket: ticket || null};
     
-    // 2. Actualización local inmediata
-    g.expenses.unshift(newExp);
-    
-    if (typeof updateBalances === 'function') updateBalances();
-    await this.saveGroups(gs);
-
-    // 3. Intento de sincronización
-    try {
-      if (!groupId) throw new Error("ID de grupo no encontrado");
-
-      await this.#req('POST', `/groups/${groupId}/expenses`, {
+    // 2. Primero el servidor: si no lo confirma, se lanza el error y la pantalla
+    //    no cambia (antes se guardaba solo en el móvil y luego desaparecía).
+    if (!groupId) throw new Error("ID de grupo no encontrado");
+    await this.#req('POST', `/groups/${groupId}/expenses`, {
         description: desc,
         amount: Number(amount),   // importe original en su moneda
         amount_base: ba,          // importe convertido con el tipo de cambio que eligió el usuario
@@ -1435,8 +1437,13 @@ class VakaDataService {
         expense_date: date,
         involved: involved,
         ticket: ticket || null    // comprobante (imagen reducida), visible para todo el grupo
-      });
-      
+    });
+
+    // 3. Guardado: se muestra ya y se descarga el grupo actualizado
+    g.expenses.unshift(newExp);
+    if (typeof updateBalances === 'function') updateBalances();
+    await this.saveGroups(gs);
+    try {
       const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
         headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
       });
@@ -1451,7 +1458,7 @@ class VakaDataService {
         renderAll();
       }
     } catch (e) {
-      console.warn("⚠️ Sincro fallida (guardado solo en LocalStorage):", e.message);
+      console.warn("Gasto guardado; no se pudo descargar el grupo actualizado:", e.message);
     }
 
     return newExp;
@@ -1467,6 +1474,11 @@ class VakaDataService {
     const ex = g.expenses[eidx];
     const serverExpId = ex.id; 
 
+    // 0. Primero el servidor: si no lo confirma, se lanza el error y el gasto sigue ahí
+    if (serverExpId && g.id) {
+      await this.#req('DELETE', `/groups/${g.id}/expenses/${serverExpId}`);
+    }
+
     // 1. Borramos el gasto del array
     g.expenses.splice(eidx, 1);
 
@@ -1476,14 +1488,6 @@ class VakaDataService {
     // 3. Guardamos en el PC
     await this.saveGroups(gs);
 
-    // 4. Sincronizamos con el servidor
-    try {
-      if (serverExpId && g.id) {
-        await this.#req('DELETE', `/groups/${g.id}/expenses/${serverExpId}`);
-      }
-    } catch (e) { 
-      console.warn("Borrado solo local (Servidor offline)"); 
-    }
     // Sincronización post-borrado
     try {
       const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
@@ -1516,12 +1520,7 @@ class VakaDataService {
         });
     }
 
-    // 2. Actualización Local Directa (evitamos delete + add)
     const oldExpense = g.expenses[eidx];
-    g.expenses[eidx] = { ...oldExpense, ...data }; 
-    
-    updateBalances();
-    await this.saveGroups(groups);
 
     // 3. Preparación de datos para el Backend (Mapeo de nombres)
     const payload = {
@@ -1534,14 +1533,15 @@ class VakaDataService {
         involved: data.involved
     };
 
-    // 4. Sincronización (PUT)
-    try {
-        if (g.id && oldExpense.id) {
-            await this.#req('PUT', `/groups/${g.id}/expenses/${oldExpense.id}`, payload);
-        }
-    } catch (e) {
-        console.error("Error al actualizar gasto en servidor:", e);
+    // 4. Primero el servidor (PUT): si no lo confirma, se lanza el error y el gasto no cambia
+    if (g.id && oldExpense.id) {
+        await this.#req('PUT', `/groups/${g.id}/expenses/${oldExpense.id}`, payload);
     }
+
+    // 5. Confirmado: se actualiza en pantalla
+    g.expenses[eidx] = { ...oldExpense, ...data };
+    updateBalances();
+    await this.saveGroups(groups);
 
     return g.expenses[eidx];
 }
@@ -1608,18 +1608,10 @@ async logActivity(msg, groupName = null) {
     const gs = groups;
     const g = gs[idx];
     
-    // 1. Actualización local
+    // Primero el servidor: si no lo confirma, se lanza el error y el nombre no cambia
+    if (g.id) await this.#req('PATCH', `/groups/${g.id}`, { name: newName });
     g.name = newName;
     await this.saveGroups(gs);
-
-    // 2. Intento de sincronización con servidor
-    try {
-      if (g.id) {
-        await this.#req('PATCH', `/groups/${g.id}`, { name: newName });
-      }
-    } catch (e) {
-      console.warn("⚠️ Actualización solo local:", e.message);
-    }
     return true;
   }
 
@@ -1797,7 +1789,8 @@ try {
 
 } catch (err) {
     console.error("Error en carga:", err);
-    groups = []; 
+    vakaData.cargaFallida = true;
+    groups = groups || [];
 }
 
 // Cálculo de seguridad
@@ -2207,7 +2200,12 @@ async function createGroup(){
   const name = nameInput.value.trim() || 'Mi Grupo';
   // Nombre del usuario logueado, que debe quedar como primer participante
   const myName = (profile && profile.nombre ? profile.nombre.trim() : '') || 'Yo';
+  const ini = document.getElementById('dateStart')?.value, fin = document.getElementById('dateEnd')?.value;
+  if (!ini || !fin) { toast('Elige la fecha de inicio y la de fin del grupo', 'e'); return; }
+  if (fin < ini) { toast('La fecha de fin no puede ser anterior a la de inicio', 'e'); return; }
 
+  const listo = bloquearBoton(document.getElementById('btnCrearGrupo'), 'Creando…');
+  if (!listo) return;   // ya se está creando: un segundo toque no crea otro grupo
   try {
     const datosNuevo = { 
         name: name, 
@@ -2257,8 +2255,8 @@ async function createGroup(){
     
   } catch(e) {
     console.error("Error al crear:", e);
-    toast("Creado solo en local (Sin conexión)", 'w');
-  }
+    toast(textoError(e, 'No se pudo crear el grupo.'), 'e');
+  } finally { listo(); }
 }
 
 // ═══ GROUPS LIST ══════════════════════════════════════════════════════
@@ -2290,7 +2288,15 @@ function renderGroupsList() {
     else counter.textContent = `(${groups.length})`;
   }
   if (groups.length === 0) {
-    el.innerHTML = cargandoInicial ? skGrupos() : '<div class="no-items"><div class="ni">'+icono('carpeta', 28)+'</div><div>No tienes grupos creados aún</div></div>';
+    if (cargandoInicial) el.innerHTML = skGrupos();
+    else if (vakaData.cargaFallida) {
+      if (counter) counter.textContent = '';
+      el.innerHTML = '<div class="no-items sin-conexion"><div class="ni">'+icono('alerta', 28)+'</div>'
+        + '<div class="sc-titulo">No se pudieron cargar tus grupos</div>'
+        + '<div>Revisa tu conexión a internet. Tus datos no se han perdido.</div>'
+        + '<button type="button" class="btn btn-outline btn-sm" id="btnReintentarCarga" onclick="reintentarCarga()">'+icono('recargar',14)+' Reintentar</button></div>';
+    }
+    else el.innerHTML = '<div class="no-items"><div class="ni">'+icono('carpeta', 28)+'</div><div>No tienes grupos creados aún</div></div>';
     return;
   }
 
@@ -2546,7 +2552,7 @@ async function deleteGroup(idx) {
         return;
       }
       if (!res.ok && res.status !== 404) {
-        toast('Error al salir del grupo', 'e');
+        toast('No se pudo salir del grupo.', 'e');
         return;
       }
     }
@@ -2567,7 +2573,7 @@ async function deleteGroup(idx) {
     }
   } catch (e) {
     console.error("Error al salir del grupo:", e);
-    toast('Error al salir del grupo', 'e');
+    toast('No se pudo salir del grupo.', 'e');
   }
 }
 
@@ -2805,7 +2811,7 @@ async function ejecutarBorradoMiembro() {
     });
     if (!res.ok) {
       const d = await res.json().catch(() => ({}));
-      toast(d.error || 'Error al eliminar el participante', 'e');
+      toast(d.error || 'No se pudo eliminar el participante.', 'e');
       cerrarModalBorrarMiembro();
       return;
     }
@@ -2874,24 +2880,21 @@ async function toggleFriendInGroup(name, el) {
     
     // Petición al backend para borrar de group_members
     try {
-      await fetch(`${API_BASE}/api/v1/groups/${g.id}/members/${encodeURIComponent(name)}`, {
+      const r = await fetch(`${API_BASE}/api/v1/groups/${g.id}/members/${encodeURIComponent(name)}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); throw Object.assign(new Error(d.error || ''), { status: r.status }); }
       delete g.members[name];
       save();
       toast(`${name} quitado del grupo`, 'i');
     } catch (e) {
-      toast('Error al quitar del grupo', 'e');
+      toast(textoError(e, 'No se pudo quitar del grupo.'), 'e');
     }
   } else {
-    // 2. Lógica para AÑADIR
-    g.members[name] = 0;
-    save();
-    
-    // Petición al backend para insertar en group_members
+    // 2. Lógica para AÑADIR: primero el servidor; si no lo confirma, no se añade
     try {
-      await fetch(`${API_BASE}/api/v1/groups/${g.id}/members`, {
+      const r = await fetch(`${API_BASE}/api/v1/groups/${g.id}/members`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json', 
@@ -2899,11 +2902,14 @@ async function toggleFriendInGroup(name, el) {
         },
         body: JSON.stringify({ display_name: name })
       });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); throw Object.assign(new Error(d.error || ''), { status: r.status }); }
+      g.members[name] = 0;
+      save();
       toast(`${name} añadido`, 's');
       refrescarActividad();
     } catch (e) {
       console.error("Error sincronizando miembro:", e);
-      toast('Añadido solo localmente (sin conexión)', 'w');
+      toast(textoError(e, `No se pudo añadir a ${name}.`), 'e');
     }
   }
   renderAll();
@@ -3044,7 +3050,7 @@ async function addExpense() {
     clearOCR();
     toast('Gasto registrado', 's');
     } catch (err) {
-    toast('Error al guardar', 'e');
+    toast(textoError(err, 'No se pudo guardar el gasto.'), 'e');
   } finally {
     guardandoGasto = false;
     const btnGuardar = document.getElementById('btnGuardarGasto');
@@ -3067,7 +3073,7 @@ async function deleteExpense(idx) {
     toast('Gasto eliminado', 'i');
   } catch (err) {
     console.error("Error al eliminar:", err);
-    toast('Error al eliminar el gasto', 'e');
+    toast(textoError(err, 'No se pudo eliminar el gasto.'), 'e');
   }
 }
 
@@ -3091,7 +3097,7 @@ async function renameGroup(idx) {
     toast('Nombre actualizado', 'i');
   } catch (err) {
     console.error("Error al renombrar:", err);
-    toast('Error al actualizar', 'e');
+    toast('No se pudo actualizar.', 'e');
   }
 }
 
@@ -3244,18 +3250,18 @@ async function saveEditExpense() {
         body: JSON.stringify({ description: desc, amount, amount_base: baseAmtEdit, currency, category: cat, payer_name: payer, expense_date: date, involved, ticket: ticketEdit })
     });
 
-    // Actualización local inmediata
+    if (!response.ok) {
+      let msg = `Error del servidor (${response.status})`;
+      try { const errData = await response.json(); if (errData.error) msg = errData.error; } catch(_) {}
+      throw Object.assign(new Error(msg), { status: response.status });
+    }
+
+    // Confirmado por el servidor: se actualiza en pantalla
     g.expenses[editingExpenseIdx] = { 
         ...g.expenses[editingExpenseIdx], 
         desc, amount, currency, cat, payer, date, involved, baseAmt: baseAmtEdit, exchangeRate: rateEdit,
         ...(ticketEdit !== undefined ? { ticket: ticketEdit, has_ticket: !!ticketEdit } : {})
     };
-
-    if (!response.ok) {
-      let msg = `Error del servidor (${response.status})`;
-      try { const errData = await response.json(); if (errData.error) msg = errData.error; } catch(_) {}
-      throw new Error(msg);
-    }
 
     // Sincronización final: Recargamos el estado completo del grupo desde el servidor
     const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
@@ -3296,7 +3302,7 @@ async function saveEditExpense() {
     }
   } catch (err) {
     console.error(err);
-    toast('Error: ' + (err.message || 'No se pudo guardar'), 'e');
+    toast(textoError(err, 'No se pudo guardar el cambio.'), 'e');
   } finally {
     if (saveBtn) saveBtn.disabled = false;
   }
@@ -3313,7 +3319,7 @@ async function calcDebts(opciones = {}) {
   if (btn) { btn.disabled = true; btn.textContent = 'Actualizando…'; }
   const ok = await recargarGrupoDelServidor(g, { aviso: !opciones.silencioso });
   if (btn) { btn.disabled = false; btn.innerHTML = icono('recargar',14) + ' Actualizar cuentas'; }
-  if (!ok) toast('Sin conexión: se calcula con los últimos datos descargados', 'e');
+  if (!ok && !opciones.silencioso) toast('Sin conexión: las cuentas se calculan con los últimos datos descargados.', 'i');
 }
 
 function calcularDeudas(aviso = true){
@@ -3758,7 +3764,7 @@ async function _registrarPago(g, { from, to, amount }, archivoComprobante) {
     }
     if (!res.ok) throw new Error(data.error || 'No se pudo registrar el pago');
   } catch (err) {
-    toast(err.message || 'No se pudo registrar el pago. Revisa tu conexión.', 'e');
+    toast(textoError(err, 'No se pudo registrar el pago.'), 'e');
     return;
   }
   await recargarGrupoDelServidor(g);
@@ -4419,7 +4425,7 @@ async function renovarInvitacion() {
     cancelarRenovarInvitacion();
     toast('Enlace cambiado. El anterior ya no funciona.', 's');
   } catch (e) {
-    toast(e.message || 'No se pudo cambiar el enlace. Revisa tu conexión.', 'e');
+    toast(textoError(e, 'No se pudo cambiar el enlace.'), 'e');
   }
 }
 function cerrarInvitar() {
@@ -4495,7 +4501,7 @@ function exportarPDF(){
   const g = groups[currentGroupIdx];
   if(!g){ toast('Abre un grupo primero','e'); return; }
   const jsPDFLib = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
-  if(!jsPDFLib){ toast('Error: librería PDF no disponible','e'); return; }
+  if(!jsPDFLib){ toast('No se pudo preparar el PDF. Inténtalo de nuevo.','e'); return; }
   const doc = new jsPDFLib({orientation:'portrait',unit:'mm',format:'a4'});
   const W = 210, pad = 16, lh = 7;
   let y = 20;
@@ -4842,7 +4848,7 @@ async function addFriend(){
       const d = buscarAmigoDuplicado({ name: fullName, email, phone });
       mostrarModalDuplicado({ titulo: 'Este amigo ya existe', nombre: d ? d.amigo.name : fullName, motivo: d ? d.motivo : 'nombre', valor: d ? _valorDup(d, { email, phone }) : '' });
     } else {
-      toast('Error al añadir amigo', 'e');
+      toast('No se pudo añadir amigo.', 'e');
     }
     console.error(err);
   }
@@ -5177,12 +5183,12 @@ async function ejecutarBorradoAmigo() {
       headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
     });
     if (!res.ok && res.status !== 404) {
-      toast('Error al eliminar el amigo', 'e');
+      toast('No se pudo eliminar el amigo.', 'e');
       return;
     }
   } catch(err) {
     console.error('Error borrando amigo:', err);
-    toast('Error al eliminar el amigo', 'e');
+    toast('No se pudo eliminar el amigo.', 'e');
     return;
   }
 
@@ -5238,14 +5244,23 @@ async function guardarCambiosGrupo() {
   }
 
   const nombreAnterior = groups[editingGroupIdx].name;
-  groups[editingGroupIdx].name = nuevoNombre;
-  save();
-
+  if (nuevoNombre === nombreAnterior) { cerrarModalEditar(); return; }
+  const listo = bloquearBoton(document.getElementById('btnGuardarGrupo'), 'Guardando…');
+  if (!listo) return;
+  try {
+    await vakaData.updateGroupName(editingGroupIdx, nuevoNombre);   // antes solo cambiaba en este móvil
+  } catch (err) {
+    listo();
+    toast(err.status === 404 ? 'Solo quien creó el grupo puede cambiarle el nombre.' : textoError(err, 'No se pudo cambiar el nombre.'), 'e');
+    return;
+  }
+  listo();
   await logActivity(`Grupo "${nombreAnterior}" renombrado a "${nuevoNombre}"`);
 
   if (typeof renderGroupsList === 'function') renderGroupsList();
+  if (typeof renderAll === 'function' && currentGroupIdx === editingGroupIdx) renderAll();
   cerrarModalEditar();
-  toast("Grupo actualizado", "s");
+  toast("Nombre del grupo cambiado", "s");
 }
 
 // ═══ ACTIVITY ════════════════════════════════════════════════════════
@@ -5459,7 +5474,7 @@ async function saveProfile() {
     renderActivity();
     toast('Perfil guardado', 's');
   } catch (error) {
-    toast(error.status === 400 && error.message ? error.message : 'Error al guardar el perfil', 'e');
+    toast(error.status === 400 && error.message ? error.message : textoError(error, 'No se pudo guardar el perfil.'), 'e');
     console.error("Error en saveProfile:", error);
   }
 }
@@ -5550,7 +5565,7 @@ async function handleAvatarChange(ev) {
     }
   } catch(err) {
     console.error('Error subiendo avatar:', err);
-    toast('Error al subir la foto', 'e');
+    toast('No se pudo subir la foto.', 'e');
   }
 }
 
@@ -5755,7 +5770,7 @@ async function processOCRFile(file) {
     toast(parsed.amount ? `Importe del ticket: ${parsed.amount} — revisa y confirma` : 'Ticket adjuntado', 's');
   } catch(err) {
     if (loading) loading.style.display = 'none';
-    toast('Error al procesar el ticket: ' + err.message, 'e');
+    toast(textoError(err, 'No se pudo leer el ticket.'), 'e');
   }
 }
 
@@ -5983,7 +5998,7 @@ async function attachGastoTicket(ev, idx) {
     toast('Comprobante guardado', 's');
     if (typeof refrescarActividad === 'function') refrescarActividad();
   } catch (err) {
-    toast(err.message || 'No se pudo guardar el comprobante', 'e');
+    toast(textoError(err, 'No se pudo guardar el comprobante'), 'e');
   }
 }
 
@@ -6014,7 +6029,7 @@ async function confirmarQuitarComprobante() {
     toast('Comprobante eliminado', 'i');
     if (typeof refrescarActividad === 'function') refrescarActividad();
   } catch (err) {
-    toast(err.message || 'No se pudo eliminar el comprobante', 'e');
+    toast(textoError(err, 'No se pudo eliminar el comprobante'), 'e');
   }
 }
 
@@ -6236,10 +6251,10 @@ function renderStats() {
     if (mainContent) mainContent.style.display = 'none';
 
     let warning = document.getElementById('stats-warning');
-    if (!warning) {
-      warning = document.createElement('div');
+    if (!warning) { warning = document.createElement('div'); pane.appendChild(warning); }
+    {
       warning.id = 'stats-warning';
-      warning.style = 'text-align:center; padding:60px 20px; color:#888;';
+      warning.style = 'text-align:center; padding:60px 20px; color:var(--muted);';
       warning.innerHTML = `
         <div style="margin-bottom:14px;color:var(--gold-text);">
           <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -6249,9 +6264,11 @@ function renderStats() {
           </svg>
         </div>
         <h2 style="color:var(--gold-text); margin-bottom:10px;">Aquí no hay nada... aún</h2>
-        <p style="color:var(--text);">Selecciona un grupo desde el badge para ver en qué se va el dinero.</p>
+        <p style="color:var(--text);">${groups.length
+          ? 'Abre uno de tus grupos y vuelve aquí para ver en qué se va el dinero.'
+          : 'Cuando crees un grupo y apuntes gastos, aquí verás en qué se va el dinero.'}</p>
+        ${groups.length ? '' : `<button type="button" class="btn btn-gold" style="margin-top:14px" onclick="switchPage('page-grupos', document.querySelector('[data-page=page-grupos]'));showNewGroupForm()">${icono('mas',16)} Crear un grupo</button>`}
       `;
-      pane.appendChild(warning);
     }
     warning.style.display = 'block';
     return;
@@ -6345,14 +6362,77 @@ function renderPayerBars(payerMap, total, sym) {
 
 
 // ═══ TOAST ═══════════════════════════════════════════════════════════
+// Avisos de la app:
+//   'e' (error)  → ventana que hay que cerrar con «Entendido»: un error no puede pasar desapercibido
+//   's' (hecho)  → aviso verde con ✓ abajo, que se va solo
+//   'i' (info)   → aviso amarillo abajo, que se va solo
 let toastT;
 function toast(msg, type = 'i') {
+  if (type === 'e') { mostrarError(msg); return; }
   const el = document.getElementById('toast');
   if (!el) return;
-  el.textContent = msg;
-  el.className = 'toast show ' + (type === 's' ? 'toast-s' : type === 'e' ? 'toast-e' : 'toast-i');
+  el.innerHTML = `<span class="t-ico">${icono(type === 's' ? 'check' : 'punto', type === 's' ? 15 : 8)}</span><span></span>`;
+  el.lastChild.textContent = msg;
+  el.className = 'toast show ' + (type === 's' ? 'toast-s' : 'toast-i');
   clearTimeout(toastT);
-  toastT = setTimeout(() => { el.className = 'toast'; }, 3000);
+  toastT = setTimeout(() => { el.className = 'toast'; }, 3800);
+}
+
+function mostrarError(msg, titulo) {
+  let m = document.getElementById('modal-error');
+  if (!m) {
+    m = document.createElement('div');
+    m.className = 'modal-overlay'; m.id = 'modal-error';
+    m.style.cssText = 'display:none;z-index:10001;';
+    m.setAttribute('onclick', 'if(event.target===this)cerrarError()');
+    m.innerHTML = `<div class="ventana" role="alertdialog" aria-modal="true" aria-labelledby="me-titulo" aria-describedby="me-texto" tabindex="-1">
+      <div class="me-ico">${icono('alerta', 26)}</div>
+      <div class="me-titulo" id="me-titulo"></div>
+      <p class="me-texto" id="me-texto"></p>
+      <button type="button" class="btn btn-gold" style="width:100%" onclick="cerrarError()">Entendido</button></div>`;
+    document.body.appendChild(m);
+  }
+  // Red de seguridad: si llega un texto técnico (del navegador o del código), se cambia por uno comprensible
+  if (!msg || /failed to fetch|networkerror|load failed|typeerror|referenceerror|undefined|null|unexpected token|json|\(\d{3}\)|^error\b/i.test(String(msg)))
+    msg = 'No se pudo completar la acción. Revisa tu conexión e inténtalo de nuevo.';
+  m.querySelector('#me-titulo').textContent = titulo || 'No se ha podido hacer';
+  m.querySelector('#me-texto').textContent = msg;
+  m.style.display = 'flex';
+  setTimeout(() => m.querySelector('button').focus({ preventScroll: true }), 60);
+}
+function cerrarError() { const m = document.getElementById('modal-error'); if (m) m.style.display = 'none'; }
+
+// Texto de error comprensible: sin conexión, servidor caído o el motivo que da el servidor
+function textoError(err, porDefecto = 'No se pudo completar la acción.') {
+  if (!/[.!?]$/.test(porDefecto)) porDefecto += '.';
+  if (!err) return porDefecto;
+  if (!navigator.onLine) return 'No tienes conexión a internet. Cuando vuelvas a tenerla, inténtalo de nuevo.';
+  if (!err.status) return porDefecto + ' No hubo respuesta del servidor; revisa tu conexión e inténtalo de nuevo.';
+  if (err.status >= 500) return porDefecto + ' El servidor ha tenido un problema; inténtalo de nuevo en un momento.';
+  return err.message || porDefecto;
+}
+
+// Bloquea un botón mientras se guarda (el servidor puede tardar) para que un
+// segundo toque no repita la acción. Devuelve la función que lo desbloquea,
+// o null si ya estaba bloqueado.
+function bloquearBoton(btn, texto = 'Guardando…') {
+  if (!btn) return () => {};
+  if (btn.dataset.ocupado) return null;
+  btn.dataset.ocupado = '1';
+  const antes = btn.innerHTML;
+  btn.disabled = true; btn.setAttribute('aria-busy', 'true'); btn.textContent = texto;
+  return () => { delete btn.dataset.ocupado; btn.disabled = false; btn.removeAttribute('aria-busy'); btn.innerHTML = antes; };
+}
+
+// «Reintentar» cuando no se pudieron cargar los grupos
+async function reintentarCarga() {
+  const listo = bloquearBoton(document.getElementById('btnReintentarCarga'), 'Cargando…');
+  if (!listo) return;
+  groups = await vakaData.getGroups() || [];
+  if (groups.length && typeof updateBalances === 'function') updateBalances();
+  renderGroupsList();
+  if (vakaData.cargaFallida) toast('Sigue sin haber conexión. Inténtalo de nuevo en un momento.', 'i');
+  else { refrescarActividad(); toast('Datos actualizados', 's'); }
 }
 
 function handleProofModalFile(event) {
@@ -6525,7 +6605,7 @@ function cerrarModalSalir() {
       <button onclick="cerrarModalEditar()" class="btn btn-outline" style="flex: 1;margin: 0">Cancelar</button>
       
       <!-- BOTÓN GUARDAR: Verde Sólido (Éxito) -->
-      <button onclick="guardarCambiosGrupo()" class="btn btn-gold" style="flex: 1;margin: 0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Guardar</button>
+      <button onclick="guardarCambiosGrupo()" id="btnGuardarGrupo" class="btn btn-gold" style="flex: 1;margin: 0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Guardar</button>
 
     </div>
   </div>
@@ -7272,7 +7352,7 @@ async function enviarMensajeChat() {
     cancelarRespuestaChat();
     await cargarChat(true);
   } catch (err) {
-    toast(err.message || 'No se pudo enviar el mensaje', 'e');
+    toast(textoError(err, 'No se pudo enviar el mensaje'), 'e');
   } finally {
     btn.disabled = false;
   }
@@ -7537,7 +7617,7 @@ async function imagenElegidaChat(ev) {
     document.getElementById('chatFotoPreviaImg').src = foto;
     document.getElementById('chatFotoPie').value = document.getElementById('chatTexto').value.trim();
     document.getElementById('chatFotoPrevia').style.display = 'flex';
-  } catch (err) { toast(err.message || 'No se pudo abrir la foto', 'e'); }
+  } catch (err) { toast(textoError(err, 'No se pudo abrir la foto'), 'e'); }
 }
 function cerrarFotoPreviaChat() {
   _chatFotoNueva = null;
@@ -7565,7 +7645,7 @@ async function enviarFotoChat() {
     cerrarFotoPreviaChat();
     await cargarChat(true);
   } catch (err) {
-    toast(err.message || 'No se pudo enviar la foto', 'e');
+    toast(textoError(err, 'No se pudo enviar la foto'), 'e');
   } finally { btn.disabled = false; }
 }
 async function verFotoChat(id) {
@@ -7740,7 +7820,7 @@ async function enviarGifChat(btn) {
   try {
     await enviarAdjuntoChat({ gif: g.url });
     await cargarChat(true);
-  } catch (err) { toast(err.message || 'No se pudo enviar el GIF', 'e'); }
+  } catch (err) { toast(textoError(err, 'No se pudo enviar el GIF'), 'e'); }
 }
 </script>
 

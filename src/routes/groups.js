@@ -79,10 +79,10 @@ router.post('/', requireAuth, async (req, res, next) => {
   try {
     const { name, type = 'viaje', date_start, date_end } = req.body;
     if (!name || !date_start || !date_end) {
-      return res.status(400).json({ error: 'name, date_start y date_end son obligatorios' });
+      return res.status(400).json({ error: 'Escribe el nombre del grupo y elige las fechas de inicio y fin' });
     }
     if (date_end < date_start) {
-      return res.status(400).json({ error: 'date_end debe ser >= date_start' });
+      return res.status(400).json({ error: 'La fecha de fin no puede ser anterior a la de inicio' });
     }
     const result = await db.query(`
       INSERT INTO groups (owner_id, name, type, date_start, date_end)
@@ -233,7 +233,7 @@ router.post('/:id/members', requireAuth, async (req, res, next) => {
     }
     // user_id no se acepta desde la app: una cuenta solo entra en un grupo con su enlace de invitación
     const { display_name, email = '', phone = '' } = req.body;
-    if (!display_name) return res.status(400).json({ error: 'display_name es obligatorio' });
+    if (!display_name) return res.status(400).json({ error: 'Escribe el nombre del participante' });
 
     // Sin distinguir mayúsculas ni espacios: "Juan" y "juan " son el mismo participante
     const existing = await db.query(
@@ -406,7 +406,7 @@ router.patch('/:id/members/:name/rename', requireAuth, async (req, res, next) =>
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
     const { display_name } = req.body;
-    if (!display_name) return res.status(400).json({ error: 'display_name es obligatorio' });
+    if (!display_name) return res.status(400).json({ error: 'Escribe el nombre del participante' });
 
     const existing = await db.query(
       'SELECT id FROM group_members WHERE group_id = $1 AND LOWER(TRIM(display_name)) = LOWER(TRIM($2)) AND display_name <> $3',
