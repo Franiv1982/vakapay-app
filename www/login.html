@@ -954,16 +954,12 @@ document.addEventListener('DOMContentLoaded', () => {
         <p style="color: var(--text); margin-bottom: 24px; font-size: var(--fs-base); opacity: 0.8;">Si vuelves atrás ahora, se borrarán todos los datos que has escrito.</p>
         
         <div style="display: flex; gap: 12px; width: 100%; margin-top: 10px;">
-            <!-- BOTÓN CANCELAR (VERDE SÓLIDO - LA OPCIÓN SEGURA PARA QUEDARSE) -->
-            <button onclick="cerrarModalAbandono()" 
-                style="flex: 1; padding: 14px; border-radius: var(--r-md); font-weight: 700; cursor: pointer; border: none; color: white; background: var(--success-strong); outline: none;">
-                Cancelar
+            <!-- Quedarse: contorno neutro (opción segura). Salir: rojo (borra lo escrito). Iconos opuestos: entrar / salir -->
+            <button type="button" onclick="cerrarModalAbandono()" style="flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:var(--r-md);font-weight:800;font-family:var(--font);font-size:var(--fs-base);cursor:pointer;background:none;border:1.5px solid var(--line-strong);color:var(--text);">
+                <svg class="icono" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="14 7 9 12 14 17"/><line x1="21" y1="12" x2="9" y2="12"/></svg> No, seguir
             </button>
-            
-            <!-- BOTÓN SÍ, SALIR (ROJO SÓLIDO - LA OPCIÓN QUE BORRA DATOS) -->
-            <button onclick="confirmarSalida()" 
-                style="flex: 1; padding: 14px; border-radius: var(--r-md); font-weight: 700; cursor: pointer; border: none; color: white; background: var(--danger-strong); outline: none;">
-                Sí, salir
+            <button type="button" onclick="confirmarSalida()" style="flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:var(--r-md);font-weight:800;font-family:var(--font);font-size:var(--fs-base);cursor:pointer;background:var(--danger-strong);border:none;color:#fff;">
+                <svg class="icono" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sí, salir
             </button>
         </div>
     </div>
