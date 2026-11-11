@@ -2622,13 +2622,15 @@ async function openDeleteGroupModal(idx) {
     const pagoSinConfirmar = yo ? (g.expenses || []).find(e => e.es_pago && e.por_confirmar && e.payer === yo) : null;
     if (yo && (Math.abs(saldo) > 0.05 || pagoSinConfirmar)) {
       const txs = deudasPendientes(g);
-      const lista = arr => arr.map(t => `${t.from === yo ? t.to : t.from} ${formatAmountBase(t.amount)}`).join(' · ');
+      // Texto corto: con una persona se nombra; con varias, solo cuántas (el detalle está en «Ver cuentas»)
       const debo = txs.filter(t => t.from === yo), meDeben = txs.filter(t => t.to === yo);
       let texto;
       if (saldo < -0.05) {
-        texto = `Debes ${formatAmountBase(-saldo)}` + (debo.length === 1 ? ` a ${debo[0].to}` : debo.length ? ` (${lista(debo)})` : '') + '. Podrás salir cuando hayas pagado.';
+        texto = (debo.length === 1 ? `Debes ${formatAmountBase(-saldo)} a ${debo[0].to}` : `Debes ${formatAmountBase(-saldo)} a ${debo.length} personas`)
+          + '. Podrás salir cuando hayas pagado.';
       } else if (saldo > 0.05) {
-        texto = `Aún te deben ${formatAmountBase(saldo)}` + (meDeben.length ? ` (${lista(meDeben)})` : '') + '. Podrás salir cuando te hayan pagado.';
+        texto = (meDeben.length === 1 ? `${meDeben[0].from} te debe ${formatAmountBase(saldo)}` : `Aún te deben ${formatAmountBase(saldo)} entre ${meDeben.length} personas`)
+          + '. Podrás salir cuando te hayan pagado.';
       } else {
         const para = (pagoSinConfirmar.involved || [])[0] || '';
         texto = `Tu pago de ${formatAmountBase(Number(pagoSinConfirmar.baseAmt) || 0)} a ${para} está pendiente de que lo confirme. Podrás salir cuando lo confirme`
