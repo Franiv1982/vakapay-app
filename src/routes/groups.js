@@ -164,9 +164,10 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
     const balance = parseFloat(memberRes.rows[0].balance);
     if (Math.abs(balance) > MARGEN_SALDO) {
       return res.status(422).json({
+        titulo: 'Aún no puedes salir del grupo',
         error: balance > 0
-          ? `Tienes un saldo positivo de ${balance.toFixed(2)}. Salda las cuentas antes de salir.`
-          : `Tienes una deuda pendiente de ${Math.abs(balance).toFixed(2)}. Salda las cuentas antes de salir.`
+          ? `Aún te deben ${balance.toFixed(2).replace('.', ',')}. Podrás salir cuando te hayan pagado.`
+          : `Debes ${Math.abs(balance).toFixed(2).replace('.', ',')}. Podrás salir cuando hayas pagado.`
       });
     }
     // Un pago tuyo que quien cobra aún no ha confirmado también impide salir
