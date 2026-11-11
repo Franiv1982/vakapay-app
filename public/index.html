@@ -555,7 +555,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 <div class="det-col det-col-a">
 
   <!-- Participants -->
-  <div class="sec-title" id="sec2" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleParticipantesSection()" data-controla="participantesSectionWrap">
+  <div class="sec-title" id="sec2" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleParticipantesSection()" data-controla="participantesSectionWrap">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">2</div>
     <h2>Participantes</h2>
@@ -621,7 +621,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 </div>
 
   <!-- Registrar Gasto -->
-<div class="sec-title" id="sec3" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleGastoSection()" data-controla="gastoSectionWrap">
+<div class="sec-title" id="sec3" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleGastoSection()" data-controla="gastoSectionWrap">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">3</div>
     <h2>Registrar gasto</h2>
@@ -720,7 +720,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 </div>
 
   <!-- Expense list -->
-  <div class="sec-title" id="sec4" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleGastosListSection()" data-controla="gastosListSectionWrap">
+  <div class="sec-title" id="sec4" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleGastosListSection()" data-controla="gastosListSectionWrap">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">4</div>
     <h2>Lista de gastos</h2>
@@ -741,7 +741,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 </div><!-- /det-col-a -->
 <div class="det-col det-col-b">
   <!-- Settlement -->
-  <div class="sec-title" id="sec5" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleCuentasSection()" data-controla="cuentasSectionWrap">
+  <div class="sec-title" id="sec5" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleCuentasSection()" data-controla="cuentasSectionWrap">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">5</div>
     <h2>Cuentas finales</h2>
@@ -761,7 +761,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 </div>
 
   <!-- Share -->
-  <div class="sec-title" id="secPagos" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="togglePagosSection()" data-controla="pagosSectionWrap">
+  <div class="sec-title" id="secPagos" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="togglePagosSection()" data-controla="pagosSectionWrap">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">6</div>
     <h2>Pagos realizados</h2>
@@ -775,7 +775,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   </div>
 </div>
 
-  <div class="sec-title" id="sec6" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleResumenSection()" data-controla="resumenSectionWrap">
+  <div class="sec-title" id="sec6" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleResumenSection()" data-controla="resumenSectionWrap">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">7</div>
     <h2>Compartir resumen</h2>
@@ -794,7 +794,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
   </div>
 </div>
 
-<div class="sec-title" id="sec7" style="opacity:.3;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="abrirChat()">
+<div class="sec-title" id="sec7" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="abrirChat()">
   <div style="display:flex;align-items:center;gap:8px">
     <div class="num">8</div>
     <h2>Chat del grupo</h2>
@@ -2361,7 +2361,6 @@ async function openGroup(idx){
   document.getElementById('hbadge').innerHTML = iconoTipo(g.type, 13) + ' ' + escaparHtml(g.name);
   document.getElementById('hbadge').style.display = 'block';
   posicionarBadge();
-  ['sec2','sec3','sec4','sec5','secPagos','sec6','sec7'].forEach(id=>document.getElementById(id).style.opacity='1');
   if (typeof actualizarNoLeidos === 'function') actualizarNoLeidos();
   _enlaceInvitacion = null;   // cada grupo tiene su propio enlace
 
