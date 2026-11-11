@@ -4000,7 +4000,6 @@ function pintarResumenSaldo() {
   const meDeben = txs.filter(t => t.to === yo);
   const nGastos = (g.expenses || []).filter(e => !e.es_pago).length;
   const total = (g.expenses || []).filter(e => !e.es_pago).reduce((s, e) => s + (Number(e.baseAmt) || 0), 0);
-  const lista = arr => arr.map(t => `${escaparHtml(t.from === yo ? t.to : t.from)} ${importeEs(t.amount)}`).join(' · ');
   let estado, cifra, detalle, botones;
   const btnGasto = (clase) => `<button type="button" class="btn ${clase}" onclick="irARegistrarGasto()">${icono('mas',15)} Añadir gasto</button>`;
   if (!yo) {
@@ -4010,11 +4009,15 @@ function pintarResumenSaldo() {
     const t = debo[0];
     const de = escaparHtml(t.from).replace(/'/g, '&#39;'), a = escaparHtml(t.to).replace(/'/g, '&#39;');
     estado = 'Debes'; cifra = `<span class="rojo">${importeEs(-saldo)}</span>`;
-    detalle = debo.length === 1 ? `a ${escaparHtml(t.to)}` : `a ${lista(debo)}`;
-    botones = `<button type="button" class="btn btn-gold" onclick="openPayModal(${t.i},'${de}','${a}',${t.amount})">Pagar a ${escaparHtml(t.to)}</button>${btnGasto('btn-outline')}`;
+    // Con una persona se nombra; con varias, solo cuántas (el detalle está en «Ver cuentas»)
+    detalle = debo.length === 1 ? `a ${escaparHtml(t.to)}` : `a ${debo.length} personas`;
+    // A una persona: «Pagar a X» directo. A varias: «Ver cuentas», donde están todos los pagos
+    botones = debo.length === 1
+      ? `<button type="button" class="btn btn-gold" onclick="openPayModal(${t.i},'${de}','${a}',${t.amount})">Pagar a ${escaparHtml(t.to)}</button>${btnGasto('btn-outline')}`
+      : `<button type="button" class="btn btn-gold" onclick="irASeccion('sec5', toggleCuentasSection, 'cuentasSectionWrap')">Ver cuentas</button>${btnGasto('btn-outline')}`;
   } else if (meDeben.length) {
     estado = 'Te deben'; cifra = `<span class="verde">${importeEs(saldo)}</span>`;
-    detalle = lista(meDeben);
+    detalle = meDeben.length === 1 ? escaparHtml(meDeben[0].from) : `entre ${meDeben.length} personas`;
     botones = btnGasto('btn-gold') + `<button type="button" class="btn btn-outline" onclick="irASeccion('sec5', toggleCuentasSection, 'cuentasSectionWrap')">Ver cuentas</button>`;
   } else {
     estado = 'Estás al día'; cifra = `<span class="verde">${icono('ok',34)}</span>`;
