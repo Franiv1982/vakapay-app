@@ -2602,13 +2602,55 @@ let groupToDeleteIdx = null;
 /**
  * 1. Abre el modal y prepara los datos del grupo a eliminar.
  */
-function openDeleteGroupModal(idx) {
+async function openDeleteGroupModal(idx) {
     groupToDeleteIdx = idx;
-    const g = groups[idx];
+    let g = groups[idx];
+    // Saldo al día antes de decidir qué ventana mostrar (si alguien acaba de pagar, que cuente)
+    if (g.id && typeof recargarGrupoDelServidor === 'function') {
+      try { await recargarGrupoDelServidor(g); g = groups[idx]; updateBalances(); } catch (_) {}
+    }
     
     // Rellenamos el modal con nombre e icono
     document.getElementById('delete-group-name').textContent = g.name;
     document.getElementById('delete-group-icon').innerHTML = iconoTipo(g.type, 26);
+    const volver = document.getElementById('del-grupo-volver'), ok = document.getElementById('del-grupo-ok');
+
+    // Con dinero pendiente no se puede salir: en vez de preguntar «¿Salir?» y luego
+    // decir que no, se explica directamente qué falta y se ofrece ir a Cuentas finales.
+    const yo = miNombreEnGrupo(g);
+    const saldo = yo ? Number(g.members[yo]) || 0 : 0;
+    const pagoSinConfirmar = yo ? (g.expenses || []).find(e => e.es_pago && e.por_confirmar && e.payer === yo) : null;
+    if (yo && (Math.abs(saldo) > 0.05 || pagoSinConfirmar)) {
+      const txs = deudasPendientes(g);
+      // Texto corto: con una persona se nombra; con varias, solo cuántas (el detalle está en «Ver cuentas»)
+      const debo = txs.filter(t => t.from === yo), meDeben = txs.filter(t => t.to === yo);
+      let texto;
+      if (saldo < -0.05) {
+        texto = (debo.length === 1 ? `Debes ${formatAmountBase(-saldo)} a ${debo[0].to}` : `Debes ${formatAmountBase(-saldo)} a ${debo.length} personas`)
+          + '. Podrás salir cuando hayas pagado.';
+      } else if (saldo > 0.05) {
+        texto = (meDeben.length === 1 ? `${meDeben[0].from} te debe ${formatAmountBase(saldo)}` : `Aún te deben ${formatAmountBase(saldo)} entre ${meDeben.length} personas`)
+          + '. Podrás salir cuando te hayan pagado.';
+      } else {
+        const para = (pagoSinConfirmar.involved || [])[0] || '';
+        texto = `Tu pago de ${formatAmountBase(Number(pagoSinConfirmar.baseAmt) || 0)} a ${para} está pendiente de que lo confirme. Podrás salir cuando lo confirme`
+          + (pagoSinConfirmar.pago_confirmar_antes ? `, o el ${fechaDiaMes(pagoSinConfirmar.pago_confirmar_antes)} si no responde.` : '.');
+      }
+      document.getElementById('del-grupo-titulo').textContent = 'Aún no puedes salir del grupo';
+      document.getElementById('del-grupo-texto').textContent = texto;
+      const conCuentas = Math.abs(saldo) > 0.05;
+      volver.className = conCuentas ? 'btn btn-outline' : 'btn btn-gold';
+      volver.innerHTML = conCuentas ? 'Entendido' : icono('check', 15) + ' Entendido';
+      ok.className = 'btn btn-gold'; ok.style.display = conCuentas ? '' : 'none';
+      ok.innerHTML = icono('billete', 15) + ' Ver cuentas';
+      ok.onclick = () => { cerrarModalBorrar(); irASeccion('sec5', toggleCuentasSection, 'cuentasSectionWrap'); };
+      document.getElementById('modal-borrar-grupo').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      return;
+    }
+    // Sin nada pendiente: la ventana de siempre, con sus botones normales
+    volver.className = 'btn btn-outline'; ok.className = 'btn btn-peligro'; ok.style.display = ''; ok.onclick = ejecutarBorradoFinal;
+
     // Misma ventana para los dos casos, con el texto y los iconos de lo que de verdad pasa
     const salir = otrosConCuenta(g) > 0;
     document.getElementById('del-grupo-titulo').textContent = salir ? '¿Salir del grupo?' : '¿Eliminar grupo?';
