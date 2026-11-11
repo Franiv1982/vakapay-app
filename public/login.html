@@ -1140,8 +1140,13 @@ function checkRegistroFields() {
     btn.disabled = !ok;
 }
 
-// Si el usuario eliminó su cuenta, limpiamos cualquier residuo de token anterior
-if (!localStorage.getItem('intentional_logout')) {
+// Con la sesión abierta (por ejemplo, al pulsar «atrás» en el navegador) no se
+// borra nada: se vuelve directamente a la app. La sesión solo se cierra con
+// «Cerrar sesión» o si el servidor la rechaza.
+if (localStorage.getItem('vp_token')) {
+    location.replace('index.html');
+} else if (!localStorage.getItem('intentional_logout')) {
+    // Sin sesión: limpiamos cualquier residuo anterior (cuenta eliminada, etc.)
     { const _tema = localStorage.getItem('vp_tema'); localStorage.clear(); if (_tema) localStorage.setItem('vp_tema', _tema); }
 }
 
@@ -1164,7 +1169,7 @@ async function iniciarSesion() {
             localStorage.setItem('token', response.token);
         }
 
-        window.location.href = 'index.html';
+        location.replace('index.html');   // sin dejar el login en el historial
         
     } catch (error) {
         console.error("❌ Detalle del fallo:", error);   
