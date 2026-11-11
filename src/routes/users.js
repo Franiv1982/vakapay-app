@@ -1,6 +1,7 @@
 // src/routes/users.js — PostgreSQL
 const express  = require('express');
 const multer   = require('multer');
+const { validarTextoPerfil } = require('../utils/perfil');
 const path     = require('path');
 const fs       = require('fs');
 const db       = require('../db/database');
@@ -61,7 +62,20 @@ router.get('/me', requireAuth, async (req, res, next) => {
 // ── PATCH /users/me ──────────────────────────────────────────────
 router.patch('/me', requireAuth, async (req, res, next) => {
   try {
-    const { nombre, apellido, email, tel, bio } = req.body;
+    const { email, tel } = req.body;
+    // Textos del perfil: tipo y longitud comprobados aquí, no solo en el formulario
+    // Solo se valida lo que cambia: la app reenvía el perfil completo al arrancar y no
+    // debe fallar por datos guardados antes de existir estos límites
+    const guardado = (await db.query('SELECT nombre, apellido, bio FROM users WHERE id = $1', [req.user.id])).rows[0] || {};
+    const textos = {};
+    for (const campo of ['nombre', 'apellido', 'bio']) {
+      const v = req.body[campo];
+      if (typeof v === 'string' && v.trim() === String(guardado[campo] ?? '').trim()) { textos[campo] = undefined; continue; }
+      const r = validarTextoPerfil(campo, v);
+      if (!r.ok) return res.status(400).json({ error: r.error, campo });
+      textos[campo] = r.valor;
+    }
+    const { nombre, apellido, bio } = textos;
     // Datos para cobrar (opcionales); cadena vacía = quitar
     const bizum = normalizarBizum(req.body.pago_bizum);
     if (!bizum.ok) return res.status(400).json({ error: bizum.error });
@@ -98,7 +112,10 @@ router.patch('/me', requireAuth, async (req, res, next) => {
       }
     }
     if (bio      !== undefined) { fields.push(`bio = $${i++}`);      values.push(bio); }
-    if (!fields.length) return res.status(400).json({ error: 'Nada que actualizar' });
+    if (!fields.length) {   // nada cambia (p. ej. el reenvío del perfil al arrancar): se devuelve tal cual
+      const actual = await db.query('SELECT id, nombre, apellido, email, tel, bio, avatar_url, pago_bizum, pago_iban, created_at, updated_at FROM users WHERE id = $1', [req.user.id]);
+      return res.json(actual.rows[0]);
+    }
 
     fields.push(`updated_at = NOW()`);
     values.push(req.user.id);

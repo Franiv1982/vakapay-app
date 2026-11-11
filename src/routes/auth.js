@@ -15,12 +15,18 @@ const emailValido = e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && e.length <= 254
 const MIN_PASSWORD = 8;
 const passwordValida = p => typeof p === 'string' && p.length >= MIN_PASSWORD && p.length <= 200;
 const ERROR_PASSWORD = `La contraseña debe tener al menos ${MIN_PASSWORD} caracteres`;
+const { validarTextoPerfil } = require('../utils/perfil');
 const escHtml = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
 // ── POST /auth/register ──────────────────────────────────────────
 router.post('/register', async (req, res, next) => {
   try {
-    const { nombre = '', apellido = '', password } = req.body;
+    const { password } = req.body;
+    const vNombre = validarTextoPerfil('nombre', req.body.nombre ?? '');
+    if (!vNombre.ok) return res.status(400).json({ error: vNombre.error, campo: 'nombre' });
+    const vApellido = validarTextoPerfil('apellido', req.body.apellido ?? '');
+    if (!vApellido.ok) return res.status(400).json({ error: vApellido.error, campo: 'apellido' });
+    const nombre = vNombre.valor, apellido = vApellido.valor;
     const email = normEmail(req.body.email);
     if (!email || !password) {
       return res.status(400).json({ error: 'Email y contraseña son obligatorios' });
