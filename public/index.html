@@ -6613,17 +6613,27 @@ if (esAppNativa && Capacitor.Plugins.App) {
   Capacitor.Plugins.App.addListener('backButton', manejarAtras);
 } else {
   // Web: el historial del navegador sigue la «profundidad» de la app (Mis grupos → grupo →
-  // chat/gasto → ventana). Chrome ignora los pasos añadidos sin que el usuario haya tocado
-  // nada desde el último «atrás» (protección contra webs que secuestran el botón), así que
-  // los pasos SOLO se añaden justo después de un toque o una tecla del usuario.
+  // chat/gasto → ventana). Chrome tiene una protección contra webs que secuestran el botón
+  // atrás: si la página añade UN solo paso sin que el usuario haya tocado nada desde el
+  // último «atrás», se salta TODOS los pasos de la app. Por eso solo se añaden pasos si
+  // ha habido un toque o tecla del usuario después del último «atrás» (variable «activo»).
   let pasos = 0;           // pasos añadidos por la app encima de la página
   let ignorar = 0;         // «atrás» lanzados por la propia app que no hay que procesar
+  let activo = false;      // toque/tecla del usuario desde el último «atrás»
   let saliendoDeLaWeb = false;
+  // ¿Hay una página anterior a la app en esta pestaña? Si no, no hay a dónde «salir»:
+  // en Mis grupos el atrás del navegador se comporta como en cualquier web.
+  let hayPaginaAnterior = true;
+  try {
+    if (sessionStorage.getItem('vp_hay_anterior') === null)
+      sessionStorage.setItem('vp_hay_anterior', history.length > 1 ? '1' : '0');
+    hayPaginaAnterior = sessionStorage.getItem('vp_hay_anterior') === '1';
+  } catch (_) {}
   const profundidad = () => {
     const ventana = [...document.querySelectorAll('.modal-overlay, #modalLogout')].some(m => getComputedStyle(m).display !== 'none');
     const pagina = (document.querySelector('.page.active') || {}).id;
     const chat = document.getElementById('page-chat')?.classList.contains('active');
-    let d = 1;                                            // 1 = guarda en «Mis grupos» (para «¿Deseas salir?»)
+    let d = hayPaginaAnterior ? 1 : 0;                    // 1 = guarda en «Mis grupos» (para «¿Deseas salir?»)
     if (pagina && pagina !== 'page-grupos') d = 2;        // grupo, Amigos, Estadísticas…
     if (pagina === 'page-gasto' || chat) d = 3;           // dentro del grupo
     return d + (ventana ? 1 : 0);
@@ -6632,31 +6642,35 @@ if (esAppNativa && Capacitor.Plugins.App) {
     if (saliendoDeLaWeb) return;
     const objetivo = profundidad();
     try {
-      while (pasos < objetivo) { history.pushState({ vakapay: pasos + 1 }, ''); pasos++; }
-      if (pasos > objetivo) {   // se volvió con los botones de la app: se quitan los pasos sobrantes
+      if (pasos < objetivo && activo) {
+        while (pasos < objetivo) { history.pushState({ vakapay: pasos + 1 }, ''); pasos++; }
+      } else if (pasos > objetivo) {   // se volvió con los botones de la app: se quitan los pasos sobrantes
         const sobran = pasos - objetivo; ignorar += sobran; pasos = objetivo; history.go(-sobran);
       }
     } catch (_) {}
   };
-  // Tras cada toque o tecla (con margen para las pantallas que tardan en abrir)
+  const marcarActivo = e => { if (e.isTrusted) activo = true; };
+  ['pointerdown', 'touchend', 'keydown'].forEach(t => document.addEventListener(t, marcarActivo, true));
+  // Tras cada toque o tecla, y cada poco por si una pantalla tarda en abrir (o se cambia deslizando)
   const trasInteraccion = () => { setTimeout(sincronizarHistorial, 60); setTimeout(sincronizarHistorial, 900); };
-  document.addEventListener('click', trasInteraccion);
-  document.addEventListener('keyup', e => { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') trasInteraccion(); });
+  ['click', 'touchend', 'keyup'].forEach(t => document.addEventListener(t, trasInteraccion, true));
+  setInterval(sincronizarHistorial, 700);
   window.addEventListener('popstate', () => {
     if (saliendoDeLaWeb) return;
     if (ignorar > 0) { ignorar--; return; }
+    activo = false;                               // Chrome exige un nuevo toque antes de añadir pasos
     pasos = Math.max(0, pasos - 1);
-    if (profundidad() > pasos) manejarAtras();   // un paso de la app por cada «atrás»
+    if (profundidad() > pasos) manejarAtras();    // un paso de la app por cada «atrás»
   });
-  // «Sí, salir» en la web: se sale de verdad (sin cerrar la sesión)
+  // «Sí, salir» en la web: vuelve a la página anterior a la app (sin cerrar la sesión)
   window.salirDeLaWeb = function () {
     cerrarModalSalir();
     saliendoDeLaWeb = true;
     history.go(-(pasos + 1));
-    // Si la app era la primera página de la pestaña, no hay a dónde volver
-    setTimeout(() => {
+    setTimeout(() => {   // si no había a dónde volver
       if (document.visibilityState === 'visible') {
-        saliendoDeLaWeb = false; pasos = 0;
+        saliendoDeLaWeb = false; hayPaginaAnterior = false;
+        try { sessionStorage.setItem('vp_hay_anterior', '0'); } catch (_) {}
         toast('Ya puedes cerrar esta pestaña. Tu sesión sigue abierta.', 'i');
       }
     }, 800);
