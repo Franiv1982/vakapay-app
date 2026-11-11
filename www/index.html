@@ -5712,10 +5712,14 @@ function mostrarModalPendientes(pendientes, tipo) {
   // Cada grupo es un botón que lleva a sus Cuentas finales
   document.getElementById('pendientes-lista').innerHTML = pendientes.map(p => {
     let estado;
-    if (p.por_confirmar && Math.abs(p.balance) <= 0.05) estado = `<span class="pd-estado" style="color:var(--gold-text)">${icono('reloj',13)} ${escaparHtml(p.por_confirmar.para)} debe confirmar tu pago</span>`;
-    else estado = `<span class="pd-estado ${p.balance < 0 ? 'rojo' : 'verde'}">${p.balance < 0 ? 'Debes' : 'Te deben'} ${formatAmountBase(Math.abs(p.balance))}</span>`;
+    // Dos líneas: el nombre del grupo arriba (entero) y el estado debajo
+    if (p.por_confirmar && Math.abs(p.balance) <= 0.05) {
+      const c = p.por_confirmar;
+      estado = `<span class="pd-estado" style="color:var(--gold-text)">${icono('reloj',13)} ${escaparHtml(c.para)} debe confirmar tu pago`
+        + (c.importe ? ` de ${formatAmountBase(c.importe)}` : '') + (c.hasta ? ` (hasta el ${fechaDiaMes(c.hasta)})` : '') + `</span>`;
+    } else estado = `<span class="pd-estado ${p.balance < 0 ? 'rojo' : 'verde'}">${p.balance < 0 ? 'Debes' : 'Te deben'} ${formatAmountBase(Math.abs(p.balance))}</span>`;
     return `<button type="button" class="pd-fila" onclick="irACuentasDeGrupo(${Number(p.id)})" aria-label="${escaparHtml(p.name)}: ver cuentas">
-      <span class="pd-nombre">${escaparHtml(p.name)}</span>${estado}<span class="pd-flecha" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+      <span class="pd-texto"><span class="pd-nombre">${escaparHtml(p.name)}</span>${estado}</span><span class="pd-flecha" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
     </button>`;
   }).join('');
   document.getElementById('modal-pendientes').style.display = 'flex';
@@ -8043,8 +8047,10 @@ body:has(#page-detalle.active) .hbadge{display:none !important}
 /* «Aún no puedes eliminar tu cuenta»: cada grupo pendiente es un botón que lleva a sus cuentas */
 .pd-fila{display:flex;align-items:center;gap:8px;width:100%;min-height:var(--alto-control);padding:8px;background:none;border:none;border-bottom:1px solid var(--line);color:inherit;font:inherit;text-align:left;cursor:pointer;border-radius:var(--r-sm)}
 .pd-fila:last-child{border-bottom:none}
-.pd-nombre{flex:1;min-width:0;color:var(--text);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pd-estado{flex-shrink:0;font-weight:800;font-size:var(--fs-sm)}
+.pd-texto{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.pd-nombre{color:var(--text);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pd-estado{font-weight:800;font-size:var(--fs-sm);line-height:1.35}
+.pd-estado .icono{display:inline-block;vertical-align:-2px;margin-right:2px}
 .pd-flecha{flex-shrink:0;color:var(--muted);display:flex}
 /* Secciones: menos peso, sin mayúsculas */
 .sec-title{margin:14px 0 8px;padding:12px 2px;border-bottom:1px solid var(--tint-1);scroll-margin-top:calc(var(--header-h,52px) + 70px)}
