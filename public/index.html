@@ -2126,6 +2126,8 @@ function pintarTituloGrupo(g) {
   document.getElementById('detTitle').innerHTML = iconoTipo(g.type, 18)
     + '<span class="det-nombre">' + escaparHtml(g.name) + '</span>'
     + '<span class="det-flecha">' + icono('abajo', 18) + '</span>';
+  // Si el chat está abierto (en escritorio queda al costado), pasa al chat del grupo nuevo
+  if (typeof chatAbierto === 'function' && chatAbierto() && g.id && g.id !== _chatGrupoId) cambiarChatDeGrupo();
 }
 
 function toggleGroupDropdown() {
@@ -7413,6 +7415,14 @@ function abrirChat() {
   cargarChat(true);
   clearInterval(_chatTimer);
   _chatTimer = setInterval(() => { if (document.visibilityState === 'visible') cargarChat(); }, 4000);
+}
+// Cambiar de grupo con el chat abierto: se cierra lo que era del grupo anterior
+// (menús, respuesta a medias, adjuntos, texto escrito) y se abre el del nuevo
+function cambiarChatDeGrupo() {
+  cerrarMenuChat(); cerrarDialogoChat(); cancelarRespuestaChat();
+  cerrarAdjuntosChat(); cerrarGifChat(); cerrarFotoPreviaChat(); cerrarVisorChat();
+  const t = document.getElementById('chatTexto'); if (t) { t.value = ''; t.style.height = 'auto'; }
+  abrirChat();
 }
 const esEscritorio = () => window.matchMedia('(min-width: 1100px)').matches;
 function cerrarChat() {
