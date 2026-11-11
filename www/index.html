@@ -6655,7 +6655,27 @@ if (esAppNativa && Capacitor.Plugins.App) {
   const trasInteraccion = () => { setTimeout(sincronizarHistorial, 60); setTimeout(sincronizarHistorial, 900); };
   ['click', 'touchend', 'keyup'].forEach(t => document.addEventListener(t, trasInteraccion, true));
   setInterval(sincronizarHistorial, 700);
+  // Diagnóstico (solo si se abre con «?depurar-atras»): muestra en una esquina lo que ve la app
+  let depurar = false;
+  try {
+    if (location.search.includes('depurar-atras')) sessionStorage.setItem('vp_depurar_atras', '1');
+    depurar = sessionStorage.getItem('vp_depurar_atras') === '1';
+  } catch (_) {}
+  const registro = [];
+  const anotar = txt => {
+    if (!depurar) return;
+    registro.unshift(new Date().toLocaleTimeString('es-ES') + ' ' + txt); registro.length = Math.min(registro.length, 6);
+    let c = document.getElementById('depurarAtras');
+    if (!c) { c = document.createElement('div'); c.id = 'depurarAtras';
+      c.style.cssText = 'position:fixed;left:6px;bottom:70px;z-index:2147483646;background:rgba(0,0,0,.82);color:#9f9;font:11px/1.35 monospace;padding:6px 8px;border-radius:6px;pointer-events:none;max-width:70vw;white-space:pre-wrap';
+      document.body.appendChild(c); }
+    c.textContent = `pasos ${pasos} · prof ${profundidad()} · hist ${history.length} · toque ${activo ? 'sí' : 'no'} · anterior ${hayPaginaAnterior ? 'sí' : 'no'}\n` + registro.join('\n');
+  };
+  if (depurar) setInterval(() => anotar('·'), 1500);
+  const pushOriginal = history.pushState.bind(history);
+  history.pushState = (...a) => { anotar('añade paso' + (activo ? '' : ' SIN TOQUE')); return pushOriginal(...a); };
   window.addEventListener('popstate', () => {
+    anotar('atrás' + (ignorar > 0 ? ' (de la app)' : ''));
     if (saliendoDeLaWeb) return;
     if (ignorar > 0) { ignorar--; return; }
     activo = false;                               // Chrome exige un nuevo toque antes de añadir pasos
