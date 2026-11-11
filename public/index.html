@@ -6612,32 +6612,54 @@ const esAppNativa = !!(window.Capacitor && Capacitor.isNativePlatform && Capacit
 if (esAppNativa && Capacitor.Plugins.App) {
   Capacitor.Plugins.App.addListener('backButton', manejarAtras);
 } else {
-  // Web: la app es una sola página, así que se deja una «entrada de guarda» en el
-  // historial. Al pulsar atrás, el navegador vuelve a la entrada anterior (dentro
-  // de la app); se hace el paso de manejarAtras() y se vuelve a poner la guarda.
+  // Web: el historial del navegador sigue la «profundidad» de la app (Mis grupos → grupo →
+  // chat/gasto → ventana). Chrome ignora los pasos añadidos sin que el usuario haya tocado
+  // nada desde el último «atrás» (protección contra webs que secuestran el botón), así que
+  // los pasos SOLO se añaden justo después de un toque o una tecla del usuario.
+  let pasos = 0;           // pasos añadidos por la app encima de la página
+  let ignorar = 0;         // «atrás» lanzados por la propia app que no hay que procesar
   let saliendoDeLaWeb = false;
-  try {
-    history.replaceState({ vakapay: 'base' }, '');
-    history.pushState({ vakapay: 'guarda' }, '');
-  } catch (_) {}
+  const profundidad = () => {
+    const ventana = [...document.querySelectorAll('.modal-overlay, #modalLogout')].some(m => getComputedStyle(m).display !== 'none');
+    const pagina = (document.querySelector('.page.active') || {}).id;
+    const chat = document.getElementById('page-chat')?.classList.contains('active');
+    let d = 1;                                            // 1 = guarda en «Mis grupos» (para «¿Deseas salir?»)
+    if (pagina && pagina !== 'page-grupos') d = 2;        // grupo, Amigos, Estadísticas…
+    if (pagina === 'page-gasto' || chat) d = 3;           // dentro del grupo
+    return d + (ventana ? 1 : 0);
+  };
+  const sincronizarHistorial = () => {
+    if (saliendoDeLaWeb) return;
+    const objetivo = profundidad();
+    try {
+      while (pasos < objetivo) { history.pushState({ vakapay: pasos + 1 }, ''); pasos++; }
+      if (pasos > objetivo) {   // se volvió con los botones de la app: se quitan los pasos sobrantes
+        const sobran = pasos - objetivo; ignorar += sobran; pasos = objetivo; history.go(-sobran);
+      }
+    } catch (_) {}
+  };
+  // Tras cada toque o tecla (con margen para las pantallas que tardan en abrir)
+  const trasInteraccion = () => { setTimeout(sincronizarHistorial, 60); setTimeout(sincronizarHistorial, 900); };
+  document.addEventListener('click', trasInteraccion);
+  document.addEventListener('keyup', e => { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') trasInteraccion(); });
   window.addEventListener('popstate', () => {
     if (saliendoDeLaWeb) return;
-    manejarAtras();
-    try { history.pushState({ vakapay: 'guarda' }, ''); } catch (_) {}
+    if (ignorar > 0) { ignorar--; return; }
+    pasos = Math.max(0, pasos - 1);
+    if (profundidad() > pasos) manejarAtras();   // un paso de la app por cada «atrás»
   });
   // «Sí, salir» en la web: se sale de verdad (sin cerrar la sesión)
   window.salirDeLaWeb = function () {
     cerrarModalSalir();
     saliendoDeLaWeb = true;
-    history.go(-2);   // la guarda y la base de la app
+    history.go(-(pasos + 1));
     // Si la app era la primera página de la pestaña, no hay a dónde volver
     setTimeout(() => {
       if (document.visibilityState === 'visible') {
-        saliendoDeLaWeb = false;
-        try { history.pushState({ vakapay: 'guarda' }, ''); } catch (_) {}
+        saliendoDeLaWeb = false; pasos = 0;
         toast('Ya puedes cerrar esta pestaña. Tu sesión sigue abierta.', 'i');
       }
-    }, 700);
+    }, 800);
   };
 }
 
