@@ -2103,6 +2103,10 @@ if (groupsChevron) groupsChevron.style.transform = 'rotate(180deg)';
     }
     renderActivity();
   }
+  // El selector de grupo se coloca a mano a la altura de la cabecera de cada
+  // pantalla: si no se recoloca aquí, conserva la altura de cuando estaba oculto
+  // (0 px) y aparece pegado a la línea inferior hasta elegir un grupo
+  requestAnimationFrame(posicionarBadge);
 }
 
 function goBack() {
