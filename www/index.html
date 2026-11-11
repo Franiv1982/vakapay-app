@@ -2036,6 +2036,9 @@ function switchPage(id, btn) {
   const targetPage = document.getElementById(id);
   if (targetPage) targetPage.classList.add('active');
   if (btn) btn.classList.add('active');
+  // El chat es de un grupo: al ir a una pantalla sin grupo (Mis grupos, Amigos, Cuenta)
+  // se cierra; en escritorio, si no, quedaba abierto al costado
+  if (['page-grupos', 'page-amigos', 'page-cuenta'].includes(id) && typeof chatAbierto === 'function' && chatAbierto()) cerrarChat();
   
   window.scrollTo(0, 0);
 resetMemberAccordions();
