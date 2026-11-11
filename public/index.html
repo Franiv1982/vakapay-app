@@ -1216,7 +1216,7 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
         <button class="btn btn-gold" style="width:100%"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button></div>`;
     caja.querySelector('div > div:nth-child(2)').textContent = titulo;
     caja.querySelector('p').textContent = texto;
-    caja.querySelector('button').onclick = () => { window.location.href = 'login.html'; };
+    caja.querySelector('button').onclick = () => { location.replace('login.html'); };
     (document.body || document.documentElement).appendChild(caja);
   }
   window.fetch = async function (...args) {
@@ -1729,7 +1729,7 @@ const skChat = () => [['izq', 62], ['der', 48], ['izq', 70], ['izq', 40], ['der'
     // 1. Verificación robusta del Token
     const token = vakaData.getToken();
     if (!token) {
-        window.location.href = 'login.html';
+        location.replace('login.html');
         return;
     }
 
@@ -1758,7 +1758,7 @@ const skChat = () => [['izq', 62], ['der', 48], ['izq', 70], ['izq', 40], ['der'
     if (sesionRechazada) {
         vakaData.setToken(null);
         localStorage.removeItem('token');
-        window.location.href = 'login.html';
+        location.replace('login.html');
         return;
     }
    
@@ -3973,7 +3973,7 @@ function confirmLogout() {
   
   // Obtiene la ruta base actual y reemplaza el archivo actual por login.html
   const rutaBase = window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-  window.location.href = rutaBase + 'login.html';
+  location.replace(rutaBase + 'login.html');
 }
 
 // ═══ SECCIÓN DE RENDERIZADO CONSOLIDADA ══════════════════════════════
@@ -5774,7 +5774,7 @@ async function ejecutarEliminarCuenta() {
   }
   clearAll();
   { const _tema = localStorage.getItem('vp_tema'); localStorage.clear(); if (_tema) localStorage.setItem('vp_tema', _tema); }
-  window.location.href = 'login.html';
+  location.replace('login.html');
 }
 
 // ═══ MULTI-CURRENCY ══════════════════════════════════════════════════
@@ -6570,9 +6570,10 @@ function openDeleteFromEdit() {
   openDeleteExpenseModal(editingExpenseIdx);
 }
 
-// Captura el botón atrás nativo de Android (API correcta de Capacitor)
-if (window.Capacitor && Capacitor.isNativePlatform() && Capacitor.Plugins.App) {
-  Capacitor.Plugins.App.addListener('backButton', () => {
+// «Atrás»: el mismo recorrido en la APK (botón de Android) y en la web (botón,
+// gesto o tecla de atrás del navegador): ventana → chat → gasto → grupo →
+// Mis grupos → «¿Deseas salir?».
+function manejarAtras() {
     // Chat abierto: primero se cierra su menú/diálogo, después el chat
     if (typeof chatAtras === 'function' && chatAtras()) return;
     // Visores a pantalla completa (comprobante, elegir cámara/galería): se cierran primero
@@ -6605,7 +6606,39 @@ if (window.Capacitor && Capacitor.isNativePlatform() && Capacitor.Plugins.App) {
     } else {
       goBack();
     }
+}
+
+const esAppNativa = !!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
+if (esAppNativa && Capacitor.Plugins.App) {
+  Capacitor.Plugins.App.addListener('backButton', manejarAtras);
+} else {
+  // Web: la app es una sola página, así que se deja una «entrada de guarda» en el
+  // historial. Al pulsar atrás, el navegador vuelve a la entrada anterior (dentro
+  // de la app); se hace el paso de manejarAtras() y se vuelve a poner la guarda.
+  let saliendoDeLaWeb = false;
+  try {
+    history.replaceState({ vakapay: 'base' }, '');
+    history.pushState({ vakapay: 'guarda' }, '');
+  } catch (_) {}
+  window.addEventListener('popstate', () => {
+    if (saliendoDeLaWeb) return;
+    manejarAtras();
+    try { history.pushState({ vakapay: 'guarda' }, ''); } catch (_) {}
   });
+  // «Sí, salir» en la web: se sale de verdad (sin cerrar la sesión)
+  window.salirDeLaWeb = function () {
+    cerrarModalSalir();
+    saliendoDeLaWeb = true;
+    history.go(-2);   // la guarda y la base de la app
+    // Si la app era la primera página de la pestaña, no hay a dónde volver
+    setTimeout(() => {
+      if (document.visibilityState === 'visible') {
+        saliendoDeLaWeb = false;
+        try { history.pushState({ vakapay: 'guarda' }, ''); } catch (_) {}
+        toast('Ya puedes cerrar esta pestaña. Tu sesión sigue abierta.', 'i');
+      }
+    }, 700);
+  };
 }
 
 function cerrarModalSalir() {
@@ -6865,7 +6898,7 @@ function cerrarModalSalir() {
     
     <div style="display:flex; gap:12px; width:100%;">
       <button onclick="cerrarModalSalir()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="14 7 9 12 14 17"/><line x1="21" y1="12" x2="9" y2="12"/></svg> No, volver</button>
-      <button onclick="if(window.Capacitor && Capacitor.Plugins.App) Capacitor.Plugins.App.exitApp()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sí, salir</button>
+      <button type="button" onclick="if(esAppNativa && Capacitor.Plugins.App) Capacitor.Plugins.App.exitApp(); else salirDeLaWeb()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sí, salir</button>
     </div>
   </div>
 </div>
