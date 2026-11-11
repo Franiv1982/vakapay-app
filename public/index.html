@@ -5705,23 +5705,29 @@ async function abrirBorrado(tipo) {
 }
 
 function mostrarModalPendientes(pendientes, tipo) {
-  const sym = SYMBOLS[getBase()] || '€';
+  const accion = tipo === 'cuenta' ? 'eliminar tu cuenta' : 'borrar tus datos';
+  document.getElementById('pendientes-titulo').textContent = `Aún no puedes ${accion}`;
   document.getElementById('pendientes-intro').textContent =
-    `Para ${tipo === 'cuenta' ? 'eliminar tu cuenta' : 'borrar tus datos'} no puedes tener saldos pendientes en grupos compartidos. Divide gastos, no amistades: salda primero estas cuentas.`;
+    `Tienes dinero pendiente en ${pendientes.length === 1 ? 'este grupo' : 'estos grupos'}. Cuando esté saldado, podrás ${accion}.`;
+  // Cada grupo es un botón que lleva a sus Cuentas finales
   document.getElementById('pendientes-lista').innerHTML = pendientes.map(p => {
-    const debes = p.balance < 0;
-    const importe = `${sym}${Math.abs(p.balance).toFixed(2)}`;
-    if (p.por_confirmar && Math.abs(p.balance) <= 0.05) return `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">
-      <span style="color:var(--text);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escaparHtml(p.name)}</span>
-      <span style="flex-shrink:0;font-weight:800;color:var(--gold-text);">${icono('reloj',13)} ${escaparHtml(p.por_confirmar.para)} debe confirmar tu pago</span>
-    </div>`;
-    return `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);">
-      <span style="color:var(--text);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name}</span>
-      <span style="flex-shrink:0;font-weight:800;color:${debes ? '#ff4d4d' : '#3DBA6F'};">${debes ? 'Debes' : 'Te deben'} ${importe}</span>
-    </div>`;
+    let estado;
+    if (p.por_confirmar && Math.abs(p.balance) <= 0.05) estado = `<span class="pd-estado" style="color:var(--gold-text)">${icono('reloj',13)} ${escaparHtml(p.por_confirmar.para)} debe confirmar tu pago</span>`;
+    else estado = `<span class="pd-estado ${p.balance < 0 ? 'rojo' : 'verde'}">${p.balance < 0 ? 'Debes' : 'Te deben'} ${formatAmountBase(Math.abs(p.balance))}</span>`;
+    return `<button type="button" class="pd-fila" onclick="irACuentasDeGrupo(${Number(p.id)})" aria-label="${escaparHtml(p.name)}: ver cuentas">
+      <span class="pd-nombre">${escaparHtml(p.name)}</span>${estado}<span class="pd-flecha" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+    </button>`;
   }).join('');
   document.getElementById('modal-pendientes').style.display = 'flex';
   document.body.style.overflow = 'hidden';
+}
+// Desde «Aún no puedes eliminar tu cuenta»: abre el grupo en Cuentas finales
+async function irACuentasDeGrupo(id) {
+  cerrarModalPendientes();
+  const idx = groups.findIndex(g => String(g.id) === String(id));
+  if (idx < 0) return;
+  await openGroup(idx);
+  setTimeout(() => irASeccion('sec5', toggleCuentasSection, 'cuentasSectionWrap'), 350);
 }
 function cerrarModalPendientes() {
   document.getElementById('modal-pendientes').style.display = 'none';
@@ -7098,9 +7104,9 @@ function tocarBotonGrupos(btn) {
     <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:rgba(255,77,77,.12); display:flex; align-items:center; justify-content:center;">
       <svg style="color:var(--danger)" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     </div>
-    <div style="color:var(--text); font-size:1.4rem; font-weight:700; margin-bottom:10px;">Primero salda tus cuentas</div>
-    <p id="pendientes-intro" style="color:var(--text); font-size:var(--fs-base); margin-bottom:16px; opacity:0.8; line-height:1.4;"></p>
-    <div id="pendientes-lista" style="background:var(--dark4); border-radius:var(--r-lg); padding:6px 14px; margin-bottom:22px; text-align:left; font-size:var(--fs-base); max-height:40vh; overflow-y:auto;"></div>
+    <div id="pendientes-titulo" style="color:var(--text); font-size:var(--fs-xl); font-weight:700; margin-bottom:10px;">Aún no puedes continuar</div>
+    <p id="pendientes-intro" style="color:var(--text2); font-size:var(--fs-base); margin-bottom:16px; line-height:1.45;"></p>
+    <div id="pendientes-lista" style="background:var(--tint-1); border-radius:var(--r-lg); padding:4px 6px; margin-bottom:22px; text-align:left; font-size:var(--fs-base); max-height:40vh; overflow-y:auto;"></div>
     <button onclick="cerrarModalPendientes()" class="btn btn-gold" style="width:100%"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button>
   </div>
 </div>
@@ -8034,6 +8040,12 @@ body:has(#page-detalle.active) .hbadge{display:none !important}
 .rs-botones{display:flex;gap:8px;margin-top:14px}
 .rs-botones .btn{flex:1;padding:12px 8px;font-size:var(--fs-base)}
 .verde{color:var(--success)} .rojo{color:var(--danger)} .gris{color:var(--muted)}
+/* «Aún no puedes eliminar tu cuenta»: cada grupo pendiente es un botón que lleva a sus cuentas */
+.pd-fila{display:flex;align-items:center;gap:8px;width:100%;min-height:var(--alto-control);padding:8px;background:none;border:none;border-bottom:1px solid var(--line);color:inherit;font:inherit;text-align:left;cursor:pointer;border-radius:var(--r-sm)}
+.pd-fila:last-child{border-bottom:none}
+.pd-nombre{flex:1;min-width:0;color:var(--text);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pd-estado{flex-shrink:0;font-weight:800;font-size:var(--fs-sm)}
+.pd-flecha{flex-shrink:0;color:var(--muted);display:flex}
 /* Secciones: menos peso, sin mayúsculas */
 .sec-title{margin:14px 0 8px;padding:12px 2px;border-bottom:1px solid var(--tint-1);scroll-margin-top:calc(var(--header-h,52px) + 70px)}
 .sec-title .num{background:transparent;border:1.5px solid var(--line-strong);color:var(--muted);width:22px;height:22px;font-size:var(--fs-xs)}
