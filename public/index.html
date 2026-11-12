@@ -416,6 +416,29 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 .bar-track{flex:1;height:8px;background:var(--tint-2);border-radius:4px;overflow:hidden}
 .bar-fill{height:100%;border-radius:4px;background:var(--gold);transition:width .5s cubic-bezier(.4,0,.2,1)}
 .bar-val{font-family:var(--font-display);font-size:var(--fs-md);color:var(--gold-text);white-space:nowrap;min-width:48px;text-align:right}
+/* Estadísticas interactivas: tocar una categoría o un pagador muestra sus gastos */
+.stat-sel{width:100%;background:none;border:0;color:var(--text);font-family:var(--font);text-align:left;cursor:pointer;
+  border-radius:var(--r-sm);min-height:var(--alto-control);padding:6px 8px;margin:0 -8px;width:calc(100% + 16px);transition:background .15s,opacity .2s}
+.stat-sel .stat-chev{color:var(--muted);display:flex;transition:transform .2s;flex-shrink:0}
+.stat-sel[aria-expanded="true"]{background:var(--gold-soft)}
+.stat-sel[aria-expanded="true"] .stat-chev{transform:rotate(180deg);color:var(--gold-text)}
+@media (hover:hover){.stat-sel:hover{background:var(--press)}.stat-sel[aria-expanded="true"]:hover{background:var(--gold-soft)}}
+.stats-con-sel .stat-sel[aria-expanded="false"]{opacity:.55}
+button.legend-item{border-bottom:1px solid var(--tint-1)}
+button.bar-row{margin-bottom:2px}
+.stat-detalle{margin:4px 0 10px;padding:4px 0 4px 12px;border-left:2px solid var(--gold-line)}
+.stat-det-cab{font-size:var(--fs-xs);color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:4px 0 6px}
+.stat-gasto{display:flex;align-items:center;gap:10px;width:100%;min-height:var(--alto-control);padding:6px 8px;border:0;border-radius:var(--r-sm);
+  background:none;color:var(--text);font-family:var(--font);text-align:left;cursor:pointer}
+@media (hover:hover){.stat-gasto:hover{background:var(--press)}}
+.stat-gasto:active{background:var(--press)}
+.stat-gasto .exp-ico{width:30px;height:30px}
+.stat-gasto-info{flex:1;min-width:0}
+.stat-gasto-nombre{font-size:var(--fs-base);font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat-gasto-meta{font-size:var(--fs-xs);color:var(--muted);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat-gasto-imp{font-family:var(--font-display);font-size:var(--fs-md);white-space:nowrap}
+#donutSvg circle{transition:opacity .2s,stroke-width .2s}
+#donutSvg circle[data-cat]{cursor:pointer}
 
 /* ── DEUDAS CON PAGO ── */
 .debt-item{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--dark3);border-radius:var(--r-md);margin-bottom:8px;border-left:3px solid var(--gold)}
@@ -2538,6 +2561,13 @@ ${e.es_pago ? `
 }
 
 function goBackToGroup() {
+  // Abierto desde Estadísticas: vuelve allí, con la categoría o el pagador que estaba abierto
+  if (_origenDetalle === 'stats') {
+    _origenDetalle = 'gastos';
+    switchPage('page-stats', document.querySelector('.nav-btn[data-page="page-stats"]'));
+    renderStats();
+    return;
+  }
   switchPage('page-detalle', null);
   document.querySelectorAll('.nav-btn').forEach(b => {
     if (b.dataset.page === 'page-grupos') b.classList.add('active');
@@ -6387,9 +6417,10 @@ function renderStats() {
   // 3. FILTRADO DE GASTOS
   let allExp = [];
   if (g.expenses) {
-    g.expenses.filter(e => !e.es_pago).forEach(e => {   // los pagos no son gastos
+    g.expenses.forEach((e, idx) => {
+      if (e.es_pago) return;                              // los pagos no son gastos
       const baseAmt = convertToBase(e.amount, e.currency || base);
-      allExp.push({...e, baseAmt});
+      allExp.push({...e, baseAmt, idx});
     });
   }
 
@@ -6411,6 +6442,9 @@ function renderStats() {
   }
 
   // 5. LLAMADA A TUS FUNCIONES DE DIBUJO
+  // Lo elegido se mantiene al volver de un gasto, pero no al cambiar de grupo
+  if (_statSel.grupo !== g.id) _statSel = { grupo: g.id, cat: null, payer: null };
+  _statGastos = allExp;
   const catMap = {};
   allExp.forEach(e => { catMap[e.cat] = (catMap[e.cat] || 0) + (Number(e.baseAmt) || 0); });
   renderDonut(catMap, total, sym);
@@ -6438,16 +6472,54 @@ function renderDonut(catMap, total, sym) {
       const dashLen = pct * circumference;
       const color = CAT_COLORS[cat] || '#F5C800';
       const icon = iconoCat(cat, 14);
-      svgContent += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${strokeW}" stroke-dasharray="${dashLen} ${circumference-dashLen}" stroke-dashoffset="${-offset}" stroke-linecap="butt" style="transform:rotate(-90deg);transform-origin:${cx}px ${cy}px"/>`;
+      const sel = _statSel.cat, esta = sel === cat;
+      svgContent += `<circle data-cat="${cat}" onclick="elegirStatCat('${cat}')" cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${esta ? strokeW + 6 : strokeW}" stroke-dasharray="${dashLen} ${circumference-dashLen}" stroke-dashoffset="${-offset}" stroke-linecap="butt" style="transform:rotate(-90deg);transform-origin:${cx}px ${cy}px;opacity:${sel && !esta ? .25 : 1}"/>`;
       offset += dashLen;
-      const catNames={food:'Comida',transport:'Transporte',hotel:'Alojamiento',activity:'Actividad',other:'Otro'};
-      const catLabel = catNames[cat] || cat;
-      legendContent += `<div class="legend-item"><div class="legend-dot" style="background:${color}"></div><span>${icon} ${catLabel}</span><span style="margin-left:auto;font-weight:700;font-size:var(--fs-sm)">${sym}${amt.toFixed(2)}</span><span class="legend-pct">${(pct*100).toFixed(0)}%</span></div>`;
+      const catLabel = CAT_NOMBRES[cat] || cat;
+      const n = _statGastos.filter(e => e.cat === cat).length;
+      legendContent += `<button type="button" class="legend-item stat-sel" onclick="elegirStatCat('${cat}')" aria-expanded="${esta}" aria-label="${catLabel}, ${sym}${amt.toFixed(2)}, ${(pct*100).toFixed(0)}%, ${n} ${n === 1 ? 'gasto' : 'gastos'}"><div class="legend-dot" style="background:${color}"></div><span>${icon} ${catLabel}</span><span style="margin-left:auto;font-weight:700;font-size:var(--fs-sm)">${sym}${amt.toFixed(2)}</span><span class="legend-pct" style="margin-left:0;min-width:34px;text-align:right">${(pct*100).toFixed(0)}%</span><span class="stat-chev">${icono('abajo', 16)}</span></button>`;
+      if (esta) legendContent += detalleStat(_statGastos.filter(e => e.cat === cat), sym, 'cat', catLabel);
     });
   }
   if(cats.length===0) legendContent = '<div style="color:var(--muted);font-size:var(--fs-sm);text-align:center;padding:8px">Sin gastos aún</div>';
   svg.innerHTML = svgContent;
+  svg.setAttribute('aria-hidden', 'true');   // la lista de debajo hace lo mismo y se lee mejor
   legend.innerHTML = legendContent;
+  legend.classList.toggle('stats-con-sel', !!_statSel.cat);
+  // En el centro, lo de la categoría elegida
+  const centro = document.getElementById('donutCenter'), rotulo = centro.nextElementSibling;
+  if (_statSel.cat && catMap[_statSel.cat] != null) {
+    centro.textContent = sym + catMap[_statSel.cat].toFixed(2);
+    if (rotulo) rotulo.textContent = CAT_NOMBRES[_statSel.cat] || _statSel.cat;
+  } else if (rotulo) rotulo.textContent = 'Total';
+}
+
+// ── Estadísticas: desglose al tocar una categoría o un pagador ──
+let _statSel = { grupo: null, cat: null, payer: null };
+let _statGastos = [];
+const CAT_NOMBRES = { food: 'Comida', transport: 'Transporte', hotel: 'Alojamiento', activity: 'Actividad', other: 'Otro' };
+function elegirStatCat(cat) { _statSel.cat = _statSel.cat === cat ? null : cat; renderStats(); }
+function elegirStatPagador(i) {
+  const nombre = (_statPagadores[i] || [])[0];
+  _statSel.payer = _statSel.payer === nombre ? null : nombre; renderStats();
+}
+let _statPagadores = [];
+function detalleStat(lista, sym, tipo, titulo) {
+  const orden = [...lista].sort((a, b) => (b.baseAmt || 0) - (a.baseAmt || 0));
+  const total = orden.reduce((t, e) => t + (Number(e.baseAmt) || 0), 0);
+  const filas = orden.map(e => {
+    const nombre = escaparHtml(e.desc || e.description || 'Sin descripción');
+    const meta = tipo === 'cat'
+      ? `${escaparHtml(e.payer || e.payer_name || '')} · ${fmtDate(e.date || e.expense_date)}`
+      : `${CAT_NOMBRES[e.cat] || 'Otro'} · ${fmtDate(e.date || e.expense_date)}`;
+    return `<button type="button" class="stat-gasto" onclick="openGasto(${e.idx},'stats')">
+      <span class="exp-ico ${CAT_CSS[e.cat] || 'c-other'}">${iconoCat(e.cat, 15)}</span>
+      <span class="stat-gasto-info"><span class="stat-gasto-nombre" style="display:block">${nombre}</span><span class="stat-gasto-meta" style="display:block">${meta}</span></span>
+      <span class="stat-gasto-imp">${sym}${(Number(e.baseAmt) || 0).toFixed(2)}</span></button>`;
+  }).join('');
+  const n = orden.length;
+  return `<div class="stat-detalle" role="region" aria-label="Gastos de ${escaparHtml(titulo)}">
+    <div class="stat-det-cab">${n} ${n === 1 ? 'gasto' : 'gastos'} · ${sym}${total.toFixed(2)}</div>${filas}</div>`;
 }
 
 function renderPayerBars(payerMap, total, sym) {
@@ -6455,12 +6527,18 @@ function renderPayerBars(payerMap, total, sym) {
   const sorted = Object.entries(payerMap).sort((a,b)=>b[1]-a[1]);
   if(sorted.length===0){el.innerHTML='<div style="color:var(--muted);font-size:var(--fs-sm);text-align:center;padding:8px">Sin gastos aún</div>';return;}
   const max = sorted[0][1];
-  el.innerHTML = sorted.map(([name,amt])=>`
-    <div class="bar-row">
-      <div class="bar-name">${name}</div>
+  _statPagadores = sorted;
+  el.classList.toggle('stats-con-sel', !!_statSel.payer);
+  el.innerHTML = sorted.map(([name,amt],i)=>{
+    const esta = _statSel.payer === name;
+    const suyos = _statGastos.filter(e => (e.payer || e.payer_name) === name);
+    return `<button type="button" class="bar-row stat-sel" onclick="elegirStatPagador(${i})" aria-expanded="${esta}" aria-label="${escaparHtml(name)}, pagó ${sym}${amt.toFixed(2)}, ${suyos.length} ${suyos.length === 1 ? 'gasto' : 'gastos'}">
+      <div class="bar-name">${escaparHtml(name)}</div>
       <div class="bar-track"><div class="bar-fill" style="width:${max?((amt/max)*100).toFixed(1):0}%"></div></div>
       <div class="bar-val">${sym}${amt.toFixed(2)}</div>
-    </div>`).join('');
+      <span class="stat-chev">${icono('abajo', 16)}</span>
+    </button>${esta ? detalleStat(suyos, sym, 'payer', name) : ''}`;
+  }).join('');
 }
 
 
