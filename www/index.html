@@ -7148,14 +7148,21 @@ const MAIN_PAGES = ['page-grupos', 'page-amigos', 'page-stats', 'page-actividad'
 // ═══ CÁMARA O GALERÍA ═════════════════════════════════════════════════
 // Cualquier botón que pide una imagen (ticket, comprobante, foto de perfil o de un amigo)
 // muestra primero dos opciones: hacer una foto con la cámara o elegirla de la galería.
+// En el ordenador no hay «Hacer foto»: los navegadores de escritorio ignoran la
+// cámara en estos campos y abren siempre las carpetas. Ahí se va directo a elegir archivo.
 let _inputImagenPendiente = null;
 let _abriendoImagen = false;
+const puedeHacerFoto = () =>
+  esAppNativa ||
+  /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) ||
+  (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);   // iPad con iPadOS
 
 document.addEventListener('click', (e) => {
   const input = e.target;
   if (!input || input.tagName !== 'INPUT' || input.type !== 'file') return;
   if (!/image/.test(input.accept || '')) return;
   if (_abriendoImagen) return;           // la abrimos nosotros tras elegir opción: dejar pasar
+  if (!puedeHacerFoto()) { input.removeAttribute('capture'); return; }   // ordenador: directo a las carpetas
   e.preventDefault();                    // se cancela el selector y se muestran las opciones
   _inputImagenPendiente = input;
   document.getElementById('origenImagenModal').style.display = 'flex';
@@ -7842,6 +7849,9 @@ function alternarAdjuntosChat() {
   const pagina = document.getElementById('page-chat').getBoundingClientRect();
   const entrada = document.querySelector('#page-chat .chat-input').getBoundingClientRect();
   const panel = document.getElementById('chatAdjuntos');
+  // En el ordenador no hay cámara para hacer la foto: solo Galería (las carpetas) y GIF
+  const cam = panel.querySelector('[onclick*="\'camara\'"]');
+  if (cam) cam.style.display = puedeHacerFoto() ? '' : 'none';
   panel.style.bottom = (pagina.bottom - entrada.top + 8) + 'px';
   panel.style.display = 'flex';
   document.getElementById('chatCapaAdj').style.display = 'block';
