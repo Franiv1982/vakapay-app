@@ -47,12 +47,36 @@ app.use(require('./utils/texto').textosSeguros);
 // Cabeceras de seguridad: el navegador no adivina tipos de archivo, la web no se
 // puede meter dentro de otra página (clickjacking) y no se envía la URL a terceros
 app.disable('x-powered-by');
+// Lista de sitios permitidos (CSP): la web solo puede cargar código, imágenes y
+// conexiones de VakaPay y de los servicios que usa. Si algún día se colara algo,
+// el navegador no le dejaría traer código de fuera ni enviar datos a otro sitio.
+//   · 'unsafe-inline': la app usa onclick="…" y style="…" en el HTML (se quitará
+//     cuando esos estilos y eventos pasen a clases; ver issue #65)
+//   · cdn.jsdelivr.net + tessdata.projectnaptha.com + wasm: lector de tickets
+//     en el móvil (Tesseract) cuando el escaneo del servidor no está disponible
+//   · giphy.com: búsqueda y GIF del chat · fonts: tipografías de Google
+// Solo afecta a la web: la APK sirve sus archivos desde el propio móvil.
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn.jsdelivr.net",
+  "worker-src 'self' blob: https://cdn.jsdelivr.net",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' data: https://fonts.gstatic.com",
+  "img-src 'self' data: blob: https://*.giphy.com https://giphy.com",
+  "connect-src 'self' data: blob: https://api.giphy.com https://cdn.jsdelivr.net https://tessdata.projectnaptha.com",
+  "media-src 'self' data: blob: https://*.giphy.com",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join('; ');
 app.use((req, res, next) => {
   res.set({
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     'Strict-Transport-Security': 'max-age=31536000',
+    'Content-Security-Policy': CSP,
   });
   next();
 });
