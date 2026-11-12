@@ -15,6 +15,11 @@
   function aplicar() {
     var claro = pref === 'claro' || (pref === 'auto' && mq && mq.matches);
     document.documentElement.setAttribute('data-theme', claro ? 'light' : 'dark');
+    // APK: que las ventanas de Android (listas de selección, calendario) sigan este tema
+    try {
+      var tn = window.Capacitor && Capacitor.Plugins && Capacitor.Plugins.TemaNativo;
+      if (tn && Capacitor.isNativePlatform && Capacitor.isNativePlatform()) tn.fijar({ modo: pref }).catch(function () {});
+    } catch (_) {}
   }
   aplicar();
   if (mq && mq.addEventListener) mq.addEventListener('change', function () { if (pref === 'auto') aplicar(); });
