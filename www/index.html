@@ -34,6 +34,7 @@
 </script>
 <script src="iconos.js"></script>
 <script src="accesible.js"></script>
+<script src="no-traducir.js"></script>
 <script src="fechas.js"></script>
 <style>
 /* Colores, tipografía, radios, sombras y espaciados: tokens.css */
@@ -1280,6 +1281,10 @@ function normalizeMembersField(rawMembers, fallback) {
 
 // Traduce los gastos del servidor (description, category, payer_name...)
 // a los nombres que usa el frontend (desc, cat, payer...). Sin esto, los iconos salen como 💡.
+// Texto escrito por la gente → seguro para meterlo en HTML (también en atributos).
+// Declarada aquí, al principio, para que exista desde la primera pantalla que se pinta.
+function escaparHtml(t) { return String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
 function normalizeExpensesField(rawExpenses) {
   return (rawExpenses || [])
     .slice()
@@ -2481,7 +2486,7 @@ function openGasto(idx, origen) {
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
       <div class="exp-ico ${e.es_pago ? 'c-other' : CAT_CSS[e.cat]}" style="width:52px;height:52px;">${e.es_pago ? iconoCat('pago', 26) : iconoCat(e.cat, 26)}</div>
       <div>
-        <div style="font-size:var(--fs-lg);font-weight:800;color:var(--text);">${e.desc}</div>
+        <div translate="no" style="font-size:var(--fs-lg);font-weight:800;color:var(--text);">${escaparHtml(e.desc)}</div>
         <div style="font-size:var(--fs-sm);color:var(--muted);">${fmtDate(e.date)}</div>
       </div>
     </div>
@@ -2493,7 +2498,7 @@ function openGasto(idx, origen) {
         ${e.currency !== base ? `<div style="font-size:var(--fs-xs);color:var(--muted);">≈ ${sym}${Number(e.baseAmt).toFixed(2)}</div>` : ''}
       </div>
       <div class="card" style="padding:12px;text-align:center;">
-        <div style="font-size:var(--fs-lg);font-weight:800;color:var(--text);">${e.es_pago ? `${escaparHtml(e.payer)} → ${escaparHtml((e.involved || [])[0] || '')}` : e.payer}</div>
+        <div translate="no" style="font-size:var(--fs-lg);font-weight:800;color:var(--text);">${e.es_pago ? `${escaparHtml(e.payer)} → ${escaparHtml((e.involved || [])[0] || '')}` : escaparHtml(e.payer)}</div>
         <div style="font-size:var(--fs-2xs);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">${e.es_pago ? (pagoPorPago ? 'Deuda' : 'Pagó → Cobró') : 'Pagó'}</div>
       </div>
     </div>
@@ -2504,14 +2509,14 @@ ${e.es_pago ? `
           ? [['Deuda de', e.payer], ['Pagó', pagoPorPago], ['Cobró', (e.involved || [])[0] || ''], ['Registró', registroPago]]
           : [['Pagó', e.payer], ['Cobró', (e.involved || [])[0] || ''], ['Registró', registroPago]])
         .filter(([, v]) => v)
-        .map(([k, v]) => `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--tint-1);font-size:var(--fs-base);"><span style="color:var(--muted);">${k}</span><strong style="color:var(--text);text-align:right;">${escaparHtml(v)}</strong></div>`).join('')}
+        .map(([k, v]) => `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--tint-1);font-size:var(--fs-base);"><span style="color:var(--muted);">${k}</span><strong translate="no" style="color:var(--text);text-align:right;">${escaparHtml(v)}</strong></div>`).join('')}
     </div>
 
 ` : `
     <div class="card" style="padding:12px;margin-bottom:16px;">
       <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text);vertical-align:middle;margin-right:4px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Participantes</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;">
-        ${(e.involved || []).map(p => `<div class="chip" style="font-size:var(--fs-sm);padding:4px 10px;"><div class="av" style="width:20px;height:20px;font-size:var(--fs-2xs);">${p[0].toUpperCase()}</div>${p}</div>`).join('')}
+        ${(e.involved || []).map(p => `<div class="chip" style="font-size:var(--fs-sm);padding:4px 10px;"><div class="av" style="width:20px;height:20px;font-size:var(--fs-2xs);">${escaparHtml(p[0].toUpperCase())}</div>${escaparHtml(p)}</div>`).join('')}
       </div>
     </div>
 
@@ -4462,7 +4467,7 @@ function renderBalances(){
     <div class="bal-row">
       <div style="display:flex;align-items:center;gap:8px">
         <div class="av-s">${n[0].toUpperCase()}</div>
-        <span style="font-weight:700">${n}</span>
+        <span translate="no" style="font-weight:700">${escaparHtml(n)}</span>
       </div>
       <span class="${Number(v) > 0.01 ? 'bal-pos' : Number(v) < -0.01 ? 'bal-neg' : 'bal-zer'}">
         ${Number(v) > 0.01 ? '+' : ''}${sym2}${Number(v || 0).toFixed(2)}
@@ -5457,8 +5462,8 @@ function renderActivity() {
         ${items.map(a => `
           <div class="act-item">
             <div class="act-dot"></div>
-            <div class="act-txt">${a.msg || a.message}
-              <div class="act-time">${formatRelTime(new Date(a.time || a.created_at))}${a.groupName && !filterGroup ? ' · ' + a.groupName : ''}</div>
+            <div class="act-txt">${escaparHtml(a.msg || a.message || '')}
+              <div class="act-time">${formatRelTime(new Date(a.time || a.created_at))}${a.groupName && !filterGroup ? ' · ' + escaparHtml(a.groupName) : ''}</div>
             </div>
           </div>`).join('')}
       </div>
@@ -7453,7 +7458,6 @@ let _chatGrupoId = null, _chatTimer = null, _chatFirma = '', _chatMensajes = [];
 let _chatMenuMsg = null, _chatPulsacion = null;
 let _chatRespuestaA = null;     // id del mensaje al que se está respondiendo
 
-const escaparHtml = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const chatAbierto = () => document.getElementById('page-chat').classList.contains('active');
 
 function apiChat(ruta = '', opciones = {}) {
