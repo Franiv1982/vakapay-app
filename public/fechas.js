@@ -15,8 +15,10 @@
     font-family:var(--font);font-size:var(--fs-base);font-weight:400;display:none;white-space:nowrap}
   .fecha-caja.vacia .fecha-pista{display:block}
   .fecha-caja.vacia input[type="date"]::-webkit-datetime-edit{color:transparent}
-  .fecha-caja.vacia input[type="date"]:focus::-webkit-datetime-edit{color:inherit}
-  .fecha-caja.vacia:focus-within .fecha-pista{display:none}
+  /* Solo se oculta la pista mientras se escribe la fecha con el teclado (ordenador);
+     abrir el calendario y cancelar deja el campo con foco, y antes la pista desaparecía */
+  .fecha-caja.vacia.escribiendo input[type="date"]::-webkit-datetime-edit{color:inherit}
+  .fecha-caja.vacia.escribiendo .fecha-pista{display:none}
   `;
   let nId = 0;
 
@@ -47,6 +49,11 @@
     caja.appendChild(pista);
     inp._fechaCaja = caja;
     ['input', 'change', 'blur'].forEach(t => inp.addEventListener(t, () => pintar(inp)));
+    // Teclas que escriben en el campo (números, flechas, borrar): se muestra lo que se escribe
+    inp.addEventListener('keydown', e => {
+      if (/^[0-9]$|^Arrow|^Backspace$|^Delete$/.test(e.key)) caja.classList.add('escribiendo');
+    });
+    inp.addEventListener('blur', () => caja.classList.remove('escribiendo'));
     vigilar(inp, 'value', () => pintar(inp));
     vigilar(inp, 'valueAsDate', () => pintar(inp));
     pintar(inp);
