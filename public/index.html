@@ -29,6 +29,7 @@
 </script>
 <script src="iconos.js"></script>
 <script src="accesible.js"></script>
+<script src="selectores.js"></script>
 <style>
 /* Colores, tipografía, radios, sombras y espaciados: tokens.css */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -6577,6 +6578,8 @@ function openDeleteFromEdit() {
 // gesto o tecla de atrás del navegador): ventana → chat → gasto → grupo →
 // Mis grupos → «¿Deseas salir?».
 function manejarAtras() {
+    // Lista desplegable abierta (divisa, categoría, quién pagó…): se cierra primero
+    if (typeof cerrarSelectorAbierto === 'function' && cerrarSelectorAbierto()) return;
     // Chat abierto: primero se cierra su menú/diálogo, después el chat
     if (typeof chatAtras === 'function' && chatAtras()) return;
     // Visores a pantalla completa (comprobante, elegir cámara/galería): se cierran primero
@@ -6639,7 +6642,8 @@ if (esAppNativa && Capacitor.Plugins.App) {
     let d = hayPaginaAnterior ? 1 : 0;                    // 1 = guarda en «Mis grupos» (para «¿Deseas salir?»)
     if (pagina && pagina !== 'page-grupos') d = 2;        // grupo, Amigos, Estadísticas…
     if (pagina === 'page-gasto' || chat) d = 3;           // dentro del grupo
-    return d + (ventana ? 1 : 0);
+    const lista = typeof selectorAbierto === 'function' && selectorAbierto();
+    return d + (ventana ? 1 : 0) + (lista ? 1 : 0);
   };
   const sincronizarHistorial = () => {
     if (saliendoDeLaWeb) return;
