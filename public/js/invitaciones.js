@@ -123,12 +123,12 @@ function mostrarModalQuienEres(info, sugerido) {
   document.getElementById('quien-titulo').textContent = `Te uniste a "${info.group.name}"`;
   document.getElementById('quien-opciones').innerHTML = info.sin_cuenta.map(n => `
     <label style="display:flex;align-items:center;gap:10px;padding:12px 12px;border:1.5px solid ${n === marcado ? 'var(--gold)' : '#333'};border-radius:var(--r-md);margin-bottom:8px;cursor:pointer;">
-      <input type="radio" name="quienEres" value="${escaparHtml(n)}" ${n === marcado ? 'checked' : ''} style="accent-color:var(--gold);" onchange="document.querySelectorAll('#quien-opciones label').forEach(l=>l.style.borderColor='var(--line)');this.parentNode.style.borderColor='var(--gold)'">
-      <span style="color:var(--text);font-weight:700;">${escaparHtml(n)}</span>
+      <input class="u-accent-gold" type="radio" name="quienEres" value="${escaparHtml(n)}" ${n === marcado ? 'checked' : ''} onchange="document.querySelectorAll('#quien-opciones label').forEach(l=>l.style.borderColor='var(--line)');this.parentNode.style.borderColor='var(--gold)'">
+      <span class="u-c-text u-fw-700">${escaparHtml(n)}</span>
     </label>`).join('') + `
     <label style="display:flex;align-items:center;gap:10px;padding:12px 12px;border:1.5px solid ${marcado ? '#333' : 'var(--gold)'};border-radius:var(--r-md);cursor:pointer;">
-      <input type="radio" name="quienEres" value="" ${marcado ? '' : 'checked'} style="accent-color:var(--gold);" onchange="document.querySelectorAll('#quien-opciones label').forEach(l=>l.style.borderColor='var(--line)');this.parentNode.style.borderColor='var(--gold)'">
-      <span style="color:var(--text);">Ninguno, soy nuevo <span style="color:var(--muted);">(entrar como ${escaparHtml(info.tu_nombre || 'tu nombre')})</span></span>
+      <input class="u-accent-gold" type="radio" name="quienEres" value="" ${marcado ? '' : 'checked'} onchange="document.querySelectorAll('#quien-opciones label').forEach(l=>l.style.borderColor='var(--line)');this.parentNode.style.borderColor='var(--gold)'">
+      <span class="u-c-text">Ninguno, soy nuevo <span class="u-c-muted">(entrar como ${escaparHtml(info.tu_nombre || 'tu nombre')})</span></span>
     </label>`;
   document.getElementById('modal-quien-eres').style.display = 'flex';
   document.body.style.overflow = 'hidden';

@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="css/chat.css">
 <link rel="stylesheet" href="css/jerarquia.css">
 <link rel="stylesheet" href="css/adaptable.css">
+<link rel="stylesheet" href="css/utilidades.css">
 <script>
 // Tema (oscuro / claro / automático según el móvil). Va aquí, antes de pintar nada, para que no parpadee.
 (function () {
@@ -79,22 +80,22 @@
 
 <!-- ═══════════════════════════════════ PAGE: GRUPOS ═══ -->
 <!-- Indicador de «deslizar hacia abajo para actualizar» -->
-<div id="ptr" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text2);color:var(--text2)"><polyline points="23 4 23 10 17 10" stroke="currentColor"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" stroke="currentColor"/></svg></div>
+<div id="ptr" aria-hidden="true"><svg class="u-c-text2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10" stroke="currentColor"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" stroke="currentColor"/></svg></div>
 
 <div class="page active" id="page-grupos">
   <div class="det-bar">
-    <div style="flex:1;max-width:660px;margin:0 auto;width:100%;padding:0 14px;box-sizing:border-box;">
-      <div class="pg-header" style="margin-bottom:0">Grupos</div>
+    <div class="u-f-1 u-maxw-660 u-m-0-auto u-w-100p u-p-0-14 u-box-border-box">
+      <div class="pg-header u-mb-0">Grupos</div>
     </div>
   </div>
 <main>
-  <div class="sec-title" onclick="toggleGroupsList()" data-controla="groupsListWrap" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between">
-  <div style="display:flex;align-items:center;gap:8px">
+  <div class="sec-title u-cur-pointer u-sel-none u-d-flex u-ai-center u-jc-space-between" onclick="toggleGroupsList()" data-controla="groupsListWrap">
+  <div class="u-d-flex u-ai-center u-gap-8">
     <div class="num">1</div>
     <h2>Mis grupos</h2>
-    <span id="groupsCounter" style="color:var(--gold-text);font-size:var(--fs-md);font-weight:700;margin-left:4px">(0)</span>
+    <span class="u-c-gold-text u-fs-md u-fw-700 u-ml-4" id="groupsCounter">(0)</span>
   </div>
-  <svg id="groupsChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0;transform:rotate(180deg)"><polyline points="6 9 12 15 18 9"/></svg>
+  <svg class="u-tr-transform-_25s u-shrink-0 u-tf-rotate180deg" id="groupsChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
 </div>
 
 <!-- Saved groups list -->
@@ -103,19 +104,19 @@
     <div class="no-items"><div class="ni"><svg class="icono" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div><div>No tienes grupos creados aún</div></div>
   </div>
 </div>
-<button class="btn btn-gold btn-full" style="margin:14px 0 10px" onclick="showNewGroupForm()"><svg class="icono" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Crear nuevo grupo</button>
-<button class="btn btn-outline btn-full" style="margin:0 0 26px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="abrirUnirseConEnlace()">
+<button class="btn btn-gold btn-full u-m-14-0-10" onclick="showNewGroupForm()"><svg class="icono" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Crear nuevo grupo</button>
+<button class="btn btn-outline btn-full u-m-0-0-26 u-d-flex u-ai-center u-jc-center u-gap-8" onclick="abrirUnirseConEnlace()">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
   Unirse con un enlace
 </button>
 
   <!-- New group form (hidden initially) -->
   <div id="newGroupForm" style="display:none">
-    <div class="sec-title" style="margin-top:0">
+    <div class="sec-title u-mt-0">
       <div class="num"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><h2>Nuevo grupo</h2>
     </div>
     <div class="card">
-      <div class="field" style="margin-bottom:16px">
+      <div class="field u-mb-16">
         <label>Tipo de grupo</label>
         <div class="type-grid">
           <div class="type-btn active" data-type="viaje" onclick="selectType(this)"><span class="ti"><svg class="icono" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg></span><span class="tl">Viaje</span></div>
@@ -129,9 +130,9 @@
         <div class="field"><label>Fecha inicio</label><input type="date" id="dateStart"></div>
         <div class="field"><label>Fecha fin</label><input type="date" id="dateEnd"></div>
       </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-outline" onclick="hideNewGroupForm()" style="flex:1">Cancelar</button>
-        <button class="btn btn-gold" id="btnCrearGrupo" onclick="createGroup()" style="flex:1">Crear Grupo</button>
+      <div class="u-d-flex u-gap-8">
+        <button class="btn btn-outline u-f-1" onclick="hideNewGroupForm()">Cancelar</button>
+        <button class="btn btn-gold u-f-1" id="btnCrearGrupo" onclick="createGroup()">Crear Grupo</button>
       </div>
     </div>
   </div>
@@ -139,9 +140,9 @@
 </div>
 
 <!-- ═══════════════════════════════════ PAGE: GRUPO DETALLE ═══ -->
-<div class="page" id="page-detalle" style="min-height:100vh;">
+<div class="page u-minh-100vh" id="page-detalle">
   <div class="det-bar">
-    <div style="flex:1;max-width:660px;margin:0 auto;width:100%;padding:0 14px;box-sizing:border-box;">
+    <div class="u-f-1 u-maxw-660 u-m-0-auto u-w-100p u-p-0-14 u-box-border-box">
       <!-- Una sola línea: volver, nombre del grupo (toca para cambiar de grupo) y menú del grupo -->
       <div class="det-fila">
         <button type="button" class="det-icono" onclick="goBack()" title="Volver a mis grupos" aria-label="Volver"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
@@ -164,37 +165,37 @@
 <div class="det-col det-col-a">
 
   <!-- Participants -->
-  <div class="sec-title" id="sec2" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleParticipantesSection()" data-controla="participantesSectionWrap">
-  <div style="display:flex;align-items:center;gap:8px">
+  <div class="sec-title u-cur-pointer u-sel-none u-ai-center u-jc-space-between" id="sec2" style="display:flex" onclick="toggleParticipantesSection()" data-controla="participantesSectionWrap">
+  <div class="u-d-flex u-ai-center u-gap-8">
     <div class="num">2</div>
     <h2>Participantes</h2>
-    <span id="participantesCounter" style="color:var(--gold-text);font-size:var(--fs-md);font-weight:700;margin-left:4px"></span>
+    <span class="u-c-gold-text u-fs-md u-fw-700 u-ml-4" id="participantesCounter"></span>
   </div>
-  <svg id="participantesChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+  <svg class="u-tr-transform-_25s u-shrink-0" id="participantesChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
 </div>
   <div id="participantesSectionWrap" style="display:none">
   <div class="card">
 
     <!-- En este grupo - desplegable -->
-    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:8px;" onclick="toggleMemberList()" data-controla="memberListWrap">
-      <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
-        En este grupo <span id="memberCount" style="color:var(--gold-text);margin-left:4px;"></span>
+    <div class="u-d-flex u-ai-center u-jc-space-between u-cur-pointer u-mb-8" onclick="toggleMemberList()" data-controla="memberListWrap">
+      <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700">
+        <svg class="u-va-middle u-mr-4" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+        En este grupo <span class="u-c-gold-text u-ml-4" id="memberCount"></span>
       </div>
-      <svg id="memberChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text);transition:transform .2s"><polyline points="6 9 12 15 18 9"/></svg>
+      <svg class="u-c-text u-tr-transform-_2s" id="memberChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
-    <div id="memberListWrap" style="display:none;margin-bottom:12px;">
-      <div class="chips" id="memberChips"><span style="color:var(--muted);font-size:var(--fs-sm)">Sin participantes aún...</span></div>
+    <div class="u-mb-12" id="memberListWrap" style="display:none">
+      <div class="chips" id="memberChips"><span class="u-c-muted u-fs-sm">Sin participantes aún...</span></div>
     </div>
 
-    <div class="dvd" style="margin:10px 0"></div>
+    <div class="dvd u-m-10-0"></div>
 
     <!-- Añadir participantes -->
-    <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:10px;">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+    <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-mb-10">
+      <svg class="u-va-middle u-mr-4" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
       Añadir participante
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:10px;">
+    <div class="u-d-flex u-gap-8 u-mb-10">
       <button type="button" class="btn btn-outline btn-metodo" onclick="toggleFriendPicker()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Mis amigos
@@ -208,21 +209,21 @@
         Manual
       </button>
     </div>
-    <button type="button" class="btn btn-outline btn-full" style="margin:0 0 10px" onclick="abrirInvitar()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Invitar con enlace</button>
+    <button type="button" class="btn btn-outline btn-full u-m-0-0-10" onclick="abrirInvitar()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Invitar con enlace</button>
 
     <!-- Panel amigos -->
-    <div id="friendPickerWrap" style="display:none;margin-bottom:10px;">
-      <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px;">Seleccionar de mis amigos</div>
-      <div id="friendPickerChips" style="display:flex;flex-wrap:wrap;gap:8px;">
-        <span style="color:var(--muted);font-size:var(--fs-sm)">Ve a Amigos y añade contactos primero</span>
+    <div class="u-mb-10" id="friendPickerWrap" style="display:none">
+      <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-mb-8">Seleccionar de mis amigos</div>
+      <div class="u-wrap-wrap u-gap-8" id="friendPickerChips" style="display:flex">
+        <span class="u-c-muted u-fs-sm">Ve a Amigos y añade contactos primero</span>
       </div>
     </div>
 
     <!-- Panel manual -->
     <div id="manualAddWrap" style="display:none;">
       <div class="add-row">
-        <div class="field" style="margin-bottom:0"><input type="text" id="memberName" maxlength="20" placeholder="Nombre del participante" oninput="this.value=this.value.slice(0,20)" onkeydown="if(event.key==='Enter')addMember()"></div>
-        <button class="btn btn-gold" style="flex-shrink:0" onclick="addMember()">+ Añadir</button>
+        <div class="field u-mb-0"><input type="text" id="memberName" maxlength="20" placeholder="Nombre del participante" oninput="this.value=this.value.slice(0,20)" onkeydown="if(event.key==='Enter')addMember()"></div>
+        <button class="btn btn-gold u-shrink-0" onclick="addMember()">+ Añadir</button>
       </div>
     </div>
 
@@ -230,12 +231,12 @@
 </div>
 
   <!-- Registrar Gasto -->
-<div class="sec-title" id="sec3" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleGastoSection()" data-controla="gastoSectionWrap">
-  <div style="display:flex;align-items:center;gap:8px">
+<div class="sec-title u-cur-pointer u-sel-none u-ai-center u-jc-space-between" id="sec3" style="display:flex" onclick="toggleGastoSection()" data-controla="gastoSectionWrap">
+  <div class="u-d-flex u-ai-center u-gap-8">
     <div class="num">3</div>
     <h2>Registrar gasto</h2>
   </div>
-  <svg id="gastoChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+  <svg class="u-tr-transform-_25s u-shrink-0" id="gastoChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
 </div>
 
   <div id="gastoSectionWrap" style="display:none">
@@ -281,31 +282,31 @@
     </div>
     <div class="field">
       <label>Fecha</label>
-      <input type="date" id="expDate" style="width:100%;">
+      <input class="u-w-100p" type="date" id="expDate">
     </div>
     <div class="field">
       <label>Ticket</label>
-      <div style="display:flex;align-items:center;justify-content:center;position:relative;">
-        <button type="button" id="ocrBtn" onclick="toggleOcrPopover()"
+      <div class="u-d-flex u-ai-center u-jc-center u-pos-relative">
+        <button class="u-pos-relative u-w-100p u-minh-alto-control u-bg-xbdf8a u-b-xc194b u-r-md u-p-10 u-cur-pointer u-c-gold-text u-tr-background-_2s u-ai-center u-jc-center u-gap-8" type="button" id="ocrBtn" onclick="toggleOcrPopover()"
           title="Adjuntar ticket"
-          style="position:relative;width:100%;min-height:var(--alto-control);background:rgba(245,200,0,.1);border:1px solid rgba(245,200,0,.3);border-radius:var(--r-md);padding:10px;cursor:pointer;color:var(--gold-text);transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px;">
+          style="display:flex">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-          <span style="font-size:var(--fs-sm);font-weight:700;">Adjuntar</span>
-          <span id="ocrDot" style="display:none;position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--success);border-radius:50%;border:1.5px solid var(--dark);"></span>
+          <span class="u-fs-sm u-fw-700">Adjuntar</span>
+          <span class="u-pos-absolute u-top-4 u-right-4 u-w-7 u-h-7 u-bg-success u-r-50p u-b-1_5-solid-dark" id="ocrDot" style="display:none"></span>
         </button>
         <input type="file" id="ocrFile" accept="image/*" style="display:none" onchange="handleOCRFile(event)">
         <!-- Popover -->
-        <div id="ocrPopover" style="display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:8000;background:var(--dark3);border:1px solid var(--border);border-radius:var(--r-md);padding:10px;width:220px;max-width:calc(100vw - 32px);box-sizing:border-box;box-shadow:var(--shadow);">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <img id="ocrPreview" alt="Foto del ticket" style="width:36px;height:36px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border);flex-shrink:0;">
-            <div style="flex:1;min-width:0;">
-              <div id="ocrFileName" style="color:var(--text);font-size:var(--fs-xs);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-              <div id="ocrLoading" style="display:none;color:var(--gold-text);font-size:var(--fs-2xs);"><span class="ocr-spinner" style="display:inline-block;width:10px;height:10px;vertical-align:-1px;"></span> Extrayendo...</div>
-              <div id="ocrSuccess" style="display:none;color:var(--success);font-size:var(--fs-2xs);"><svg class="icono" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Datos extraídos</div>
+        <div class="u-pos-absolute u-top-xeaba4 u-right-0 u-z-8000 u-bg-dark3 u-b-1-solid-border u-r-md u-p-10 u-w-220 u-maxw-x9e4af u-box-border-box u-sh-shadow" id="ocrPopover" style="display:none">
+          <div class="u-d-flex u-ai-center u-gap-8">
+            <img class="u-w-36 u-h-36 u-fit-cover u-r-sm u-b-1-solid-border u-shrink-0" id="ocrPreview" alt="Foto del ticket">
+            <div class="u-f-1 u-minw-0">
+              <div class="u-c-text u-fs-xs u-fw-700 u-ws-nowrap u-ov-hidden u-tov-ellipsis" id="ocrFileName"></div>
+              <div class="u-c-gold-text u-fs-2xs" id="ocrLoading" style="display:none"><span class="ocr-spinner u-d-inline-block u-w-10 u-h-10 u-va-1"></span> Extrayendo...</div>
+              <div class="u-c-success u-fs-2xs" id="ocrSuccess" style="display:none"><svg class="icono" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Datos extraídos</div>
             </div>
-            <button onclick="clearOCR()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:var(--fs-base);flex-shrink:0;" title="Quitar" aria-label="Quitar"><svg class="icono" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+            <button class="u-bg-none u-b-none u-c-danger u-cur-pointer u-fs-base u-shrink-0" onclick="clearOCR()" title="Quitar" aria-label="Quitar"><svg class="icono" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
           </div>
-          <button onclick="document.getElementById('ocrFile').click()" style="width:100%;margin-top:8px;background:rgba(245,200,0,.08);border:1px solid rgba(245,200,0,.2);border-radius:var(--r-sm);padding:4px;color:var(--gold-text);font-size:var(--fs-xs);cursor:pointer;font-weight:700;">
+          <button class="u-w-100p u-mt-8 u-bg-x6ed30 u-b-x1b470 u-r-sm u-p-4 u-c-gold-text u-fs-xs u-cur-pointer u-fw-700" onclick="document.getElementById('ocrFile').click()">
             <svg class="icono" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Cambiar archivo
           </button>
         </div>
@@ -314,28 +315,28 @@
   </div>
 
   <div class="field">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-      <label style="margin-bottom:0">¿Para quiénes?</label>
-      <button class="btn btn-sm btn-outline" onclick="toggleSelectAll()" id="btnSelectAll" style="font-size:var(--fs-xs);padding:4px 10px"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Todos</button>
+    <div class="u-d-flex u-ai-center u-jc-space-between u-mb-8">
+      <label class="u-mb-0">¿Para quiénes?</label>
+      <button class="btn btn-sm btn-outline u-fs-xs u-p-4-10" onclick="toggleSelectAll()" id="btnSelectAll"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Todos</button>
     </div>
-    <div class="chips" id="involvedChips" style="margin-top:4px">
-      <span style="color:var(--muted);font-size:var(--fs-sm)">Primero añade participantes</span>
+    <div class="chips u-mt-4" id="involvedChips">
+      <span class="u-c-muted u-fs-sm">Primero añade participantes</span>
     </div>
   </div>
 
-  <div style="height:8px"></div>
+  <div class="u-h-8"></div>
   <button class="btn btn-gold btn-full" id="btnGuardarGasto" onclick="addExpense()">Guardar Gasto</button>
 </div>
 </div>
 
   <!-- Expense list -->
-  <div class="sec-title" id="sec4" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleGastosListSection()" data-controla="gastosListSectionWrap">
-  <div style="display:flex;align-items:center;gap:8px">
+  <div class="sec-title u-cur-pointer u-sel-none u-ai-center u-jc-space-between" id="sec4" style="display:flex" onclick="toggleGastosListSection()" data-controla="gastosListSectionWrap">
+  <div class="u-d-flex u-ai-center u-gap-8">
     <div class="num">4</div>
     <h2>Lista de gastos</h2>
-    <span id="gastosCounter" style="color:var(--gold-text);font-size:var(--fs-md);font-weight:700;margin-left:4px"></span>
+    <span class="u-c-gold-text u-fs-md u-fw-700 u-ml-4" id="gastosCounter"></span>
   </div>
-  <svg id="gastosListChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+  <svg class="u-tr-transform-_25s u-shrink-0" id="gastosListChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
 </div>
   <div id="gastosListSectionWrap" style="display:none">
   <div class="card">
@@ -343,40 +344,40 @@
       <div class="stat-box"><div class="stat-v" id="statTotal">$0</div><div class="stat-l">Total</div></div>
       <div class="stat-box"><div class="stat-v" id="statPP">$0</div><div class="stat-l">Por persona</div></div>
     </div>
-    <div id="expenseList"><div class="no-items"><div class="ni"><svg style="color:var(--text)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div>Sin gastos registrados</div></div></div>
+    <div id="expenseList"><div class="no-items"><div class="ni"><svg class="u-c-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div>Sin gastos registrados</div></div></div>
   </div>
 </div>
 
 </div><!-- /det-col-a -->
 <div class="det-col det-col-b">
   <!-- Settlement -->
-  <div class="sec-title" id="sec5" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleCuentasSection()" data-controla="cuentasSectionWrap">
-  <div style="display:flex;align-items:center;gap:8px">
+  <div class="sec-title u-cur-pointer u-sel-none u-ai-center u-jc-space-between" id="sec5" style="display:flex" onclick="toggleCuentasSection()" data-controla="cuentasSectionWrap">
+  <div class="u-d-flex u-ai-center u-gap-8">
     <div class="num">5</div>
     <h2>Cuentas finales</h2>
   </div>
-  <svg id="cuentasChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+  <svg class="u-tr-transform-_25s u-shrink-0" id="cuentasChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
 </div>
   <div id="cuentasSectionWrap" style="display:none">
   <div class="card">
-    <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px">Balance</div>
-    <div id="balanceList"><div class="no-items"><div class="ni"><svg style="color:var(--text)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div>Sin datos</div></div></div>
+    <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-mb-8">Balance</div>
+    <div id="balanceList"><div class="no-items"><div class="ni"><svg class="u-c-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div>Sin datos</div></div></div>
     <div class="dvd"></div>
-    <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:10px">Quién paga a quién</div>
+    <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-mb-10">Quién paga a quién</div>
     <div id="debtList"><div class="no-items"><div class="ni"><svg class="icono" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg></div><div>Pulsa calcular para ver</div></div></div>
-    <div style="height:10px"></div>
+    <div class="u-h-10"></div>
     <button class="btn btn-outline btn-full" id="btnCalcularDeudas" onclick="calcDebts()"><svg class="icono" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Actualizar cuentas</button>
   </div>
 </div>
 
   <!-- Share -->
-  <div class="sec-title" id="secPagos" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="togglePagosSection()" data-controla="pagosSectionWrap">
-  <div style="display:flex;align-items:center;gap:8px">
+  <div class="sec-title u-cur-pointer u-sel-none u-ai-center u-jc-space-between" id="secPagos" style="display:flex" onclick="togglePagosSection()" data-controla="pagosSectionWrap">
+  <div class="u-d-flex u-ai-center u-gap-8">
     <div class="num">6</div>
     <h2>Pagos realizados</h2>
-    <span id="pagosCounter" style="color:var(--gold-text);font-size:var(--fs-md);font-weight:700;margin-left:4px"></span>
+    <span class="u-c-gold-text u-fs-md u-fw-700 u-ml-4" id="pagosCounter"></span>
   </div>
-  <svg id="pagosChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+  <svg class="u-tr-transform-_25s u-shrink-0" id="pagosChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
 </div>
   <div id="pagosSectionWrap" style="display:none">
   <div class="card">
@@ -384,32 +385,32 @@
   </div>
 </div>
 
-  <div class="sec-title" id="sec6" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="toggleResumenSection()" data-controla="resumenSectionWrap">
-  <div style="display:flex;align-items:center;gap:8px">
+  <div class="sec-title u-cur-pointer u-sel-none u-ai-center u-jc-space-between" id="sec6" style="display:flex" onclick="toggleResumenSection()" data-controla="resumenSectionWrap">
+  <div class="u-d-flex u-ai-center u-gap-8">
     <div class="num">7</div>
     <h2>Compartir resumen</h2>
   </div>
-  <svg id="resumenChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;flex-shrink:0"><polyline points="6 9 12 15 18 9"/></svg>
+  <svg class="u-tr-transform-_25s u-shrink-0" id="resumenChevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
 </div>
   <div id="resumenSectionWrap" style="display:none">
   <div class="card">
-    <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:8px">Resumen de cuentas</div>
-    <div id="resumenVista" style="background:var(--dark2);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 12px;color:var(--text2);font-size:var(--fs-sm);line-height:1.5;margin-bottom:14px;white-space:pre-line;max-height:180px;overflow:auto;"></div>
-    <button type="button" class="btn btn-gold btn-full" style="margin-bottom:10px" onclick="compartirResumen()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Compartir resumen</button>
-    <div style="display:flex;gap:10px">
-      <button type="button" class="btn btn-whatsapp" style="flex:1" onclick="abrirWhatsApp(textoResumen())"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.6-1.3a.4.4 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg> WhatsApp</button>
-      <button type="button" class="btn btn-outline" style="flex:1" onclick="exportarPDF()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PDF</button>
+    <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-mb-8">Resumen de cuentas</div>
+    <div class="u-bg-dark2 u-b-1-solid-line u-r-md u-p-10-12 u-c-text2 u-fs-sm u-lh-1_5 u-mb-14 u-ws-pre-line u-maxh-180 u-ov-auto" id="resumenVista"></div>
+    <button type="button" class="btn btn-gold btn-full u-mb-10" onclick="compartirResumen()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Compartir resumen</button>
+    <div class="u-d-flex u-gap-10">
+      <button type="button" class="btn btn-whatsapp u-f-1" onclick="abrirWhatsApp(textoResumen())"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.6-1.3a.4.4 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg> WhatsApp</button>
+      <button type="button" class="btn btn-outline u-f-1" onclick="exportarPDF()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> PDF</button>
     </div>
   </div>
 </div>
 
-<div class="sec-title" id="sec7" style="cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between" onclick="abrirChat()">
-  <div style="display:flex;align-items:center;gap:8px">
+<div class="sec-title u-cur-pointer u-sel-none u-ai-center u-jc-space-between" id="sec7" style="display:flex" onclick="abrirChat()">
+  <div class="u-d-flex u-ai-center u-gap-8">
     <div class="num">8</div>
     <h2>Chat del grupo</h2>
-    <span id="chatBadge" style="display:none;background:var(--danger-strong);color:#fff;font-size:var(--fs-xs);font-weight:900;border-radius:var(--r-md);padding:2px 8px;margin-left:2px;"></span>
+    <span class="u-bg-danger-strong u-c-fff u-fs-xs u-fw-900 u-r-md u-p-2-8 u-ml-2" id="chatBadge" style="display:none"></span>
   </div>
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+  <svg class="u-shrink-0" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
 </div>
 </div><!-- /det-col-b -->
 </main>
@@ -417,12 +418,12 @@
 <!-- ═══ PAGE: DETALLE GASTO ═══ -->
 <div class="page" id="page-gasto">
   <div class="det-bar">
-    <div style="flex:1;max-width:660px;margin:0 auto;width:100%;padding:0 14px;box-sizing:border-box;">
-      <div style="display:flex;align-items:center;gap:6px;">
+    <div class="u-f-1 u-maxw-660 u-m-0-auto u-w-100p u-p-0-14 u-box-border-box">
+      <div class="u-d-flex u-ai-center u-gap-6">
         <button type="button" class="det-icono" onclick="goBackToGroup()" title="Volver al grupo" aria-label="Volver al grupo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>
-        <div style="overflow:hidden;">
-          <div class="pg-header" id="gastoTitle" style="margin-bottom:0;font-size:var(--fs-lg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
-          <div style="font-size:var(--fs-xs);color:var(--muted)" id="gastoMeta"></div>
+        <div class="u-ov-hidden">
+          <div class="pg-header u-mb-0 u-fs-lg u-ws-nowrap u-ov-hidden u-tov-ellipsis" id="gastoTitle"></div>
+          <div class="u-fs-xs u-c-muted" id="gastoMeta"></div>
         </div>
       </div>
     </div>
@@ -434,16 +435,16 @@
 <!-- ═══════════════════════════════════ PAGE: AMIGOS ═══ -->
 <div class="page" id="page-amigos">
   <div class="det-bar">
-    <div style="flex:1;max-width:660px;margin:0 auto;width:100%;padding:0 14px;box-sizing:border-box;">
-      <div class="pg-header" style="margin-bottom:0">Amigos</div>
-      <div class="pg-sub" style="margin:0; color:var(--text);">Contactos con quienes compartes gastos</div>
+    <div class="u-f-1 u-maxw-660 u-m-0-auto u-w-100p u-p-0-14 u-box-border-box">
+      <div class="pg-header u-mb-0">Amigos</div>
+      <div class="pg-sub u-m-0 u-c-text">Contactos con quienes compartes gastos</div>
     </div>
   </div>
 <main>
-  <div class="card" style="margin-bottom:14px">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">
-      <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;"><svg class="icono" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg> Nuevo amigo</div>
-      <button type="button" id="btnAmigoContactos" onclick="rellenarAmigoDesdeContactos()" style="display:none;background:var(--dark3);border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 12px;color:var(--text);font-size:var(--fs-sm);cursor:pointer;align-items:center;gap:6px;">
+  <div class="card u-mb-14">
+    <div class="u-d-flex u-ai-center u-jc-space-between u-gap-10 u-mb-12">
+      <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700"><svg class="icono" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg> Nuevo amigo</div>
+      <button class="u-bg-dark3 u-b-1-solid-line u-r-sm u-p-8-12 u-c-text u-fs-sm u-cur-pointer u-ai-center u-gap-6" type="button" id="btnAmigoContactos" onclick="rellenarAmigoDesdeContactos()" style="display:none">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         Contactos
       </button>
@@ -468,20 +469,20 @@
     </div>
     <button class="btn btn-gold btn-full" onclick="addFriend()">+ Añadir Amigo</button>
   </div>
-  <div id="friendsList"><div class="no-items"><div class="ni"><svg style="color:var(--text)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div>Sin amigos añadidos aún</div></div></div>
+  <div id="friendsList"><div class="no-items"><div class="ni"><svg class="u-c-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div>Sin amigos añadidos aún</div></div></div>
 </main>
 </div>
 
 <!-- ═══════════════════════════════════ PAGE: ACTIVIDAD ═══ -->
 <div class="page" id="page-actividad">
   <div class="det-bar">
-    <div style="flex:1;max-width:660px;margin:0 auto;width:100%;padding:0 14px;box-sizing:border-box;">
-      <div class="pg-header" style="margin-bottom:0">Actividad</div>
-      <div class="pg-sub" id="activitySubtitle" style="margin:0">Últimas acciones en tus grupos</div>
+    <div class="u-f-1 u-maxw-660 u-m-0-auto u-w-100p u-p-0-14 u-box-border-box">
+      <div class="pg-header u-mb-0">Actividad</div>
+      <div class="pg-sub u-m-0" id="activitySubtitle">Últimas acciones en tus grupos</div>
     </div>
   </div>
 <main>
-  <div id="activityList"><div class="no-items"><div class="ni"><svg style="color:var(--text)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div>Sin actividad reciente</div></div></div>
+  <div id="activityList"><div class="no-items"><div class="ni"><svg class="u-c-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div>Sin actividad reciente</div></div></div>
 </main>
 </div>
 
@@ -499,33 +500,33 @@
   </div>
 
   <div class="card">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Mis Datos</div>
-      <button id="btnEditProfile" class="btn btn-outline btn-sm" onclick="toggleEditProfile()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar</button>
+    <div class="u-d-flex u-ai-center u-jc-space-between u-mb-12">
+      <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700"><svg class="u-va-middle u-mr-4" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Mis Datos</div>
+      <button id="btnEditProfile" class="btn btn-outline btn-sm" onclick="toggleEditProfile()"><svg class="u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar</button>
     </div>
 
     <!-- MODO LECTURA -->
     <div id="profileReadMode">
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div style="display:flex;justify-content:space-between;font-size:var(--fs-base);">
-          <span style="color:var(--muted)">Nombre</span>
-          <span id="readNombre" style="font-weight:700;color:var(--text)">—</span>
+      <div class="u-d-flex u-dir-column u-gap-10">
+        <div class="u-d-flex u-jc-space-between u-fs-base">
+          <span class="u-c-muted">Nombre</span>
+          <span class="u-fw-700 u-c-text" id="readNombre">—</span>
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:var(--fs-base);">
+        <div class="u-d-flex u-jc-space-between u-fs-base">
           
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:var(--fs-base);">
-          <span style="color:var(--muted)">Email</span>
-          <span id="readEmail" style="font-weight:700;color:var(--text)">—</span>
+        <div class="u-d-flex u-jc-space-between u-fs-base">
+          <span class="u-c-muted">Email</span>
+          <span class="u-fw-700 u-c-text" id="readEmail">—</span>
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:var(--fs-base);">
-          <span style="color:var(--muted)">Teléfono</span>
-          <span id="readTel" style="font-weight:700;color:var(--text)">—</span>
+        <div class="u-d-flex u-jc-space-between u-fs-base">
+          <span class="u-c-muted">Teléfono</span>
+          <span class="u-fw-700 u-c-text" id="readTel">—</span>
         </div>
         
-        <div style="display:flex;justify-content:space-between;font-size:var(--fs-base);">
-          <span style="color:var(--muted)">Cobros</span>
-          <span id="readCobro" style="font-weight:700;color:var(--text);text-align:right;max-width:60%">—</span>
+        <div class="u-d-flex u-jc-space-between u-fs-base">
+          <span class="u-c-muted">Cobros</span>
+          <span class="u-fw-700 u-c-text u-t-right u-maxw-60p" id="readCobro">—</span>
         </div>
       </div>
     </div>
@@ -535,11 +536,11 @@
       <div class="field"><label>Nombre</label><input type="text" id="profNombre" minlength="2" maxlength="40" placeholder="Tu nombre completo" oninput="updateProfilePreview()"></div>
       <div class="field"><label>Email</label><input type="email" id="profEmail" placeholder="tu@email.com" oninput="updateProfilePreview()"></div>
       <div class="field"><label>Teléfono</label><input type="tel" id="profTel" placeholder="+34 600 000 000"></div>
-      <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin:14px 0 4px;">Cómo quieres cobrar (opcional)</div>
-      <div style="font-size:var(--fs-sm);color:var(--muted);margin-bottom:10px;line-height:1.4;">Solo lo verán quienes te deban dinero en tus grupos, al pulsar «Pagar».</div>
+      <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-m-14-0-4">Cómo quieres cobrar (opcional)</div>
+      <div class="u-fs-sm u-c-muted u-mb-10 u-lh-1_4">Solo lo verán quienes te deban dinero en tus grupos, al pulsar «Pagar».</div>
       <div class="field"><label>Teléfono para Bizum</label><input type="tel" id="profBizum" inputmode="tel" placeholder="ej: 600 000 000"></div>
       <div class="field"><label>IBAN para transferencias</label><input type="text" id="profIban" autocapitalize="characters" placeholder="ej: ES00 0000 0000 0000 0000 0000" oninput="this.value=this.value.toUpperCase()"></div>
-      <div style="display:flex;gap:10px;margin-top:8px;">
+      <div class="u-d-flex u-gap-10 u-mt-8">
         <button class="btn btn-outline btn-full" onclick="toggleEditProfile()">Cancelar</button>
         <button class="btn btn-gold btn-full" onclick="saveProfile()">Guardar</button>
       </div>
@@ -548,28 +549,28 @@
     
   </div>
 
-  <div class="card" style="margin-top:12px">
-    <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Mis Estadísticas</div>
+  <div class="card u-mt-12">
+    <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-mb-12"><svg class="u-va-middle u-mr-4" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Mis Estadísticas</div>
     <div class="stat-row">
       <div class="stat-box"><div class="stat-v" id="statGroups">0</div><div class="stat-l">Grupos</div></div>
       <div class="stat-box"><div class="stat-v" id="statFriends">0</div><div class="stat-l">Amigos</div></div>
     </div>
   </div>
 
-  <div class="card" style="margin-top:12px">
-    <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px"><svg class="icono" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Apariencia</div>
+  <div class="card u-mt-12">
+    <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-mb-12 u-d-flex u-ai-center u-gap-6"><svg class="icono" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Apariencia</div>
     <div class="selector-tema" role="radiogroup" aria-label="Apariencia">
       <button type="button" data-tema-opcion="auto" onclick="cambiarTema('auto')">Automático</button>
       <button type="button" data-tema-opcion="oscuro" onclick="cambiarTema('oscuro')">Oscuro</button>
       <button type="button" data-tema-opcion="claro" onclick="cambiarTema('claro')">Claro</button>
     </div>
-    <div style="font-size:var(--fs-xs);color:var(--muted);margin-top:8px">Automático sigue el modo del móvil.</div>
+    <div class="u-fs-xs u-c-muted u-mt-8">Automático sigue el modo del móvil.</div>
   </div>
 
-  <div class="card" style="margin-top:12px">
-    <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Opciones</div>
+  <div class="card u-mt-12">
+    <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-mb-12"><svg class="u-va-middle u-mr-4" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Opciones</div>
     <button class="btn btn-outline btn-full" onclick="handleLogout()">Cerrar sesión</button>
-    <div style="display:flex;justify-content:center;gap:18px;margin-top:16px;">
+    <div class="u-d-flex u-jc-center u-gap-18 u-mt-16">
       <button type="button" class="enlace-peligro" onclick="abrirBorrado('datos')">Borrar mis datos</button>
       <button type="button" class="enlace-peligro" onclick="abrirBorrado('cuenta')">Eliminar mi cuenta</button>
     </div>
@@ -581,8 +582,8 @@
 <div class="modal-overlay" id="editModal" onclick="if(event.target===this)closeEditModal()">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <button class="modal-close" onclick="closeEditModal()" style="color:var(--text);"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar</button>
-    <div class="modal-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar Gasto</div>
+    <button class="modal-close u-c-text" onclick="closeEditModal()"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar</button>
+    <div class="modal-title"><svg class="u-va-middle u-mr-6" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar Gasto</div>
 
     <div class="field">
       <label>Descripción</label>
@@ -608,7 +609,7 @@
 
     <div class="field">
       <label>Moneda</label>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      <div class="u-d-flex u-gap-6 u-wrap-wrap">
         <button type="button" class="currency-chip active" data-currency="EUR" onclick="selectEditCurrency(this)">€ EUR</button>
         <button type="button" class="currency-chip" data-currency="USD" onclick="selectEditCurrency(this)">$ USD</button>
         <button type="button" class="currency-chip" data-currency="GBP" onclick="selectEditCurrency(this)">£ GBP</button>
@@ -620,7 +621,7 @@
     <div class="field" id="editRateContainer" style="display:none;">
       <label>Tasa de cambio (1€ = ?)</label>
       <input type="number" id="editExchangeRate" placeholder="Ej: 1700" step="0.01">
-      <small style="color:var(--muted);font-size:var(--fs-xs);">Define cuántos pesos equivalen a 1 Euro</small>
+      <small class="u-c-muted u-fs-xs">Define cuántos pesos equivalen a 1 Euro</small>
     </div>
 
     <!-- Cada campo en su fila: en la ventana de edición, a dos columnas, el año de la fecha se cortaba -->
@@ -630,59 +631,59 @@
     </div>
     <div class="field">
       <label>Fecha</label>
-      <input type="date" id="editDate" style="width:100%;">
+      <input class="u-w-100p" type="date" id="editDate">
     </div>
 
     <div class="field">
       <label>Comprobante</label>
-      <div style="display:flex;gap:8px;align-items:center;background:var(--dark3);border:1px solid var(--border);border-radius:var(--r-md);padding:8px 12px;">
-        <button type="button" id="editOcrBtn" onclick="toggleEditOcrPopover()"
-          style="position:relative;flex-shrink:0;background:rgba(245,200,0,.1);border:1px solid rgba(245,200,0,.3);border-radius:var(--r-sm);padding:6px 12px;cursor:pointer;font-size:var(--fs-base);color:var(--gold-text);font-weight:700;">
+      <div class="u-d-flex u-gap-8 u-ai-center u-bg-dark3 u-b-1-solid-border u-r-md u-p-8-12">
+        <button class="u-pos-relative u-shrink-0 u-bg-xbdf8a u-b-xc194b u-r-sm u-p-6-12 u-cur-pointer u-fs-base u-c-gold-text u-fw-700" type="button" id="editOcrBtn" onclick="toggleEditOcrPopover()"
+         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Adjuntar
-          <span id="editOcrDot" style="display:none;position:absolute;top:3px;right:3px;width:7px;height:7px;background:var(--success);border-radius:50%;border:1.5px solid var(--dark);"></span>
+          <span class="u-pos-absolute u-top-3 u-right-3 u-w-7 u-h-7 u-bg-success u-r-50p u-b-1_5-solid-dark" id="editOcrDot" style="display:none"></span>
         </button>
         <input type="file" id="editOcrFile" accept="image/*" style="display:none" onchange="handleEditOCRFile(event)">
-        <div id="editOcrFileInfo" style="flex:1;overflow:hidden;">
-          <div id="editOcrFileName" style="color:var(--muted);font-size:var(--fs-xs);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Sin comprobante</div>
-          <div id="editOcrLoading" style="display:none;color:var(--gold-text);font-size:var(--fs-2xs);"><span class="ocr-spinner" style="display:inline-block;width:10px;height:10px;vertical-align:-1px;"></span> Extrayendo...</div>
-          <div id="editOcrSuccess" style="display:none;color:var(--success);font-size:var(--fs-2xs);"><svg class="icono" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Extraído</div>
+        <div class="u-f-1 u-ov-hidden" id="editOcrFileInfo">
+          <div class="u-c-muted u-fs-xs u-ws-nowrap u-ov-hidden u-tov-ellipsis" id="editOcrFileName">Sin comprobante</div>
+          <div class="u-c-gold-text u-fs-2xs" id="editOcrLoading" style="display:none"><span class="ocr-spinner u-d-inline-block u-w-10 u-h-10 u-va-1"></span> Extrayendo...</div>
+          <div class="u-c-success u-fs-2xs" id="editOcrSuccess" style="display:none"><svg class="icono" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Extraído</div>
         </div>
-        <img id="editOcrPreview" alt="Foto del ticket" style="display:none;width:32px;height:32px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border);flex-shrink:0;">
-        <button onclick="clearEditOCR()" id="editOcrClearBtn" style="display:none;background:none;border:none;color:var(--muted);cursor:pointer;font-size:var(--fs-sm);flex-shrink:0;padding:2px 4px;border:1px solid var(--border);border-radius:var(--r-sm);" title="Quitar"><svg class="icono" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        <img class="u-w-32 u-h-32 u-fit-cover u-r-sm u-b-1-solid-border u-shrink-0" id="editOcrPreview" alt="Foto del ticket" style="display:none">
+        <button class="u-bg-none u-c-muted u-cur-pointer u-fs-sm u-shrink-0 u-p-2-4 u-b-1-solid-border u-r-sm" onclick="clearEditOCR()" id="editOcrClearBtn" style="display:none" title="Quitar"><svg class="icono" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
     </div>
 
     <div class="field">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <label style="margin-bottom:0">¿Para quiénes?</label>
-        <button class="btn btn-sm btn-outline" onclick="toggleEditSelectAll()" id="btnEditSelectAll" style="font-size:var(--fs-xs);padding:4px 10px"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Todos</button>
+      <div class="u-d-flex u-ai-center u-jc-space-between u-mb-8">
+        <label class="u-mb-0">¿Para quiénes?</label>
+        <button class="btn btn-sm btn-outline u-fs-xs u-p-4-10" onclick="toggleEditSelectAll()" id="btnEditSelectAll"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg> Todos</button>
       </div>
       <div class="modal-chips" id="editInvolvedChips"></div>
     </div>
 
-    <div style="display:flex;gap:8px;margin-top:6px">
+    <div class="u-d-flex u-gap-8 u-mt-6">
   <!-- Se asegura la llamada a la función de confirmación -->
-  <button type="button" class="btn btn-danger" onclick="openDeleteFromEdit()" style="flex:1">Eliminar</button>
+  <button type="button" class="btn btn-danger u-f-1" onclick="openDeleteFromEdit()">Eliminar</button>
   <!-- Se añade type="button" para evitar comportamiento de formulario accidental -->
-  <button type="button" class="btn btn-gold" onclick="saveEditExpense()" style="flex:1">Guardar cambios</button>
+  <button type="button" class="btn btn-gold u-f-1" onclick="saveEditExpense()">Guardar cambios</button>
 </div>
   </div>
 </div>
 
 <!-- ═══ EDIT FRIEND MODAL ═══ -->
 <div class="modal-overlay" id="friendModal" onclick="if(event.target===this)closeFriendModal()">
-  <div class="modal-sheet" style="max-height:85vh;overflow-y:auto;">
+  <div class="modal-sheet u-maxh-85vh u-ovy-auto">
     <div class="modal-handle"></div>
-    <button class="modal-close" onclick="closeFriendModal()" style="color:var(--text);"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar</button>
-    <div class="modal-title" id="friendModalTitle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar Amigo</div>
+    <button class="modal-close u-c-text" onclick="closeFriendModal()"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar</button>
+    <div class="modal-title" id="friendModalTitle"><svg class="u-va-middle u-mr-6" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar Amigo</div>
 
-    <div style="display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:18px">
-      <div class="avatar-wrap" style="width:74px;height:74px">
-        <div id="friendModalAvatar" style="width:74px;height:74px;border-radius:50%;background:var(--dark3);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--muted);overflow:hidden;cursor:pointer" onclick="document.getElementById('friendAvatarFile').click()"></div>
-        <div class="avatar-edit" style="width:22px;height:22px;font-size:var(--fs-xs)" onclick="document.getElementById('friendAvatarFile').click()" aria-label="Cambiar foto"><svg class="icono" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></div>
+    <div class="u-d-flex u-dir-column u-ai-center u-gap-10 u-mb-18">
+      <div class="avatar-wrap u-w-74 u-h-74">
+        <div class="u-w-74 u-h-74 u-r-50p u-bg-dark3 u-b-3-solid-gold u-ai-center u-jc-center u-fs-1_8rem u-c-muted u-ov-hidden u-cur-pointer" id="friendModalAvatar" style="display:flex" onclick="document.getElementById('friendAvatarFile').click()"></div>
+        <div class="avatar-edit u-w-22 u-h-22 u-fs-xs" onclick="document.getElementById('friendAvatarFile').click()" aria-label="Cambiar foto"><svg class="icono" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></div>
       </div>
       <input type="file" id="friendAvatarFile" accept="image/*" onchange="handleFriendAvatarChange(event)" style="display:none">
-      <div style="font-size:var(--fs-xs);color:var(--muted)">Toca para cambiar foto</div>
+      <div class="u-fs-xs u-c-muted">Toca para cambiar foto</div>
     </div>
 
     <div class="g2">
@@ -695,12 +696,12 @@
 
     <div class="field">
       <label>Grupos vinculados</label>
-      <div id="editFriendGroups" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px"></div>
+      <div class="u-wrap-wrap u-gap-8 u-mt-6" id="editFriendGroups" style="display:flex"></div>
     </div>
 
-    <div style="display:flex;gap:8px;margin-top:6px">
-      <button onclick="confirmDeleteFriend()" class="btn btn-danger" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Eliminar</button>
-      <button onclick="saveEditFriend()" class="btn btn-gold" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Guardar</button>
+    <div class="u-d-flex u-gap-8 u-mt-6">
+      <button onclick="confirmDeleteFriend()" class="btn btn-danger u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Eliminar</button>
+      <button onclick="saveEditFriend()" class="btn btn-gold u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Guardar</button>
     </div>
   </div>
 </div>
@@ -710,9 +711,9 @@
 <!-- ═══════════════════════════════════ PAGE: ESTADÍSTICAS ═══ -->
 <div class="page" id="page-stats">
   <div class="det-bar">
-    <div style="flex:1;max-width:660px;margin:0 auto;width:100%;padding:0 14px;box-sizing:border-box;">
-      <div class="pg-header" style="margin-bottom:0">Estadísticas</div>
-      <div class="pg-sub" id="statsSubtitle" style="margin:0; color: var(--text);">Resumen de todos tus grupos</div>
+    <div class="u-f-1 u-maxw-660 u-m-0-auto u-w-100p u-p-0-14 u-box-border-box">
+      <div class="pg-header u-mb-0">Estadísticas</div>
+      <div class="pg-sub u-m-0 u-c-text" id="statsSubtitle">Resumen de todos tus grupos</div>
     </div>
   </div>
 <main>
@@ -726,8 +727,8 @@
   </div>
 
   <!-- Donut por categoría -->
-  <div class="card" style="margin-bottom:12px">
-    <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px"><svg class="icono" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg> Por categoría</div>
+  <div class="card u-mb-12">
+    <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-mb-12"><svg class="icono" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg> Por categoría</div>
     <div class="donut-wrap" id="donutWrap">
       <svg class="donut-svg" id="donutSvg" width="160" height="160" viewBox="0 0 160 160"></svg>
       <div class="donut-label"><div class="dv" id="donutCenter">€0</div><div class="dl">Total</div></div>
@@ -737,7 +738,7 @@
 
   <!-- Barras por pagador -->
   <div class="card">
-    <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:12px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text);vertical-align:middle;margin-right:4px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Por pagador</div>
+    <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-mb-12"><svg class="u-c-text u-va-middle u-mr-4" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Por pagador</div>
     <div id="payerBars"></div>
   </div>
 </main>
@@ -745,7 +746,7 @@
 
 <nav class="bottom-nav">
    <button class="nav-btn" data-page="page-grupos" onclick="tocarBotonGrupos(this)">
-  <div class="nav-ico-wrapper" style="margin: 0 auto 4px auto; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+  <div class="nav-ico-wrapper u-m-0-auto-4-auto u-w-28 u-h-28 u-d-flex u-ai-center u-jc-center">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
     </svg>
@@ -753,7 +754,7 @@
   GRUPOS
 </button>
   <button class="nav-btn" data-page="page-amigos" onclick="switchPage('page-amigos',this)">
-  <div class="nav-ico-wrapper" style="margin: 0 auto 4px auto; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+  <div class="nav-ico-wrapper u-m-0-auto-4-auto u-w-28 u-h-28 u-d-flex u-ai-center u-jc-center">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
       <circle cx="9" cy="7" r="4"></circle>
@@ -764,7 +765,7 @@
   AMIGOS
 </button>
   <button class="nav-btn" data-page="page-stats" onclick="switchPage('page-stats',this);renderStats()">
-  <div class="nav-ico-wrapper" style="margin: 0 auto 4px auto; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+  <div class="nav-ico-wrapper u-m-0-auto-4-auto u-w-28 u-h-28 u-d-flex u-ai-center u-jc-center">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
   <line x1="18" y1="20" x2="18" y2="10"></line>
   <line x1="12" y1="20" x2="12" y2="4"></line>
@@ -774,7 +775,7 @@
   ESTADISTICAS
 </button>
   <button class="nav-btn" data-page="page-actividad" onclick="switchPage('page-actividad',this)">
-  <div class="nav-ico-wrapper" style="margin: 0 auto 4px auto; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
+  <div class="nav-ico-wrapper u-m-0-auto-4-auto u-w-28 u-h-28 u-d-flex u-ai-center u-jc-center">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
       <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -784,9 +785,9 @@
 </button>
   <button class="nav-btn" data-page="page-cuenta" onclick="switchPage('page-cuenta',this)">
     <!-- Contenedor circular para la foto o inicial -->
-    <div id="user-nav-wrapper" style="width: 28px; height: 28px; border-radius: 50%; overflow: hidden; border: 1.5px solid currentColor; margin: 0 auto 4px auto; display: flex; align-items: center; justify-content: center; background: var(--tint-2);">
-        <img id="user-nav-photo" alt="" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;" onerror="this.style.display='none';document.getElementById('user-nav-initials').style.display='block';">
-        <span id="user-nav-initials" style="font-size: var(--fs-base); font-weight: 700; line-height: 1;">
+    <div class="u-w-28 u-h-28 u-r-50p u-ov-hidden u-b-x809f7 u-m-0-auto-4-auto u-ai-center u-jc-center u-bg-tint-2" id="user-nav-wrapper" style="display:flex">
+        <img class="u-w-100p u-h-100p u-fit-cover" id="user-nav-photo" alt="" src="" style="display:none" onerror="this.style.display='none';document.getElementById('user-nav-initials').style.display='block';">
+        <span class="u-fs-base u-fw-700 u-lh-1" id="user-nav-initials">
             <svg class="icono" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </span>
     </div>
@@ -821,79 +822,79 @@
 
 <!-- ═══ PAY MODAL ═══ -->
 <div class="modal-overlay" id="payModal" onclick="if(event.target===this)closePayModal()">
-  <div class="modal-sheet" style="max-width:380px;">
+  <div class="modal-sheet u-maxw-380">
     <div class="modal-handle"></div>
     <button class="modal-close" onclick="closePayModal()"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar</button>
     <div class="modal-title" id="pmTitle">Pagar deuda</div>
-    <div style="text-align:center;margin-bottom:10px">
-      <div style="font-size:var(--fs-xs);color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px">Importe</div>
-      <div style="font-family:var(--font-display);font-size:1.6rem;color:var(--gold-text)" id="pmAmount">€0</div>
+    <div class="u-t-center u-mb-10">
+      <div class="u-fs-xs u-c-muted u-tt-uppercase u-fw-700 u-ls-_7">Importe</div>
+      <div class="u-ff-font-display u-fs-1_6rem u-c-gold-text" id="pmAmount">€0</div>
     </div>
     <div id="pmTambien" class="pagar-tambien" style="display:none"></div>
-    <div style="font-size:var(--fs-xs);color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:6px">Elige método de pago</div>
+    <div class="u-fs-xs u-c-muted u-tt-uppercase u-fw-700 u-ls-_7 u-mb-6">Elige método de pago</div>
     <div class="pay-method-grid">
       <button class="pay-method-btn" onclick="selectPayMethod(this,'bizum')"><span class="pm-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></span>Bizum</button>
       <button class="pay-method-btn" onclick="selectPayMethod(this,'transferencia')"><span class="pm-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="21" x2="21" y2="21"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="5 6 12 3 19 6"/><line x1="4" y1="10" x2="4" y2="21"/><line x1="20" y1="10" x2="20" y2="21"/><line x1="8" y1="14" x2="8" y2="17"/><line x1="12" y1="14" x2="12" y2="17"/><line x1="16" y1="14" x2="16" y2="17"/></svg></span>Transferencia</button>
       <button class="pay-method-btn" onclick="selectPayMethod(this,'efectivo')"><span class="pm-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><line x1="6" y1="12" x2="6.01" y2="12"/><line x1="18" y1="12" x2="18.01" y2="12"/></svg></span>Efectivo</button>
     </div>
-    <div id="pmDetalle" style="display:none;background:var(--dark3);border:1px solid var(--border);border-radius:var(--r-md);padding:12px;margin-bottom:12px;font-size:var(--fs-base);line-height:1.45;"></div>
-    <div style="font-size:var(--fs-xs);color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:6px;margin-top:8px">Adjuntar comprobante (opcional)</div>
-    <div class="proof-area" onclick="document.getElementById('pmProofFile').click()" style="padding:8px;margin-top:0;display:flex;align-items:center;gap:10px;text-align:left">
+    <div class="u-bg-dark3 u-b-1-solid-border u-r-md u-p-12 u-mb-12 u-fs-base u-lh-1_45" id="pmDetalle" style="display:none"></div>
+    <div class="u-fs-xs u-c-muted u-tt-uppercase u-fw-700 u-ls-_7 u-mb-6 u-mt-8">Adjuntar comprobante (opcional)</div>
+    <div class="proof-area u-p-8 u-mt-0 u-d-flex u-ai-center u-gap-10 u-t-left" onclick="document.getElementById('pmProofFile').click()">
       <input type="file" id="pmProofFile" accept="image/*" onchange="handleProofUpload(event)">
-      <span style="flex-shrink:0;color:var(--text2);display:flex"><svg class="icono" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></span>
-      <div style="font-size:var(--fs-sm);color:var(--muted);font-weight:700">Subir captura de pago</div>
-      <img id="pmProofThumb" alt="Justificante del pago" class="proof-thumb" style="max-height:32px;margin-left:auto">
+      <span class="u-shrink-0 u-c-text2 u-d-flex"><svg class="icono" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></span>
+      <div class="u-fs-sm u-c-muted u-fw-700">Subir captura de pago</div>
+      <img id="pmProofThumb" alt="Justificante del pago" class="proof-thumb u-maxh-32 u-ml-auto">
     </div>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn btn-outline" onclick="closePayModal()" style="flex:1;font-size:var(--fs-sm)">Cancelar</button>
-      <button class="btn btn-gold" onclick="confirmPayment(true)" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Marcar saldado</button>
+    <div class="u-d-flex u-gap-8 u-mt-12">
+      <button class="btn btn-outline u-f-1 u-fs-sm" onclick="closePayModal()">Cancelar</button>
+      <button class="btn btn-gold u-f-1" onclick="confirmPayment(true)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Marcar saldado</button>
     </div>
   </div>
 </div>
 
 <!-- ═══ PROOF MODAL ═══ -->
 <div class="modal-overlay" id="proofModal" onclick="if(event.target===this)closeProofModal()">
-  <div class="modal-sheet" style="max-width:380px;">
+  <div class="modal-sheet u-maxw-380">
     <div class="modal-handle"></div>
     <button class="modal-close" onclick="closeProofModal()"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar</button>
     <div class="modal-title" id="proofTitle">Comprobante de pago</div>
-    <div id="proofSubtitulo" style="font-size:var(--fs-sm);color:var(--muted);margin:-4px 0 12px;line-height:1.4;"></div>
+    <div class="u-fs-sm u-c-muted u-m-4-0-12 u-lh-1_4" id="proofSubtitulo"></div>
     <div id="proofTambien" class="pagar-tambien" style="display:none"></div>
-    <div class="proof-area" onclick="document.getElementById('proofFileInput').click()" style="padding:10px;margin-bottom:10px;">
+    <div class="proof-area u-p-10 u-mb-10" onclick="document.getElementById('proofFileInput').click()">
       <input type="file" id="proofFileInput" accept="image/*" onchange="handleProofModalFile(event)">
-      <span style="color:var(--text2);display:flex;justify-content:center"><svg class="icono" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg></span>
-      <div style="font-size:var(--fs-sm);color:var(--muted);margin-top:4px;font-weight:700">Sube la captura del pago</div>
-      <div style="font-size:var(--fs-2xs);color:var(--muted2);margin-top:2px">Bizum, transferencia, screenshot…</div>
-      <img id="proofThumbView" alt="Justificante del pago" class="proof-thumb" style="max-height:80px;">
+      <span class="u-c-text2 u-d-flex u-jc-center"><svg class="icono" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg></span>
+      <div class="u-fs-sm u-c-muted u-mt-4 u-fw-700">Sube la captura del pago</div>
+      <div class="u-fs-2xs u-c-muted2 u-mt-2">Bizum, transferencia, screenshot…</div>
+      <img id="proofThumbView" alt="Justificante del pago" class="proof-thumb u-maxh-80">
     </div>
-    <div style="margin-top:8px;">
+    <div class="u-mt-8">
       <button class="btn btn-gold btn-full" onclick="sendProof(true)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Confirmar cobro</button>
-      <button class="btn btn-outline btn-full" style="margin-top:8px;" onclick="closeProofModal()">Cancelar</button>
+      <button class="btn btn-outline btn-full u-mt-8" onclick="closeProofModal()">Cancelar</button>
     </div>
   </div>
 </div>
 
 <!-- Modal Edición de Grupo --> 
 <div class="modal-overlay" id="modal-editar-grupo" style="display: none;" onclick="if(event.target===this)cerrarModalEditar()">
-  <div class="ventana" style="text-align: center">
+  <div class="ventana u-t-center">
     
     <!-- Título en blanco para neutralidad -->
-    <div style="color: var(--text); font-size: var(--fs-xl); font-weight: 700; margin-bottom: 20px;">Editar grupo</div>
+    <div class="u-c-text u-fs-xl u-fw-700 u-mb-20">Editar grupo</div>
 
-    <div style="text-align: left; margin-bottom: 24px;">
-      <label style="color: var(--text); font-size: var(--fs-xs); letter-spacing: 1px; display: block; margin-bottom: 8px; margin-left: 4px;">NOMBRE DEL GRUPO</label>
+    <div class="u-t-left u-mb-24">
+      <label class="u-c-text u-fs-xs u-ls-1 u-d-block u-mb-8 u-ml-4">NOMBRE DEL GRUPO</label>
       <!-- Mantenemos el maxlength para control de QA -->
-      <input type="text" id="edit-group-name" maxlength="20" style="width: 100%; background: var(--dark4); border: 1px solid var(--line-strong); border-radius: var(--r-md); padding: 12px; color: var(--text); box-sizing: border-box; outline: none;">
+      <input class="u-w-100p u-bg-dark4 u-b-x26507 u-r-md u-p-12 u-c-text u-box-border-box u-ol-none" type="text" id="edit-group-name" maxlength="20">
     </div>
 
     <!-- Contenedor Flex para botones -->
-    <div style="display: flex; gap: 12px; width: 100%; margin-top: 24px;">
+    <div class="u-d-flex u-gap-12 u-w-100p u-mt-24">
       
       <!-- BOTÓN CANCELAR: Gris Neutro -->
-      <button onclick="cerrarModalEditar()" class="btn btn-outline" style="flex: 1;margin: 0">Cancelar</button>
+      <button onclick="cerrarModalEditar()" class="btn btn-outline u-f-1 u-m-0">Cancelar</button>
       
       <!-- BOTÓN GUARDAR: Verde Sólido (Éxito) -->
-      <button onclick="guardarCambiosGrupo()" id="btnGuardarGrupo" class="btn btn-gold" style="flex: 1;margin: 0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Guardar</button>
+      <button onclick="guardarCambiosGrupo()" id="btnGuardarGrupo" class="btn btn-gold u-f-1 u-m-0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Guardar</button>
 
     </div>
   </div>
@@ -901,19 +902,19 @@
 
 <!-- Modal Confirmar Borrado de Grupo -->
 <div class="modal-overlay" id="modal-borrar-grupo" style="display: none;" onclick="if(event.target===this)cerrarModalBorrar()">
-  <div class="ventana" style="text-align: center">
+  <div class="ventana u-t-center">
     
-    <div id="del-grupo-titulo" style="color: var(--text); font-size: var(--fs-xl); font-weight: 700; margin-bottom: 10px;">¿Eliminar grupo?</div>
-    <p id="del-grupo-texto" style="color: var(--text2); font-size: var(--fs-base); margin-bottom: 20px; line-height:1.45;">Esta acción no se puede deshacer.</p>
+    <div class="u-c-text u-fs-xl u-fw-700 u-mb-10" id="del-grupo-titulo">¿Eliminar grupo?</div>
+    <p class="u-c-text2 u-fs-base u-mb-20 u-lh-1_45" id="del-grupo-texto">Esta acción no se puede deshacer.</p>
 
     <!-- Contenedor del Info del Grupo -->
-    <div style="background: var(--dark4); border-radius: var(--r-lg); padding: 16px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; justify-content: center;">
-      <div id="delete-group-icon" style="color: var(--text); display:flex;"></div>
-      <div id="delete-group-name" style="color: var(--text); font-weight: 800; font-size: var(--fs-md);"></div>
+    <div class="u-bg-dark4 u-r-lg u-p-16 u-mb-24 u-d-flex u-ai-center u-gap-12 u-jc-center">
+      <div class="u-c-text" id="delete-group-icon" style="display:flex"></div>
+      <div class="u-c-text u-fw-800 u-fs-md" id="delete-group-name"></div>
     </div>
 
     <!-- Volver: contorno (opción segura). Salir/Eliminar: rojo. Texto e iconos los pone openDeleteGroupModal -->
-    <div style="display: flex; gap: 12px; width: 100%;">
+    <div class="u-d-flex u-gap-12 u-w-100p">
       <button type="button" id="del-grupo-volver" onclick="cerrarModalBorrar()" class="btn btn-outline" style="flex: 1">No, volver</button>
       <button type="button" id="del-grupo-ok" onclick="ejecutarBorradoFinal()" class="btn btn-peligro" style="flex: 1">Sí, eliminar</button>
     </div>
@@ -921,145 +922,145 @@
 </div>
 
 <!-- Modal de Confirmación de Borrar Gasto -->
-	<div class="modal-overlay" id="modal-borrar-gasto" style="display: none; z-index:9999;" onclick="if(event.target===this)cerrarModalBorrarGasto()">
-	<div class="ventana" style="text-align: center">
+	<div class="modal-overlay u-z-9999" id="modal-borrar-gasto" style="display:none" onclick="if(event.target===this)cerrarModalBorrarGasto()">
+	<div class="ventana u-t-center">
     
-    <div style="color: var(--text); font-size: var(--fs-xl); font-weight: 700; margin-bottom: 10px;">¿Borrar gasto?</div>
-    <p style="color: var(--text); font-size: var(--fs-base); margin-bottom: 20px; opacity: 0.8;">Esta acción no se puede deshacer.</p>
+    <div class="u-c-text u-fs-xl u-fw-700 u-mb-10">¿Borrar gasto?</div>
+    <p class="u-c-text u-fs-base u-mb-20 u-op-0_8">Esta acción no se puede deshacer.</p>
 
-    <div style="background: var(--dark4); border-radius: var(--r-lg); padding: 16px; margin-bottom: 24px; text-align: left;">
-      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-        <div id="del-gasto-icon" style="font-size:1.6rem;"></div>
-        <div id="del-gasto-desc" style="color:var(--text); font-weight:800; font-size:1rem;"></div>
+    <div class="u-bg-dark4 u-r-lg u-p-16 u-mb-24 u-t-left">
+      <div class="u-d-flex u-ai-center u-gap-10 u-mb-8">
+        <div class="u-fs-1_6rem" id="del-gasto-icon"></div>
+        <div class="u-c-text u-fw-800 u-fs-1rem" id="del-gasto-desc"></div>
       </div>
-      <div style="color:var(--text2); font-size:var(--fs-base); display:flex; flex-direction:column; gap:4px;">
-        <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text2);vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span id="del-gasto-amount"></span></span>
-        <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text2);vertical-align:middle;margin-right:4px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Pagó: <span id="del-gasto-payer"></span></span>
-        <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text2);vertical-align:middle;margin-right:4px"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="del-gasto-date"></span></span>
+      <div class="u-c-text2 u-fs-base u-d-flex u-dir-column u-gap-4">
+        <span><svg class="u-c-text2 u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span id="del-gasto-amount"></span></span>
+        <span><svg class="u-c-text2 u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Pagó: <span id="del-gasto-payer"></span></span>
+        <span><svg class="u-c-text2 u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="del-gasto-date"></span></span>
       </div>
     </div>
 
-    <div style="display: flex; gap: 12px; width: 100%;">
-      <button onclick="cerrarModalBorrarGasto()" class="btn btn-outline" style="flex: 1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
-      <button onclick="ejecutarBorradoGasto()" class="btn btn-peligro" style="flex: 1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
+    <div class="u-d-flex u-gap-12 u-w-100p">
+      <button onclick="cerrarModalBorrarGasto()" class="btn btn-outline u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button onclick="ejecutarBorradoGasto()" class="btn btn-peligro u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
     </div>
   </div>
 </div>
 
 <!-- Modal de Confirmación de Borrar Amigo -->
-<div class="modal-overlay" id="modal-borrar-amigo" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalBorrarAmigo()">
-  <div class="ventana" style="text-align:center">
+<div class="modal-overlay u-z-9999" id="modal-borrar-amigo" style="display:none" onclick="if(event.target===this)cerrarModalBorrarAmigo()">
+  <div class="ventana u-t-center">
     
-    <div style="color:var(--text); font-size:var(--fs-xl); font-weight:700; margin-bottom:10px;">¿Borrar amigo?</div>
-    <p style="color:var(--text); font-size:var(--fs-base); margin-bottom:20px; opacity:0.8;">Esta acción no se puede deshacer.</p>
+    <div class="u-c-text u-fs-xl u-fw-700 u-mb-10">¿Borrar amigo?</div>
+    <p class="u-c-text u-fs-base u-mb-20 u-op-0_8">Esta acción no se puede deshacer.</p>
 
-    <div style="background:var(--dark4); border-radius:var(--r-lg); padding:16px; margin-bottom:24px; text-align:left;">
-      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-        <div id="del-amigo-avatar" style="width:38px;height:38px;border-radius:50%;background:var(--gold-dark);color:var(--on-gold);font-size:var(--fs-lg);font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
-        <div id="del-amigo-name" style="color:var(--text); font-weight:800; font-size:1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px;"></div>
+    <div class="u-bg-dark4 u-r-lg u-p-16 u-mb-24 u-t-left">
+      <div class="u-d-flex u-ai-center u-gap-10 u-mb-8">
+        <div class="u-w-38 u-h-38 u-r-50p u-bg-gold-dark u-c-on-gold u-fs-lg u-fw-900 u-ai-center u-jc-center u-shrink-0" id="del-amigo-avatar" style="display:flex"></div>
+        <div class="u-c-text u-fw-800 u-fs-1rem u-ov-hidden u-tov-ellipsis u-ws-nowrap u-maxw-220" id="del-amigo-name"></div>
       </div>
-      <div style="color:var(--text2); font-size:var(--fs-base); display:flex; flex-direction:column; gap:4px;">
-        <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text2);vertical-align:middle;margin-right:4px"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span id="del-amigo-contact"></span></span>
-        <span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text2);vertical-align:middle;margin-right:4px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span id="del-amigo-groups"></span></span>
+      <div class="u-c-text2 u-fs-base u-d-flex u-dir-column u-gap-4">
+        <span><svg class="u-c-text2 u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span id="del-amigo-contact"></span></span>
+        <span><svg class="u-c-text2 u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span id="del-amigo-groups"></span></span>
       </div>
     </div>
 
-    <div style="display:flex; gap:12px; width:100%;">
-      <button onclick="cerrarModalBorrarAmigo()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
-      <button onclick="ejecutarBorradoAmigo()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
+    <div class="u-d-flex u-gap-12 u-w-100p">
+      <button onclick="cerrarModalBorrarAmigo()" class="btn btn-outline u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button onclick="ejecutarBorradoAmigo()" class="btn btn-peligro u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
     </div>
   </div>
 </div>
 
 <!-- Modal de Confirmación de Logout -->
-<div id="modalLogout" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center; padding:20px;">
-  <div class="ventana" style="text-align:center; color:var(--text);">
-    <div style="width:56px;height:56px;margin:0 auto 16px;border-radius:50%;background:rgba(245,200,0,.12);display:flex;align-items:center;justify-content:center;"><svg style="color:var(--gold-text)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
-    <h3 id="logoutGreeting" style="margin-bottom:10px; color:var(--text);">¿Ya te vas?</h3>
-    <p id="logoutMessage" style="color:var(--text); font-size:var(--fs-md); margin-bottom:24px; opacity:0.9;"></p>
+<div class="u-pos-fixed u-top-0 u-left-0 u-w-100p u-h-100p u-bg-xa941e u-z-9999 u-jc-center u-ai-center u-p-20" id="modalLogout" style="display:none">
+  <div class="ventana u-t-center u-c-text">
+    <div class="u-w-56 u-h-56 u-m-0-auto-16 u-r-50p u-bg-x3cc9f u-d-flex u-ai-center u-jc-center"><svg class="u-c-gold-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+    <h3 class="u-mb-10 u-c-text" id="logoutGreeting">¿Ya te vas?</h3>
+    <p class="u-c-text u-fs-md u-mb-24 u-op-0_9" id="logoutMessage"></p>
     
-    <div style="display:flex; gap:10px;">
-      <button type="button" onclick="closeLogoutModal()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="14 7 9 12 14 17"/><line x1="21" y1="12" x2="9" y2="12"/></svg> No, volver</button>
-      <button onclick="confirmLogout()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sí, salir</button>
+    <div class="u-d-flex u-gap-10">
+      <button type="button" onclick="closeLogoutModal()" class="btn btn-outline u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="14 7 9 12 14 17"/><line x1="21" y1="12" x2="9" y2="12"/></svg> No, volver</button>
+      <button onclick="confirmLogout()" class="btn btn-peligro u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sí, salir</button>
     </div>
   </div>
 </div>
 
 <!-- Modal Eliminar Participante con Gastos -->
-<div class="modal-overlay" id="modal-borrar-miembro" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalBorrarMiembro()">
-  <div class="ventana" style="text-align:center">
+<div class="modal-overlay u-z-9999" id="modal-borrar-miembro" style="display:none" onclick="if(event.target===this)cerrarModalBorrarMiembro()">
+  <div class="ventana u-t-center">
     
-    <div id="del-miembro-titulo" style="color:var(--text); font-size:var(--fs-xl); font-weight:700; margin-bottom:10px;">¿Eliminar participante?</div>
-    <p id="del-miembro-msg" style="color:var(--text); font-size:var(--fs-base); margin-bottom:20px; opacity:0.8;"></p>
+    <div class="u-c-text u-fs-xl u-fw-700 u-mb-10" id="del-miembro-titulo">¿Eliminar participante?</div>
+    <p class="u-c-text u-fs-base u-mb-20 u-op-0_8" id="del-miembro-msg"></p>
 
-    <div style="background:var(--dark4); border-radius:var(--r-lg); padding:16px; margin-bottom:24px; text-align:left;">
-      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-        <div id="del-miembro-avatar" style="width:38px;height:38px;border-radius:50%;background:var(--gold-dark);color:var(--on-gold);font-size:var(--fs-lg);font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
-        <div id="del-miembro-name" style="color:var(--text); font-weight:800; font-size:1rem;"></div>
+    <div class="u-bg-dark4 u-r-lg u-p-16 u-mb-24 u-t-left">
+      <div class="u-d-flex u-ai-center u-gap-10 u-mb-8">
+        <div class="u-w-38 u-h-38 u-r-50p u-bg-gold-dark u-c-on-gold u-fs-lg u-fw-900 u-ai-center u-jc-center u-shrink-0" id="del-miembro-avatar" style="display:flex"></div>
+        <div class="u-c-text u-fw-800 u-fs-1rem" id="del-miembro-name"></div>
       </div>
-      <div id="del-miembro-info" style="color:var(--text2); font-size:var(--fs-base); display:flex; flex-direction:column; gap:4px;"></div>
+      <div class="u-c-text2 u-fs-base u-dir-column u-gap-4" id="del-miembro-info" style="display:flex"></div>
     </div>
 
-    <div style="display:flex; gap:12px; width:100%;">
+    <div class="u-d-flex u-gap-12 u-w-100p">
       <button id="del-miembro-volver" onclick="cerrarModalBorrarMiembro()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
-      <button id="del-miembro-si" onclick="ejecutarBorradoMiembro()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, eliminar</button>
+      <button id="del-miembro-si" onclick="ejecutarBorradoMiembro()" class="btn btn-peligro u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, eliminar</button>
     </div>
   </div>
 </div>
 
 <!-- Modal Borrar Todos los Datos -->
-<div class="modal-overlay" id="modal-borrar-datos" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalBorrarDatos()">
-  <div class="ventana" style="text-align:center">
+<div class="modal-overlay u-z-9999" id="modal-borrar-datos" style="display:none" onclick="if(event.target===this)cerrarModalBorrarDatos()">
+  <div class="ventana u-t-center">
     
-    <div style="width:56px;height:56px;margin:0 auto 10px;border-radius:50%;background:rgba(255,77,77,.12);display:flex;align-items:center;justify-content:center;"><svg style="color:var(--danger)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></div>
-    <div style="color:var(--text); font-size:var(--fs-xl); font-weight:700; margin-bottom:10px;">¿Borrar todo?</div>
-    <p id="borrar-datos-resumen" style="color:var(--text); font-size:var(--fs-base); margin-bottom:20px; opacity:0.8; line-height:1.4;">Se eliminarán todos tus grupos, gastos, amigos y actividad. Esta acción no se puede deshacer.</p>
+    <div class="u-w-56 u-h-56 u-m-0-auto-10 u-r-50p u-bg-x396b6 u-d-flex u-ai-center u-jc-center"><svg class="u-c-danger" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></div>
+    <div class="u-c-text u-fs-xl u-fw-700 u-mb-10">¿Borrar todo?</div>
+    <p class="u-c-text u-fs-base u-mb-20 u-op-0_8 u-lh-1_4" id="borrar-datos-resumen">Se eliminarán todos tus grupos, gastos, amigos y actividad. Esta acción no se puede deshacer.</p>
 
-    <div style="display:flex; gap:12px; width:100%;">
-      <button onclick="cerrarModalBorrarDatos()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
-      <button onclick="ejecutarBorradoDatos()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
+    <div class="u-d-flex u-gap-12 u-w-100p">
+      <button onclick="cerrarModalBorrarDatos()" class="btn btn-outline u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button onclick="ejecutarBorradoDatos()" class="btn btn-peligro u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
     </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="modal-eliminar-cuenta" style="display:none; z-index:9999;" onclick="if(event.target===this)document.getElementById('modal-eliminar-cuenta').style.display='none'">
-  <div class="ventana" style="text-align:center">
-    <div style="width:56px;height:56px;margin:0 auto 10px;border-radius:50%;background:rgba(255,77,77,.12);display:flex;align-items:center;justify-content:center;"><svg style="color:var(--danger)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="8" x2="22" y2="13"/><line x1="22" y1="8" x2="17" y2="13"/></svg></div>
-    <div style="color:var(--danger); font-size:var(--fs-xl); font-weight:700; margin-bottom:10px;">Eliminar cuenta</div>
-    <p id="eliminar-cuenta-resumen" style="color:var(--text); font-size:var(--fs-base); margin-bottom:20px; opacity:0.8; line-height:1.4;">Se eliminarán permanentemente tu cuenta, grupos, gastos, amigos y toda tu actividad. Esta acción <strong>no se puede deshacer</strong>.</p>
-    <div style="display:flex; gap:12px; width:100%;">
-      <button onclick="document.getElementById('modal-eliminar-cuenta').style.display='none';document.body.style.overflow=''" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
-      <button onclick="ejecutarEliminarCuenta()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, eliminar</button>
+<div class="modal-overlay u-z-9999" id="modal-eliminar-cuenta" style="display:none" onclick="if(event.target===this)document.getElementById('modal-eliminar-cuenta').style.display='none'">
+  <div class="ventana u-t-center">
+    <div class="u-w-56 u-h-56 u-m-0-auto-10 u-r-50p u-bg-x396b6 u-d-flex u-ai-center u-jc-center"><svg class="u-c-danger" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" y1="8" x2="22" y2="13"/><line x1="22" y1="8" x2="17" y2="13"/></svg></div>
+    <div class="u-c-danger u-fs-xl u-fw-700 u-mb-10">Eliminar cuenta</div>
+    <p class="u-c-text u-fs-base u-mb-20 u-op-0_8 u-lh-1_4" id="eliminar-cuenta-resumen">Se eliminarán permanentemente tu cuenta, grupos, gastos, amigos y toda tu actividad. Esta acción <strong>no se puede deshacer</strong>.</p>
+    <div class="u-d-flex u-gap-12 u-w-100p">
+      <button onclick="document.getElementById('modal-eliminar-cuenta').style.display='none';document.body.style.overflow=''" class="btn btn-outline u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button onclick="ejecutarEliminarCuenta()" class="btn btn-peligro u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, eliminar</button>
     </div>
   </div>
 </div>
-<div class="modal-overlay" id="modal-renombrar-miembro" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalRenombrarMiembro()">
-  <div class="ventana" style="text-align:center">
-    <div style="color:var(--text); font-size:var(--fs-xl); font-weight:700; margin-bottom:10px;">Renombrar participante</div>
-    <p style="color:var(--text); font-size:var(--fs-base); margin-bottom:20px; opacity:0.8;">Introduce el nuevo nombre para este participante.</p>
-    <div style="background:var(--dark4); border-radius:var(--r-lg); padding:16px; margin-bottom:20px; text-align:left;">
-      <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
-        <div id="rename-miembro-avatar" style="width:38px;height:38px;border-radius:50%;background:var(--gold-dark);color:var(--on-gold);font-size:var(--fs-lg);font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
-        <div id="rename-miembro-name" style="color:var(--text); font-weight:800; font-size:1rem;"></div>
+<div class="modal-overlay u-z-9999" id="modal-renombrar-miembro" style="display:none" onclick="if(event.target===this)cerrarModalRenombrarMiembro()">
+  <div class="ventana u-t-center">
+    <div class="u-c-text u-fs-xl u-fw-700 u-mb-10">Renombrar participante</div>
+    <p class="u-c-text u-fs-base u-mb-20 u-op-0_8">Introduce el nuevo nombre para este participante.</p>
+    <div class="u-bg-dark4 u-r-lg u-p-16 u-mb-20 u-t-left">
+      <div class="u-d-flex u-ai-center u-gap-10 u-mb-12">
+        <div class="u-w-38 u-h-38 u-r-50p u-bg-gold-dark u-c-on-gold u-fs-lg u-fw-900 u-ai-center u-jc-center u-shrink-0" id="rename-miembro-avatar" style="display:flex"></div>
+        <div class="u-c-text u-fw-800 u-fs-1rem" id="rename-miembro-name"></div>
       </div>
-      <input id="rename-miembro-input" type="text" placeholder="Nuevo nombre..."
-        style="width:100%; padding:10px 12px; border-radius:var(--r-md); border:1.5px solid var(--line-strong); background:var(--card); color:var(--text); font-size:var(--fs-md); box-sizing:border-box; outline:none;"/>
+      <input class="u-w-100p u-p-10-12 u-r-md u-b-xbb23b u-bg-card u-c-text u-fs-md u-box-border-box u-ol-none" id="rename-miembro-input" type="text" placeholder="Nuevo nombre..."
+       />
     </div>
-    <div style="display:flex; gap:12px; width:100%;">
-      <button onclick="cerrarModalRenombrarMiembro()" class="btn btn-outline" style="flex:1">Cancelar</button>
-      <button onclick="ejecutarRenombrarMiembro()" class="btn btn-gold" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Guardar</button>
+    <div class="u-d-flex u-gap-12 u-w-100p">
+      <button onclick="cerrarModalRenombrarMiembro()" class="btn btn-outline u-f-1">Cancelar</button>
+      <button onclick="ejecutarRenombrarMiembro()" class="btn btn-gold u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Guardar</button>
     </div>
   </div>
 </div>
 <!-- Modal Confirmar Salida de App -->
-<div class="modal-overlay" id="modal-salir-app" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalSalir()">
-  <div class="ventana" style="text-align:center">
-    <div style="width:56px;height:56px;margin:0 auto 10px;border-radius:50%;background:rgba(245,200,0,.12);display:flex;align-items:center;justify-content:center;"><svg style="color:var(--gold-text)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
-    <div style="color:var(--text); font-size:var(--fs-lg); font-weight:700; margin-bottom:20px;">¿Deseas salir?</div>
+<div class="modal-overlay u-z-9999" id="modal-salir-app" style="display:none" onclick="if(event.target===this)cerrarModalSalir()">
+  <div class="ventana u-t-center">
+    <div class="u-w-56 u-h-56 u-m-0-auto-10 u-r-50p u-bg-x3cc9f u-d-flex u-ai-center u-jc-center"><svg class="u-c-gold-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></div>
+    <div class="u-c-text u-fs-lg u-fw-700 u-mb-20">¿Deseas salir?</div>
     
-    <div style="display:flex; gap:12px; width:100%;">
-      <button onclick="cerrarModalSalir()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="14 7 9 12 14 17"/><line x1="21" y1="12" x2="9" y2="12"/></svg> No, volver</button>
-      <button type="button" onclick="if(esAppNativa && Capacitor.Plugins.App) Capacitor.Plugins.App.exitApp(); else salirDeLaWeb()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sí, salir</button>
+    <div class="u-d-flex u-gap-12 u-w-100p">
+      <button onclick="cerrarModalSalir()" class="btn btn-outline u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="14 7 9 12 14 17"/><line x1="21" y1="12" x2="9" y2="12"/></svg> No, volver</button>
+      <button type="button" onclick="if(esAppNativa && Capacitor.Plugins.App) Capacitor.Plugins.App.exitApp(); else salirDeLaWeb()" class="btn btn-peligro u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sí, salir</button>
     </div>
   </div>
 </div>
@@ -1068,81 +1069,81 @@
 
 
 <!-- Elegir origen de la imagen: cámara o galería -->
-<div id="origenImagenModal" onclick="if(event.target===this)cerrarOrigenImagen()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10000;align-items:flex-end;justify-content:center;">
-  <div style="background:var(--dark3);width:100%;max-width:460px;border-radius:20px 20px 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));border-top:1px solid var(--border);">
-    <div style="color:var(--text);font-weight:800;text-align:center;margin-bottom:14px;">Añadir imagen</div>
-    <button type="button" onclick="elegirOrigenImagen('camara')" class="btn btn-gold btn-full" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">
+<div class="u-pos-fixed u-inset-0 u-bg-x3040b u-z-10000 u-ai-flex-end u-jc-center" id="origenImagenModal" onclick="if(event.target===this)cerrarOrigenImagen()" style="display:none">
+  <div class="u-bg-dark3 u-w-100p u-maxw-460 u-r-20-20-0-0 u-p-xc1c9b u-bt-1-solid-border">
+    <div class="u-c-text u-fw-800 u-t-center u-mb-14">Añadir imagen</div>
+    <button type="button" onclick="elegirOrigenImagen('camara')" class="btn btn-gold btn-full u-mb-10 u-d-flex u-ai-center u-jc-center u-gap-8">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
       Hacer foto
     </button>
-    <button type="button" onclick="elegirOrigenImagen('galeria')" class="btn btn-outline btn-full" style="margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">
+    <button type="button" onclick="elegirOrigenImagen('galeria')" class="btn btn-outline btn-full u-mb-10 u-d-flex u-ai-center u-jc-center u-gap-8">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
       Elegir de la galería
     </button>
-    <button type="button" onclick="cerrarOrigenImagen()" style="width:100%;background:none;border:none;color:var(--muted);padding:10px;font-weight:700;cursor:pointer;">Cancelar</button>
+    <button class="u-w-100p u-bg-none u-b-none u-c-muted u-p-10 u-fw-700 u-cur-pointer" type="button" onclick="cerrarOrigenImagen()">Cancelar</button>
   </div>
 </div>
 
 <!-- Visor del comprobante a pantalla completa -->
-<div id="visorTicketModal" onclick="if(event.target===this)cerrarVisorTicket()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:10001;flex-direction:column;align-items:center;justify-content:center;padding:16px;overflow:hidden;">
+<div class="u-pos-fixed u-inset-0 u-bg-xd7fbf u-z-10001 u-dir-column u-ai-center u-jc-center u-p-16 u-ov-hidden" id="visorTicketModal" onclick="if(event.target===this)cerrarVisorTicket()" style="display:none">
   <div class="zoom-area" onclick="if(event.target===this)cerrarVisorTicket()">
     <img id="visorTicketImg" alt="Comprobante">
   </div>
   <div class="zoom-pista">Pellizca o toca dos veces para ampliar</div>
-  <div style="display:flex;gap:10px;margin-top:16px;width:100%;max-width:420px;">
-    <button type="button" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="downloadTicket(+document.getElementById('visorTicketModal').dataset.idx)">
+  <div class="u-d-flex u-gap-10 u-mt-16 u-w-100p u-maxw-420">
+    <button type="button" class="btn btn-outline u-f-1 u-d-flex u-ai-center u-jc-center u-gap-6" onclick="downloadTicket(+document.getElementById('visorTicketModal').dataset.idx)">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Descargar
     </button>
-    <button type="button" class="btn btn-gold" style="flex:1;" onclick="cerrarVisorTicket()">Cerrar</button>
+    <button type="button" class="btn btn-gold u-f-1" onclick="cerrarVisorTicket()">Cerrar</button>
   </div>
 </div>
 
 <!-- Modal de confirmación: quitar comprobante -->
-<div class="modal-overlay" id="modal-quitar-comprobante" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalQuitarComprobante()">
-  <div class="ventana" style="text-align:center">
-    <div style="color:var(--text); font-size:var(--fs-xl); font-weight:700; margin-bottom:10px;">¿Quitar comprobante?</div>
-    <p style="color:var(--text); font-size:var(--fs-base); margin-bottom:20px; opacity:0.8;">El gasto se mantiene; solo se elimina la imagen adjunta para todo el grupo.</p>
-    <div style="background:var(--dark4); border-radius:var(--r-lg); padding:12px; margin-bottom:24px; display:flex; align-items:center; gap:12px; text-align:left;">
-      <img id="quitar-comp-img" alt="" style="width:48px; height:48px; object-fit:cover; border-radius:var(--r-sm); border:1px solid var(--line-strong); flex-shrink:0;">
-      <div style="min-width:0;">
-        <div style="color:var(--text2); font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:.5px;">Gasto</div>
-        <div id="quitar-comp-desc" style="color:var(--text); font-weight:800; font-size:1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
+<div class="modal-overlay u-z-9999" id="modal-quitar-comprobante" style="display:none" onclick="if(event.target===this)cerrarModalQuitarComprobante()">
+  <div class="ventana u-t-center">
+    <div class="u-c-text u-fs-xl u-fw-700 u-mb-10">¿Quitar comprobante?</div>
+    <p class="u-c-text u-fs-base u-mb-20 u-op-0_8">El gasto se mantiene; solo se elimina la imagen adjunta para todo el grupo.</p>
+    <div class="u-bg-dark4 u-r-lg u-p-12 u-mb-24 u-d-flex u-ai-center u-gap-12 u-t-left">
+      <img class="u-w-48 u-h-48 u-fit-cover u-r-sm u-b-x26507 u-shrink-0" id="quitar-comp-img" alt="">
+      <div class="u-minw-0">
+        <div class="u-c-text2 u-fs-xs u-tt-uppercase u-ls-_5">Gasto</div>
+        <div class="u-c-text u-fw-800 u-fs-1rem u-ov-hidden u-tov-ellipsis u-ws-nowrap" id="quitar-comp-desc"></div>
       </div>
     </div>
-    <div style="display:flex; gap:12px; width:100%;">
-      <button onclick="cerrarModalQuitarComprobante()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
-      <button onclick="confirmarQuitarComprobante()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, quitar</button>
+    <div class="u-d-flex u-gap-12 u-w-100p">
+      <button onclick="cerrarModalQuitarComprobante()" class="btn btn-outline u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button onclick="confirmarQuitarComprobante()" class="btn btn-peligro u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, quitar</button>
     </div>
   </div>
 </div>
 
 <!-- Modal: contacto o participante duplicado -->
-<div class="modal-overlay" id="modal-duplicado" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalDuplicado()">
-  <div class="ventana" style="text-align:center">
-    <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:rgba(245,200,0,.12); display:flex; align-items:center; justify-content:center;">
-      <svg style="color:var(--gold-text)" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+<div class="modal-overlay u-z-9999" id="modal-duplicado" style="display:none" onclick="if(event.target===this)cerrarModalDuplicado()">
+  <div class="ventana u-t-center">
+    <div class="u-w-52 u-h-52 u-m-0-auto-12 u-r-50p u-bg-x3cc9f u-d-flex u-ai-center u-jc-center">
+      <svg class="u-c-gold-text" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
     </div>
-    <div id="dup-titulo" style="color:var(--text); font-size:1.4rem; font-weight:700; margin-bottom:10px;">Contacto duplicado</div>
-    <p style="color:var(--text); font-size:var(--fs-base); margin-bottom:18px; opacity:0.8;">No se ha añadido para evitar duplicados.</p>
-    <div style="background:var(--dark4); border-radius:var(--r-lg); padding:14px; margin-bottom:22px; text-align:left;">
-      <div id="dup-nombre" style="color:var(--text); font-weight:800; font-size:1rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></div>
-      <div id="dup-motivo" style="color:var(--text2); font-size:var(--fs-base); margin-top:4px; word-break:break-word;"></div>
+    <div class="u-c-text u-fs-1_4rem u-fw-700 u-mb-10" id="dup-titulo">Contacto duplicado</div>
+    <p class="u-c-text u-fs-base u-mb-18 u-op-0_8">No se ha añadido para evitar duplicados.</p>
+    <div class="u-bg-dark4 u-r-lg u-p-14 u-mb-22 u-t-left">
+      <div class="u-c-text u-fw-800 u-fs-1rem u-ov-hidden u-tov-ellipsis u-ws-nowrap" id="dup-nombre"></div>
+      <div class="u-c-text2 u-fs-base u-mt-4 u-wb-break-word" id="dup-motivo"></div>
     </div>
-    <button onclick="cerrarModalDuplicado()" class="btn btn-gold" style="width:100%"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button>
+    <button onclick="cerrarModalDuplicado()" class="btn btn-gold u-w-100p"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button>
   </div>
 </div>
 
 <!-- Modal: saldos pendientes que impiden borrar datos o eliminar la cuenta -->
-<div class="modal-overlay" id="modal-pendientes" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarModalPendientes()">
-  <div class="ventana" style="text-align:center">
-    <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:rgba(255,77,77,.12); display:flex; align-items:center; justify-content:center;">
-      <svg style="color:var(--danger)" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+<div class="modal-overlay u-z-9999" id="modal-pendientes" style="display:none" onclick="if(event.target===this)cerrarModalPendientes()">
+  <div class="ventana u-t-center">
+    <div class="u-w-52 u-h-52 u-m-0-auto-12 u-r-50p u-bg-x396b6 u-d-flex u-ai-center u-jc-center">
+      <svg class="u-c-danger" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
     </div>
-    <div id="pendientes-titulo" style="color:var(--text); font-size:var(--fs-xl); font-weight:700; margin-bottom:10px;">Aún no puedes continuar</div>
-    <p id="pendientes-intro" style="color:var(--text2); font-size:var(--fs-base); margin-bottom:16px; line-height:1.45;"></p>
-    <div id="pendientes-lista" style="background:var(--tint-1); border-radius:var(--r-lg); padding:4px 6px; margin-bottom:22px; text-align:left; font-size:var(--fs-base); max-height:40vh; overflow-y:auto;"></div>
-    <button onclick="cerrarModalPendientes()" class="btn btn-gold" style="width:100%"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button>
+    <div class="u-c-text u-fs-xl u-fw-700 u-mb-10" id="pendientes-titulo">Aún no puedes continuar</div>
+    <p class="u-c-text2 u-fs-base u-mb-16 u-lh-1_45" id="pendientes-intro"></p>
+    <div class="u-bg-tint-1 u-r-lg u-p-4-6 u-mb-22 u-t-left u-fs-base u-maxh-40vh u-ovy-auto" id="pendientes-lista"></div>
+    <button onclick="cerrarModalPendientes()" class="btn btn-gold u-w-100p"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button>
   </div>
 </div>
 
@@ -1151,7 +1152,7 @@
 <div id="page-chat">
   <div class="chat-top">
     <button type="button" class="det-icono chat-volver" onclick="cerrarChat()" title="Volver al grupo" aria-label="Cerrar el chat y volver al grupo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg></button>
-    <div style="min-width:0;"><div class="t" id="chatTitulo">Chat</div><div class="s" id="chatMiembros"></div></div>
+    <div class="u-minw-0"><div class="t" id="chatTitulo">Chat</div><div class="s" id="chatMiembros"></div></div>
   </div>
   <div class="chat-list" id="chatLista"></div>
   <div id="chatRespondiendo">
@@ -1167,9 +1168,9 @@
   <div id="chatCapa" onclick="cerrarMenuChat()"></div>
   <div id="chatCapaAdj" onclick="cerrarAdjuntosChat()"></div>
   <div id="chatAdjuntos">
-    <button type="button" onclick="elegirAdjuntoChat('camara')"><span class="ic" style="background:#E5486B;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>Cámara</button>
-    <button type="button" onclick="elegirAdjuntoChat('galeria')"><span class="ic" style="background:#8B63E8;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>Galería</button>
-    <button type="button" onclick="elegirAdjuntoChat('gif')"><span class="ic" style="background:#13A87E;"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M9.5 10H7.8a1.3 1.3 0 0 0-1.3 1.3v1.4A1.3 1.3 0 0 0 7.8 14h.4a1.3 1.3 0 0 0 1.3-1.3V12H8.2"/><line x1="12" y1="10" x2="12" y2="14"/><path d="M17.5 10h-2.5v4M15 12h2"/></svg></span>GIF</button>
+    <button type="button" onclick="elegirAdjuntoChat('camara')"><span class="ic u-bg-e5486b"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>Cámara</button>
+    <button type="button" onclick="elegirAdjuntoChat('galeria')"><span class="ic u-bg-8b63e8"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>Galería</button>
+    <button type="button" onclick="elegirAdjuntoChat('gif')"><span class="ic u-bg-13a87e"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M9.5 10H7.8a1.3 1.3 0 0 0-1.3 1.3v1.4A1.3 1.3 0 0 0 7.8 14h.4a1.3 1.3 0 0 0 1.3-1.3V12H8.2"/><line x1="12" y1="10" x2="12" y2="14"/><path d="M17.5 10h-2.5v4M15 12h2"/></svg></span>GIF</button>
   </div>
   <div id="chatFotoPrevia">
     <button type="button" class="chat-x" onclick="cerrarFotoPreviaChat()" title="Cancelar"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -1185,8 +1186,8 @@
     </div>
     <div class="zoom-pista">Pellizca o toca dos veces para ampliar</div>
     <div class="botones">
-      <button type="button" class="btn btn-outline" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="descargarFotoChat()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar</button>
-      <button type="button" class="btn btn-gold" style="flex:1;" onclick="cerrarVisorChat()">Cerrar</button>
+      <button type="button" class="btn btn-outline u-f-1 u-d-flex u-ai-center u-jc-center u-gap-6" onclick="descargarFotoChat()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Descargar</button>
+      <button type="button" class="btn btn-gold u-f-1" onclick="cerrarVisorChat()">Cerrar</button>
     </div>
   </div>
   <div id="chatGif">
@@ -1204,94 +1205,94 @@
 <script src="js/chat.js"></script>
 
 <!-- Modal: ¿Quién eres en este grupo? (invitaciones) -->
-<div class="modal-overlay" id="modal-quien-eres" style="display:none; z-index:9999;">
-  <div class="ventana" style="max-height:85vh;overflow-y:auto">
-    <div id="quien-titulo" style="color:var(--text); font-size:1.25rem; font-weight:700; margin-bottom:8px; text-align:center;"></div>
-    <p style="color:var(--text); font-size:var(--fs-base); margin-bottom:16px; opacity:0.8; text-align:center; line-height:1.4;">¿Quién eres en este grupo? Si ya te habían añadido, elige tu nombre: conservarás tus gastos y saldos.</p>
-    <div id="quien-opciones" style="margin-bottom:18px;"></div>
-    <button onclick="confirmarQuienEres()" class="btn btn-gold" style="width:100%">Continuar</button>
+<div class="modal-overlay u-z-9999" id="modal-quien-eres" style="display:none">
+  <div class="ventana u-maxh-85vh u-ovy-auto">
+    <div class="u-c-text u-fs-1_25rem u-fw-700 u-mb-8 u-t-center" id="quien-titulo"></div>
+    <p class="u-c-text u-fs-base u-mb-16 u-op-0_8 u-t-center u-lh-1_4">¿Quién eres en este grupo? Si ya te habían añadido, elige tu nombre: conservarás tus gastos y saldos.</p>
+    <div class="u-mb-18" id="quien-opciones"></div>
+    <button onclick="confirmarQuienEres()" class="btn btn-gold u-w-100p">Continuar</button>
   </div>
 </div>
 
 <!-- Modal: pago pendiente → «Recibí otro importe» o «Rechazar» -->
-<div class="modal-overlay" id="modal-pago-pendiente" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarPagoPendiente()">
+<div class="modal-overlay u-z-9999" id="modal-pago-pendiente" style="display:none" onclick="if(event.target===this)cerrarPagoPendiente()">
   <div class="ventana">
-    <div id="pp-titulo" style="color:var(--text); font-size:var(--fs-lg); font-weight:800; text-align:center; margin-bottom:6px;"></div>
-    <p id="pp-texto" style="color:var(--text2); font-size:var(--fs-sm); text-align:center; line-height:1.45; margin-bottom:14px;"></p>
+    <div class="u-c-text u-fs-lg u-fw-800 u-t-center u-mb-6" id="pp-titulo"></div>
+    <p class="u-c-text2 u-fs-sm u-t-center u-lh-1_45 u-mb-14" id="pp-texto"></p>
     <div id="pp-importe-wrap" style="display:none;">
-      <input id="pp-importe" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" oninput="actualizarPagoPendiente()"
-        style="width:100%; box-sizing:border-box; background:var(--dark2); border:1.5px solid var(--gold); border-radius:var(--r-md); padding:12px; font-size:1.4rem; font-weight:800; text-align:center; color:var(--gold-text); margin-bottom:10px; outline:none;">
+      <input class="u-w-100p u-box-border-box u-bg-dark2 u-b-1_5-solid-gold u-r-md u-p-12 u-fs-1_4rem u-fw-800 u-t-center u-c-gold-text u-mb-10 u-ol-none" id="pp-importe" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" oninput="actualizarPagoPendiente()"
+       >
     </div>
-    <div id="pp-resumen" style="display:none; background:var(--dark4); border-radius:var(--r-md); padding:10px 12px; font-size:var(--fs-sm); line-height:1.6; margin-bottom:14px; color:var(--text);"></div>
-    <div style="display:flex; gap:10px;">
-      <button type="button" onclick="cerrarPagoPendiente()" class="btn btn-outline" style="flex:1">Cancelar</button>
+    <div class="u-bg-dark4 u-r-md u-p-10-12 u-fs-sm u-lh-1_6 u-mb-14 u-c-text" id="pp-resumen" style="display:none"></div>
+    <div class="u-d-flex u-gap-10">
+      <button type="button" onclick="cerrarPagoPendiente()" class="btn btn-outline u-f-1">Cancelar</button>
       <button type="button" id="pp-aceptar" class="btn btn-gold" onclick="aceptarPagoPendiente()" style="flex:1">Confirmar</button>
     </div>
   </div>
 </div>
 
 <!-- Modal: aviso genérico (título + texto + Entendido) -->
-<div class="modal-overlay" id="modal-aviso" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarAviso()">
-  <div class="ventana" style="text-align:center">
-    <div id="aviso-titulo" style="color:var(--text); font-size:var(--fs-lg); font-weight:800; margin-bottom:8px;"></div>
-    <p id="aviso-texto" style="color:var(--text2); font-size:var(--fs-base); line-height:1.5; margin-bottom:16px;"></p>
-    <button type="button" onclick="cerrarAviso()" class="btn btn-gold" style="width:100%"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button>
+<div class="modal-overlay u-z-9999" id="modal-aviso" style="display:none" onclick="if(event.target===this)cerrarAviso()">
+  <div class="ventana u-t-center">
+    <div class="u-c-text u-fs-lg u-fw-800 u-mb-8" id="aviso-titulo"></div>
+    <p class="u-c-text2 u-fs-base u-lh-1_5 u-mb-16" id="aviso-texto"></p>
+    <button type="button" onclick="cerrarAviso()" class="btn btn-gold u-w-100p"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button>
   </div>
 </div>
 
 <!-- Modal: invitar al grupo con un enlace (Participantes → Invitar con enlace) -->
-<div class="modal-overlay" id="modal-invitar" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarInvitar()">
+<div class="modal-overlay u-z-9999" id="modal-invitar" style="display:none" onclick="if(event.target===this)cerrarInvitar()">
   <div class="ventana">
-    <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:rgba(245,200,0,.12); display:flex; align-items:center; justify-content:center; color:var(--gold-text);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
-    <div id="invitarTitulo" style="color:var(--text); font-size:1.25rem; font-weight:800; text-align:center; margin-bottom:6px;"></div>
-    <p style="color:var(--text2); font-size:var(--fs-base); text-align:center; line-height:1.45; margin-bottom:16px;">Quien abra el enlace podrá registrarse y unirse. Si ya estaba apuntado, elegirá su nombre y conservará sus gastos.</p>
-    <div id="invitarEnlace" style="background:var(--dark2); border:1px solid var(--line); border-radius:var(--r-md); padding:10px 12px; color:var(--text2); font-size:var(--fs-sm); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:14px;"></div>
-    <button type="button" onclick="compartirInvitacion()" style="width:100%; padding:12px; border-radius:var(--r-md); border:none; background:var(--gold); color:#000; font-weight:800; font-size:var(--fs-md); display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px; cursor:pointer;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Compartir invitación</button>
-    <div style="display:flex; gap:10px; margin-bottom:12px;">
-      <button type="button" onclick="whatsappInvitacion()" style="flex:1; padding:12px; border-radius:var(--r-md); border:1px solid var(--whatsapp); background:rgba(37,211,102,.1); color:var(--whatsapp); font-weight:800; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.6-1.3a.4.4 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg> WhatsApp</button>
-      <button type="button" onclick="copiarInvitacion()" style="flex:1; padding:12px; border-radius:var(--r-md); border:1px solid var(--line-strong); background:none; color:var(--text); font-weight:800; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar</button>
+    <div class="u-w-52 u-h-52 u-m-0-auto-12 u-r-50p u-bg-x3cc9f u-d-flex u-ai-center u-jc-center u-c-gold-text"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></div>
+    <div class="u-c-text u-fs-1_25rem u-fw-800 u-t-center u-mb-6" id="invitarTitulo"></div>
+    <p class="u-c-text2 u-fs-base u-t-center u-lh-1_45 u-mb-16">Quien abra el enlace podrá registrarse y unirse. Si ya estaba apuntado, elegirá su nombre y conservará sus gastos.</p>
+    <div class="u-bg-dark2 u-b-1-solid-line u-r-md u-p-10-12 u-c-text2 u-fs-sm u-ws-nowrap u-ov-hidden u-tov-ellipsis u-mb-14" id="invitarEnlace"></div>
+    <button class="u-w-100p u-p-12 u-r-md u-b-none u-bg-gold u-c-000 u-fw-800 u-fs-md u-d-flex u-ai-center u-jc-center u-gap-8 u-mb-10 u-cur-pointer" type="button" onclick="compartirInvitacion()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Compartir invitación</button>
+    <div class="u-d-flex u-gap-10 u-mb-12">
+      <button class="u-f-1 u-p-12 u-r-md u-b-1-solid-whatsapp u-bg-x63738 u-c-whatsapp u-fw-800 u-d-flex u-ai-center u-jc-center u-gap-6 u-cur-pointer" type="button" onclick="whatsappInvitacion()"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.6-1.3a.4.4 0 0 0 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg> WhatsApp</button>
+      <button class="u-f-1 u-p-12 u-r-md u-b-x26507 u-bg-none u-c-text u-fw-800 u-d-flex u-ai-center u-jc-center u-gap-6 u-cur-pointer" type="button" onclick="copiarInvitacion()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar</button>
     </div>
     <!-- Solo quien creó el grupo: cambiar el enlace (el anterior deja de funcionar) -->
-    <div id="invitarRenovar" style="display:none; border-top:1px solid var(--line); padding-top:10px; margin-bottom:6px;">
-      <button type="button" id="invitarRenovarBtn" onclick="pedirRenovarInvitacion()" style="width:100%; padding:6px; background:none; border:none; color:var(--text2); font-size:var(--fs-sm); font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Cambiar enlace</button>
-      <div id="invitarRenovarConfirma" style="display:none; text-align:center;">
-        <p style="color:var(--text2); font-size:var(--fs-sm); line-height:1.4; margin:2px 0 10px;">El enlace actual dejará de funcionar. Quien ya está en el grupo no se ve afectado.</p>
-        <div style="display:flex; gap:8px;">
-          <button type="button" onclick="cancelarRenovarInvitacion()" class="btn btn-outline" style="flex:1">Cancelar</button>
-          <button type="button" onclick="renovarInvitacion()" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Cambiar enlace</button>
+    <div class="u-bt-1-solid-line u-pt-10 u-mb-6" id="invitarRenovar" style="display:none">
+      <button class="u-w-100p u-p-6 u-bg-none u-b-none u-c-text2 u-fs-sm u-fw-700 u-cur-pointer u-ai-center u-jc-center u-gap-6" type="button" id="invitarRenovarBtn" onclick="pedirRenovarInvitacion()" style="display:flex"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Cambiar enlace</button>
+      <div class="u-t-center" id="invitarRenovarConfirma" style="display:none">
+        <p class="u-c-text2 u-fs-sm u-lh-1_4 u-m-2-0-10">El enlace actual dejará de funcionar. Quien ya está en el grupo no se ve afectado.</p>
+        <div class="u-d-flex u-gap-8">
+          <button type="button" onclick="cancelarRenovarInvitacion()" class="btn btn-outline u-f-1">Cancelar</button>
+          <button type="button" onclick="renovarInvitacion()" class="btn btn-peligro u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg> Cambiar enlace</button>
         </div>
       </div>
     </div>
-    <button type="button" onclick="cerrarInvitar()" style="width:100%; padding:8px; background:none; border:none; color:var(--muted); font-weight:700; cursor:pointer;">Cerrar</button>
+    <button class="u-w-100p u-p-8 u-bg-none u-b-none u-c-muted u-fw-700 u-cur-pointer" type="button" onclick="cerrarInvitar()">Cerrar</button>
   </div>
 </div>
 
 <!-- Modal: unirse a un grupo pegando el enlace de invitación -->
-<div class="modal-overlay" id="modal-unirse-enlace" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarUnirseConEnlace()">
+<div class="modal-overlay u-z-9999" id="modal-unirse-enlace" style="display:none" onclick="if(event.target===this)cerrarUnirseConEnlace()">
   <div class="ventana">
-    <div style="width:52px; height:52px; margin:0 auto 12px; border-radius:50%; background:rgba(245,200,0,.12); display:flex; align-items:center; justify-content:center;">
-      <svg style="color:var(--gold-text)" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+    <div class="u-w-52 u-h-52 u-m-0-auto-12 u-r-50p u-bg-x3cc9f u-d-flex u-ai-center u-jc-center">
+      <svg class="u-c-gold-text" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
     </div>
-    <div style="color:var(--text); font-size:var(--fs-lg); font-weight:700; margin-bottom:8px; text-align:center;">Unirse a un grupo</div>
-    <p style="color:var(--text); font-size:var(--fs-base); margin-bottom:16px; opacity:0.8; text-align:center; line-height:1.4;">Copia el enlace de invitación que te enviaron (por WhatsApp, email…) y pégalo en el campo.</p>
-    <div class="field" style="margin-bottom:10px;">
+    <div class="u-c-text u-fs-lg u-fw-700 u-mb-8 u-t-center">Unirse a un grupo</div>
+    <p class="u-c-text u-fs-base u-mb-16 u-op-0_8 u-t-center u-lh-1_4">Copia el enlace de invitación que te enviaron (por WhatsApp, email…) y pégalo en el campo.</p>
+    <div class="field u-mb-10">
       <input type="text" id="unirse-enlace-input" placeholder="https://vakapay-app.vercel.app/login.html?invite=…" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="document.getElementById('unirse-enlace-error').style.display='none'" onkeydown="if(event.key==='Enter')unirseConEnlace()">
     </div>
-    <div id="unirse-enlace-error" style="display:none; color:var(--danger); font-size:var(--fs-sm); margin-bottom:10px; line-height:1.4;"></div>
-    <div style="display:flex; gap:12px; margin-top:6px;">
-      <button onclick="cerrarUnirseConEnlace()" class="btn btn-outline" style="flex:1">Cancelar</button>
-      <button onclick="unirseConEnlace()" class="btn btn-gold" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Unirse</button>
+    <div class="u-c-danger u-fs-sm u-mb-10 u-lh-1_4" id="unirse-enlace-error" style="display:none"></div>
+    <div class="u-d-flex u-gap-12 u-mt-6">
+      <button onclick="cerrarUnirseConEnlace()" class="btn btn-outline u-f-1">Cancelar</button>
+      <button onclick="unirseConEnlace()" class="btn btn-gold u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Unirse</button>
     </div>
   </div>
 </div>
 
 <!-- Modal: resultado de unirse a un grupo -->
-<div class="modal-overlay" id="modal-invitacion-resultado" style="display:none; z-index:9999;" onclick="if(event.target===this)cerrarResultadoInvitacion()">
-  <div class="ventana" style="text-align:center">
-    <div id="inv-res-icono" style="margin-bottom:14px;"></div>
-    <div id="inv-res-titulo" style="color:var(--text); font-size:1.35rem; font-weight:700; margin-bottom:10px;"></div>
-    <p id="inv-res-texto" style="color:var(--text); font-size:var(--fs-base); margin-bottom:22px; opacity:0.8; line-height:1.45;"></p>
-    <button id="inv-res-ir" onclick="irAlGrupoInvitado()" class="btn btn-gold" style="width:100%">Ir al grupo</button>
+<div class="modal-overlay u-z-9999" id="modal-invitacion-resultado" style="display:none" onclick="if(event.target===this)cerrarResultadoInvitacion()">
+  <div class="ventana u-t-center">
+    <div class="u-mb-14" id="inv-res-icono"></div>
+    <div class="u-c-text u-fs-1_35rem u-fw-700 u-mb-10" id="inv-res-titulo"></div>
+    <p class="u-c-text u-fs-base u-mb-22 u-op-0_8 u-lh-1_45" id="inv-res-texto"></p>
+    <button id="inv-res-ir" onclick="irAlGrupoInvitado()" class="btn btn-gold u-w-100p">Ir al grupo</button>
     <button id="inv-res-cerrar" onclick="cerrarResultadoInvitacion()">Entendido</button>
   </div>
 </div>

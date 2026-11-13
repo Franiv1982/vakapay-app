@@ -45,19 +45,19 @@ function renderPagosRealizados() {
     const detalles = [fmtDate(e.date), pagoPor ? `pagó ${pagoPor}` : '', quien ? `registró ${quien}` : ''].filter(Boolean).join(' · ');
     if (e.por_confirmar) return tarjetaPagoPendiente(e, i, para, detalles, base);
     // Cada pago es una tarjeta (como en Lista de gastos): tocarla abre el detalle; 🧾 abre el comprobante
-    return `<div class="group-card" onclick="openGasto(${i},'pagos')" style="gap:10px;padding:12px 12px;margin-bottom:8px;">
-      <div style="width:34px;height:34px;border-radius:var(--r-md);background:rgba(61,186,111,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <svg style="color:var(--success)" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    return `<div class="group-card u-gap-10 u-p-12-12 u-mb-8" onclick="openGasto(${i},'pagos')">
+      <div class="u-w-34 u-h-34 u-r-md u-bg-x05021 u-d-flex u-ai-center u-jc-center u-shrink-0">
+        <svg class="u-c-success" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:var(--fs-base);color:var(--text);"><strong>${escaparHtml(e.payer)}</strong> → <strong>${escaparHtml(para)}</strong></div>
-        <div style="font-size:var(--fs-xs);color:var(--muted);margin-top:2px;">${escaparHtml(detalles)}</div>
+      <div class="u-f-1 u-minw-0">
+        <div class="u-fs-base u-c-text"><strong>${escaparHtml(e.payer)}</strong> → <strong>${escaparHtml(para)}</strong></div>
+        <div class="u-fs-xs u-c-muted u-mt-2">${escaparHtml(detalles)}</div>
       </div>
-      <div style="font-weight:800;color:var(--success);font-size:var(--fs-base);white-space:nowrap;">${formatAmountBase(Number(e.baseAmt) || 0, base)}</div>
+      <div class="u-fw-800 u-c-success u-fs-base u-ws-nowrap">${formatAmountBase(Number(e.baseAmt) || 0, base)}</div>
       ${e.has_ticket || e.ticket
-        ? `<button type="button" title="Ver comprobante" onclick="event.stopPropagation();verTicket(${i})" style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;flex-shrink:0;border-radius:var(--r-sm);border:1px solid rgba(245,200,0,.35);background:none;color:var(--gold-text);cursor:pointer;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></button>`
+        ? `<button class="u-ai-center u-jc-center u-w-32 u-h-32 u-shrink-0 u-r-sm u-b-x6caa3 u-bg-none u-c-gold-text u-cur-pointer" type="button" title="Ver comprobante" onclick="event.stopPropagation();verTicket(${i})" style="display:flex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></button>`
         : ''}
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+      <svg class="u-shrink-0" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
     </div>`;
   }).join('');
 }
@@ -76,23 +76,23 @@ function tarjetaPagoPendiente(e, i, para, detalles, base) {
     : yo === e.payer ? `Esperando que ${para} lo confirme. Si no responde, se confirmará solo el ${hasta}.`
     : `Pendiente de que ${para} lo confirme (como máximo hasta el ${hasta}).`;
   const botones = yo === para ? `
-      <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;" onclick="event.stopPropagation()">
+      <div class="u-d-flex u-dir-column u-gap-8 u-mt-10" onclick="event.stopPropagation()">
         <button type="button" class="btn btn-gold" onclick="confirmarPagoPendiente(${i})"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Confirmar: recibí ${imp}</button>
         <button type="button" class="btn btn-outline" onclick="abrirPagoPendiente(${i},'otro')">Recibí otro importe</button>
         <button type="button" class="btn btn-danger" onclick="abrirPagoPendiente(${i},'rechazar')">Rechazar: no he recibido nada</button>
       </div>` : '';
-  return `<div onclick="openGasto(${i},'pagos')" style="border:1.5px solid rgba(245,200,0,.55);background:rgba(245,200,0,.05);border-radius:var(--r-md);margin-bottom:8px;padding:12px 12px;cursor:pointer;">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <div style="width:34px;height:34px;border-radius:var(--r-md);background:rgba(245,200,0,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <svg style="color:var(--gold-text)" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+  return `<div class="u-b-x65d6c u-bg-x3c1ef u-r-md u-mb-8 u-p-12-12 u-cur-pointer" onclick="openGasto(${i},'pagos')">
+    <div class="u-d-flex u-ai-center u-gap-10">
+      <div class="u-w-34 u-h-34 u-r-md u-bg-x3cc9f u-d-flex u-ai-center u-jc-center u-shrink-0">
+        <svg class="u-c-gold-text" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       </div>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:var(--fs-base);color:var(--text);"><strong>${escaparHtml(e.payer)}</strong> → <strong>${escaparHtml(para)}</strong></div>
-        <div style="font-size:var(--fs-xs);color:var(--muted);margin-top:2px;">${escaparHtml(detalles)}</div>
+      <div class="u-f-1 u-minw-0">
+        <div class="u-fs-base u-c-text"><strong>${escaparHtml(e.payer)}</strong> → <strong>${escaparHtml(para)}</strong></div>
+        <div class="u-fs-xs u-c-muted u-mt-2">${escaparHtml(detalles)}</div>
       </div>
-      <div style="font-weight:800;color:var(--gold-text);font-size:var(--fs-base);white-space:nowrap;">${imp}</div>
+      <div class="u-fw-800 u-c-gold-text u-fs-base u-ws-nowrap">${imp}</div>
     </div>
-    <div style="display:inline-block;font-size:var(--fs-xs);font-weight:800;color:var(--gold-text);background:rgba(245,200,0,.12);border-radius:var(--r-lg);padding:4px 10px;margin-top:8px;line-height:1.35;">${escaparHtml(etiqueta)}</div>
+    <div class="u-d-inline-block u-fs-xs u-fw-800 u-c-gold-text u-bg-x3cc9f u-r-lg u-p-4-10 u-mt-8 u-lh-1_35">${escaparHtml(etiqueta)}</div>
     ${botones}
   </div>`;
 }
@@ -246,14 +246,14 @@ function selectPayMethod(el, method) {
   const concepto = `VakaPay · ${g ? g.name : 'deuda'}`;
   const to = _payData.to;
   const fila = (etiqueta, valor, copiar) => `
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--tint-1);">
-      <div style="min-width:0;"><div style="color:var(--muted);font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.5px;">${etiqueta}</div>
-      <div style="font-weight:800;color:var(--text);word-break:break-all;">${valor}</div></div>
-      <button type="button" class="btn btn-outline btn-sm" style="flex-shrink:0;font-size:var(--fs-xs);padding:4px 10px;" onclick="copiarTexto(${JSON.stringify(copiar).replace(/"/g, '&quot;')})">Copiar</button>
+    <div class="u-d-flex u-ai-center u-jc-space-between u-gap-8 u-p-6-0 u-bb-1-solid-tint-1">
+      <div class="u-minw-0"><div class="u-c-muted u-fs-xs u-tt-uppercase u-ls-_5">${etiqueta}</div>
+      <div class="u-fw-800 u-c-text u-wb-break-all">${valor}</div></div>
+      <button type="button" class="btn btn-outline btn-sm u-shrink-0 u-fs-xs u-p-4-10" onclick="copiarTexto(${JSON.stringify(copiar).replace(/"/g, '&quot;')})">Copiar</button>
     </div>`;
   let html = '';
   if (_cobro === 'cargando') {
-    html = '<div aria-label="Cargando datos de cobro"><div class="sk" style="height:10px;width:30%;margin-bottom:8px;"></div><div class="sk" style="height:16px;width:65%;"></div></div>';
+    html = '<div aria-label="Cargando datos de cobro"><div class="sk u-h-10 u-w-30p u-mb-8"></div><div class="sk u-h-16 u-w-65p"></div></div>';
   } else if (method === 'bizum') {
     // 1º el teléfono que esa persona puso en su perfil para cobrar;
     // 2º si no lo puso, el teléfono que tú tienes guardado de ella en Amigos
@@ -261,13 +261,13 @@ function selectPayMethod(el, method) {
     const telBizum = (_cobro && _cobro.bizum) || (amigo && amigo.phone) || '';
     const desdeAmigos = !(_cobro && _cobro.bizum) && !!telBizum;
     html = telBizum
-      ? `<div style="margin-bottom:6px;">Envía un Bizum a <strong>${to}</strong> desde la app de tu banco:</div>
+      ? `<div class="u-mb-6">Envía un Bizum a <strong>${to}</strong> desde la app de tu banco:</div>
          ${fila(desdeAmigos ? 'Teléfono (de tus amigos)' : 'Teléfono', telBizum, telBizum.replace(/\s+/g, ''))}${fila('Importe', formatAmountBase(Number(importe), base), importe.replace('.', ','))}${fila('Concepto', concepto, concepto)}
-         ${desdeAmigos ? `<div style="margin-top:8px;color:var(--gold-text);font-size:var(--fs-sm);">${to} no ha configurado Bizum en su perfil; es el número que tienes guardado en Amigos. Comprueba que sea el que usa para Bizum.</div>` : ''}`
+         ${desdeAmigos ? `<div class="u-mt-8 u-c-gold-text u-fs-sm">${to} no ha configurado Bizum en su perfil; es el número que tienes guardado en Amigos. Comprueba que sea el que usa para Bizum.</div>` : ''}`
       : `<strong>${to}</strong> aún no ha añadido su teléfono para Bizum, y tampoco lo tienes en Amigos. Puedes añadirlo en Amigos o elegir otro método.`;
   } else if (method === 'transferencia') {
     html = (_cobro && _cobro.iban)
-      ? `<div style="margin-bottom:6px;">Haz una transferencia a <strong>${to}</strong> desde la app de tu banco:</div>
+      ? `<div class="u-mb-6">Haz una transferencia a <strong>${to}</strong> desde la app de tu banco:</div>
          ${fila('Titular', _cobro.titular || to, _cobro.titular || to)}${fila('IBAN', formatearIban(_cobro.iban), _cobro.iban)}${fila('Importe', formatAmountBase(Number(importe), base), importe.replace('.', ','))}${fila('Concepto', concepto, concepto)}`
       : `<strong>${to}</strong> aún no ha añadido su IBAN. Puedes pedírselo o elegir otro método.`;
   } else if (method === 'efectivo') {
@@ -276,7 +276,7 @@ function selectPayMethod(el, method) {
   if (method === 'transferencia' && _cobro && !_cobro.tiene_cuenta) {
     html = `<strong>${to}</strong> no tiene cuenta en VakaPay, así que no tiene datos de cobro guardados. Acordad el pago entre vosotros y pulsa «Marcar saldado».`;
   }
-  det.innerHTML = html + (method !== 'efectivo' ? '<div style="margin-top:8px;color:var(--muted);font-size:var(--fs-sm);">Cuando hayas pagado, adjunta la captura y pulsa «Marcar saldado».</div>' : '');
+  det.innerHTML = html + (method !== 'efectivo' ? '<div class="u-mt-8 u-c-muted u-fs-sm">Cuando hayas pagado, adjunta la captura y pulsa «Marcar saldado».</div>' : '');
   det.style.display = 'block';
 }
 

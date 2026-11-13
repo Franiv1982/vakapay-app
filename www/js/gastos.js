@@ -255,13 +255,13 @@ function openEditModal(idx) {
     cargarTicket(idx).then(t => { if (t) document.getElementById('editOcrPreview').src = t; });
   }
   if (e.ticket || e.has_ticket) {
-	document.getElementById('editOcrBtn').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Adjuntar <span id="editOcrDot" style="display:none;position:absolute;top:3px;right:3px;width:7px;height:7px;background:var(--success);border-radius:50%;border:1.5px solid var(--dark);"></span>';
+	document.getElementById('editOcrBtn').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Adjuntar <span class="u-pos-absolute u-top-3 u-right-3 u-w-7 u-h-7 u-bg-success u-r-50p u-b-1_5-solid-dark" id="editOcrDot" style="display:none"></span>';
     document.getElementById('editOcrPreview').src = e.ticket || '';
     document.getElementById('editOcrPreview').style.display = 'block';
     document.getElementById('editOcrFileName').textContent = 'Comprobante guardado';
     document.getElementById('editOcrDot').style.display = 'block';
     document.getElementById('editOcrClearBtn').style.display = 'block';
-    document.getElementById('editOcrBtn').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Cambiar <span id="editOcrDot" style="display:none;position:absolute;top:3px;right:3px;width:7px;height:7px;background:var(--success);border-radius:50%;border:1.5px solid var(--dark);"></span>';
+    document.getElementById('editOcrBtn').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> Cambiar <span class="u-pos-absolute u-top-3 u-right-3 u-w-7 u-h-7 u-bg-success u-r-50p u-b-1_5-solid-dark" id="editOcrDot" style="display:none"></span>';
     document.getElementById('editOcrSuccess').innerHTML = icono('ok',12) + ' Guardado';
     document.getElementById('editOcrSuccess').style.display = 'block';
   }
@@ -429,22 +429,22 @@ function calcularDeudas(aviso = true){
   dl.innerHTML=txs.length===0
     ?'<div class="all-good">'+icono('ok',18)+' ¡Todas las cuentas están cuadradas!</div>'
    :txs.map((t,i)=>`
-      <div class="debt-item" id="debt-${i}" style="flex-wrap:wrap;gap:8px;">
-        <div style="display:flex;align-items:center;gap:8px;width:100%;">
-          <span style="color:var(--gold-text)">→</span>
+      <div class="debt-item u-wrap-wrap u-gap-8" id="debt-${i}">
+        <div class="u-d-flex u-ai-center u-gap-8 u-w-100p">
+          <span class="u-c-gold-text">→</span>
           <div class="debt-txt"><em>${t.from}</em> debe pagar a <em>${t.to}</em></div>
           <div class="debt-amt">${formatAmountBase(t.amount,base)}</div>
         </div>
-        <div style="display:flex;gap:6px;width:100%;justify-content:flex-end;align-items:center;">
+        <div class="u-d-flex u-gap-6 u-w-100p u-jc-flex-end u-ai-center">
           ${(() => {
             // Solo el deudor puede pagar y solo el acreedor puede confirmar el cobro.
             // El resto del grupo ve la deuda, sin botones.
             const g = groups[currentGroupIdx];
             const myName = miNombreEnGrupo(g);
             const de = escaparHtml(t.from).replace(/'/g, '&#39;'), a = escaparHtml(t.to).replace(/'/g, '&#39;');
-            if (myName === t.from) return `<button class="btn btn-gold btn-sm" onclick="openPayModal(${i},'${de}','${a}',${t.amount})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Pagar</button>`;
-            if (myName === t.to) return `<span style="display:flex;align-items:center;gap:4px;font-size:var(--fs-sm);color:var(--muted);font-weight:700;margin-right:auto;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Pendiente de cobro</span>
-              <button class="btn btn-outline btn-sm" onclick="openProofModal(${i},'${de}','${a}',${t.amount})"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><polyline points="20 6 9 17 4 12"/></svg>Confirmar cobro</button>`;
+            if (myName === t.from) return `<button class="btn btn-gold btn-sm" onclick="openPayModal(${i},'${de}','${a}',${t.amount})"><svg class="u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Pagar</button>`;
+            if (myName === t.to) return `<span class="u-d-flex u-ai-center u-gap-4 u-fs-sm u-c-muted u-fw-700 u-mr-auto"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Pendiente de cobro</span>
+              <button class="btn btn-outline btn-sm" onclick="openProofModal(${i},'${de}','${a}',${t.amount})"><svg class="u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Confirmar cobro</button>`;
             return '';
           })()}
         </div>

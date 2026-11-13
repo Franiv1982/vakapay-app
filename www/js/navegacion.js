@@ -125,8 +125,8 @@ function openGroupDropdown() {
   list.innerHTML = groups.map((g, i) => `
     <div class="gdrop-item ${i === currentGroupIdx ? 'active' : ''}" onclick="closeGroupDropdown();switchGroupFromDropdown(${i})">
       <span>${iconoTipo(g.type, 16)}</span>
-      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${g.name}</span>
-      ${i === currentGroupIdx ? '<span style="margin-left:auto;display:flex">'+icono('check',14)+'</span>' : ''}
+      <span class="u-ov-hidden u-tov-ellipsis u-ws-nowrap">${g.name}</span>
+      ${i === currentGroupIdx ? '<span class="u-ml-auto u-d-flex">'+icono('check',14)+'</span>' : ''}
     </div>`).join('');
   document.getElementById('groupDropdown').classList.add('open');
   // Cerrar al tocar fuera

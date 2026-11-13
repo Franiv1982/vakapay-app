@@ -93,7 +93,7 @@ function renderGroupsList() {
   const counter = document.getElementById('groupsCounter');
   if (counter) {
     // Mientras carga por primera vez no se pone «(0)», que parecería que no tienes grupos
-    if (cargandoInicial && groups.length === 0) counter.innerHTML = '<span class="sk" style="display:inline-block;width:26px;height:13px;vertical-align:middle;border-radius:var(--r-sm);"></span>';
+    if (cargandoInicial && groups.length === 0) counter.innerHTML = '<span class="sk u-d-inline-block u-w-26 u-h-13 u-va-middle u-r-sm"></span>';
     else counter.textContent = `(${groups.length})`;
   }
   if (groups.length === 0) {
@@ -120,7 +120,7 @@ function renderGroupsList() {
 
     return `
       <div class="group-card" data-gid="${g.id}" onclick="openGroup(${i})">
-        <div class="gc-icon" style="position:relative;">${iconoTipo(g.type, 22)}<span class="chat-dot" title="Mensajes nuevos en el chat" style="display:${(typeof chatNoLeidos !== 'undefined' && chatNoLeidos[g.id] > 0) ? 'block' : 'none'}"></span></div>
+        <div class="gc-icon u-pos-relative">${iconoTipo(g.type, 22)}<span class="chat-dot" title="Mensajes nuevos en el chat" style="display:${(typeof chatNoLeidos !== 'undefined' && chatNoLeidos[g.id] > 0) ? 'block' : 'none'}"></span></div>
         <div class="gc-info">
           <div class="gc-name">${g.name}</div>
           <div class="gc-meta">${nm} participante${nm !== 1 ? 's' : ''} · total ${sym0}${Number(total || 0).toFixed(2)}</div>
@@ -227,82 +227,82 @@ function openGasto(idx, origen) {
     : fmtDate(e.date) + ' · Pagó ' + e.payer;
 
   const ticketHTML = e.ticket ? `
-    <div style="margin-top:12px;">
-      <img src="${e.ticket}" alt="Foto del ticket" style="width:100%;max-height:200px;object-fit:contain;border-radius:var(--r-md);border:1px solid var(--border);">
-      <button onclick="downloadTicket(${idx})" class="btn btn-outline btn-full" style="margin-top:8px;color:var(--gold-text);border-color:var(--gold);">
+    <div class="u-mt-12">
+      <img class="u-w-100p u-maxh-200 u-fit-contain u-r-md u-b-1-solid-border" src="${e.ticket}" alt="Foto del ticket">
+      <button onclick="downloadTicket(${idx})" class="btn btn-outline btn-full u-mt-8 u-c-gold-text u-bc-gold">
         <svg class="icono" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar comprobante
       </button>
     </div>` : '';
 
   document.getElementById('gastoDetail').innerHTML = `
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
-      <div class="exp-ico ${e.es_pago ? 'c-other' : CAT_CSS[e.cat]}" style="width:52px;height:52px;">${e.es_pago ? iconoCat('pago', 26) : iconoCat(e.cat, 26)}</div>
+    <div class="u-d-flex u-ai-center u-gap-14 u-mb-18">
+      <div class="exp-ico ${e.es_pago ? 'c-other' : CAT_CSS[e.cat]} u-w-52 u-h-52">${e.es_pago ? iconoCat('pago', 26) : iconoCat(e.cat, 26)}</div>
       <div>
-        <div translate="no" style="font-size:var(--fs-lg);font-weight:800;color:var(--text);">${escaparHtml(e.desc)}</div>
-        <div style="font-size:var(--fs-sm);color:var(--muted);">${fmtDate(e.date)}</div>
+        <div class="u-fs-lg u-fw-800 u-c-text" translate="no">${escaparHtml(e.desc)}</div>
+        <div class="u-fs-sm u-c-muted">${fmtDate(e.date)}</div>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-      <div class="card" style="padding:12px;text-align:center;">
-        <div style="font-size:var(--fs-xl);font-weight:800;color:var(--gold-text);">${displaySym}${Number(e.amount).toFixed(2)}</div>
-        <div style="font-size:var(--fs-2xs);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">Monto</div>
-        ${e.currency !== base ? `<div style="font-size:var(--fs-xs);color:var(--muted);">≈ ${sym}${Number(e.baseAmt).toFixed(2)}</div>` : ''}
+    <div class="u-d-grid u-cols-1fr-1fr u-gap-10 u-mb-16">
+      <div class="card u-p-12 u-t-center">
+        <div class="u-fs-xl u-fw-800 u-c-gold-text">${displaySym}${Number(e.amount).toFixed(2)}</div>
+        <div class="u-fs-2xs u-c-muted u-tt-uppercase u-ls-_5">Monto</div>
+        ${e.currency !== base ? `<div class="u-fs-xs u-c-muted">≈ ${sym}${Number(e.baseAmt).toFixed(2)}</div>` : ''}
       </div>
-      <div class="card" style="padding:12px;text-align:center;">
-        <div translate="no" style="font-size:var(--fs-lg);font-weight:800;color:var(--text);">${e.es_pago ? `${escaparHtml(e.payer)} → ${escaparHtml((e.involved || [])[0] || '')}` : escaparHtml(e.payer)}</div>
-        <div style="font-size:var(--fs-2xs);color:var(--muted);text-transform:uppercase;letter-spacing:.5px;">${e.es_pago ? (pagoPorPago ? 'Deuda' : 'Pagó → Cobró') : 'Pagó'}</div>
+      <div class="card u-p-12 u-t-center">
+        <div class="u-fs-lg u-fw-800 u-c-text" translate="no">${e.es_pago ? `${escaparHtml(e.payer)} → ${escaparHtml((e.involved || [])[0] || '')}` : escaparHtml(e.payer)}</div>
+        <div class="u-fs-2xs u-c-muted u-tt-uppercase u-ls-_5">${e.es_pago ? (pagoPorPago ? 'Deuda' : 'Pagó → Cobró') : 'Pagó'}</div>
       </div>
     </div>
 
 ${e.es_pago ? `
-    <div class="card" style="padding:12px;margin-bottom:16px;">
+    <div class="card u-p-12 u-mb-16">
       ${(pagoPorPago
           ? [['Deuda de', e.payer], ['Pagó', pagoPorPago], ['Cobró', (e.involved || [])[0] || ''], ['Registró', registroPago]]
           : [['Pagó', e.payer], ['Cobró', (e.involved || [])[0] || ''], ['Registró', registroPago]])
         .filter(([, v]) => v)
-        .map(([k, v]) => `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--tint-1);font-size:var(--fs-base);"><span style="color:var(--muted);">${k}</span><strong translate="no" style="color:var(--text);text-align:right;">${escaparHtml(v)}</strong></div>`).join('')}
+        .map(([k, v]) => `<div class="u-d-flex u-jc-space-between u-gap-10 u-p-8-0 u-bb-1-solid-tint-1 u-fs-base"><span class="u-c-muted">${k}</span><strong class="u-c-text u-t-right" translate="no">${escaparHtml(v)}</strong></div>`).join('')}
     </div>
 
 ` : `
-    <div class="card" style="padding:12px;margin-bottom:16px;">
-      <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text);vertical-align:middle;margin-right:4px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Participantes</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;">
-        ${(e.involved || []).map(p => `<div class="chip" style="font-size:var(--fs-sm);padding:4px 10px;"><div class="av" style="width:20px;height:20px;font-size:var(--fs-2xs);">${escaparHtml(p[0].toUpperCase())}</div>${escaparHtml(p)}</div>`).join('')}
+    <div class="card u-p-12 u-mb-16">
+      <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_5 u-mb-8"><svg class="u-c-text u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Participantes</div>
+      <div class="u-d-flex u-wrap-wrap u-gap-6">
+        ${(e.involved || []).map(p => `<div class="chip u-fs-sm u-p-4-10"><div class="av u-w-20 u-h-20 u-fs-2xs">${escaparHtml(p[0].toUpperCase())}</div>${escaparHtml(p)}</div>`).join('')}
       </div>
     </div>
 
-    <div class="card" style="padding:12px;margin-bottom:16px;">
-      <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text);vertical-align:middle;margin-right:4px"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Categoría</div>
-      <div style="font-weight:700;">${iconoCat(e.cat, 15)} ${{food:'Comida',transport:'Transporte',hotel:'Alojamiento',activity:'Actividad',other:'Otro'}[e.cat]||e.cat}</div>
+    <div class="card u-p-12 u-mb-16">
+      <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_5 u-mb-4"><svg class="u-c-text u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Categoría</div>
+      <div class="u-fw-700">${iconoCat(e.cat, 15)} ${{food:'Comida',transport:'Transporte',hotel:'Alojamiento',activity:'Actividad',other:'Otro'}[e.cat]||e.cat}</div>
     </div>
 
-`}    <div class="card" style="padding:12px;margin-bottom:16px;">
-      <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text);vertical-align:middle;margin-right:4px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Comprobante</div>
-      <div style="display:flex;gap:8px;align-items:center;background:var(--dark3);border:1px solid var(--border);border-radius:var(--r-md);padding:8px 12px;">
-        ${puede ? `<button type="button" onclick="document.getElementById('gastoTicketFile').click()"
-          style="flex-shrink:0;background:rgba(245,200,0,.1);border:1px solid rgba(245,200,0,.3);border-radius:var(--r-sm);padding:6px 12px;cursor:pointer;font-size:var(--fs-base);color:var(--gold-text);font-weight:700;">
+`}    <div class="card u-p-12 u-mb-16">
+      <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_5 u-mb-8"><svg class="u-c-text u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Comprobante</div>
+      <div class="u-d-flex u-gap-8 u-ai-center u-bg-dark3 u-b-1-solid-border u-r-md u-p-8-12">
+        ${puede ? `<button class="u-shrink-0 u-bg-xbdf8a u-b-xc194b u-r-sm u-p-6-12 u-cur-pointer u-fs-base u-c-gold-text u-fw-700" type="button" onclick="document.getElementById('gastoTicketFile').click()"
+         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> ${tieneTicket ? 'Cambiar' : 'Adjuntar'}
         </button>
         <input type="file" id="gastoTicketFile" accept="image/*" style="display:none" onchange="attachGastoTicket(event,${idx})">` : ''}
-        <div style="flex:1;overflow:hidden;">
-          <div style="color:var(--muted);font-size:var(--fs-xs);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+        <div class="u-f-1 u-ov-hidden">
+          <div class="u-c-muted u-fs-xs u-ws-nowrap u-ov-hidden u-tov-ellipsis">
             ${tieneTicket ? 'Comprobante adjunto · toca la imagen para verlo' : 'Sin comprobante'}
           </div>
-          ${tieneTicket ? `<div style="font-size:var(--fs-2xs);color:var(--success);">${icono('ok',12)} Guardado</div>` : ''}
+          ${tieneTicket ? `<div class="u-fs-2xs u-c-success">${icono('ok',12)} Guardado</div>` : ''}
         </div>
         ${tieneTicket ? `
-          <img id="gastoTicketThumb" alt="Ver ticket" src="${e.ticket || ''}" style="width:40px;height:40px;object-fit:cover;border-radius:var(--r-sm);border:1px solid var(--border);flex-shrink:0;cursor:pointer;background:var(--dark4);" onclick="verTicket(${idx})" title="Ver comprobante">
-          ${puede ? `<button onclick="removeGastoTicket(${idx})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:var(--fs-sm);flex-shrink:0;padding:2px 4px;border:1px solid var(--border);border-radius:var(--r-sm);" title="Quitar comprobante" aria-label="Quitar comprobante">${icono('cerrar',12)}</button>` : ''}
+          <img class="u-w-40 u-h-40 u-fit-cover u-r-sm u-b-1-solid-border u-shrink-0 u-cur-pointer u-bg-dark4" id="gastoTicketThumb" alt="Ver ticket" src="${e.ticket || ''}" onclick="verTicket(${idx})" title="Ver comprobante">
+          ${puede ? `<button class="u-bg-none u-c-muted u-cur-pointer u-fs-sm u-shrink-0 u-p-2-4 u-b-1-solid-border u-r-sm" onclick="removeGastoTicket(${idx})" title="Quitar comprobante" aria-label="Quitar comprobante">${icono('cerrar',12)}</button>` : ''}
         ` : ''}
       </div>
     </div>
 
-    <div style="display:flex;gap:10px;margin-top:18px;">
-      ${e.es_pago ? '' : `<button onclick="openEditModal(${idx})" class="btn btn-gold" style="flex:1">Editar</button>`}
+    <div class="u-d-flex u-gap-10 u-mt-18">
+      ${e.es_pago ? '' : `<button onclick="openEditModal(${idx})" class="btn btn-gold u-f-1">Editar</button>`}
       ${puede
-        ? `<button onclick="openDeleteExpenseModal(${idx})" class="btn btn-danger" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> ${e.es_pago ? 'Anular pago' : 'Eliminar'}</button>`
-        : `<div style="flex:1;text-align:center;font-size:var(--fs-sm);color:var(--muted);line-height:1.4;">Solo ${escaparHtml(e.payer)} o ${escaparHtml((e.involved || [])[0] || '')} pueden anular este pago.</div>`}
+        ? `<button onclick="openDeleteExpenseModal(${idx})" class="btn btn-danger u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> ${e.es_pago ? 'Anular pago' : 'Eliminar'}</button>`
+        : `<div class="u-f-1 u-t-center u-fs-sm u-c-muted u-lh-1_4">Solo ${escaparHtml(e.payer)} o ${escaparHtml((e.involved || [])[0] || '')} pueden anular este pago.</div>`}
     </div>
   `;
 

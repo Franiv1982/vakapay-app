@@ -69,7 +69,7 @@ function toggleEditProfile() {
     editMode.style.display = 'none';
     btn.style.display = '';
     btn.focus({ preventScroll: true });   // el foco vuelve a «Editar» (lector de pantalla y teclado)
-    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar';
+    btn.innerHTML = '<svg class="u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar';
   } else {
     loadProfile();   // al entrar a editar, siempre con los datos guardados
     readMode.style.display = 'none';
@@ -282,7 +282,7 @@ function mostrarModalPendientes(pendientes, tipo) {
     // Dos líneas: el nombre del grupo arriba (entero) y el estado debajo
     if (p.por_confirmar && Math.abs(p.balance) <= 0.05) {
       const c = p.por_confirmar;
-      estado = `<span class="pd-estado" style="color:var(--gold-text)">${icono('reloj',13)} ${escaparHtml(c.para)} debe confirmar tu pago`
+      estado = `<span class="pd-estado u-c-gold-text">${icono('reloj',13)} ${escaparHtml(c.para)} debe confirmar tu pago`
         + (c.importe ? ` de ${formatAmountBase(c.importe)}` : '') + (c.hasta ? ` (hasta el ${fechaDiaMes(c.hasta)})` : '') + `</span>`;
     } else estado = `<span class="pd-estado ${p.balance < 0 ? 'rojo' : 'verde'}">${p.balance < 0 ? 'Debes' : 'Te deben'} ${formatAmountBase(Math.abs(p.balance))}</span>`;
     return `<button type="button" class="pd-fila" onclick="irACuentasDeGrupo(${Number(p.id)})" aria-label="${escaparHtml(p.name)}: ver cuentas">

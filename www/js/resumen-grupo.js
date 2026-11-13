@@ -247,7 +247,7 @@ function renderMembers() {
   if (!el) return;
 
   el.innerHTML = mbs.length === 0
-  ? '<span style="color:var(--muted);font-size:var(--fs-sm)">Sin participantes aún...</span>'
+  ? '<span class="u-c-muted u-fs-sm">Sin participantes aún...</span>'
   : mbs.map(m => {
     const isOwner = profile.id && g.owner_id && profile.id === g.owner_id;
     const editBtn = isOwner ? `<span class="chip-edit" aria-label="Cambiar el nombre de ${m}" onclick="event.stopPropagation();openRenameMember('${m}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>` : '';
@@ -275,7 +275,7 @@ if (mbs.includes(prev)) ps.value = prev;
   const ic = document.getElementById('involvedChips');
   if (ic) {
     if (mbs.length === 0) {
-      ic.innerHTML = '<span style="color:var(--muted);font-size:var(--fs-sm)">Primero añade participantes</span>';
+      ic.innerHTML = '<span class="u-c-muted u-fs-sm">Primero añade participantes</span>';
     } else {
       const wasSel = [...document.querySelectorAll('#involvedChips .chip.sel')].map(c => c.dataset.name);
       ic.innerHTML = mbs.map(m => `<div class="chip ${wasSel.includes(m) ? 'sel' : ''}" data-name="${m}" onclick="this.classList.toggle('sel');updateSelectAllBtn()"><div class="av">${m[0].toUpperCase()}</div>${m}</div>`).join('');
@@ -340,7 +340,7 @@ function renderExpenses() {
 
   // Los pagos de deudas no se listan aquí: están en Cuentas finales → Pagos realizados
   if (nGastos === 0) {
-    el.innerHTML = '<div class="no-items"><div class="ni"><svg style="color:var(--text)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div>Sin gastos registrados</div></div>';
+    el.innerHTML = '<div class="no-items"><div class="ni"><svg class="u-c-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div><div>Sin gastos registrados</div></div>';
     if (sg) sg.style.display = 'none';
     return;
   }
@@ -368,28 +368,28 @@ function renderExpenses() {
 
     if (e.es_pago) {
       const destino = (e.involved && e.involved[0]) || (e.splits && e.splits[0] && e.splits[0].member_name) || '';
-      return `<div class="group-card" onclick="openGasto(${i},'gastos')" style="cursor:pointer;border-style:dashed;">
+      return `<div class="group-card u-cur-pointer u-border-dashed" onclick="openGasto(${i},'gastos')">
       <div class="exp-ico c-other">${iconoCat('pago', 18)}</div>
       <div class="gc-info">
         <div class="gc-name">Pago a ${destino}</div>
         <div class="gc-meta"><strong>${payer}</strong> saldó deuda · ${fmtDate(date)}</div>
       </div>
-      <div style="text-align:right;">
-        <div class="exp-amt" style="color:var(--success);">${displaySym}${amount.toFixed(2)}</div>
-        ${(e.ticket || e.has_ticket) ? '<div style="color:var(--text2);line-height:1;" title="Con comprobante">'+icono('ticket',13)+'</div>' : ''}
+      <div class="u-t-right">
+        <div class="exp-amt u-c-success">${displaySym}${amount.toFixed(2)}</div>
+        ${(e.ticket || e.has_ticket) ? '<div class="u-c-text2 u-lh-1" title="Con comprobante">'+icono('ticket',13)+'</div>' : ''}
       </div>
     </div>`;
     }
-    return `<div class="group-card" onclick="openGasto(${i},'gastos')" style="cursor:pointer;">
+    return `<div class="group-card u-cur-pointer" onclick="openGasto(${i},'gastos')">
       <div class="exp-ico ${CAT_CSS[e.cat] || 'c-other'}">${iconoCat(e.cat, 18)}</div>
       <div class="gc-info">
         <div class="gc-name">${desc}</div>
         <div class="gc-meta">Pagó <strong>${payer}</strong> · ${fmtDate(date)}</div>
       </div>
-      <div style="text-align:right;">
+      <div class="u-t-right">
         <div class="exp-amt">${displaySym}${amount.toFixed(2)}</div>
-        ${displayCurrency !== base ? `<div style="font-size:var(--fs-xs);color:var(--muted);">≈ ${sym}${(Number(e.baseAmt)||0).toFixed(2)}</div>` : ''}
-        ${(e.ticket || e.has_ticket) ? '<div style="color:var(--text2);line-height:1;" title="Con comprobante">'+icono('ticket',13)+'</div>' : ''}
+        ${displayCurrency !== base ? `<div class="u-fs-xs u-c-muted">≈ ${sym}${(Number(e.baseAmt)||0).toFixed(2)}</div>` : ''}
+        ${(e.ticket || e.has_ticket) ? '<div class="u-c-text2 u-lh-1" title="Con comprobante">'+icono('ticket',13)+'</div>' : ''}
       </div>
     </div>`;
   }).join('');
@@ -436,7 +436,7 @@ function renderBalances(){
   const mbs = Object.entries(g.members);
   
   if(mbs.length === 0){
-    bl.innerHTML = '<div class="no-items"><div class="ni"><svg style="color:var(--text)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div>Sin datos</div></div>';
+    bl.innerHTML = '<div class="no-items"><div class="ni"><svg class="u-c-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div>Sin datos</div></div>';
     return;
   }
 
@@ -445,9 +445,9 @@ function renderBalances(){
   
   bl.innerHTML = mbs.map(([n,v]) => `
     <div class="bal-row">
-      <div style="display:flex;align-items:center;gap:8px">
+      <div class="u-d-flex u-ai-center u-gap-8">
         <div class="av-s">${n[0].toUpperCase()}</div>
-        <span translate="no" style="font-weight:700">${escaparHtml(n)}</span>
+        <span class="u-fw-700" translate="no">${escaparHtml(n)}</span>
       </div>
       <span class="${Number(v) > 0.01 ? 'bal-pos' : Number(v) < -0.01 ? 'bal-neg' : 'bal-zer'}">
         ${Number(v) > 0.01 ? '+' : ''}${sym2}${Number(v || 0).toFixed(2)}
