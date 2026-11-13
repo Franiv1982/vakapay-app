@@ -197,7 +197,7 @@ function cerrarAviso() {
   document.body.style.overflow = '';
 }
 
-// ─── PAY MODAL ──────────────────────────────────────────────────────
+// ─── VENTANA PAGAR ───────────────────────────────────────────────────────
 let _payData = null;
 function openPayModal(idx,from,to,amount){
   _payData={idx,from,to,amount};
@@ -423,7 +423,7 @@ async function recargarGrupoDelServidor(g, { aviso = false } = {}) {
       ok = true;
     }
   } catch (_) {}
-  save(); renderAll(); calcularDeudas(aviso);
+  renderAll(); calcularDeudas(aviso);
   return ok;
 }
 
@@ -438,7 +438,7 @@ function confirmPayment(settle){
   closePayModal();
 }
 
-// ─── PROOF MODAL (comprobante) ──────────────────────────────────────
+// ─── VENTANA COMPROBANTE ─────────────────────────────────────────────────
 let _proofData = null;
 function openProofModal(idx,from,to,amount){
   _proofData={idx,from,to,amount};

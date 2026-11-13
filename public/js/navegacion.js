@@ -1,7 +1,7 @@
 // public/js/navegacion.js — Cambio de pantallas, selector de grupo y tipo de grupo
 // (antes dentro de index.html; el orden de carga está en index.html)
 
-// ═══ PAGE NAVIGATION ═════════════════════════════════════════════════
+// ═══ NAVEGACIÓN ENTRE PANTALLAS ══════════════════════════════════════════
 function switchPage(id, btn) {
   // 1. GESTIÓN DE CLASES ACTIVAS (Páginas y Botones)
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -100,7 +100,7 @@ function goBack() {
   }
 }
 
-// ─── GROUP DROPDOWN ──────────────────────────────────────────────
+// ─── SELECTOR DE GRUPO ───────────────────────────────────────────────────
 // Nombre del grupo arriba: es el botón que abre el desplegable para cambiar de grupo.
 // La flecha va aparte del nombre para que no la corten los puntos suspensivos.
 function pintarTituloGrupo(g) {
@@ -177,14 +177,13 @@ function switchGroupFromDropdown(idx) {
   requestAnimationFrame(posicionarBadge);
 }
 
-// ═══ TYPE SELECTOR
+// ═══ TIPO DE GRUPO ═══════════════════════════════════════════════════════
 
-// ═══ TYPE SELECTOR ═══════════════════════════════════════════════════
 function selectType(el){
   document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');selectedType=el.dataset.type;
 }
 
-// ═══ NEW GROUP FORM TOGGLE ════════════════════════════════════════════
+// ═══ FORMULARIO DE NUEVO GRUPO ═══════════════════════════════════════════
 function showNewGroupForm(){document.getElementById('newGroupForm').style.display='block';document.getElementById('newGroupForm').scrollIntoView({behavior:'smooth'});}
 function hideNewGroupForm(){document.getElementById('newGroupForm').style.display='none';}

@@ -7,7 +7,6 @@
    «display» sigue en línea en los elementos con id y en los ocultos (display:none):
    la app los busca, lee si están visibles y los muestra u oculta desde JavaScript. */
 
-
 /* background */
 :root .u-bg-13a87e{background:#13A87E}
 :root .u-bg-8b63e8{background:#8B63E8}

@@ -1,7 +1,7 @@
 // public/js/cuenta.js — Cuenta: perfil, estadísticas propias, borrar datos y eliminar cuenta
 // (antes dentro de index.html; el orden de carga está en index.html)
 
-// ═══ PROFILE ═════════════════════════════════════════════════════════
+// ═══ PERFIL ══════════════════════════════════════════════════════════════
 function loadProfile(){
   if(!profile) return;
   // También los vacíos: si no, al cancelar se quedaba lo escrito en Bizum o IBAN
@@ -216,13 +216,13 @@ async function handleAvatarChange(ev) {
   }
 }
 
-// ═══ STATS ═══════════════════════════════════════════════════════════
+// ═══ MIS ESTADÍSTICAS ════════════════════════════════════════════════════
 function updateStats(){
   document.getElementById('statGroups').textContent=groups.length;
   document.getElementById('statFriends').textContent=friends.length;
 }
 
-// ═══ CLEAR ALL ════════════════════════════════════════════════════════
+// ═══ BORRAR MIS DATOS ════════════════════════════════════════════════════
 function clearAll(){
   groups=[];friends=[];activity=[];profile={};
   ['vp_groups','vp_friends','vp_activity','vp_profile'].forEach(k=>localStorage.removeItem(k));

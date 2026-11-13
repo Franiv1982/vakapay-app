@@ -1,7 +1,7 @@
 // public/js/tickets.js — Divisas y escaneo de tickets
 // (antes dentro de index.html; el orden de carga está en index.html)
 
-// ═══ MULTI-CURRENCY ══════════════════════════════════════════════════
+// ═══ DIVISAS ═════════════════════════════════════════════════════════════
 const RATES = { EUR:1, USD:1.09, GBP:0.86, ARS:1050 };
 const SYMBOLS = { EUR:'€', USD:'$', GBP:'£', ARS:'$' };
 
@@ -40,14 +40,7 @@ function onBaseCurrencyChange() {
   renderBalances();
 }
 
-// ═══ OCR / TICKET SCAN ═══════════════════════════════════════════════
-function handleOCRDrop(ev) {
-  ev.preventDefault();
-  document.getElementById('ocrArea').classList.remove('drag-over');
-  const file = ev.dataTransfer.files[0];
-  if(file) processOCRFile(file);
-}
-
+// ═══ TICKETS (OCR) ═══════════════════════════════════════════════════════
 function handleOCRFile(ev) {
   const file = ev.target.files[0];
   if(file) processOCRFile(file);

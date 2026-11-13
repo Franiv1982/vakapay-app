@@ -2,7 +2,7 @@
 // Va el último de su grupo: usa funciones de todos los archivos anteriores.
 // (antes dentro de index.html; el orden de carga está en index.html)
 
-// ═══ INIT ═════════════════════════════════════════════════════════════
+// ═══ ARRANQUE ════════════════════════════════════════════════════════════
 (async function init(){
   try {
     // 1. Verificación robusta del Token
@@ -11,6 +11,9 @@
         location.replace('login.html');
         return;
     }
+
+    // Copias antiguas que ya no se leen (antes se guardaban por duplicado): fuera
+    try { localStorage.removeItem('vaka_groups'); localStorage.removeItem('vaka_friends'); } catch (_) {}
 
     // 1b. Pintar al instante lo último guardado en el móvil; si no hay nada, esqueletos
     groups   = vakaData.cache('groups')   || [];
@@ -52,7 +55,6 @@ try {
         .then(r => r.json()).catch(() => null),
     ]);
     groups = Array.isArray(remote) ? remote : [];
-    localStorage.setItem('vaka_groups', JSON.stringify(groups));
 
     friends = amigos || friends || [];
     activity = ((actividad || activity) || []).map(a => ({...a,
@@ -93,7 +95,7 @@ if (window.groups && groups.length > 0 && typeof updateBalances === 'function') 
     renderActivity();
 
   } catch(err) {
-    console.error('❌ Error en la inicialización:', err);
+    console.error('Error en la inicialización:', err);
     // Si falla el login, intentamos cargar lo que haya en local
     cargandoInicial = false;
     groups = await vakaData.getGroups() || [];

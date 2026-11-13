@@ -1,7 +1,7 @@
 // public/js/grupos.js — Grupos: crear, lista de Mis grupos, abrir un grupo, editar y eliminar o salir
 // (antes dentro de index.html; el orden de carga está en index.html)
 
-// ═══ CREATE GROUP ═════════════════════════════════════════════════════
+// ═══ CREAR GRUPO ═════════════════════════════════════════════════════════
 async function createGroup(){
   const nameInput = document.getElementById('groupName');
   if(!nameInput) return;
@@ -32,7 +32,7 @@ async function createGroup(){
     // Si falla, usamos el local (pero ya sabemos que no tendrá ID).
     const grupoFinal = grupoServidor || datosNuevo;
 
-    // 3. FIX: nos aseguramos de que el creador quede como participante,
+    // 3. Nos aseguramos de que el creador quede como participante,
     // aunque el backend no lo haya incluido en la respuesta del POST /groups
     if (!grupoFinal.members || Object.keys(grupoFinal.members).length === 0) {
       grupoFinal.members = { [myName]: 0 };
@@ -56,7 +56,6 @@ async function createGroup(){
     groups.unshift(grupoFinal);
 
     // 6. Guardamos en el PC
-    localStorage.setItem('vaka_groups', JSON.stringify(groups));
 
     hideNewGroupForm();
     renderGroupsList();
@@ -68,7 +67,7 @@ async function createGroup(){
   } finally { listo(); }
 }
 
-// ═══ GROUPS LIST ══════════════════════════════════════════════════════
+// ═══ LISTA DE GRUPOS ═════════════════════════════════════════════════════
 
 function toggleGroupsList() {
   const wrap = document.getElementById('groupsListWrap');
@@ -374,7 +373,6 @@ async function deleteGroup(idx) {
     }
 
     groups.splice(idx, 1);
-    save();
 
     renderGroupsList();
     updateStats();
@@ -484,7 +482,7 @@ function ejecutarBorradoFinal() {
     }
 }
 
-// ═══ GROUP EDIT MODAL (CORREGIDO) ════════════════════════════════════════════
+// ═══ EDITAR GRUPO ═══════════════════════════════════════════════════════════════════════════════════════════════
 let editingGroupIdx = null;
 
 function openEditGroupModal(idx) {

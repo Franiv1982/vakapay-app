@@ -175,23 +175,11 @@ async function unirseAGrupo(opciones) {
   }
 }
 
-async function save() {
-  try {
-    // 1. Intento oficial a través del servicio
-    await vakaData.saveGroups(groups);
-    // 2. Respaldo manual (QA check)
-    localStorage.setItem('vaka_groups', JSON.stringify(groups));
-  } catch (err) {
-    console.error("❌ Error al guardar grupos:", err);
-  }
-}
-
 async function saveFriends() { 
   try {
     await vakaData.saveFriends(friends);
-    localStorage.setItem('vaka_friends', JSON.stringify(friends));
   } catch (err) {
-    console.error("❌ Error al guardar amigos:", err);
+    console.error("Error al guardar amigos:", err);
   }
 }
 

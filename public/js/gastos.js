@@ -1,7 +1,7 @@
 // public/js/gastos.js — Gastos: registrar, lista, detalle, editar y borrar
 // (antes dentro de index.html; el orden de carga está en index.html)
 
-// ═══ EXPENSES ═════════════════════════════════════════════════════════
+// ═══ GASTOS ══════════════════════════════════════════════════════════════
 function toggleAddRate() {
   const currency = document.getElementById('expCurrency').value;
   const container = document.getElementById('addRateContainer');
@@ -14,13 +14,6 @@ function toggleAddRate() {
     const rateInput = document.getElementById('expExchangeRate');
     if (!rateInput.value) rateInput.value = RATES[currency] || '';
   }
-}
-
-function selectCurrency(el) {
-  document.querySelectorAll('#expCurrency-chips .currency-chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('expCurrency').value = el.dataset.currency;
-  toggleAddRate();
 }
 
 function selectEditCurrency(el) {
@@ -162,31 +155,7 @@ async function deleteExpense(idx) {
   }
 }
 
-async function renameGroup(idx) {
-  const g = groups[idx];
-  
-  // 1. Pedimos el nuevo nombre al usuario
-  const nuevoNombre = prompt("Editar nombre del grupo:", g.name);
-  
-  // 2. Validaciones de integridad
-  if (nuevoNombre === null) return; 
-  const cleanedName = nuevoNombre.trim();
-  if (cleanedName === "" || cleanedName === g.name) return; 
-
-  try {
-    // 3. Llamamos al método de la clase que añadimos antes
-    await vakaData.updateGroupName(idx, cleanedName);
-    
-    // 4. Actualizamos la pantalla
-    renderAll(); 
-    toast('Nombre actualizado', 's');
-  } catch (err) {
-    console.error("Error al renombrar:", err);
-    toast('No se pudo actualizar.', 'e');
-  }
-}
-
-// ═══ EDIT EXPENSE ═════════════════════════════════════════════════════
+// ═══ EDITAR GASTO ════════════════════════════════════════════════════════
 editingExpenseIdx = null;
 
 function openEditModal(idx) {
@@ -392,7 +361,7 @@ async function saveEditExpense() {
     if (saveBtn) saveBtn.disabled = false;
   }
 }
-// ═══ DELETE EXPENSE ════════════════════════════════════════════════════
+// ═══ BORRAR GASTO ════════════════════════════════════════════════════════
 // «Actualizar cuentas»: primero descarga el grupo del servidor (pagos y gastos que
 // otros hayan registrado mientras tenías la app abierta) y después calcula.
 // Antes se calculaba con los datos cargados al abrir el grupo: si alguien había
@@ -496,24 +465,6 @@ async function ejecutarBorradoGasto() {
   renderAll();
   goBackToGroup();
   await borrado;
-}
-
-// Confirmar y ejecutar la eliminación de un gasto
-function confirmDeleteExpense() {
-  if (editingExpenseIdx === null) return;
-  
-  const g = groups[currentGroupIdx];
-  const exp = g.expenses[editingExpenseIdx];
-
-  if (!exp) return;
-
-  if (!confirm(`¿Eliminar "${exp.desc}"?`)) return;
-
-  // Llamamos a la función asíncrona de borrado
-  deleteExpense(editingExpenseIdx);
-
-  // Cerramos el modal inmediatamente para mejorar la UX
-  closeEditModal();
 }
 
 function openDeleteFromEdit() {

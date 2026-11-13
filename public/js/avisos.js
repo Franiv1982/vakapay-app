@@ -1,7 +1,7 @@
 // public/js/avisos.js — Avisos y errores: toast, ventana de error, mensajes claros, bloquear botones
 // (antes dentro de index.html; el orden de carga está en index.html)
 
-// ═══ TOAST ═══════════════════════════════════════════════════════════
+// ═══ AVISOS ══════════════════════════════════════════════════════════════
 // Avisos de la app:
 //   'e' (error)  → ventana que hay que cerrar con «Entendido»: un error no puede pasar desapercibido
 //   's' (hecho)  → aviso verde con ✓ abajo, que se va solo

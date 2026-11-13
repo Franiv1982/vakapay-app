@@ -1,7 +1,7 @@
 // public/js/amigos.js — Amigos: lista, ficha, contactos del móvil y deslizar para actualizar
 // (antes dentro de index.html; el orden de carga está en index.html)
 
-// ═══ FRIENDS ════════════════════════════════════════════════════════
+// ═══ AMIGOS ══════════════════════════════════════════════════════════════
 function populateFriendGroupSelect(){
   const sel=document.getElementById('friendGroupLink');
   if(!sel)return;
@@ -125,12 +125,6 @@ async function rellenarAmigoDesdeContactos() {
   if (b && window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()) b.style.display = 'flex';
 })();
 
-function removeFriend(idx){
-  const name=friends[idx].name;
-  groups.forEach(g=>{if(g.members.hasOwnProperty(name)&&!g.expenses.some(e=>e.payer===name||e.involved.includes(name))){delete g.members[name];}});
-  save();
-  friends.splice(idx,1);saveFriends();renderFriends();renderFriendPicker();updateStats();
-}
 function renderFriends(){
   populateFriendGroupSelect();
   const el=document.getElementById('friendsList');
@@ -161,7 +155,7 @@ function renderFriends(){
   }).join('');
 }
 
-// ═══ FRIEND EDIT MODAL ════════════════════════════════════════════════
+// ═══ EDITAR AMIGO ════════════════════════════════════════════════════════
 let editingFriendIdx = null;
 
 function openFriendModal(idx){
@@ -373,7 +367,6 @@ async function saveEditFriend(){
         });
       }
     });
-    save();
   }
   friends[editingFriendIdx]={...f,name:newName,email,phone,notes,contact:email||phone||'',avatar:f._tmpAvatar||f.avatar||null};
   delete friends[editingFriendIdx]._tmpAvatar;

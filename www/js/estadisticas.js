@@ -1,7 +1,7 @@
 // public/js/estadisticas.js — Pantalla Estadísticas: dona, barras y desglose
 // (antes dentro de index.html; el orden de carga está en index.html)
 
-// ═══ STATISTICS ═══════════════════════════════════════════════════════
+// ═══ ESTADÍSTICAS ════════════════════════════════════════════════════════
 const CAT_COLORS = { food:'#FFA032', transport:'#64B4FF', hotel:'#B464FF', activity:'#50DC96', other:'#F5C800' };
 
 function renderStats() {

@@ -1,7 +1,7 @@
 // public/js/datos.js — Logo y servicio de datos (VakaDataService): llamadas al servidor, caché en el móvil
 // (antes dentro de index.html; el orden de carga está en index.html)
 
-// ═══ LOGO ════════════════════════════════════════════════════════════
+// ═══ LOGO ════════════════════════════════════════════════════════════════
 document.getElementById('logoImg').src = "logo_vakapay.png";
 
 
@@ -123,12 +123,6 @@ class VakaDataService {
     return data;
   }
 
-  async logout() {
-    try { await this.#req('POST', '/auth/logout'); } catch(_) {}
-    this.setToken(null);
-    Object.values(this.#KEYS).forEach(k => localStorage.removeItem(k));
-  }
-
   async getGroups() {
     try {
       const data = await this.#req('GET', '/groups');
@@ -142,11 +136,6 @@ class VakaDataService {
       this.cargaFallida = true;   // sin conexión: se usa lo guardado en el móvil
       return this.#read(this.#KEYS.groups) ?? [];
     }
-  }
-
-  async saveGroups(gs) { 
-    localStorage.setItem('vaka_groups', JSON.stringify(gs));
-    return true; 
   }
 
   async createGroup(data) {
@@ -165,24 +154,9 @@ class VakaDataService {
     } catch(err) {
       // Si el servidor no lo confirma, NO se crea un grupo solo en el móvil:
       // nunca llegaría a los demás y desaparecería al volver la conexión.
-      console.error("❌ Error servidor:", err.message);
+      console.error("Error servidor:", err.message);
       throw err;
     }
-  }
-
-  async addMember(idx, name) {
-    const gs = groups; 
-    if (gs[idx].members.hasOwnProperty(name)) throw new Error('Ya existe');
-    gs[idx].members[name] = 0; 
-    await this.saveGroups(gs); 
-    return true;
-  }
-
-  async removeMember(idx, name) { 
-    const gs = groups; 
-    delete gs[idx].members[name]; 
-    await this.saveGroups(gs); 
-    return true; 
   }
 
   async addExpense(idx, {desc, amount, cat, payer, date, involved, currency, baseAmt, ticket}) {
@@ -223,7 +197,6 @@ class VakaDataService {
     // 3. Guardado: se muestra ya y se descarga el grupo actualizado
     g.expenses.unshift(newExp);
     if (typeof updateBalances === 'function') updateBalances();
-    await this.saveGroups(gs);
     try {
       const resFresh = await fetch(`${API_BASE}/api/v1/groups/${g.id}`, {
         headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
@@ -267,7 +240,6 @@ class VakaDataService {
     if (typeof updateBalances === 'function') updateBalances();
 
     // 3. Guardamos en el PC
-    await this.saveGroups(gs);
 
     // Sincronización post-borrado
     try {
@@ -288,44 +260,6 @@ class VakaDataService {
     } catch (e) { console.error("Error sincronizando tras borrar:", e); }
     return true;
   }
-
-  async updateExpense(idx, eidx, data) {
-    const g = groups[idx];
-    
-    // 1. Validación preventiva: Aseguramos que los miembros existan
-    if (data.involved && Array.isArray(data.involved)) {
-        data.involved.forEach(name => {
-            if (!g.members.hasOwnProperty(name)) {
-                g.members[name] = 0; 
-            }
-        });
-    }
-
-    const oldExpense = g.expenses[eidx];
-
-    // 3. Preparación de datos para el Backend (Mapeo de nombres)
-    const payload = {
-        description: data.desc || data.description,
-        amount: data.amount,
-        currency: data.currency || 'EUR',
-        category: data.cat || data.category || 'other',
-        payer_name: data.payer || data.payer_name,
-        expense_date: data.date || data.expense_date,
-        involved: data.involved
-    };
-
-    // 4. Primero el servidor (PUT): si no lo confirma, se lanza el error y el gasto no cambia
-    if (g.id && oldExpense.id) {
-        await this.#req('PUT', `/groups/${g.id}/expenses/${oldExpense.id}`, payload);
-    }
-
-    // 5. Confirmado: se actualiza en pantalla
-    g.expenses[eidx] = { ...oldExpense, ...data };
-    updateBalances();
-    await this.saveGroups(groups);
-
-    return g.expenses[eidx];
-}
 
   async getFriends() {
     try {
@@ -392,30 +326,7 @@ async logActivity(msg, groupName = null) {
     // Primero el servidor: si no lo confirma, se lanza el error y el nombre no cambia
     if (g.id) await this.#req('PATCH', `/groups/${g.id}`, { name: newName });
     g.name = newName;
-    await this.saveGroups(gs);
     return true;
-  }
-
-  async clearAll() { 
-    Object.values(this.#KEYS).forEach(k => localStorage.removeItem(k)); 
-    return true; 
-  }
-  async deleteGroup(id) {
-    try {
-      // 1. Enviamos petición al servidor
-      await this.#req('DELETE', `/groups/${id}`);
-      
-      // 2. Solo si no hubo error, filtramos localmente
-      const gs = this.#read(this.#KEYS.groups) ?? [];
-      const filtered = gs.filter(g => (g.id || g._id) !== id);
-      
-      // 3. Persistimos el nuevo estado
-      this.#write(this.#KEYS.groups, filtered);
-      
-      return true;
-    } catch (err) {
-      throw err;
-    }
   }
 
   // Borrado en el servidor, en una sola operación (ver src/utils/borrado.js).
