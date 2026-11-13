@@ -1,0 +1,120 @@
+/* Componentes: botones, ventanas, chips, gastos, saldos, deudas, compartir y edición
+   (antes dentro de index.html; se cargan en el orden de index.html, que importa) */
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:var(--alto-control);padding:10px 16px;border-radius:var(--r-md);border:none;font-family:var(--font);font-weight:800;font-size:var(--fs-base);cursor:pointer;transition:transform .14s,filter .14s;letter-spacing:.4px;white-space:nowrap}
+/* En las ventanas, un botón nunca puede salirse: si el texto no cabe (móvil estrecho o letra grande), ocupa dos líneas */
+.ventana .btn, .modal-overlay .btn, .modal .btn, #modalLogout .btn{white-space:normal;text-align:center;line-height:1.2;min-width:0;overflow-wrap:anywhere}
+.btn:active{transform:scale(.95)}
+.btn-gold{background:var(--gold);color:var(--on-gold);box-shadow:var(--glow-gold)}
+@media (hover:hover){.btn-gold:hover{filter:brightness(1.08)}}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}
+@media (hover:hover){.btn-outline:hover{border-color:var(--gold);color:var(--gold-text)}}
+.btn-danger{background:rgba(255,77,77,.1);border:1.5px solid rgba(255,77,77,.27);color:var(--danger)}
+/* Selector de tema (Cuenta → Apariencia) */
+.selector-tema{display:flex;gap:6px;background:var(--dark2);border:1px solid var(--line);border-radius:var(--r-md);padding:4px}
+.selector-tema button{flex:1;padding:9px 6px;border:none;border-radius:var(--r-sm);background:none;color:var(--text2);font-family:var(--font);font-weight:800;font-size:var(--fs-sm);cursor:pointer}
+.selector-tema button.activa{background:var(--gold);color:var(--on-gold)}
+/* Iconos SVG en línea con el texto */
+.icono{display:inline-block;vertical-align:-0.18em;flex-shrink:0}
+/* Iconos en el color del texto (blanco en oscuro, oscuro en claro); el amarillo
+   queda para lo seleccionado, las acciones y los importes */
+.gc-icon .icono,.exp-ico .icono,.ti .icono{color:var(--text)}
+.type-btn.active .ti .icono{color:var(--gold-text)}
+/* Botones (opción B): amarillo = acción principal · borde = cancelar/volver ·
+   rojo relleno = confirmar algo que no se deshace · rojo suave = abrir una acción peligrosa */
+.btn-peligro{background:var(--danger-strong);color:#fff;border:none}
+/* Ventana emergente (diálogo): todas con el mismo marco */
+.ventana{background:var(--dark3);width:90%;max-width:360px;padding:24px 20px;border-radius:var(--r-xl);border:1px solid var(--line);box-shadow:var(--shadow-lg);box-sizing:border-box}
+.ventana .btn{padding:12px 10px}
+@media (hover:hover){.btn-peligro:hover{filter:brightness(1.08)}}
+.btn-outline{border-color:var(--line-strong)}
+.btn svg{flex-shrink:0}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-green{background:rgba(61,186,111,.1);border:1.5px solid rgba(61,186,111,.28);color:var(--success)}
+.btn-sm{padding:6px 12px;font-size:var(--fs-sm);border-radius:var(--r-sm);min-height:var(--alto-sm)}
+.btn-whatsapp{background:color-mix(in srgb,var(--whatsapp) 12%,transparent);border:1.5px solid var(--whatsapp);color:var(--whatsapp)}
+.btn-metodo{flex:1;font-size:var(--fs-sm);padding:8px 6px;gap:6px}
+.btn-full{width:100%}
+
+/* ── ADD-ROW ── */
+.add-row{display:flex;gap:8px;align-items:flex-end}
+.add-row .field{flex:1;margin-bottom:0}
+
+/* ── CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:4px;background:var(--dark3);border:1.5px solid var(--border);border-radius:var(--r-xl);padding:4px 10px 4px 8px;font-size:var(--fs-sm);font-weight:700;cursor:pointer;transition:border-color .2s,background .2s;user-select:none}
+.chip.sel{background:rgba(245,200,0,.11);border-color:var(--gold);color:var(--gold-text)}
+.chip .av{width:19px;height:19px;border-radius:50%;background:var(--gold-dark);color:var(--on-gold);font-size:var(--fs-2xs);font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chip-x{color:var(--muted);font-size:var(--fs-base);transition:color .2s;margin-left:1px}
+@media (hover:hover){.chip-x:hover{color:var(--danger)}}
+.chip-edit{color:var(--muted);display:inline-flex;align-items:center;transition:color .2s;margin-left:2px;cursor:pointer}
+@media (hover:hover){.chip-edit:hover{color:var(--gold-text)}}
+
+/* ── EXPENSE ITEMS ── */
+.exp-item{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--tint-1)}
+.exp-item:last-child{border:none}
+.exp-ico{width:38px;height:38px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:var(--fs-lg);flex-shrink:0}
+.exp-info{flex:1;min-width:0}
+.exp-desc{font-weight:700;font-size:var(--fs-base);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exp-meta{font-size:var(--fs-xs);color:var(--muted);margin-top:2px}
+.exp-amt{font-family:var(--font-display);font-size:var(--fs-lg);color:var(--gold-text);white-space:nowrap}
+.no-items{text-align:center;padding:22px 0;color:var(--muted);font-size:var(--fs-base)}
+.no-items .ni{font-size:1.8rem;margin-bottom:4px}
+
+/* ── Estadisticas ── */
+.stat-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat-box{background:var(--dark3);border-radius:var(--r-md);padding:12px;border:1px solid var(--border);text-align:center}
+.stat-v{font-family:var(--font-display);font-size:var(--fs-xl);color:var(--gold-text);letter-spacing:1px;line-height:1}
+.stat-l{font-size:var(--fs-2xs);color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-top:4px}
+
+/* ── BALANCE ── */
+.bal-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--tint-1);font-size:var(--fs-base)}
+.bal-row:last-child{border:none}
+.bal-pos{color:var(--success);font-weight:800;font-family:var(--font-display)}
+.bal-neg{color:var(--danger);font-weight:800;font-family:var(--font-display)}
+.bal-zer{color:var(--muted);font-weight:800;font-family:var(--font-display)}
+.av-s{width:23px;height:23px;border-radius:50%;background:var(--gold-dark);color:var(--on-gold);font-size:var(--fs-2xs);font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ── DEBT ── */
+.debt-item{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--dark3);border-radius:var(--r-md);margin-bottom:8px;border-left:3px solid var(--gold)}
+.debt-txt{flex:1;font-size:var(--fs-base);font-weight:700}
+.debt-txt em{color:var(--gold-text);font-style:normal}
+.debt-amt{font-family:var(--font-display);font-size:var(--fs-md);color:var(--gold-light);white-space:nowrap}
+.all-good{text-align:center;padding:14px;color:var(--success);font-weight:800;font-size:var(--fs-base)}
+
+/* ── SHARE ── */
+.share-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
+.sh-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 4px;border-radius:var(--r-md);border:none;cursor:pointer;font-family:var(--font);font-weight:800;font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.5px;transition:transform .13s,filter .13s}
+.sh-btn:active{transform:scale(.93)}
+.sh-btn .si{font-size:var(--fs-xl)}
+.sh-wa{background:#1DB954;color:#fff}
+.sh-em{background:#E34234;color:#fff}
+.sh-ph{background:#2196F3;color:#fff}
+@media (hover:hover){.sh-btn:hover{filter:brightness(1.1)}}
+
+/* ── LINK BOX ── */
+.link-box input:focus,#chatGif .buscar input:focus{box-shadow:none}  /* el marco lo pone su contenedor */
+.link-box{display:flex;align-items:center;gap:8px;background:var(--dark3);border:1.5px solid rgba(245,200,0,.25);border-radius:var(--r-md);padding:8px 12px;margin-top:10px}
+.link-box input{flex:1;background:transparent;border:none;outline:none;color:var(--gold-text);font-family:var(--font);font-size:var(--fs-sm);font-weight:700;min-width:0;cursor:pointer}
+.link-copy{flex-shrink:0;background:var(--gold);color:var(--on-gold);border:none;border-radius:var(--r-sm);padding:4px 10px;font-family:var(--font);font-weight:800;font-size:var(--fs-sm);cursor:pointer;transition:filter .13s}
+@media (hover:hover){.link-copy:hover{filter:brightness(1.1)}}
+
+/* ── DVDivider ── */
+.dvd{height:1px;background:var(--tint-1);margin:14px 0}
+
+/* ── EDIT MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.80);z-index:9999;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-sheet{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px 18px 32px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-handle{width:40px;height:4px;background:var(--tint-3);border-radius:4px;margin:0 auto 18px}
+.modal-title{font-family:var(--font-display);font-size:1.35rem;letter-spacing:2px;color:var(--gold-text);margin-bottom:16px}
+.modal-close{float:right;background:var(--dark3);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--muted);padding:4px 10px;font-size:var(--fs-base);cursor:pointer;font-family:var(--font);font-weight:700;transition:color .2s}
+@media (hover:hover){.modal-close:hover{color:var(--text)}}
+/* Involved chips inside modal */
+.modal-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.modal-chip{display:inline-flex;align-items:center;gap:4px;background:var(--dark3);border:1.5px solid var(--border);border-radius:var(--r-xl);padding:4px 10px 4px 8px;font-size:var(--fs-sm);font-weight:700;cursor:pointer;transition:border-color .2s,background .2s;user-select:none}
+.modal-chip.sel{background:rgba(245,200,0,.11);border-color:var(--gold);color:var(--gold-text)}
+.modal-chip .av{width:19px;height:19px;border-radius:50%;background:var(--gold-dark);color:var(--on-gold);font-size:var(--fs-2xs);font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}

@@ -1,0 +1,11 @@
+/* Pagos: «Pagar también por…»
+   (antes dentro de index.html; se cargan en el orden de index.html, que importa) */
+
+.pagar-tambien{background:var(--dark3);border:1px solid var(--border);border-radius:var(--r-md);padding:10px 12px;margin-bottom:12px}
+.pagar-tambien .pt-titulo{font-size:var(--fs-xs);color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.7px;margin-bottom:6px}
+.pagar-tambien label{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--tint-1);cursor:pointer;font-size:var(--fs-base);color:var(--text)}
+.pagar-tambien label:last-of-type{border-bottom:none}
+.pagar-tambien input{width:18px;height:18px;accent-color:var(--gold);flex-shrink:0}
+.pagar-tambien .pt-nombre{flex:1;font-weight:700}
+.pagar-tambien .pt-imp{color:var(--gold-text);font-weight:800}
+.pagar-tambien .pt-nota{font-size:var(--fs-xs);color:var(--muted);margin-top:6px;line-height:1.35}
