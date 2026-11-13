@@ -19,7 +19,6 @@
 :root .u-bg-e5486b{background:#E5486B}
 :root .u-bg-gold{background:var(--gold)}
 :root .u-bg-gold-dark{background:var(--gold-dark)}
-:root .u-bg-gold-off-bg{background:var(--gold-off-bg)}
 :root .u-bg-none{background:none}
 :root .u-bg-success{background:var(--success)}
 :root .u-bg-success-strong{background:var(--success-strong)}
@@ -95,7 +94,6 @@
 :root .u-b-1_5-solid-gold{border:1.5px solid var(--gold)}
 :root .u-b-3-solid-gold{border:3px solid var(--gold)}
 :root .u-b-none{border:none}
-:root .u-b-x10d31{border:1px solid var(--gold-off-line)}
 :root .u-b-x1b470{border:1px solid rgba(245,200,0,.2)}
 :root .u-b-x26507{border:1px solid var(--line-strong)}
 :root .u-b-x65d6c{border:1.5px solid rgba(245,200,0,.55)}
@@ -141,7 +139,6 @@
 :root .u-c-black{color:black}
 :root .u-c-danger{color:var(--danger)}
 :root .u-c-fff{color:#fff}
-:root .u-c-gold-off-text{color:var(--gold-off-text)}
 :root .u-c-gold-text{color:var(--gold-text)}
 :root .u-c-muted{color:var(--muted)}
 :root .u-c-muted2{color:var(--muted2)}
@@ -412,7 +409,6 @@
 :root .u-wrap-wrap{flex-wrap:wrap}
 
 /* cursor */
-:root .u-cur-not-allowed{cursor:not-allowed}
 :root .u-cur-pointer{cursor:pointer}
 
 /* word-break */

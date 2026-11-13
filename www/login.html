@@ -341,7 +341,7 @@
                 </a>
             </div>
         </div>
-        <button id="btnEntrar" onclick="iniciarSesion()" class="btn-primary u-mt-10 u-bg-gold-off-bg u-c-gold-off-text u-b-x10d31 u-cur-not-allowed" disabled>Entrar</button>
+        <button id="btnEntrar" onclick="iniciarSesion()" class="btn-primary u-mt-10" disabled>Entrar</button>
         <button class="u-bg-none u-b-1-solid-gold u-c-gold-text u-fs-base u-mt-14 u-cur-pointer u-ls-_4 u-p-8-24 u-r-sm u-d-block u-ml-auto u-mr-auto" onclick="switchPage('page-login-inicio')">Volver al inicio</button>
     </div></div>
 </div>
@@ -356,7 +356,7 @@
                 <input type="email" id="recuperar-email" placeholder="ej: tu.email@gmail.com" class="auth-input u-mb-0" oninput="checkRecuperarFields()">
             </div>
         </div>
-        <button id="btnContinuarRecuperar" onclick="enviarCodigoRecuperacion()" class="btn-primary u-mt-10 u-bg-gold-off-bg u-c-gold-off-text u-b-x10d31 u-cur-not-allowed" disabled>Continuar</button>
+        <button id="btnContinuarRecuperar" onclick="enviarCodigoRecuperacion()" class="btn-primary u-mt-10" disabled>Continuar</button>
         <button class="u-bg-none u-b-1-solid-gold u-c-gold-text u-fs-base u-mt-14 u-cur-pointer u-ls-_4 u-p-8-24 u-r-sm u-d-block u-ml-auto u-mr-auto" onclick="switchPage('page-login-formulario')">Volver</button>
     </div></div>
 </div>
@@ -382,7 +382,7 @@
             <a id="enlace-reenviar" onclick="reenviarCodigo()" class="deshabilitado u-c-gold-text u-cur-pointer u-ml-6">Reenviar código</a>
         </div>
 
-        <button id="btnVerificarCodigo" onclick="verificarCodigo()" class="btn-primary u-mt-0 u-bg-gold-off-bg u-c-gold-off-text u-b-x10d31 u-cur-not-allowed" disabled>Verificar</button>
+        <button id="btnVerificarCodigo" onclick="verificarCodigo()" class="btn-primary u-mt-0" disabled>Verificar</button>
         <button class="u-bg-none u-b-1-solid-gold u-c-gold-text u-fs-base u-mt-14 u-cur-pointer u-ls-_4 u-p-8-24 u-r-sm u-d-block u-ml-auto u-mr-auto" onclick="switchPage('page-recuperar-password')">Volver</button>
     </div></div>
 </div>
@@ -412,7 +412,7 @@
             </div>
         </div>
 
-        <button id="btnGuardarPassword" onclick="guardarNuevaPassword()" class="btn-primary u-mt-10 u-bg-gold-off-bg u-c-gold-off-text u-b-x10d31 u-cur-not-allowed" disabled>Continuar</button>
+        <button id="btnGuardarPassword" onclick="guardarNuevaPassword()" class="btn-primary u-mt-10" disabled>Continuar</button>
         <button class="u-bg-none u-b-1-solid-gold u-c-gold-text u-fs-base u-mt-14 u-cur-pointer u-ls-_4 u-p-8-24 u-r-sm u-d-block u-ml-auto u-mr-auto" onclick="switchPage('page-verificar-codigo')">Volver</button>
     </div></div>
 </div>
@@ -457,7 +457,7 @@
                 <span class="toggle-password" aria-label="Mostrar u ocultar la contraseña" onclick="togglePass('reg-pass-confirm', this)"><svg class="icono" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
                 <span id="err-pass-confirm" class="error-message"></span>
             </div>
-            <button id="btnRegistrarse" class="btn-primary u-mt-10 u-bg-gold-off-bg u-c-gold-off-text u-b-x10d31 u-cur-not-allowed" onclick="handleRegistro()" disabled>Registrarse</button>
+            <button id="btnRegistrarse" class="btn-primary u-mt-10" onclick="handleRegistro()" disabled>Registrarse</button>
             <button class="u-bg-none u-b-1-solid-gold u-c-gold-text u-fs-base u-mt-14 u-cur-pointer u-ls-_4 u-p-8-24 u-r-sm u-d-block u-ml-auto u-mr-auto" onclick="safeBack()">Volver al inicio</button>
         </div>
     </div></div>
@@ -1122,11 +1122,7 @@ function checkLoginFields() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
     const ok = emailRegex.test(email) && passRegex.test(pass);
-    btn.disabled = !ok;
-    btn.style.background = ok ? '' : 'var(--gold-off-bg)';
-    btn.style.color = ok ? '' : 'var(--gold-off-text)';
-    btn.style.border = ok ? '' : '1px solid var(--gold-off-line)';
-    btn.style.cursor = ok ? 'pointer' : 'not-allowed';
+    btn.disabled = !ok;   // el aspecto apagado lo pone .btn-primary:disabled
 }
 function checkRegistroFields() {
     const nombre = document.getElementById('reg-nombre').value.trim();
@@ -1139,11 +1135,7 @@ function checkRegistroFields() {
     const prefijoElegido = document.getElementById('prefixCode')?.textContent.trim() !== '+--';
     const ok = nombre.length > 0 && email.length > 0 && pass.length > 0 && confirm.length > 0
             && prefijoElegido && telefono.length > 0;
-    btn.style.background = ok ? '' : 'var(--gold-off-bg)';
-    btn.style.color = ok ? '' : 'var(--gold-off-text)';
-    btn.style.border = ok ? '' : '1px solid var(--gold-off-line)';
-    btn.style.cursor = ok ? 'pointer' : 'not-allowed';
-    btn.disabled = !ok;
+    btn.disabled = !ok;   // el aspecto apagado lo pone .btn-primary:disabled
 }
 
 // Con la sesión abierta (por ejemplo, al pulsar «atrás» en el navegador) no se
