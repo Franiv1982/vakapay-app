@@ -96,6 +96,7 @@ function renderGroupsList() {
     if (cargandoInicial && groups.length === 0) counter.innerHTML = '<span class="sk u-d-inline-block u-w-26 u-h-13 u-va-middle u-r-sm"></span>';
     else counter.textContent = `(${groups.length})`;
   }
+  if (!cargandoInicial && !vakaData.cargaFallida) recordarNGrupos(groups.length);
   if (groups.length === 0) {
     if (cargandoInicial) el.innerHTML = skGrupos();
     else if (vakaData.cargaFallida) {

@@ -39,7 +39,26 @@ const TYPE_ICONS={viaje:'✈️',casa:'🏠',pareja:'💑',otros:'🎯'};
 // de sesión, móvil nuevo), las listas muestran formas grises animadas en vez
 // de «No tienes grupos…», para que se entienda que está cargando.
 let cargandoInicial = true;
-const skGrupos = (n = 3) => Array.from({ length: n }, (_, i) => `
+// Cuántos grupos tenía esta cuenta la última vez que cargaron: los esqueletos muestran
+// ese número (antes siempre 3, y con 2 grupos parecía que uno no había cargado).
+// Se guarda por cuenta (el «sub» del token) para no usar el número de otra persona.
+function claveNGrupos() {
+  try {
+    const t = vakaData.getToken(); if (!t) return null;
+    const sub = JSON.parse(atob(t.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).sub;
+    return sub ? 'vp_n_grupos_' + sub : null;
+  } catch (_) { return null; }
+}
+function nGruposRecordados() {
+  const k = claveNGrupos(); if (!k) return null;
+  const n = parseInt(localStorage.getItem(k), 10);
+  return Number.isFinite(n) ? n : null;
+}
+function recordarNGrupos(n) {
+  const k = claveNGrupos(); if (!k) return;
+  try { localStorage.setItem(k, String(n)); } catch (_) {}
+}
+const skGrupos = (n = Math.min(5, Math.max(1, nGruposRecordados() ?? 3))) => Array.from({ length: n }, (_, i) => `
   <div class="sk-card" aria-hidden="true">
     <div class="sk u-w-44 u-h-44 u-r-md u-shrink-0"></div>
     <div class="u-f-1 u-minw-0">
