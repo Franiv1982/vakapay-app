@@ -953,10 +953,7 @@ button.bar-row{margin-bottom:2px}
 
     <!-- MODO EDICIÓN (oculto por defecto) -->
     <div id="profileEditMode" style="display:none;">
-      <div class="g2">
-        <div class="field"><label>Nombre</label><input type="text" id="profNombre" minlength="2" maxlength="40" placeholder="Tu nombre completo" oninput="updateProfilePreview()"></div>
-        
-      </div>
+      <div class="field"><label>Nombre</label><input type="text" id="profNombre" minlength="2" maxlength="40" placeholder="Tu nombre completo" oninput="updateProfilePreview()"></div>
       <div class="field"><label>Email</label><input type="email" id="profEmail" placeholder="tu@email.com" oninput="updateProfilePreview()"></div>
       <div class="field"><label>Teléfono</label><input type="tel" id="profTel" placeholder="+34 600 000 000"></div>
       <div style="font-size:var(--fs-xs);color:var(--text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin:14px 0 4px;">Cómo quieres cobrar (opcional)</div>
@@ -5554,12 +5551,17 @@ function toggleEditProfile() {
     loadProfile();
     readMode.style.display = 'block';
     editMode.style.display = 'none';
+    btn.style.display = '';
+    btn.focus({ preventScroll: true });   // el foco vuelve a «Editar» (lector de pantalla y teclado)
     btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar';
   } else {
     loadProfile();   // al entrar a editar, siempre con los datos guardados
     readMode.style.display = 'none';
     editMode.style.display = 'block';
-    btn.innerHTML = icono('cerrar',13) + ' Cancelar';
+    // Mientras se edita, arriba no hay botón: se sale con «Cancelar» o «Guardar» de abajo
+    // (o con atrás). Así no hay dos botones que hagan lo mismo.
+    btn.style.display = 'none';
+    document.getElementById('profNombre')?.focus({ preventScroll: true });
   }
 }
 
@@ -6666,6 +6668,12 @@ function openDeleteFromEdit() {
 // gesto o tecla de atrás del navegador): ventana → chat → gasto → grupo →
 // Mis grupos → «¿Deseas salir?».
 function manejarAtras() {
+    // Editando «Mis datos»: atrás es como «Cancelar»
+    const edPerfil = document.getElementById('profileEditMode');
+    const hayVentana = [...document.querySelectorAll('.modal-overlay, #modalLogout, #visorTicketModal, #origenImagenModal')].some(m => getComputedStyle(m).display !== 'none');
+    if (!hayVentana && edPerfil && edPerfil.style.display !== 'none' && document.getElementById('page-cuenta')?.classList.contains('active')) {
+      toggleEditProfile(); return;
+    }
     // Chat abierto: primero se cierra su menú/diálogo, después el chat
     if (typeof chatAtras === 'function' && chatAtras()) return;
     // Visores a pantalla completa (comprobante, elegir cámara/galería): se cierran primero
@@ -6728,7 +6736,8 @@ if (esAppNativa && Capacitor.Plugins.App) {
     let d = hayPaginaAnterior ? 1 : 0;                    // 1 = guarda en «Mis grupos» (para «¿Deseas salir?»)
     if (pagina && pagina !== 'page-grupos') d = 2;        // grupo, Amigos, Estadísticas…
     if (pagina === 'page-gasto' || chat) d = 3;           // dentro del grupo
-    return d + (ventana ? 1 : 0);
+    const editandoPerfil = pagina === 'page-cuenta' && document.getElementById('profileEditMode')?.style.display !== 'none';
+    return d + (ventana || editandoPerfil ? 1 : 0);
   };
   const sincronizarHistorial = () => {
     if (saliendoDeLaWeb) return;
