@@ -525,7 +525,9 @@ function closeLogoutModal() {
 function confirmLogout() {
   localStorage.setItem('intentional_logout', 'true');
   vakaData.setToken(null);
-  { const _tema = localStorage.getItem('vp_tema'); localStorage.clear(); if (_tema) localStorage.setItem('vp_tema', _tema); }
+  { // Se conservan el tema y cuántos grupos tenía cada cuenta (para las tarjetas grises de carga)
+    const guardar = Object.keys(localStorage).filter(k => k === 'vp_tema' || k.startsWith('vp_n_grupos_')).map(k => [k, localStorage.getItem(k)]);
+    localStorage.clear(); guardar.forEach(([k, v]) => localStorage.setItem(k, v)); }
   sessionStorage.clear();
   
   // Obtiene la ruta base actual y reemplaza el archivo actual por login.html
