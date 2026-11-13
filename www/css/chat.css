@@ -91,3 +91,10 @@
 #chatGif .giphy{font-size:var(--fs-2xs);color:var(--muted);text-align:center;padding:4px 0 6px;letter-spacing:.04em;flex-shrink:0}
 #chatDialogo{display:none;position:absolute;inset:0;z-index:5;background:rgba(0,0,0,.6);align-items:center;justify-content:center}
 #chatDialogo .caja{background:var(--dark3);width:88%;max-width:330px;padding:22px;border-radius:var(--r-lg);border:1px solid var(--line);text-align:center;box-sizing:border-box}
+
+/* Visores de imagen (comprobante, foto del chat y foto antes de enviarla): el fondo es
+   siempre negro, también con el tema claro; sus botones y textos van siempre en claro */
+#visorTicketModal .btn-outline,#chatVisor .btn-outline{color:#f2f2f2;border-color:rgba(255,255,255,.35)}
+@media (hover:hover){#visorTicketModal .btn-outline:hover,#chatVisor .btn-outline:hover{background:rgba(255,255,255,.08)}}
+#visorTicketModal .zoom-pista,#chatVisor .zoom-pista{color:rgba(255,255,255,.7)}
+#chatFotoPrevia .chat-x{color:#f2f2f2}
