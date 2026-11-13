@@ -2,7 +2,7 @@
 const express = require('express');
 const db      = require('../db/database');
 const { requireAuth }  = require('../middleware/auth');
-const { logGroupActivity, mensajeSistema, actorName } = require('../utils/activity');
+const { logGroupActivity } = require('../utils/activity');
 const { DIAS_CONFIRMAR, porConfirmar, fechaCorta } = require('../utils/pagos');
 
 const router = express.Router({ mergeParams: true });

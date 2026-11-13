@@ -26,9 +26,7 @@ fs.mkdirSync(DEST, { recursive: true });
 function copyRecursive(srcDir, destDir) {
   for (const entry of fs.readdirSync(srcDir, { withFileTypes: true })) {
     const srcPath = path.join(srcDir, entry.name);
-    let destName = entry.name;
-
-    destName = entry.name;
+    const destName = entry.name;
 
     const destPath = path.join(destDir, destName);
 

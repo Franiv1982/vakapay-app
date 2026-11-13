@@ -55,8 +55,6 @@ async function createGroup(){
     // 5. Actualizamos la lista global con el grupo que YA tiene ID y participante
     groups.unshift(grupoFinal);
 
-    // 6. Guardamos en el PC
-
     hideNewGroupForm();
     renderGroupsList();
     toast(`¡Grupo "${name}" creado!`,'s');

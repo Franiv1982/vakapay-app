@@ -1,0 +1,70 @@
+# Comprobaciones automáticas en cada PR (y en cada cambio en main)
+# 1. Revisor de código (ESLint)
+# 2. Comprobaciones de la web (scripts/comprobar.js): nombres repetidos entre
+#    archivos, onclick a funciones que no existen, clases u-… inexistentes y
+#    www/ al día con public/
+# 3. Pruebas en un navegador de verdad (Playwright) contra la API y una base de
+#    datos PostgreSQL de pruebas, vacía en cada ejecución
+name: Comprobaciones
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: comprobaciones-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  comprobar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: vakapay_pruebas
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/vakapay_pruebas
+      JWT_SECRET: solo-para-pruebas-en-ci
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Revisor de código (ESLint)
+        run: npm run lint
+
+      - name: Comprobaciones de la web
+        run: npm run comprobar
+
+      - name: Instalar Chromium para las pruebas
+        run: npx playwright install --with-deps chromium
+
+      - name: Pruebas en el navegador
+        run: npm run test:e2e
+
+      - name: Guardar el informe si algo falla
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: informe-pruebas
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

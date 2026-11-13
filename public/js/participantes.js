@@ -159,7 +159,7 @@ function renderFriendPicker() {
   }
 
   el.innerHTML = allPossibleParticipants.map(name => {
-    const inGroup = g && g.members.hasOwnProperty(name);
+    const inGroup = g && Object.prototype.hasOwnProperty.call(g.members, name);
     
     return `<div class="chip friend-pick ${inGroup ? 'sel' : ''}" data-name="${name}" onclick="toggleFriendInGroup('${name}',this)">
       <div class="av">${name[0].toUpperCase()}</div>${name}
@@ -172,7 +172,7 @@ async function toggleFriendInGroup(name, el) {
   const g = groups[currentGroupIdx];
   const token = vakaData.getToken();
 
-  if (g.members.hasOwnProperty(name)) {
+  if (Object.prototype.hasOwnProperty.call(g.members, name)) {
     // 1. Lógica para QUITAR
     if (g.expenses.some(e => e.payer === name || e.involved.includes(name))) {
       toast('Tiene gastos, no se puede quitar', 'e');

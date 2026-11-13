@@ -7,9 +7,13 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "seed": "node src/db/seed.js",
-    "test": "node --test tests/",
+    "test": "npm run verificar",
     "build": "npm rebuild better-sqlite3",
-    "sync:app": "node scripts/sync-www.js"
+    "sync:app": "node scripts/sync-www.js",
+    "lint": "eslint .",
+    "comprobar": "node scripts/comprobar.js",
+    "test:e2e": "playwright test",
+    "verificar": "npm run lint && npm run comprobar && npm run test:e2e"
   },
   "keywords": [],
   "author": "",
@@ -37,6 +41,11 @@
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "8.4.1",
     "@capacitor/core": "8.4.1",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
+    "acorn": "^8.19.0",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
     "nodemon": "^3.0.3"
   },
   "engines": {

@@ -4,7 +4,6 @@
 // ================================================================
 
 const db      = require('./database');
-const bcrypt  = require('bcryptjs');
 
 console.log('🌱 Seeding VakaPay database…');
 

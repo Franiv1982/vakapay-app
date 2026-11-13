@@ -166,7 +166,7 @@ class VakaDataService {
     // ══ REFUERZO: Asegurar que los miembros existan en el grupo ══
     if (Array.isArray(involved)) {
         involved.forEach(name => {
-            if (!g.members.hasOwnProperty(name)) {
+            if (!Object.prototype.hasOwnProperty.call(g.members, name)) {
                 g.members[name] = 0; // Crea el miembro localmente si falta
             }
         });
@@ -238,8 +238,6 @@ class VakaDataService {
 
     // 2. Recalculamos todos los saldos de forma automática
     if (typeof updateBalances === 'function') updateBalances();
-
-    // 3. Guardamos en el PC
 
     // Sincronización post-borrado
     try {

@@ -464,16 +464,6 @@
 </div>
 
 <script>
-function checkRegistroFields() {
-    const ok = document.getElementById('reg-nombre').value.trim().length > 0 &&
-               document.getElementById('reg-email').value.trim().length > 0 &&
-               document.getElementById('reg-pass').value.length > 0 &&
-               document.getElementById('reg-pass-confirm').value.length > 0;
-    const btn = document.getElementById('btnRegistrarse');
-    if (!btn) return;
-    btn.disabled = !ok;
-    btn.classList.toggle('btn-activo', ok);
-}
         // --- 1. UTILIDADES DE NAVEGACIÓN Y VISTA ---
 function switchPage(id) {
     clearErrors();
@@ -686,23 +676,6 @@ function irAlLoginDespuesDeCambio() {
 }
 	
 // --- FUNCIÓN DE NAVEGACIÓN SEGURA ---
-function safeBack() {
-    const nombre = document.getElementById('reg-nombre').value.trim();
-    const tieneDatos = nombre.length > 0 || 
-                       document.getElementById('reg-email').value.trim().length > 0 ||
-                       document.getElementById('reg-pass').value.length > 0;
-
-    if (tieneDatos) {
-        const saludo = nombre ? `${nombre}, ¿confirmas` : "¿Confirmas";
-        if (confirm(`${saludo} que quieres volver? Se perderán los datos introducidos.`)) {
-            limpiarRegistro();
-            switchPage('page-login-inicio');
-        }
-    } else {
-        limpiarRegistro();
-        switchPage('page-login-inicio');
-    }
-}
 
 function limpiarRegistro() {
     document.getElementById('reg-nombre').value = '';

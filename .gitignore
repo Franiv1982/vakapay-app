@@ -34,3 +34,7 @@ dist/
 .env
 # Bases de datos locales antiguas
 *.db
+
+# Pruebas (Playwright)
+test-results/
+playwright-report/

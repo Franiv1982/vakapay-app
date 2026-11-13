@@ -148,3 +148,18 @@ npx cap open android    # abre Android Studio para compilar la APK
 - Francisco Rodriguez: idea, diseño y desarrollo de VakaPay.
 
 - GitHub: [Franiv1982](https://github.com/Franiv1982)
+
+## Comprobaciones automáticas
+
+En cada PR, GitHub ejecuta `.github/workflows/comprobaciones.yml`. En local:
+
+```bash
+npm run lint        # revisor de código (ESLint)
+npm run comprobar   # web: nombres repetidos entre archivos, onclick a funciones que no existen,
+                    # clases u-… inexistentes, www/ al día con public/
+npm run test:e2e    # pruebas en Chromium; necesita PostgreSQL:
+                    # DATABASE_URL=postgres://usuario:clave@localhost:5432/vakapay_pruebas
+npm run verificar   # las tres
+```
+
+Las pruebas (`tests/e2e/`) crean sus propios usuarios y grupos, así que la base de datos de pruebas puede empezar vacía. Nunca apuntes `DATABASE_URL` a la base de datos real.
