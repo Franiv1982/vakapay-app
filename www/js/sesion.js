@@ -12,12 +12,12 @@
     try { ['vp_token','vp_groups','vp_friends','vp_activity','vp_profile','vaka_groups','vaka_friends'].forEach(k => localStorage.removeItem(k)); } catch (_) {}
     const caja = document.createElement('div');
     caja.style.cssText = 'position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:24px;font-family:var(--font)';
-    caja.innerHTML = `<div style="background:var(--dark3);border:1px solid var(--line);border-radius:var(--r-xl);padding:26px 22px;max-width:340px;width:100%;text-align:center;">
-        <div style="width:56px;height:56px;margin:0 auto 14px;border-radius:50%;background:rgba(255,77,77,.12);display:flex;align-items:center;justify-content:center;">
-          <svg style="color:var(--danger)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
-        <div style="color:var(--text);font-size:var(--fs-lg);font-weight:800;margin-bottom:10px;"></div>
-        <p style="color:var(--text);opacity:.8;font-size:var(--fs-base);line-height:1.45;margin-bottom:22px;"></p>
-        <button class="btn btn-gold" style="width:100%"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button></div>`;
+    caja.innerHTML = `<div class="u-bg-dark3 u-b-1-solid-line u-r-xl u-p-26-22 u-maxw-340 u-w-100p u-t-center">
+        <div class="u-w-56 u-h-56 u-m-0-auto-14 u-r-50p u-bg-x396b6 u-d-flex u-ai-center u-jc-center">
+          <svg class="u-c-danger" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div class="u-c-text u-fs-lg u-fw-800 u-mb-10"></div>
+        <p class="u-c-text u-op-_8 u-fs-base u-lh-1_45 u-mb-22"></p>
+        <button class="btn btn-gold u-w-100p"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Entendido</button></div>`;
     caja.querySelector('div > div:nth-child(2)').textContent = titulo;
     caja.querySelector('p').textContent = texto;
     caja.querySelector('button').onclick = () => { location.replace('login.html'); };

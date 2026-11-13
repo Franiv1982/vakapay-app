@@ -191,7 +191,7 @@ function renderFriendPicker() {
   const allPossibleParticipants = [...friendNames, ...groupMembers];
 
   if (allPossibleParticipants.length === 0) {
-    el.innerHTML = '<span style="color:var(--muted);font-size:var(--fs-sm)">No hay contactos disponibles</span>';
+    el.innerHTML = '<span class="u-c-muted u-fs-sm">No hay contactos disponibles</span>';
     return;
   }
 
@@ -200,7 +200,7 @@ function renderFriendPicker() {
     
     return `<div class="chip friend-pick ${inGroup ? 'sel' : ''}" data-name="${name}" onclick="toggleFriendInGroup('${name}',this)">
       <div class="av">${name[0].toUpperCase()}</div>${name}
-      ${inGroup ? '<span style="color:var(--gold-text);display:flex">'+icono('check',15)+'</span>' : '<span style="color:var(--muted);font-size:var(--fs-sm)">+</span>'}
+      ${inGroup ? '<span class="u-c-gold-text u-d-flex">'+icono('check',15)+'</span>' : '<span class="u-c-muted u-fs-sm">+</span>'}
     </div>`;
   }).join('');
 }

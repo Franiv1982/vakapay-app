@@ -32,11 +32,11 @@ function renderActivity() {
 
   if (sub) sub.innerHTML = filterGroup
     ? 'Grupo: ' + groups[currentGroupIdx].name
-    : '<span style="color:var(--text);">Todas las acciones</span>';
+    : '<span class="u-c-text">Todas las acciones</span>';
 
   if (filtered.length === 0 && cargandoInicial) { el.innerHTML = skFilas(5, false); return; }
   if (filtered.length === 0) {
-    el.innerHTML = '<div class="no-items"><div class="ni"><svg style="color:var(--text)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div style="color:var(--text);">Sin actividad' + (filterGroup ? ' en este grupo' : ' reciente') + '</div></div>';
+    el.innerHTML = '<div class="no-items"><div class="ni"><svg class="u-c-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="u-c-text">Sin actividad' + (filterGroup ? ' en este grupo' : ' reciente') + '</div></div>';
     return;
   }
 
@@ -61,12 +61,12 @@ function renderActivity() {
     const id = 'actDay_' + idx;
     const isHoy = fecha === 'Hoy';
     return `
-    <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin:14px 0 6px 0;" onclick="toggleActDay('${id}')" data-controla="${id}">
-      <div style="font-size:var(--fs-xs);color:var(--gold-text);text-transform:uppercase;letter-spacing:.8px;font-weight:700;">${fecha} <span style="color:var(--muted);font-weight:400">(${items.length})</span></div>
+    <div class="u-ai-center u-jc-space-between u-cur-pointer u-m-14-0-6-0" style="display:flex" onclick="toggleActDay('${id}')" data-controla="${id}">
+      <div class="u-fs-xs u-c-gold-text u-tt-uppercase u-ls-_8 u-fw-700">${fecha} <span class="u-c-muted u-fw-400">(${items.length})</span></div>
       <svg id="${id}_chv" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition:transform .25s;transform:${isHoy ? 'rotate(180deg)' : ''}"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
     <div id="${id}" style="display:${isHoy ? 'block' : 'none'}">
-      <div class="card" style="margin-bottom:4px;">
+      <div class="card u-mb-4">
         ${items.map(a => `
           <div class="act-item">
             <div class="act-dot"></div>

@@ -29,7 +29,7 @@ function mostrarError(msg, titulo) {
       <div class="me-ico">${icono('alerta', 26)}</div>
       <div class="me-titulo" id="me-titulo"></div>
       <p class="me-texto" id="me-texto"></p>
-      <button type="button" class="btn btn-gold" style="width:100%" onclick="cerrarError()">Entendido</button></div>`;
+      <button type="button" class="btn btn-gold u-w-100p" onclick="cerrarError()">Entendido</button></div>`;
     document.body.appendChild(m);
   }
   // Red de seguridad: si llega un texto técnico (del navegador o del código), se cambia por uno comprensible

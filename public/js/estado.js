@@ -41,17 +41,17 @@ const TYPE_ICONS={viaje:'✈️',casa:'🏠',pareja:'💑',otros:'🎯'};
 let cargandoInicial = true;
 const skGrupos = (n = 3) => Array.from({ length: n }, (_, i) => `
   <div class="sk-card" aria-hidden="true">
-    <div class="sk" style="width:44px;height:44px;border-radius:var(--r-md);flex-shrink:0;"></div>
-    <div style="flex:1;min-width:0;">
+    <div class="sk u-w-44 u-h-44 u-r-md u-shrink-0"></div>
+    <div class="u-f-1 u-minw-0">
       <div class="sk" style="height:13px;width:${[62, 48, 70][i % 3]}%;margin-bottom:8px;"></div>
       <div class="sk" style="height:10px;width:${[80, 66, 74][i % 3]}%;"></div>
     </div>
-    <div class="sk" style="width:58px;height:14px;flex-shrink:0;"></div>
-  </div>`).join('') + '<div style="text-align:center;color:var(--muted);font-size:var(--fs-sm);margin-top:4px;">Cargando tus grupos…</div>';
+    <div class="sk u-w-58 u-h-14 u-shrink-0"></div>
+  </div>`).join('') + '<div class="u-t-center u-c-muted u-fs-sm u-mt-4">Cargando tus grupos…</div>';
 const skFilas = (n = 4, avatar = true) => Array.from({ length: n }, (_, i) => `
   <div class="sk-fila" aria-hidden="true">
-    ${avatar ? '<div class="sk" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;"></div>' : '<div class="sk" style="width:8px;height:8px;border-radius:50%;flex-shrink:0;"></div>'}
-    <div style="flex:1;min-width:0;">
+    ${avatar ? '<div class="sk u-w-38 u-h-38 u-r-50p u-shrink-0"></div>' : '<div class="sk u-w-8 u-h-8 u-r-50p u-shrink-0"></div>'}
+    <div class="u-f-1 u-minw-0">
       <div class="sk" style="height:12px;width:${[55, 72, 40, 64][i % 4]}%;margin-bottom:8px;"></div>
       <div class="sk" style="height:9px;width:${[35, 48, 30, 42][i % 4]}%;"></div>
     </div>

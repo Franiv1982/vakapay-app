@@ -135,26 +135,26 @@ function renderFriends(){
   populateFriendGroupSelect();
   const el=document.getElementById('friendsList');
   if(friends.length===0&&cargandoInicial){el.innerHTML=skFilas(4,true);return;}
-  if(friends.length===0){el.innerHTML='<div class="no-items"><div class="ni"><svg style="color:var(--text)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div>Sin amigos añadidos aún</div></div>';return;}
+  if(friends.length===0){el.innerHTML='<div class="no-items"><div class="ni"><svg class="u-c-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div>Sin amigos añadidos aún</div></div>';return;}
   el.innerHTML=friends.map((f,i)=>{
     const inGroups=groups.filter(g=>g.members.hasOwnProperty(f.name)).map(g=>iconoTipo(g.type, 12)+' '+escaparHtml(g.name));
     const avatarContent=f.avatar
-      ?`<img src="${f.avatar}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
-      :`<span style="font-size:var(--fs-md);font-weight:900;color:var(--gold-text)">${f.name[0].toUpperCase()}</span>`;
+      ?`<img class="u-w-100p u-h-100p u-fit-cover u-r-50p" src="${f.avatar}" alt="">`
+      :`<span class="u-fs-md u-fw-900 u-c-gold-text">${f.name[0].toUpperCase()}</span>`;
     return`<div class="friend-item">
       <div class="fi-av">${avatarContent}</div>
       <div class="fi-info">
         <div class="fi-name">${f.name}</div>
         <div class="fi-sub">${[f.email,f.phone].filter(Boolean).join(' · ')||f.contact||'Sin contacto'}</div>
-        ${f.notes?`<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:1px;font-style:italic">${f.notes}</div>`:''}
-        ${inGroups.length?`<div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px">${inGroups.map(g=>`<span style="background:rgba(245,200,0,.1);border:1px solid rgba(245,200,0,.2);border-radius:var(--r-lg);padding:1px 8px;font-size:var(--fs-2xs);color:var(--gold-text);font-weight:700">${g}</span>`).join('')}</div>`:''}
+        ${f.notes?`<div class="u-fs-xs u-c-muted u-mt-1 u-fst-italic">${f.notes}</div>`:''}
+        ${inGroups.length?`<div class="u-mt-4 u-d-flex u-wrap-wrap u-gap-4">${inGroups.map(g=>`<span class="u-bg-xbdf8a u-b-x1b470 u-r-lg u-p-1-8 u-fs-2xs u-c-gold-text u-fw-700">${g}</span>`).join('')}</div>`:''}
       </div>
-      <div style="display:flex; gap:6px;">
+      <div class="u-d-flex u-gap-6">
         <button class="btn btn-outline btn-sm" onclick="openFriendModal(${i})" title="Editar">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
-        <button class="btn btn-outline btn-sm" style="color:var(--danger);border-color:var(--danger)" onclick="confirmDeleteFriend(${i})" title="Eliminar">
-          <svg style="color:var(--danger)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        <button class="btn btn-outline btn-sm u-c-danger u-bc-danger" onclick="confirmDeleteFriend(${i})" title="Eliminar">
+          <svg class="u-c-danger" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         </button>
       </div>
     </div>`;
@@ -173,15 +173,15 @@ function openFriendModal(idx){
   document.getElementById('editFriendEmail').value=f.email||f.contact||'';
   document.getElementById('editFriendPhone').value=f.phone||'';
   document.getElementById('editFriendNotes').value=f.notes||'';
-  document.getElementById('friendModalTitle').innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar: '+f.name;
+  document.getElementById('friendModalTitle').innerHTML='<svg class="u-va-middle u-mr-6" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar: '+f.name;
   const av=document.getElementById('friendModalAvatar');
-  av.innerHTML=f.avatar?`<img src="${f.avatar}" alt="" style="width:100%;height:100%;object-fit:cover">`:f.name[0].toUpperCase();
+  av.innerHTML=f.avatar?`<img class="u-w-100p u-h-100p u-fit-cover" src="${f.avatar}" alt="">`:f.name[0].toUpperCase();
   const gc=document.getElementById('editFriendGroups');
-  if(groups.length===0){gc.innerHTML='<span style="color:var(--muted);font-size:var(--fs-sm)">No hay grupos creados aún</span>';}
+  if(groups.length===0){gc.innerHTML='<span class="u-c-muted u-fs-sm">No hay grupos creados aún</span>';}
   else{gc.innerHTML=groups.map((g,gi)=>{
     const inGroup=g.members.hasOwnProperty(f.name);
     return`<div class="modal-chip ${inGroup?'sel':''}" data-gidx="${gi}" onclick="toggleFriendGroupChip(this,'${f.name.replace(/'/g,'\\\'')}')">`+
-      `<span style="font-size:var(--fs-md)">${iconoTipo(g.type, 14)}</span>${g.name}</div>`;
+      `<span class="u-fs-md">${iconoTipo(g.type, 14)}</span>${g.name}</div>`;
   }).join('');}
   document.getElementById('friendModal').style.display = '';
   document.getElementById('friendModal').classList.add('open');
@@ -341,7 +341,7 @@ function handleFriendAvatarChange(ev){
       canvas.width=Math.round(img.width*scale);canvas.height=Math.round(img.height*scale);
       canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
       const data=canvas.toDataURL('image/jpeg',0.8);
-      document.getElementById('friendModalAvatar').innerHTML=`<img src="${data}" alt="" style="width:100%;height:100%;object-fit:cover">`;
+      document.getElementById('friendModalAvatar').innerHTML=`<img class="u-w-100p u-h-100p u-fit-cover" src="${data}" alt="">`;
       if(editingFriendIdx!==null)friends[editingFriendIdx]._tmpAvatar=data;
     };
     img.src=e.target.result;

@@ -301,12 +301,13 @@
     #enlace-reenviar.deshabilitado { color: var(--gold-off-text); pointer-events: none; cursor: not-allowed; opacity: .6; }
     .country-code { color:var(--gold-text); font-size:var(--fs-base); font-weight:700; }
     </style>
+<link rel="stylesheet" href="css/utilidades.css">
 </head>
 <body>
 
     <!-- ═══ PÁGINA: INICIO DE ACCESO ═══ -->
     <div class="page active" id="page-login-inicio">
-        <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
+        <div class="auth-box"><div class="u-w-100p u-maxw-460 u-m-0-auto">
             <img src="logo_vakapay.png" class="logo" alt="Vakapay Logo">
             <h1>VAKAPAY</h1>
             <p class="auth-subtitle">Divide gastos, no amistades</p>
@@ -321,53 +322,53 @@
 	
 	<!-- ═══ PÁGINA: FORMULARIO DE LOGIN ═══ -->
 <div class="page" id="page-login-formulario">
-    <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
-        <h2 style="margin:0 0 8px 0; color:var(--text); font-size:var(--fs-xl); text-align:center;">Inicia sesión</h2>
+    <div class="auth-box"><div class="u-w-100p u-maxw-460 u-m-0-auto">
+        <h2 class="u-m-0-0-8-0 u-c-text u-fs-xl u-t-center">Inicia sesión</h2>
         <p class="auth-sub">Introduce tus credenciales para entrar.</p>
-        <div class="auth-form" style="display:flex; flex-direction:column;">
-            <div style="margin-bottom: 16px;">
-                <input type="email" id="login-email" placeholder="ej: tu.email@gmail.com" class="auth-input" style="margin-bottom:0;" oninput="checkLoginFields()">
+        <div class="auth-form u-d-flex u-dir-column">
+            <div class="u-mb-16">
+                <input type="email" id="login-email" placeholder="ej: tu.email@gmail.com" class="auth-input u-mb-0" oninput="checkLoginFields()">
             </div>
-            <div class="password-wrapper" style="position: relative; width: 100%; margin-bottom: 16px;">
-                <input type="password" id="login-pass" placeholder="Contraseña" class="auth-input" style="width: 100%; margin-bottom:0;" oninput="checkLoginFields()">
-                <span class="toggle-password" aria-label="Mostrar u ocultar la contraseña" onclick="togglePass('login-pass', this)" 
-                      style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; display: flex; align-items: center; height: 100%;"><svg class="icono" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
+            <div class="password-wrapper u-pos-relative u-w-100p u-mb-16">
+                <input type="password" id="login-pass" placeholder="Contraseña" class="auth-input u-w-100p u-mb-0" oninput="checkLoginFields()">
+                <span class="toggle-password u-pos-absolute u-right-15 u-top-50p u-tf-translatey-50p u-cur-pointer u-d-flex u-ai-center u-h-100p" aria-label="Mostrar u ocultar la contraseña" onclick="togglePass('login-pass', this)" 
+                     ><svg class="icono" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
             </div>
-            <div style="text-align:right; margin-bottom:16px;">
-                <a onclick="switchPage('page-recuperar-password')" 
-                   style="color:var(--gold-text); font-size:var(--fs-base); cursor:pointer; opacity:.85;">
+            <div class="u-t-right u-mb-16">
+                <a class="u-c-gold-text u-fs-base u-cur-pointer u-op-_85" onclick="switchPage('page-recuperar-password')" 
+                  >
                    ¿Olvidaste tu contraseña?
                 </a>
             </div>
         </div>
-        <button id="btnEntrar" onclick="iniciarSesion()" class="btn-primary" style="margin-top:10px;background:var(--gold-off-bg);color:var(--gold-off-text);border:1px solid var(--gold-off-line);cursor:not-allowed;" disabled>Entrar</button>
-        <button onclick="switchPage('page-login-inicio')" style="background:none;border:1px solid var(--gold);color:var(--gold-text);font-size:var(--fs-base);margin-top:14px;cursor:pointer;letter-spacing:.4px;padding:8px 24px;border-radius:var(--r-sm);display:block;margin-left:auto;margin-right:auto;">Volver al inicio</button>
+        <button id="btnEntrar" onclick="iniciarSesion()" class="btn-primary u-mt-10 u-bg-gold-off-bg u-c-gold-off-text u-b-x10d31 u-cur-not-allowed" disabled>Entrar</button>
+        <button class="u-bg-none u-b-1-solid-gold u-c-gold-text u-fs-base u-mt-14 u-cur-pointer u-ls-_4 u-p-8-24 u-r-sm u-d-block u-ml-auto u-mr-auto" onclick="switchPage('page-login-inicio')">Volver al inicio</button>
     </div></div>
 </div>
 
 <!-- ═══ PÁGINA: RECUPERAR CONTRASEÑA (paso 1: correo) ═══ -->
 <div class="page" id="page-recuperar-password">
-    <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
-        <h2 style="margin:0 0 8px 0; color:var(--text); font-size:var(--fs-xl); text-align:center;">Restablece tu contraseña</h2>
-        <p class="auth-sub" style="text-align:center;">Para proteger tu información, necesitamos verificar tu correo electrónico.</p>
-        <div class="auth-form" style="display:flex; flex-direction:column; margin-top:16px;">
-            <div style="margin-bottom: 16px;">
-                <input type="email" id="recuperar-email" placeholder="ej: tu.email@gmail.com" class="auth-input" style="margin-bottom:0;" oninput="checkRecuperarFields()">
+    <div class="auth-box"><div class="u-w-100p u-maxw-460 u-m-0-auto">
+        <h2 class="u-m-0-0-8-0 u-c-text u-fs-xl u-t-center">Restablece tu contraseña</h2>
+        <p class="auth-sub u-t-center">Para proteger tu información, necesitamos verificar tu correo electrónico.</p>
+        <div class="auth-form u-d-flex u-dir-column u-mt-16">
+            <div class="u-mb-16">
+                <input type="email" id="recuperar-email" placeholder="ej: tu.email@gmail.com" class="auth-input u-mb-0" oninput="checkRecuperarFields()">
             </div>
         </div>
-        <button id="btnContinuarRecuperar" onclick="enviarCodigoRecuperacion()" class="btn-primary" style="margin-top:10px;background:var(--gold-off-bg);color:var(--gold-off-text);border:1px solid var(--gold-off-line);cursor:not-allowed;" disabled>Continuar</button>
-        <button onclick="switchPage('page-login-formulario')" style="background:none;border:1px solid var(--gold);color:var(--gold-text);font-size:var(--fs-base);margin-top:14px;cursor:pointer;letter-spacing:.4px;padding:8px 24px;border-radius:var(--r-sm);display:block;margin-left:auto;margin-right:auto;">Volver</button>
+        <button id="btnContinuarRecuperar" onclick="enviarCodigoRecuperacion()" class="btn-primary u-mt-10 u-bg-gold-off-bg u-c-gold-off-text u-b-x10d31 u-cur-not-allowed" disabled>Continuar</button>
+        <button class="u-bg-none u-b-1-solid-gold u-c-gold-text u-fs-base u-mt-14 u-cur-pointer u-ls-_4 u-p-8-24 u-r-sm u-d-block u-ml-auto u-mr-auto" onclick="switchPage('page-login-formulario')">Volver</button>
     </div></div>
 </div>
 
 <!-- ═══ PÁGINA: RECUPERAR CONTRASEÑA (paso 2: código OTP) ═══ -->
 <div class="page" id="page-verificar-codigo">
-    <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
-        <h2 style="margin:0 0 8px 0; color:var(--text); font-size:var(--fs-xl); text-align:center;">Verifica tu código</h2>
-        <p class="auth-sub" id="codigo-sub-soporte" style="text-align:center; display:none;">Escribe el código de 6 dígitos que te ha facilitado soporte.</p>
-        <p class="auth-sub" id="codigo-sub-correo" style="text-align:center;">Enviamos un código de 6 dígitos a <span id="codigo-email-destino" style="color:var(--gold-text);font-weight:700;">tu correo</span></p>
+    <div class="auth-box"><div class="u-w-100p u-maxw-460 u-m-0-auto">
+        <h2 class="u-m-0-0-8-0 u-c-text u-fs-xl u-t-center">Verifica tu código</h2>
+        <p class="auth-sub u-t-center" id="codigo-sub-soporte" style="display:none">Escribe el código de 6 dígitos que te ha facilitado soporte.</p>
+        <p class="auth-sub u-t-center" id="codigo-sub-correo">Enviamos un código de 6 dígitos a <span class="u-c-gold-text u-fw-700" id="codigo-email-destino">tu correo</span></p>
 
-        <div style="display:flex; gap:8px; justify-content:center; margin:24px 0 10px;">
+        <div class="u-d-flex u-gap-8 u-jc-center u-m-24-0-10">
             <input type="text" maxlength="1" inputmode="numeric" class="auth-input otp-input" id="otp-1" oninput="moverAlSiguiente(this,'otp-2')" onkeydown="moverAlAnterior(event,this,null)">
             <input type="text" maxlength="1" inputmode="numeric" class="auth-input otp-input" id="otp-2" oninput="moverAlSiguiente(this,'otp-3')" onkeydown="moverAlAnterior(event,this,'otp-1')">
             <input type="text" maxlength="1" inputmode="numeric" class="auth-input otp-input" id="otp-3" oninput="moverAlSiguiente(this,'otp-4')" onkeydown="moverAlAnterior(event,this,'otp-2')">
@@ -376,51 +377,51 @@
             <input type="text" maxlength="1" inputmode="numeric" class="auth-input otp-input" id="otp-6" oninput="moverAlSiguiente(this,null)" onkeydown="moverAlAnterior(event,this,'otp-5')">
         </div>
 
-        <div style="text-align:center; margin-bottom:20px; font-size:var(--fs-base);">
-            <span id="contador-reenvio" style="color:var(--muted);">3:00</span>
-            <a id="enlace-reenviar" onclick="reenviarCodigo()" class="deshabilitado" style="color:var(--gold-text); cursor:pointer; margin-left:6px;">Reenviar código</a>
+        <div class="u-t-center u-mb-20 u-fs-base">
+            <span class="u-c-muted" id="contador-reenvio">3:00</span>
+            <a id="enlace-reenviar" onclick="reenviarCodigo()" class="deshabilitado u-c-gold-text u-cur-pointer u-ml-6">Reenviar código</a>
         </div>
 
-        <button id="btnVerificarCodigo" onclick="verificarCodigo()" class="btn-primary" style="margin-top:0;background:var(--gold-off-bg);color:var(--gold-off-text);border:1px solid var(--gold-off-line);cursor:not-allowed;" disabled>Verificar</button>
-        <button onclick="switchPage('page-recuperar-password')" style="background:none;border:1px solid var(--gold);color:var(--gold-text);font-size:var(--fs-base);margin-top:14px;cursor:pointer;letter-spacing:.4px;padding:8px 24px;border-radius:var(--r-sm);display:block;margin-left:auto;margin-right:auto;">Volver</button>
+        <button id="btnVerificarCodigo" onclick="verificarCodigo()" class="btn-primary u-mt-0 u-bg-gold-off-bg u-c-gold-off-text u-b-x10d31 u-cur-not-allowed" disabled>Verificar</button>
+        <button class="u-bg-none u-b-1-solid-gold u-c-gold-text u-fs-base u-mt-14 u-cur-pointer u-ls-_4 u-p-8-24 u-r-sm u-d-block u-ml-auto u-mr-auto" onclick="switchPage('page-recuperar-password')">Volver</button>
     </div></div>
 </div>
 
 <!-- ═══ PÁGINA: NUEVA CONTRASEÑA ═══ -->
 <div class="page" id="page-nueva-password">
-    <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
-        <h2 style="margin:0 0 8px 0; color:var(--text); font-size:var(--fs-xl); text-align:center;">Restablece tu contraseña</h2>
-        <p class="auth-sub" style="text-align:center;">A continuación crea una contraseña segura.</p>
+    <div class="auth-box"><div class="u-w-100p u-maxw-460 u-m-0-auto">
+        <h2 class="u-m-0-0-8-0 u-c-text u-fs-xl u-t-center">Restablece tu contraseña</h2>
+        <p class="auth-sub u-t-center">A continuación crea una contraseña segura.</p>
         
-        <div class="auth-form" style="display:flex; flex-direction:column; margin-top:16px;">
+        <div class="auth-form u-d-flex u-dir-column u-mt-16">
             <div class="input-group">
                 <input type="password" id="new-pass" placeholder="Nueva contraseña (mín. 8 caracteres)" class="auth-input" autocomplete="new-password" oninput="checkNewPassFields()">
                 <span class="toggle-password" aria-label="Mostrar u ocultar la contraseña" onclick="togglePass('new-pass', this)"><svg class="icono" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
-                <div id="new-pass-rules" style="margin-top:8px;text-align:left;display:none;">
-                    <div id="new-rule-len" style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Mínimo 8 caracteres</div>
-                    <div id="new-rule-upper" style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Una mayúscula</div>
-                    <div id="new-rule-lower" style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Una minúscula</div>
-                    <div id="new-rule-num" style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Un número</div>
-                    <div id="new-rule-sym" style="font-size:var(--fs-sm);color:var(--danger);">✗ Un símbolo (!@#$...)</div>
+                <div class="u-mt-8 u-t-left" id="new-pass-rules" style="display:none">
+                    <div class="u-fs-sm u-c-danger u-mb-4" id="new-rule-len">✗ Mínimo 8 caracteres</div>
+                    <div class="u-fs-sm u-c-danger u-mb-4" id="new-rule-upper">✗ Una mayúscula</div>
+                    <div class="u-fs-sm u-c-danger u-mb-4" id="new-rule-lower">✗ Una minúscula</div>
+                    <div class="u-fs-sm u-c-danger u-mb-4" id="new-rule-num">✗ Un número</div>
+                    <div class="u-fs-sm u-c-danger" id="new-rule-sym">✗ Un símbolo (!@#$...)</div>
                 </div>
             </div>
             
-            <div class="input-group" style="margin-bottom:20px;">
+            <div class="input-group u-mb-20">
                 <input type="password" id="new-pass-confirm" placeholder="Repite tu contraseña" class="auth-input" autocomplete="new-password" oninput="checkNewPassFields()">
                 <span class="toggle-password" aria-label="Mostrar u ocultar la contraseña" onclick="togglePass('new-pass-confirm', this)"><svg class="icono" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
             </div>
         </div>
 
-        <button id="btnGuardarPassword" onclick="guardarNuevaPassword()" class="btn-primary" style="margin-top:10px;background:var(--gold-off-bg);color:var(--gold-off-text);border:1px solid var(--gold-off-line);cursor:not-allowed;" disabled>Continuar</button>
-        <button onclick="switchPage('page-verificar-codigo')" style="background:none;border:1px solid var(--gold);color:var(--gold-text);font-size:var(--fs-base);margin-top:14px;cursor:pointer;letter-spacing:.4px;padding:8px 24px;border-radius:var(--r-sm);display:block;margin-left:auto;margin-right:auto;">Volver</button>
+        <button id="btnGuardarPassword" onclick="guardarNuevaPassword()" class="btn-primary u-mt-10 u-bg-gold-off-bg u-c-gold-off-text u-b-x10d31 u-cur-not-allowed" disabled>Continuar</button>
+        <button class="u-bg-none u-b-1-solid-gold u-c-gold-text u-fs-base u-mt-14 u-cur-pointer u-ls-_4 u-p-8-24 u-r-sm u-d-block u-ml-auto u-mr-auto" onclick="switchPage('page-verificar-codigo')">Volver</button>
     </div></div>
 </div>
     <!-- ═══ PÁGINA: REGISTRO ═══ -->
 <div class="page" id="page-registro">
-    <div class="auth-box"><div style="width:100%;max-width:460px;margin:0 auto;">
-        <h2 style="margin:0 0 8px 0; color:var(--text); font-size:var(--fs-xl); text-align:center;">Crea tu cuenta</h2>
+    <div class="auth-box"><div class="u-w-100p u-maxw-460 u-m-0-auto">
+        <h2 class="u-m-0-0-8-0 u-c-text u-fs-xl u-t-center">Crea tu cuenta</h2>
         <p class="auth-sub">Únete a Vakapay y empieza a dividir gastos.</p>
-        <div class="auth-form" style="display:flex; flex-direction:column;">
+        <div class="auth-form u-d-flex u-dir-column">
             <div class="input-group">
                 <input type="text" id="reg-nombre" maxlength="40" placeholder="Nombre completo" class="auth-input" autocomplete="name" inputmode="text" oninput="checkRegistroFields()">
                 <span id="err-nombre" class="error-message"></span>
@@ -429,7 +430,7 @@
                 <input type="email" id="reg-email" placeholder="ej: tu.email@gmail.com" class="auth-input" autocomplete="email" inputmode="email" oninput="checkRegistroFields()">
                 <span id="err-email" class="error-message"></span>
             </div>
-            <div class="input-group" style="margin-bottom:24px;">
+            <div class="input-group u-mb-24">
                 <div class="phone-row">
                     <button type="button" class="prefix-btn" onclick="abrirSelectorPais()" id="prefixBtn">
                         <span id="prefixFlag"><svg class="icono" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></span>
@@ -437,18 +438,18 @@
                     </button>
                     <input type="tel" id="reg-tel" placeholder="Número de teléfono" class="auth-input phone-input" autocomplete="tel" inputmode="tel" oninput="this.value=this.value.replace(/[^\d\s-]/g,'');limpiarErrorTelefono();checkRegistroFields()">
                 </div>
-                <span id="err-tel" class="error-message" style="top:54px;"></span>
+                <span id="err-tel" class="error-message u-top-54"></span>
             </div>
             <div class="input-group">
                 <input type="password" id="reg-pass" placeholder="Contraseña (mín. 8 caracteres)" class="auth-input" autocomplete="new-password" oninput="checkRegistroFields()">
                 <span class="toggle-password" aria-label="Mostrar u ocultar la contraseña" onclick="togglePass('reg-pass', this)"><svg class="icono" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
                 <span id="err-pass" class="error-message"></span>
-                <div id="pass-rules" style="margin-top:8px;text-align:left;display:none;">
-                    <div id="rule-len"  style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Mínimo 8 caracteres</div>
-                    <div id="rule-upper" style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Una mayúscula</div>
-                    <div id="rule-lower" style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Una minúscula</div>
-                    <div id="rule-num"  style="font-size:var(--fs-sm);color:var(--danger);margin-bottom:4px;">✗ Un número</div>
-                    <div id="rule-sym"  style="font-size:var(--fs-sm);color:var(--danger);">✗ Un símbolo (!@#$...)</div>
+                <div class="u-mt-8 u-t-left" id="pass-rules" style="display:none">
+                    <div class="u-fs-sm u-c-danger u-mb-4" id="rule-len" >✗ Mínimo 8 caracteres</div>
+                    <div class="u-fs-sm u-c-danger u-mb-4" id="rule-upper">✗ Una mayúscula</div>
+                    <div class="u-fs-sm u-c-danger u-mb-4" id="rule-lower">✗ Una minúscula</div>
+                    <div class="u-fs-sm u-c-danger u-mb-4" id="rule-num" >✗ Un número</div>
+                    <div class="u-fs-sm u-c-danger" id="rule-sym" >✗ Un símbolo (!@#$...)</div>
                 </div>
             </div>
             <div class="input-group">
@@ -456,8 +457,8 @@
                 <span class="toggle-password" aria-label="Mostrar u ocultar la contraseña" onclick="togglePass('reg-pass-confirm', this)"><svg class="icono" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span>
                 <span id="err-pass-confirm" class="error-message"></span>
             </div>
-            <button id="btnRegistrarse" class="btn-primary" onclick="handleRegistro()" style="margin-top:10px;background:var(--gold-off-bg);color:var(--gold-off-text);border:1px solid var(--gold-off-line);cursor:not-allowed;" disabled>Registrarse</button>
-            <button onclick="safeBack()" style="background:none;border:1px solid var(--gold);color:var(--gold-text);font-size:var(--fs-base);margin-top:14px;cursor:pointer;letter-spacing:.4px;padding:8px 24px;border-radius:var(--r-sm);display:block;margin-left:auto;margin-right:auto;">Volver al inicio</button>
+            <button id="btnRegistrarse" class="btn-primary u-mt-10 u-bg-gold-off-bg u-c-gold-off-text u-b-x10d31 u-cur-not-allowed" onclick="handleRegistro()" disabled>Registrarse</button>
+            <button class="u-bg-none u-b-1-solid-gold u-c-gold-text u-fs-base u-mt-14 u-cur-pointer u-ls-_4 u-p-8-24 u-r-sm u-d-block u-ml-auto u-mr-auto" onclick="safeBack()">Volver al inicio</button>
         </div>
     </div></div>
 </div>
@@ -930,40 +931,40 @@ document.addEventListener('DOMContentLoaded', () => {
 <div id="modal-exito" class="modal-overlay">
     <div class="modal-content">
         <div class="success-icon">
-            <svg style="color:var(--gold-text)" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg class="u-c-gold-text" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
         </div>
         <h2>¡Registro completado!</h2>
-        <p>¡Te damos la bienvenida a Vakapay, <span id="user-name-welcome" style="color: var(--gold-text); font-weight: 700;"></span>. Tu cuenta ha sido creada con éxito.</p>
+        <p>¡Te damos la bienvenida a Vakapay, <span class="u-c-gold-text u-fw-700" id="user-name-welcome"></span>. Tu cuenta ha sido creada con éxito.</p>
         <button class="btn-primary" onclick="cerrarModalYEntrar()">Comenzar</button>
     </div>
 </div>
 
 <!-- Modal de Éxito: Contraseña Actualizada -->
-<div id="modal-password-exito" class="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;">
-    <div class="modal-content" style="background:var(--dark3);border-radius:var(--r-lg);padding:30px;max-width:360px;width:90%;text-align:center;border:1px solid var(--line);">
-        <div style="width:56px;height:56px;margin:0 auto 16px;border-radius:50%;background:rgba(61,186,111,.12);display:flex;align-items:center;justify-content:center;"><svg style="color:var(--success)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-        <h2 style="color:var(--gold-text); margin-bottom:10px; font-size:1.4rem;">¡Listo!</h2>
-        <p style="color:var(--text); font-size:var(--fs-md); margin-bottom:24px; line-height:1.4;">Tu contraseña fue actualizada con éxito. Recuerda no compartirla con nadie.</p>
-        <button onclick="irAlLoginDespuesDeCambio()" class="btn-primary btn-activo" style="width:100%;">Entendido</button>
+<div id="modal-password-exito" class="modal-overlay u-pos-fixed u-inset-0 u-bg-xb8e0d u-z-9999 u-ai-center u-jc-center" style="display:none">
+    <div class="modal-content u-bg-dark3 u-r-lg u-p-30 u-maxw-360 u-w-90p u-t-center u-b-1-solid-line">
+        <div class="u-w-56 u-h-56 u-m-0-auto-16 u-r-50p u-bg-x05021 u-d-flex u-ai-center u-jc-center"><svg class="u-c-success" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+        <h2 class="u-c-gold-text u-mb-10 u-fs-1_4rem">¡Listo!</h2>
+        <p class="u-c-text u-fs-md u-mb-24 u-lh-1_4">Tu contraseña fue actualizada con éxito. Recuerda no compartirla con nadie.</p>
+        <button onclick="irAlLoginDespuesDeCambio()" class="btn-primary btn-activo u-w-100p">Entendido</button>
     </div>
 </div>
 
 <!-- Modal de Confirmación para Salir (LOGIN/REGISTRO) -->
-<div id="modal-confirm-exit" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center;">
-    <div class="modal-content" style="background: var(--dark3); width: 90%; max-width: 340px; padding: 24px; border-radius: var(--r-xl); border: 1px solid var(--line); text-align: center;">
+<div id="modal-confirm-exit" class="modal-overlay u-pos-fixed u-top-0 u-left-0 u-w-100p u-h-100p u-bg-xa941e u-z-9999 u-jc-center u-ai-center" style="display:none">
+    <div class="modal-content u-bg-dark3 u-w-90p u-maxw-340 u-p-24 u-r-xl u-b-1-solid-line u-t-center">
         
-        <h2 style="color: var(--text); margin-bottom: 10px; font-size: var(--fs-xl);">¿Abandonar registro?</h2>
-        <p style="color: var(--text); margin-bottom: 24px; font-size: var(--fs-base); opacity: 0.8;">Si vuelves atrás ahora, se borrarán todos los datos que has escrito.</p>
+        <h2 class="u-c-text u-mb-10 u-fs-xl">¿Abandonar registro?</h2>
+        <p class="u-c-text u-mb-24 u-fs-base u-op-0_8">Si vuelves atrás ahora, se borrarán todos los datos que has escrito.</p>
         
-        <div style="display: flex; gap: 12px; width: 100%; margin-top: 10px;">
+        <div class="u-d-flex u-gap-12 u-w-100p u-mt-10">
             <!-- Quedarse: contorno neutro (opción segura). Salir: rojo (borra lo escrito). Iconos opuestos: entrar / salir -->
-            <button type="button" onclick="cerrarModalAbandono()" style="flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:var(--r-md);font-weight:800;font-family:var(--font);font-size:var(--fs-base);cursor:pointer;background:none;border:1.5px solid var(--line-strong);color:var(--text);">
+            <button class="u-f-1 u-minh-44 u-d-flex u-ai-center u-jc-center u-gap-8 u-p-12 u-r-md u-fw-800 u-ff-font u-fs-base u-cur-pointer u-bg-none u-b-xbb23b u-c-text" type="button" onclick="cerrarModalAbandono()">
                 <svg class="icono" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="14 7 9 12 14 17"/><line x1="21" y1="12" x2="9" y2="12"/></svg> No, seguir
             </button>
-            <button type="button" onclick="confirmarSalida()" style="flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:var(--r-md);font-weight:800;font-family:var(--font);font-size:var(--fs-base);cursor:pointer;background:var(--danger-strong);border:none;color:#fff;">
+            <button class="u-f-1 u-minh-44 u-d-flex u-ai-center u-jc-center u-gap-8 u-p-12 u-r-md u-fw-800 u-ff-font u-fs-base u-cur-pointer u-bg-danger-strong u-b-none u-c-fff" type="button" onclick="confirmarSalida()">
                 <svg class="icono" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Sí, salir
             </button>
         </div>
@@ -971,16 +972,16 @@ document.addEventListener('DOMContentLoaded', () => {
 </div>
 
 <!-- Modal Error de Inicio de Sesión -->
-<div id="modal-login-error" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center;">
-        <div style="background: var(--dark3); width: calc(100% - 48px); max-width: 340px; padding: 28px 22px; border-radius: var(--r-xl); border: 1px solid var(--line); text-align: center;">
+<div id="modal-login-error" class="modal-overlay u-pos-fixed u-top-0 u-left-0 u-w-100p u-h-100p u-bg-xa941e u-z-9999 u-jc-center u-ai-center" style="display:none">
+        <div class="u-bg-dark3 u-w-xe00cd u-maxw-340 u-p-28-22 u-r-xl u-b-1-solid-line u-t-center">
         
-        <div style="width:56px;height:56px;margin:0 auto 16px;border-radius:50%;background:rgba(255,77,77,.12);display:flex;align-items:center;justify-content:center;"><svg style="color:var(--danger)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><line x1="12" y1="15" x2="12" y2="18"/></svg></div>
-        <h2 style="color: var(--text); margin-bottom: 10px; font-size: 1.4rem;">Acceso denegado</h2>
-        <p id="login-error-texto" style="color: var(--text); margin-bottom: 24px; font-size: var(--fs-base); opacity: 0.8;">El correo electrónico o la contraseña son incorrectos. Por favor, verifica tus datos e inténtalo de nuevo.</p>
+        <div class="u-w-56 u-h-56 u-m-0-auto-16 u-r-50p u-bg-x396b6 u-d-flex u-ai-center u-jc-center"><svg class="u-c-danger" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><line x1="12" y1="15" x2="12" y2="18"/></svg></div>
+        <h2 class="u-c-text u-mb-10 u-fs-1_4rem">Acceso denegado</h2>
+        <p class="u-c-text u-mb-24 u-fs-base u-op-0_8" id="login-error-texto">El correo electrónico o la contraseña son incorrectos. Por favor, verifica tus datos e inténtalo de nuevo.</p>
         
         <!-- BOTÓN ACEPTAR (VERDE SÓLIDO - CONTINUIDAD) -->
-        <button onclick="cerrarModalLoginError()" 
-            style="width: 100%; padding: 14px; border-radius: var(--r-md); font-weight: 700; cursor: pointer; border: none; color: white; background: var(--success-strong); outline: none;">
+        <button class="u-w-100p u-p-14 u-r-md u-fw-700 u-cur-pointer u-b-none u-c-white u-bg-success-strong u-ol-none" onclick="cerrarModalLoginError()" 
+           >
             Aceptar
         </button>
     </div>
@@ -1197,13 +1198,13 @@ async function iniciarSesion() {
 }
 </script>
 
-<div id="modal-cuenta-existente" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;align-items:center;justify-content:center;">
-  <div style="background:var(--dark3);border-radius:var(--r-md);padding:28px 24px;max-width:320px;width:90%;text-align:center;border:1px solid var(--line);">
-    <div style="width:56px;height:56px;margin:0 auto 12px;border-radius:50%;background:rgba(245,200,0,.12);display:flex;align-items:center;justify-content:center;"><svg style="color:var(--gold-text)" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="12"/><line x1="19" y1="15" x2="19.01" y2="15"/></svg></div>
-    <div style="font-size:var(--fs-lg);font-weight:700;color:var(--gold-text);letter-spacing:1px;margin-bottom:10px;">CUENTA EXISTENTE</div>
-    <p style="color:var(--text);font-size:var(--fs-base);margin-bottom:20px;">Ya existe una cuenta registrada con ese email. Intenta iniciar sesión.</p>
-    <button onclick="document.getElementById('modal-cuenta-existente').style.display='none';switchPage('page-login-formulario')" style="background:var(--gold);color:black;border:none;padding:12px 24px;border-radius:var(--r-sm);font-weight:700;cursor:pointer;width:100%;margin-bottom:8px;">Ir a iniciar sesión</button>
-    <button onclick="document.getElementById('modal-cuenta-existente').style.display='none'" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:var(--fs-base);">Volver al registro</button>
+<div class="u-pos-fixed u-inset-0 u-bg-x3040b u-z-999 u-ai-center u-jc-center" id="modal-cuenta-existente" style="display:none">
+  <div class="u-bg-dark3 u-r-md u-p-28-24 u-maxw-320 u-w-90p u-t-center u-b-1-solid-line">
+    <div class="u-w-56 u-h-56 u-m-0-auto-12 u-r-50p u-bg-x3cc9f u-d-flex u-ai-center u-jc-center"><svg class="u-c-gold-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="12"/><line x1="19" y1="15" x2="19.01" y2="15"/></svg></div>
+    <div class="u-fs-lg u-fw-700 u-c-gold-text u-ls-1 u-mb-10">CUENTA EXISTENTE</div>
+    <p class="u-c-text u-fs-base u-mb-20">Ya existe una cuenta registrada con ese email. Intenta iniciar sesión.</p>
+    <button class="u-bg-gold u-c-black u-b-none u-p-12-24 u-r-sm u-fw-700 u-cur-pointer u-w-100p u-mb-8" onclick="document.getElementById('modal-cuenta-existente').style.display='none';switchPage('page-login-formulario')">Ir a iniciar sesión</button>
+    <button class="u-bg-none u-b-none u-c-text2 u-cur-pointer u-fs-base" onclick="document.getElementById('modal-cuenta-existente').style.display='none'">Volver al registro</button>
   </div>
 </div>
 
@@ -1348,13 +1349,13 @@ function validarTelefonoRegistro() {
 </script>
 
 <!-- Modal de aviso de la app (sustituye a los alert() del sistema) -->
-<div id="modal-aviso-login" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center;" onclick="if(event.target===this)cerrarAvisoLogin()">
-    <div style="background:var(--dark3); width:calc(100% - 48px); max-width:340px; padding:28px 22px; border-radius:var(--r-xl); border:1px solid var(--line); text-align:center;">
-        <div id="aviso-login-icono" style="margin-bottom:16px;"></div>
-        <h2 id="aviso-login-titulo" style="color:var(--text); margin-bottom:10px; font-size:1.4rem;"></h2>
-        <p id="aviso-login-texto" style="color:var(--text); margin-bottom:24px; font-size:var(--fs-base); opacity:0.8; line-height:1.4;"></p>
-        <button id="aviso-login-accion" style="display:none; width:100%; padding:14px; margin-bottom:10px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:#000; background:var(--gold);"></button>
-        <button id="aviso-login-entendido" onclick="cerrarAvisoLogin()" style="width:100%; padding:14px; border-radius:var(--r-md); font-weight:700; cursor:pointer; border:none; color:#000; background:var(--gold);">Entendido</button>
+<div id="modal-aviso-login" class="modal-overlay u-pos-fixed u-inset-0 u-bg-xa941e u-z-9999 u-jc-center u-ai-center" style="display:none" onclick="if(event.target===this)cerrarAvisoLogin()">
+    <div class="u-bg-dark3 u-w-xe00cd u-maxw-340 u-p-28-22 u-r-xl u-b-1-solid-line u-t-center">
+        <div class="u-mb-16" id="aviso-login-icono"></div>
+        <h2 class="u-c-text u-mb-10 u-fs-1_4rem" id="aviso-login-titulo"></h2>
+        <p class="u-c-text u-mb-24 u-fs-base u-op-0_8 u-lh-1_4" id="aviso-login-texto"></p>
+        <button class="u-w-100p u-p-14 u-mb-10 u-r-md u-fw-700 u-cur-pointer u-b-none u-c-000 u-bg-gold" id="aviso-login-accion" style="display:none"></button>
+        <button class="u-w-100p u-p-14 u-r-md u-fw-700 u-cur-pointer u-b-none u-c-000 u-bg-gold" id="aviso-login-entendido" onclick="cerrarAvisoLogin()">Entendido</button>
     </div>
 </div>
 <script>

@@ -23,15 +23,15 @@ function renderStats() {
       warning.id = 'stats-warning';
       warning.style = 'text-align:center; padding:60px 20px; color:var(--muted);';
       warning.innerHTML = `
-        <div style="margin-bottom:14px;color:var(--gold-text);">
+        <div class="u-mb-14 u-c-gold-text">
           <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="20" x2="18" y2="10"></line>
             <line x1="12" y1="20" x2="12" y2="4"></line>
             <line x1="6" y1="20" x2="6" y2="14"></line>
           </svg>
         </div>
-        <h2 style="color:var(--gold-text); margin-bottom:10px;">Aquí no hay nada... aún</h2>
-        <p style="color:var(--text);">${groups.length
+        <h2 class="u-c-gold-text u-mb-10">Aquí no hay nada... aún</h2>
+        <p class="u-c-text">${groups.length
           ? 'Abre uno de tus grupos y vuelve aquí para ver en qué se va el dinero.'
           : 'Cuando crees un grupo y apuntes gastos, aquí verás en qué se va el dinero.'}</p>
       `;
@@ -110,11 +110,11 @@ function renderDonut(catMap, total, sym) {
       offset += dashLen;
       const catLabel = CAT_NOMBRES[cat] || cat;
       const n = _statGastos.filter(e => e.cat === cat).length;
-      legendContent += `<button type="button" class="legend-item stat-sel" onclick="elegirStatCat('${cat}')" aria-expanded="${esta}" aria-label="${catLabel}, ${sym}${amt.toFixed(2)}, ${(pct*100).toFixed(0)}%, ${n} ${n === 1 ? 'gasto' : 'gastos'}"><div class="legend-dot" style="background:${color}"></div><span>${icon} ${catLabel}</span><span style="margin-left:auto;font-weight:700;font-size:var(--fs-sm)">${sym}${amt.toFixed(2)}</span><span class="legend-pct" style="margin-left:0;min-width:34px;text-align:right">${(pct*100).toFixed(0)}%</span><span class="stat-chev">${icono('abajo', 16)}</span></button>`;
+      legendContent += `<button type="button" class="legend-item stat-sel" onclick="elegirStatCat('${cat}')" aria-expanded="${esta}" aria-label="${catLabel}, ${sym}${amt.toFixed(2)}, ${(pct*100).toFixed(0)}%, ${n} ${n === 1 ? 'gasto' : 'gastos'}"><div class="legend-dot" style="background:${color}"></div><span>${icon} ${catLabel}</span><span class="u-ml-auto u-fw-700 u-fs-sm">${sym}${amt.toFixed(2)}</span><span class="legend-pct u-ml-0 u-minw-34 u-t-right">${(pct*100).toFixed(0)}%</span><span class="stat-chev">${icono('abajo', 16)}</span></button>`;
       if (esta) legendContent += detalleStat(_statGastos.filter(e => e.cat === cat), sym, 'cat', catLabel);
     });
   }
-  if(cats.length===0) legendContent = '<div style="color:var(--muted);font-size:var(--fs-sm);text-align:center;padding:8px">Sin gastos aún</div>';
+  if(cats.length===0) legendContent = '<div class="u-c-muted u-fs-sm u-t-center u-p-8">Sin gastos aún</div>';
   svg.innerHTML = svgContent;
   svg.setAttribute('aria-hidden', 'true');   // la lista de debajo hace lo mismo y se lee mejor
   legend.innerHTML = legendContent;
@@ -147,7 +147,7 @@ function detalleStat(lista, sym, tipo, titulo) {
       : `${CAT_NOMBRES[e.cat] || 'Otro'} · ${fmtDate(e.date || e.expense_date)}`;
     return `<button type="button" class="stat-gasto" onclick="openGasto(${e.idx},'stats')">
       <span class="exp-ico ${CAT_CSS[e.cat] || 'c-other'}">${iconoCat(e.cat, 15)}</span>
-      <span class="stat-gasto-info"><span class="stat-gasto-nombre" style="display:block">${nombre}</span><span class="stat-gasto-meta" style="display:block">${meta}</span></span>
+      <span class="stat-gasto-info"><span class="stat-gasto-nombre u-d-block">${nombre}</span><span class="stat-gasto-meta u-d-block">${meta}</span></span>
       <span class="stat-gasto-imp">${sym}${(Number(e.baseAmt) || 0).toFixed(2)}</span></button>`;
   }).join('');
   const n = orden.length;
@@ -158,7 +158,7 @@ function detalleStat(lista, sym, tipo, titulo) {
 function renderPayerBars(payerMap, total, sym) {
   const el = document.getElementById('payerBars');
   const sorted = Object.entries(payerMap).sort((a,b)=>b[1]-a[1]);
-  if(sorted.length===0){el.innerHTML='<div style="color:var(--muted);font-size:var(--fs-sm);text-align:center;padding:8px">Sin gastos aún</div>';return;}
+  if(sorted.length===0){el.innerHTML='<div class="u-c-muted u-fs-sm u-t-center u-p-8">Sin gastos aún</div>';return;}
   const max = sorted[0][1];
   _statPagadores = sorted;
   el.classList.toggle('stats-con-sel', !!_statSel.payer);

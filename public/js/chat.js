@@ -146,7 +146,7 @@ function pintarChat(alFinal = false) {
       ? `<span class="cita" onclick="event.stopPropagation();irAMensajeChat(${m.respuesta.id})"><span class="c-autor">${escaparHtml(m.respuesta.autor)}</span><span class="c-texto">${escaparHtml(m.respuesta.texto)}</span></span>`
       : '';
     if (m.tipo === 'sistema') {
-      html += `<div class="chat-sis" data-id="${m.id}">${(() => { const x = iconoDeMensaje(m.texto); return x.icono + (x.icono ? ' ' : '') + escaparHtml(x.resto); })()}<span class="hora">${horaChat(m.created_at)}</span></div>${bloqueReacc ? `<div style="align-self:center;">${bloqueReacc}</div>` : ''}`;
+      html += `<div class="chat-sis" data-id="${m.id}">${(() => { const x = iconoDeMensaje(m.texto); return x.icono + (x.icono ? ' ' : '') + escaparHtml(x.resto); })()}<span class="hora">${horaChat(m.created_at)}</span></div>${bloqueReacc ? `<div class="u-as-center">${bloqueReacc}</div>` : ''}`;
       autorAnterior = '';
       continue;
     }
@@ -313,18 +313,18 @@ function verReaccionesChat(id) {
   cerrarMenuChat();
   if (!m) return;
   const filas = Object.entries(m.reacciones || {}).map(([emoji, nombres]) =>
-    `<div style="display:flex;gap:10px;align-items:flex-start;text-align:left;padding:8px 0;border-bottom:1px solid var(--line);">
-       <span style="font-size:var(--fs-lg);">${emoji}</span><span style="color:var(--text);font-size:var(--fs-base);line-height:1.5;">${nombres.map(escaparHtml).join(', ')}</span></div>`).join('');
-  abrirDialogoChat(`<div style="color:var(--text);font-size:var(--fs-lg);font-weight:700;margin-bottom:10px;">Reacciones</div>${filas}
-    <button onclick="cerrarDialogoChat()" class="btn btn-gold" style="width:100%;margin-top:16px">Cerrar</button>`);
+    `<div class="u-d-flex u-gap-10 u-ai-flex-start u-t-left u-p-8-0 u-bb-1-solid-line">
+       <span class="u-fs-lg">${emoji}</span><span class="u-c-text u-fs-base u-lh-1_5">${nombres.map(escaparHtml).join(', ')}</span></div>`).join('');
+  abrirDialogoChat(`<div class="u-c-text u-fs-lg u-fw-700 u-mb-10">Reacciones</div>${filas}
+    <button onclick="cerrarDialogoChat()" class="btn btn-gold u-w-100p u-mt-16">Cerrar</button>`);
 }
 function confirmarBorrarChat(id) {
   cerrarMenuChat();
-  abrirDialogoChat(`<div style="color:var(--text);font-size:var(--fs-lg);font-weight:700;margin-bottom:8px;">¿Borrar mensaje?</div>
-    <p style="color:var(--text);font-size:var(--fs-base);opacity:.8;margin-bottom:20px;">Se mostrará como «Mensaje eliminado» para todo el grupo.</p>
-    <div style="display:flex;gap:12px;">
-      <button onclick="cerrarDialogoChat()" class="btn btn-outline" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
-      <button onclick="borrarMensajeChat(${id})" class="btn btn-peligro" style="flex:1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
+  abrirDialogoChat(`<div class="u-c-text u-fs-lg u-fw-700 u-mb-8">¿Borrar mensaje?</div>
+    <p class="u-c-text u-fs-base u-op-_8 u-mb-20">Se mostrará como «Mensaje eliminado» para todo el grupo.</p>
+    <div class="u-d-flex u-gap-12">
+      <button onclick="cerrarDialogoChat()" class="btn btn-outline u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
+      <button onclick="borrarMensajeChat(${id})" class="btn btn-peligro u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
     </div>`);
 }
 async function borrarMensajeChat(id) {
