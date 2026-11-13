@@ -131,7 +131,7 @@ function renderFriends(){
   if(friends.length===0&&cargandoInicial){el.innerHTML=skFilas(4,true);return;}
   if(friends.length===0){el.innerHTML='<div class="no-items"><div class="ni"><svg class="u-c-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div>Sin amigos añadidos aún</div></div>';return;}
   el.innerHTML=friends.map((f,i)=>{
-    const inGroups=groups.filter(g=>g.members.hasOwnProperty(f.name)).map(g=>iconoTipo(g.type, 12)+' '+escaparHtml(g.name));
+    const inGroups=groups.filter(g=>Object.prototype.hasOwnProperty.call(g.members, f.name)).map(g=>iconoTipo(g.type, 12)+' '+escaparHtml(g.name));
     const avatarContent=f.avatar
       ?`<img class="u-w-100p u-h-100p u-fit-cover u-r-50p" src="${f.avatar}" alt="">`
       :`<span class="u-fs-md u-fw-900 u-c-gold-text">${f.name[0].toUpperCase()}</span>`;
@@ -173,7 +173,7 @@ function openFriendModal(idx){
   const gc=document.getElementById('editFriendGroups');
   if(groups.length===0){gc.innerHTML='<span class="u-c-muted u-fs-sm">No hay grupos creados aún</span>';}
   else{gc.innerHTML=groups.map((g,gi)=>{
-    const inGroup=g.members.hasOwnProperty(f.name);
+    const inGroup=Object.prototype.hasOwnProperty.call(g.members, f.name);
     return`<div class="modal-chip ${inGroup?'sel':''}" data-gidx="${gi}" onclick="toggleFriendGroupChip(this,'${f.name.replace(/'/g,'\\\'')}')">`+
       `<span class="u-fs-md">${iconoTipo(g.type, 14)}</span>${g.name}</div>`;
   }).join('');}
@@ -359,7 +359,7 @@ async function saveEditFriend(){
   if (dupEdit) { mostrarModalDuplicado({ titulo: 'Ya tienes este contacto', nombre: dupEdit.amigo.name, motivo: dupEdit.motivo, valor: _valorDup(dupEdit, { email, phone }) }); return; }
   if(newName!==oldName){
     groups.forEach(g=>{
-      if(g.members.hasOwnProperty(oldName)){
+      if(Object.prototype.hasOwnProperty.call(g.members, oldName)){
         g.members[newName]=g.members[oldName];delete g.members[oldName];
         g.expenses.forEach(ex=>{
           if(ex.payer===oldName)ex.payer=newName;
@@ -386,7 +386,7 @@ function openDeleteFriendModal(idx) {
   if (!f) return;
   amigoABorrarIdx = idx;
 
-  const inGroups = groups.filter(g => g.members.hasOwnProperty(f.name)).map(g => g.name);
+  const inGroups = groups.filter(g => Object.prototype.hasOwnProperty.call(g.members, f.name)).map(g => g.name);
 
   document.getElementById('del-amigo-avatar').textContent = f.name[0].toUpperCase();
   document.getElementById('del-amigo-name').textContent = f.name;
