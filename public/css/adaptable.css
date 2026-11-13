@@ -1,0 +1,65 @@
+/* Diseño adaptable: tablet (desde 768 px) y escritorio (desde 1100 px)
+   (antes dentro de index.html; se cargan en el orden de index.html, que importa) */
+
+/* ════════════════════════════════════════════════════════════════════
+   DISEÑO ADAPTABLE — el móvil no cambia; tablet y escritorio aprovechan el ancho
+   ════════════════════════════════════════════════════════════════════ */
+.det-col{display:contents}
+
+/* ── TABLET (desde 768 px) ── */
+@media (min-width:768px){
+  :root{--ancho:780px}
+  main{max-width:var(--ancho);padding-left:20px;padding-right:20px}
+  .det-bar > div{max-width:var(--ancho) !important;padding:0 20px !important}
+  /* Logo alineado con el contenido */
+  header{padding-left:max(16px, calc((100% - var(--ancho)) / 2 + 20px));padding-right:max(16px, calc((100% - var(--ancho)) / 2 + 20px))}
+  /* Barra de navegación del ancho del contenido */
+  .bottom-nav{left:50%;right:auto;width:min(var(--ancho), 100%);transform:translateX(-50%);border:1px solid var(--border);border-bottom:none;border-radius:18px 18px 0 0}
+  .hbadge{right:max(12px, calc((100% - var(--ancho)) / 2 + 20px));width:150px}
+  .nav-btn{font-size:var(--fs-xs)}
+}
+
+/* ── ESCRITORIO (desde 1100 px) ── */
+@media (min-width:1100px){
+  :root{--ancho:1180px;--menu:230px}
+  body{padding-left:var(--menu);padding-bottom:0}
+  main{padding-bottom:40px}
+  .det-bar > div{padding:0 28px !important}
+  main{padding-left:28px;padding-right:28px}
+  .hbadge{right:28px;top:22px;width:180px}
+  /* Menú lateral en lugar de la barra de abajo */
+  .bottom-nav{top:0;bottom:0;left:0;transform:none;width:var(--menu);height:auto;flex-direction:column;justify-content:flex-start;gap:4px;
+    padding:96px 14px 20px;border:none;border-right:1px solid var(--border);border-radius:0;background:var(--bar-bg)}
+  .nav-btn{flex:0 0 auto;flex-direction:row;justify-content:flex-start;gap:12px;padding:12px 14px;border-radius:var(--r-md);font-size:var(--fs-sm);letter-spacing:.8px}
+  .nav-btn .nav-ico-wrapper, .nav-btn #user-nav-wrapper{margin:0 !important;flex-shrink:0}
+  .nav-btn::after{top:10px;bottom:10px;left:0;right:auto;width:3px;height:auto;border-radius:0 4px 4px 0;transform:scaleY(0)}
+  .nav-btn.active::after{transform:scaleY(1)}
+  .nav-btn.active{background:rgba(245,200,0,.08)}
+  @media (hover:hover){.nav-btn:hover{background:var(--tint-1)}}
+  /* La cabecera (logo) pasa a lo alto del menú lateral */
+  header{position:fixed;top:0;left:0;width:var(--menu);padding:20px 18px !important;background:none;backdrop-filter:none;border:none;z-index:1100;box-sizing:border-box}
+  header .logo-wrap{width:40px;height:40px}
+  .header-text h1{font-size:1.45rem}
+  .header-text p{font-size:var(--fs-2xs);letter-spacing:.5px;display:block !important}
+  body:has(#page-detalle.active) #groupDropdown{left:calc(var(--menu) + 70px);top:54px}
+  .det-bar{top:0 !important}
+  /* Grupo en dos columnas: a la izquierda participantes, registrar y lista;
+     a la derecha cuentas finales, pagos, resumen y chat */
+  #page-detalle main{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:0 32px;align-items:start}
+  #page-detalle .det-col{display:block;min-width:0}
+  #resumenSaldo{grid-column:1/-1}
+  #page-detalle main{align-content:start}
+  .rs-botones{max-width:520px}
+  /* Grupos en dos columnas */
+  #groupsList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  #groupsList > .group-card, #groupsList > .sk-card{margin-bottom:0}
+  #groupsList > :not(.group-card):not(.sk-card){grid-column:1/-1}
+  /* Chat como panel lateral */
+  #page-chat{left:auto;width:400px;border-left:1px solid var(--border);box-shadow:-12px 0 30px rgba(0,0,0,.45)}
+  body.chat-abierto{padding-right:400px}
+  body.chat-abierto .hbadge{display:none !important}
+  @media (hover:hover){/* Ratón */
+  .group-card:hover{border-color:rgba(245,200,0,.55);transform:translateY(-1px)}}
+  @media (hover:hover){.sec-title:hover h2{color:var(--gold-text)}}
+  @media (hover:hover){.btn:hover{filter:brightness(1.08)}}
+}

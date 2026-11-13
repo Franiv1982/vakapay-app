@@ -1,0 +1,56 @@
+/* Formularios: campos, rejilla de dos columnas y selector de tipo de grupo
+   (antes dentro de index.html; se cargan en el orden de index.html, que importa) */
+
+/* ── FIELDS ── */
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.field label{font-size:var(--fs-xs);font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.9px}
+.field input,.field select,.field textarea{
+  width:100%;min-height:var(--alto-control);background:var(--dark3);border:1.5px solid var(--tint-2);
+  border-radius:var(--r-md);padding:10px 12px;color:var(--text);
+  font-family:var(--font);font-size:var(--fs-base);font-weight:700;
+  outline:none;transition:border-color .2s,box-shadow .2s;
+  -webkit-appearance:none;appearance:none;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(245,200,0,.1)}
+.field input::placeholder,.field textarea::placeholder{color:var(--muted);font-weight:400}
+.field textarea{resize:none;min-height:70px}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23777' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.field select option{background:var(--dark3)}
+
+input[type="date"]{
+  position:relative;cursor:pointer;-webkit-user-select:none;user-select:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;
+}
+input[type="date"]::-webkit-calendar-picker-indicator{
+  position:absolute;inset:0;width:auto;height:auto;margin:0;padding:0;opacity:0;cursor:pointer;
+}
+input[type="date"]::-webkit-datetime-edit-day-field:focus,
+input[type="date"]::-webkit-datetime-edit-month-field:focus,
+input[type="date"]::-webkit-datetime-edit-year-field:focus{background:transparent;color:inherit}
+/* ── GRID ── */
+.g2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.g2 > .field{min-width:0}
+.field input[type="date"]{min-width:0;max-width:100%}
+/* Campos de fecha compactos: en móviles estrechos (o con letra grande) el año se cortaba */
+.field input[type="date"]{padding-left:10px;padding-right:26px;font-size:var(--fs-base);letter-spacing:0;
+  background-size:14px 14px;background-position:right 8px center}
+/* Selectores en dos columnas (categoría, quién pagó, divisa…): mismo ajuste que la fecha */
+.g2 .field select{padding-left:10px;padding-right:24px;font-size:var(--fs-base);background-position:right 8px center;
+  text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
+input[type="date"]::-webkit-datetime-edit,
+input[type="date"]::-webkit-datetime-edit-fields-wrapper{padding:0}
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
+.g3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+.span2{grid-column:span 2}
+
+/* ── TYPE SELECTOR ── */
+.type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:2px}
+.type-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 4px;border-radius:var(--r-md);border:2px solid var(--tint-2);background:var(--dark3);cursor:pointer;transition:border-color .2s,background .2s,transform .14s;user-select:none}
+.type-btn:active{transform:scale(.94)}
+.type-btn .ti{font-size:var(--fs-xl);line-height:1}
+.type-btn .tl{font-size:var(--fs-2xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}
+.type-btn.active{border-color:var(--gold);background:rgba(245,200,0,.09)}
+.type-btn.active .tl{color:var(--gold-text)}

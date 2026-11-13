@@ -1,0 +1,68 @@
+/* Estructura: cabecera, barra de navegación, páginas, títulos de sección y tarjetas
+   (antes dentro de index.html; se cargan en el orden de index.html, que importa) */
+
+/* Colores, tipografía, radios, sombras y espaciados: tokens.css */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth;overscroll-behavior-y:contain}
+/* ── Deslizar hacia abajo para actualizar ── */
+#ptr{position:fixed;top:0;left:50%;z-index:3000;width:40px;height:40px;margin-left:-20px;border-radius:50%;
+  background:var(--dark3);border:1px solid rgba(245,200,0,.35);box-shadow:var(--shadow-sm);
+  display:flex;align-items:center;justify-content:center;transform:translateY(-60px);opacity:0;pointer-events:none}
+#ptr svg{transition:none}
+#ptr.listo svg{color:var(--gold-text)}
+#ptr.vuelve{transition:transform .25s ease,opacity .25s ease}
+#ptr.cargando svg{animation:ptrGira .8s linear infinite}
+@keyframes ptrGira{to{transform:rotate(360deg)}}
+body{background:var(--dark);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden;padding-bottom:80px}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(rgba(245,200,0,.045) 1px,transparent 1px);background-size:26px 26px;pointer-events:none;z-index:0}
+
+/* ── HEADER ── */
+header{position:sticky;top:0;z-index:200;background:var(--bar-bg);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:8px 16px}
+.logo-wrap{width:46px;height:46px;border-radius:50%;overflow:hidden;border:2.5px solid var(--gold);box-shadow:var(--glow-gold);flex-shrink:0}
+.logo-wrap img{width:100%;height:100%;object-fit:cover}
+.header-text h1{font-family:var(--font-display);font-size:1.7rem;letter-spacing:3px;color:var(--gold-text);line-height:1}
+.header-text p{font-family:var(--font);font-style:normal;font-size:14.4px;color:var(--text);letter-spacing:.9px;text-transform:uppercase;font-weight:800;font-display: swap}
+.hbadge{display:none;position:fixed;top:64px;right:12px;z-index:900;background:var(--gold-soft);color:var(--gold-text);border:1.5px solid var(--gold-line);border-radius:var(--r-pill);padding:4px 26px 4px 10px;font-size:var(--fs-xs);font-weight:800;letter-spacing:.4px;white-space:nowrap;width:140px;overflow:hidden;text-overflow:ellipsis;text-align:left;cursor:pointer;}
+/* Misma flecha que el selector del grupo (pastilla); gira al abrir el desplegable */
+.hbadge:after{content:'';position:absolute;right:8px;top:50%;width:14px;height:14px;transform:translateY(-50%);transition:transform .2s;background:var(--gold-text);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") center/contain no-repeat}
+.hbadge[aria-expanded="true"]:after{transform:translateY(-50%) rotate(180deg)}
+/* La etiqueta solo tiene sentido en Estadísticas y Actividad (para elegir de qué grupo ver los datos).
+   En Grupos, Amigos, Cuenta y la ficha de un gasto o pago no se muestra nunca, venga de donde venga la navegación. */
+body:has(#page-grupos.active) .hbadge, body:has(#page-amigos.active) .hbadge, body:has(#page-cuenta.active) .hbadge, body:has(#page-gasto.active) .hbadge{display:none !important}
+#ocrPopover{animation:fadeIn .15s ease;}
+#ocrBtn.has-file{background:rgba(61,186,111,.15);border-color:rgba(61,186,111,.4);color:var(--success);}
+
+.det-bar{position:sticky;top:var(--header-h, 64px);z-index:500;background:var(--bar-bg);backdrop-filter:blur(18px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:8px 0;width:100%;box-sizing:border-box;}
+#groupDropdown{display:none;position:fixed;top:70px;right:12px;background:var(--dark3);border:1px solid var(--border);border-radius:var(--r-md);min-width:180px;max-width:240px;z-index:8000;box-shadow:var(--shadow);overflow:hidden;}
+#groupDropdown{display:none;position:fixed;top:70px;right:12px;background:var(--dark3);border:1px solid var(--border);border-radius:var(--r-md);min-width:180px;max-width:240px;z-index:8000;box-shadow:var(--shadow);overflow:hidden;}
+#groupDropdown.open{display:block;animation:fadeIn .15s ease;}
+.gdrop-item{display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;font-size:var(--fs-base);font-weight:700;color:var(--text);transition:background .15s;}
+@media (hover:hover){.gdrop-item:hover{background:rgba(245,200,0,.08);}}
+.gdrop-item.active{color:var(--gold-text);}
+.gdrop-divider{height:1px;background:var(--border);margin:4px 0;}
+.gdrop-back{display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;font-size:var(--fs-sm);font-weight:700;color:var(--muted);transition:background .15s;}
+@media (hover:hover){.gdrop-back:hover{background:var(--tint-1);}}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:1000;background:var(--bar-bg);backdrop-filter:blur(18px);border-top:1px solid var(--border);display:flex;align-items:stretch;height:68px}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:transparent;border:none;cursor:pointer;color:var(--text);font-family:var(--font);font-size:var(--fs-2xs);font-weight:800;text-transform:uppercase;letter-spacing:.5px;transition:color .2s;padding:6px 2px;position:relative}
+.nav-btn .nav-ico{font-size:1.35rem;line-height:1;transition:transform .2s}
+.nav-btn.active{color:var(--gold-text)}
+.nav-btn.active .nav-ico{transform:scale(1.15)}
+.nav-btn::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2.5px;background:var(--gold);border-radius:0 0 4px 4px;transform:scaleX(0);transition:transform .25s}
+.nav-btn.active::after{transform:scaleX(1)}
+
+/* ── PAGES ── */
+.page{display:none}
+.page.active{display:flex;flex-direction:column;min-height:100vh;}
+@keyframes fadeUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+main{flex:1;max-width:660px;margin:0 auto;padding:18px 14px 90px 14px;position:relative;z-index:1;width:100%;animation:fadeUp .35s ease both}
+
+/* ── SECTION TITLES ── */
+.sec-title{display:flex;align-items:center;gap:8px;margin:24px 0 12px;transition:opacity .3s}
+.sec-title .num{width:26px;height:26px;border-radius:50%;background:var(--gold);color:var(--on-gold);font-weight:900;font-size:var(--fs-base);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sec-title h2{font-size:var(--fs-md);font-weight:800;letter-spacing:.9px;text-transform:uppercase}
+
+/* ── CARD ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
