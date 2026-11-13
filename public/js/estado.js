@@ -1,7 +1,7 @@
 // public/js/estado.js — Estado de la app (grupos, amigos, actividad, perfil…) y esqueletos de carga
 // (antes dentro de index.html; el orden de carga está en index.html)
 
-// ═══ STATE ═══════════════════════════════════════════════════════════
+// ═══ ESTADO ══════════════════════════════════════════════════════════════
 // Datos cargados por async init() a través de VakaDataService
 const API_BASE = 'https://vakapay-app.vercel.app';
 function resolverAvatar(u) {
@@ -11,20 +11,12 @@ function resolverAvatar(u) {
 }
 let groups   = [];
 let friends  = [];
-let grupoAEditar = null;
 let activity = [];
 let profile  = {};
 let currentGroupIdx = null;
 let selectedType = 'viaje';
 let editingExpenseIdx = null;
 
-const CAT_ICONS = {
-  food: '🍔', 'Comida': '🍔',
-  transport: '🚗', 'Transporte': '🚗',
-  hotel: '🏨', 'Alojamiento': '🏨',
-  activity: '🎭', 'Actividad': '🎭',
-  other: '💡', 'Otro': '💡'
-};
 const CAT_CSS = {
   food: 'c-food', 'Comida': 'c-food',
   transport: 'c-transport', 'Transporte': 'c-transport',

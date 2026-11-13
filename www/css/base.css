@@ -46,9 +46,9 @@ body:has(#page-grupos.active) .hbadge, body:has(#page-amigos.active) .hbadge, bo
 /* ── BOTTOM NAV ── */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:1000;background:var(--bar-bg);backdrop-filter:blur(18px);border-top:1px solid var(--border);display:flex;align-items:stretch;height:68px}
 .nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:transparent;border:none;cursor:pointer;color:var(--text);font-family:var(--font);font-size:var(--fs-2xs);font-weight:800;text-transform:uppercase;letter-spacing:.5px;transition:color .2s;padding:6px 2px;position:relative}
-.nav-btn .nav-ico{font-size:1.35rem;line-height:1;transition:transform .2s}
+
 .nav-btn.active{color:var(--gold-text)}
-.nav-btn.active .nav-ico{transform:scale(1.15)}
+
 .nav-btn::after{content:'';position:absolute;top:0;left:20%;right:20%;height:2.5px;background:var(--gold);border-radius:0 0 4px 4px;transform:scaleX(0);transition:transform .25s}
 .nav-btn.active::after{transform:scaleX(1)}
 

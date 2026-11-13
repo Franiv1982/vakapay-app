@@ -147,7 +147,6 @@ async function guardarTicketServidor(idx, ticket) {
   if (!res.ok) throw new Error(data.error || 'No se pudo guardar el comprobante');
   e.ticket = ticket;
   e.has_ticket = !!ticket;
-  save();
 }
 
 async function attachGastoTicket(ev, idx) {

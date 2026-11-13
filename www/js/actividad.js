@@ -1,7 +1,7 @@
 // public/js/actividad.js — Pantalla Actividad
 // (antes dentro de index.html; el orden de carga está en index.html)
 
-// ═══ ACTIVITY ════════════════════════════════════════════════════════
+// ═══ ACTIVIDAD ═══════════════════════════════════════════════════════════
 // Recarga la actividad desde el servidor (incluye los cambios de otros participantes)
 async function refrescarActividad() {
   try {

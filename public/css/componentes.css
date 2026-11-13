@@ -31,7 +31,7 @@
 .btn-outline{border-color:var(--line-strong)}
 .btn svg{flex-shrink:0}
 .btn:disabled{opacity:.5;cursor:not-allowed}
-.btn-green{background:rgba(61,186,111,.1);border:1.5px solid rgba(61,186,111,.28);color:var(--success)}
+
 .btn-sm{padding:6px 12px;font-size:var(--fs-sm);border-radius:var(--r-sm);min-height:var(--alto-sm)}
 .btn-whatsapp{background:color-mix(in srgb,var(--whatsapp) 12%,transparent);border:1.5px solid var(--whatsapp);color:var(--whatsapp)}
 .btn-metodo{flex:1;font-size:var(--fs-sm);padding:8px 6px;gap:6px}
@@ -52,12 +52,8 @@
 @media (hover:hover){.chip-edit:hover{color:var(--gold-text)}}
 
 /* ── EXPENSE ITEMS ── */
-.exp-item{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--tint-1)}
-.exp-item:last-child{border:none}
 .exp-ico{width:38px;height:38px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:var(--fs-lg);flex-shrink:0}
-.exp-info{flex:1;min-width:0}
-.exp-desc{font-weight:700;font-size:var(--fs-base);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.exp-meta{font-size:var(--fs-xs);color:var(--muted);margin-top:2px}
+
 .exp-amt{font-family:var(--font-display);font-size:var(--fs-lg);color:var(--gold-text);white-space:nowrap}
 .no-items{text-align:center;padding:22px 0;color:var(--muted);font-size:var(--fs-base)}
 .no-items .ni{font-size:1.8rem;margin-bottom:4px}
@@ -83,22 +79,8 @@
 .debt-amt{font-family:var(--font-display);font-size:var(--fs-md);color:var(--gold-light);white-space:nowrap}
 .all-good{text-align:center;padding:14px;color:var(--success);font-weight:800;font-size:var(--fs-base)}
 
-/* ── SHARE ── */
-.share-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}
-.sh-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 4px;border-radius:var(--r-md);border:none;cursor:pointer;font-family:var(--font);font-weight:800;font-size:var(--fs-xs);text-transform:uppercase;letter-spacing:.5px;transition:transform .13s,filter .13s}
-.sh-btn:active{transform:scale(.93)}
-.sh-btn .si{font-size:var(--fs-xl)}
-.sh-wa{background:#1DB954;color:#fff}
-.sh-em{background:#E34234;color:#fff}
-.sh-ph{background:#2196F3;color:#fff}
-@media (hover:hover){.sh-btn:hover{filter:brightness(1.1)}}
-
-/* ── LINK BOX ── */
-.link-box input:focus,#chatGif .buscar input:focus{box-shadow:none}  /* el marco lo pone su contenedor */
-.link-box{display:flex;align-items:center;gap:8px;background:var(--dark3);border:1.5px solid rgba(245,200,0,.25);border-radius:var(--r-md);padding:8px 12px;margin-top:10px}
-.link-box input{flex:1;background:transparent;border:none;outline:none;color:var(--gold-text);font-family:var(--font);font-size:var(--fs-sm);font-weight:700;min-width:0;cursor:pointer}
-.link-copy{flex-shrink:0;background:var(--gold);color:var(--on-gold);border:none;border-radius:var(--r-sm);padding:4px 10px;font-family:var(--font);font-weight:800;font-size:var(--fs-sm);cursor:pointer;transition:filter .13s}
-@media (hover:hover){.link-copy:hover{filter:brightness(1.1)}}
+/* Buscador de GIF del chat: el marco lo pone su contenedor */
+#chatGif .buscar input:focus{box-shadow:none}
 
 /* ── DVDivider ── */
 .dvd{height:1px;background:var(--tint-1);margin:14px 0}

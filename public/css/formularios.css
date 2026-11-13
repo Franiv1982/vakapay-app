@@ -43,7 +43,7 @@ input[type="date"]::-webkit-datetime-edit-fields-wrapper{padding:0}
 input[type="date"]::-webkit-datetime-edit-day-field,
 input[type="date"]::-webkit-datetime-edit-month-field,
 input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
-.g3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+
 .span2{grid-column:span 2}
 
 /* ── TYPE SELECTOR ── */

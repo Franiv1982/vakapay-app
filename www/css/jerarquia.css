@@ -41,7 +41,7 @@ body:has(#page-detalle.active) .hbadge{display:none !important}
 .rs-detalle{font-size:var(--fs-base);color:var(--text2);margin-top:2px}
 .rs-botones{display:flex;gap:8px;margin-top:14px}
 .rs-botones .btn{flex:1;padding:12px 8px;font-size:var(--fs-base)}
-.verde{color:var(--success)} .rojo{color:var(--danger)} .gris{color:var(--muted)}
+.verde{color:var(--success)} .rojo{color:var(--danger)} 
 /* «Aún no puedes eliminar tu cuenta»: cada grupo pendiente es un botón que lleva a sus cuentas */
 .pd-fila{display:flex;align-items:center;gap:8px;width:100%;min-height:var(--alto-control);padding:8px;background:none;border:none;border-bottom:1px solid var(--line);color:inherit;font:inherit;text-align:left;cursor:pointer;border-radius:var(--r-sm)}
 .pd-fila:last-child{border-bottom:none}

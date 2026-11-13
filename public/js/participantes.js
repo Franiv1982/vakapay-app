@@ -1,42 +1,6 @@
 // public/js/participantes.js — Participantes de un grupo
 // (antes dentro de index.html; el orden de carga está en index.html)
 
-// ═══ MEMBERS ══════════════════════════════════════════════════════════
-async function addMemberFromFriend(friendName) { 
-  if (currentGroupIdx === null) { toast('Abre un grupo primero', 'e'); return; }
-  
-  const g = groups[currentGroupIdx];
-  if (g.members.hasOwnProperty(friendName)) { 
-    toast(`${friendName} ya está en el grupo`, 'i'); 
-    return; 
-  }
-  
-  g.members[friendName] = 0;
-  await save();
-  renderAll();
-  
-
-  // Sincronización backend — SIN esto el miembro se pierde al refrescar
-  try {
-    await fetch(`${API_BASE}/api/v1/groups/${g.id}/members`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
-      body: JSON.stringify({ display_name: friendName })
-    });
-  } catch(err) { console.error('Error añadiendo miembro desde amigos:', err); }
-
-  try {
-    groups = await vakaData.getGroups(); 
-    renderGroupsList();
-    renderAll(); 
-  } catch (err) {
-    console.error("Error refrescando tras añadir:", err);
-  }
-  
-  toast(`${friendName} añadido`, 's');
-  refrescarActividad();
-}
-
 async function addMember() {
   if (currentGroupIdx === null) { toast('Abre un grupo primero', 'e'); return; }
   const inp = document.getElementById('memberName');
@@ -54,7 +18,6 @@ async function addMember() {
 
   // 1. Añadimos al grupo
   g.members[n] = 0; 
-  await save(); 
 
   // 2. Sincronización backend (el servidor lo guarda también en Amigos, sin duplicar)
   try {
@@ -224,7 +187,6 @@ async function toggleFriendInGroup(name, el) {
       });
       if (!r.ok) { const d = await r.json().catch(() => ({})); throw Object.assign(new Error(d.error || ''), { status: r.status }); }
       delete g.members[name];
-      save();
       toast(`${name} quitado del grupo`, 's');
     } catch (e) {
       toast(textoError(e, 'No se pudo quitar del grupo.'), 'e');
@@ -242,7 +204,6 @@ async function toggleFriendInGroup(name, el) {
       });
       if (!r.ok) { const d = await r.json().catch(() => ({})); throw Object.assign(new Error(d.error || ''), { status: r.status }); }
       g.members[name] = 0;
-      save();
       toast(`${name} añadido`, 's');
       refrescarActividad();
     } catch (e) {

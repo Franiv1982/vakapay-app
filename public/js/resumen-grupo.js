@@ -322,7 +322,6 @@ async function ejecutarRenombrarMiembro() {
       body: JSON.stringify({ display_name: trimmed })
     });
   } catch(_) {}
-  save();
   cerrarModalRenombrarMiembro();
   renderMembers();
   renderExpenses();

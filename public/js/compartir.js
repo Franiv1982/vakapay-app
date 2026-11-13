@@ -1,9 +1,9 @@
 // public/js/compartir.js — Compartir: enlaces de invitación, resumen y PDF
 // (antes dentro de index.html; el orden de carga está en index.html)
 
-// ═══ LINK GENERATION ════════════════════════════════════════════════
+// ═══ ENLACES ═════════════════════════════════════════════════════════════
 
-// ═══ LOAD FROM URL PARAM ════════════════════════════════════════════
+// ═══ ABRIR DESDE UN ENLACE ═══════════════════════════════════════════════
 function loadFromHash(){
   const params=new URLSearchParams(window.location.search);
   const encoded=params.get('vp');
@@ -16,7 +16,7 @@ function loadFromHash(){
     if(exists>=0){idx=exists;}
     else{
       const g={id:Date.now(),name:payload.n,type:payload.t||'viaje',start:payload.s,end:payload.e,members:payload.m||{},expenses:payload.ex||[],createdAt:new Date().toISOString(),fromLink:true};
-      groups.unshift(g);save();renderGroupsList();updateStats();
+      groups.unshift(g);renderGroupsList();updateStats();
       idx=0;
     }
     // Clean URL
@@ -25,7 +25,7 @@ function loadFromHash(){
   }catch(err){toast('Link inválido','e');}
 }
 
-// ═══ SHARE ══════════════════════════════════════════════════════════
+// ═══ COMPARTIR ═══════════════════════════════════════════════════════════
 // ═══ INVITAR CON ENLACE (Participantes) ══════════════════════════════
 let _enlaceInvitacion = null;
 function textoInvitacion(g, enlace) {
