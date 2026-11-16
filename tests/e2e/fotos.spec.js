@@ -80,3 +80,38 @@ test('amigo sin foto: tocar su inicial (en la lista o en la ficha) la muestra en
   await expect(page.locator('#friendModal')).toBeVisible();
   expect(selector).toBe(false);
 });
+
+test('ficha de amigo: «Quitar foto» borra la que le pusiste al pulsar Guardar (y Cancelar la mantiene)', async ({ page, request }) => {
+  const ana = await crearUsuario(request, 'Ana');
+  const { datos: amigo } = await api(request, 'POST', '/friends', { name: 'Pepe' }, ana.token);
+  await api(request, 'PATCH', `/friends/${amigo.id}`, { avatar_url: MINI }, ana.token);
+  await entrar(page, ana);
+  await page.click('[data-page="page-amigos"]');
+  const abrirFicha = () => page.evaluate(() => openFriendModal(friends.findIndex(f => f.name === 'Pepe')));
+
+  // Quitar y cerrar sin guardar: la foto sigue
+  await abrirFicha();
+  await page.click('#btnQuitarFotoAmigo');
+  await expect(page.locator('#friendModalAvatar img')).toHaveCount(0);
+  await page.evaluate(() => closeFriendModal());
+  await abrirFicha();
+  await expect(page.locator('#friendModalAvatar img')).toHaveCount(1);
+
+  // Quitar y guardar: se borra en el servidor y en la lista sale la inicial
+  await page.click('#btnQuitarFotoAmigo');
+  await expect(page.locator('#btnQuitarFotoAmigo')).toBeHidden();
+  await page.locator('#friendModal').getByRole('button', { name: /Guardar/ }).click();
+  await expect(page.locator('.friend-item', { hasText: 'Pepe' }).locator('.fi-av img')).toHaveCount(0);
+  const { datos: lista } = await api(request, 'GET', '/friends', null, ana.token);
+  expect(lista.find(f => f.name === 'Pepe').avatar_url).toBeNull();
+});
+
+test('Cuenta sin foto: tocar tu inicial la muestra en grande', async ({ page, request }) => {
+  const ana = await crearUsuario(request, 'Ana');
+  await entrar(page, ana);
+  await page.click('[data-page="page-cuenta"]');
+  await page.locator('#avatarDisplay').click();
+  await expect(page.locator('#fotoPerfilInicial')).toHaveText('A');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#fotoPerfilModal')).toBeHidden();
+});
