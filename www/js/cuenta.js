@@ -460,3 +460,8 @@ async function quitarFotoPerfil() {
   } catch (e) { toast(textoError(e, 'No se pudo quitar la foto.'), 'e'); }
   finally { listo(); }
 }
+
+// Al abrir la Política o los Términos desde Cuenta, al volver se regresa a Cuenta
+function recordarVolverACuenta() {
+  try { sessionStorage.setItem('vp_volver_a', 'page-cuenta'); } catch (_) {}
+}

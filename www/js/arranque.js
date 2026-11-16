@@ -24,6 +24,13 @@
       if (groups.length) updateBalances();
       loadProfile(); renderGroupsList(); renderFriends(); renderActivity(); updateStats();
     } catch (e) { console.warn('No se pudo pintar lo guardado:', e); }
+    // Volviendo de la Política de privacidad o los Términos abiertos desde Cuenta: a Cuenta
+    try {
+      if (sessionStorage.getItem('vp_volver_a') === 'page-cuenta') {
+        sessionStorage.removeItem('vp_volver_a');
+        switchPage('page-cuenta', document.querySelector('.nav-btn[data-page="page-cuenta"]'));
+      }
+    } catch (_) {}
 
     // 2. Validación de sesión con el backend
     //    - Si el servidor rechaza el token (sesión caducada o inválida) → se vuelve al login.
