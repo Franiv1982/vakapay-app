@@ -4,6 +4,7 @@
 // ═══ PERFIL ══════════════════════════════════════════════════════════════
 function loadProfile(){
   if(!profile) return;
+  pintarAvisoFoto();
   // También los vacíos: si no, al cancelar se quedaba lo escrito en Bizum o IBAN
   const set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val || ''; };
   set('profNombre', profile.nombre);
@@ -201,6 +202,10 @@ async function handleAvatarChange(ev) {
       img.src = URL.createObjectURL(file);
     });
     formData.append('avatar', reducida, 'avatar.jpg');
+    const urlTemporal = URL.createObjectURL(reducida);
+    const mini = await hacerMiniatura(urlTemporal);
+    URL.revokeObjectURL(urlTemporal);
+    if (mini) formData.append('mini', mini);
     const res = await fetch(`${API_BASE}/api/v1/users/me/avatar`, {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${vakaData.getToken()}` },
@@ -209,7 +214,9 @@ async function handleAvatarChange(ev) {
     const data = await res.json();
     if (data.avatar_url) {
       profile.avatar = data.avatar_url;
+      profile.tiene_mini = !!data.tiene_mini;
       await vakaData.saveProfile(profile);
+      pintarAvisoFoto();
       toast('Foto actualizada', 's');
     }
   } catch(err) {
@@ -368,3 +375,66 @@ function cerrarFotoPerfil() {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && document.getElementById('fotoPerfilModal')?.style.display === 'flex') cerrarFotoPerfil();
 });
+
+// Foto de otra persona: se abre al momento con la pequeña y se cambia por la grande al llegar
+async function abrirFotoDeCuenta(idUsuario, miniatura) {
+  abrirFotoPerfil(miniatura);
+  try {
+    const r = await fetch(`${API_BASE}/api/v1/users/${encodeURIComponent(idUsuario)}/foto`, { headers: { 'Authorization': `Bearer ${vakaData.getToken()}` } });
+    if (!r.ok) return;
+    const { avatar } = await r.json();
+    const grande = document.getElementById('fotoPerfilGrande');
+    if (avatar && document.getElementById('fotoPerfilModal').style.display === 'flex') grande.src = avatar;
+  } catch (_) {}
+}
+
+// ═══ MINIATURA DE TU FOTO ════════════════════════════════════════════
+// Lo que ven tus grupos y amigos es una versión de 96 px (pesa ~5 KB), para que
+// un grupo de muchas personas cargue rápido. La grande solo se pide al ampliarla.
+function hacerMiniatura(src) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const lado = 96, c = document.createElement('canvas');
+      c.width = lado; c.height = lado;
+      const m = Math.min(img.width, img.height);            // recorte cuadrado centrado
+      c.getContext('2d').drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, lado, lado);
+      resolve(c.toDataURL('image/jpeg', 0.75));
+    };
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+// Fotos subidas antes de que existiera la miniatura: se hace una vez, al entrar
+async function completarMiniatura() {
+  if (!profile.avatar || profile.tiene_mini !== false) return;
+  const mini = await hacerMiniatura(profile.avatar);
+  if (!mini) return;
+  try {
+    const r = await fetch(`${API_BASE}/api/v1/users/me/avatar-mini`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: JSON.stringify({ mini }),
+    });
+    if (r.ok) profile.tiene_mini = true;
+  } catch (_) {}
+}
+
+// ═══ QUITAR TU FOTO ══════════════════════════════════════════════════
+function pintarAvisoFoto() {
+  const aviso = document.getElementById('avisoFotoPerfil');
+  if (aviso) aviso.style.display = profile.avatar ? '' : 'none';
+}
+async function quitarFotoPerfil() {
+  const btn = document.getElementById('btnQuitarFoto');
+  const listo = bloquearBoton(btn, 'Quitando…');
+  if (!listo) return;
+  try {
+    const r = await fetch(`${API_BASE}/api/v1/users/me/avatar`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${vakaData.getToken()}` } });
+    if (!r.ok) throw new Error('No se pudo quitar la foto');
+    profile.avatar = null; profile.tiene_mini = false;
+    await vakaData.saveProfile(profile);
+    loadProfile();
+    toast('Foto quitada', 's');
+  } catch (e) { toast(textoError(e, 'No se pudo quitar la foto.'), 'e'); }
+  finally { listo(); }
+}

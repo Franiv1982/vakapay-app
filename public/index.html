@@ -504,6 +504,7 @@
     </div>
     <div class="profile-name" id="profileDisplayName">Tu Nombre</div>
     <div class="profile-email" id="profileDisplayEmail">tu.email@gmail.com</div>
+    <div class="aviso-foto" id="avisoFotoPerfil" style="display:none">Tu foto la ven tus grupos y tus amigos · <button type="button" class="enlace-quitar" id="btnQuitarFoto" onclick="quitarFotoPerfil()">Quitar foto</button></div>
   </div>
 
   <div class="card">
@@ -690,7 +691,7 @@
         <div class="avatar-edit u-w-22 u-h-22 u-fs-xs" onclick="document.getElementById('friendAvatarFile').click()" aria-label="Cambiar foto"><svg class="icono" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></div>
       </div>
       <input type="file" id="friendAvatarFile" accept="image/*" onchange="handleFriendAvatarChange(event)" style="display:none">
-      <div class="u-fs-xs u-c-muted">Toca para cambiar foto</div>
+      <div class="u-fs-xs u-c-muted" id="friendFotoPista">Toca para añadir una foto</div>
     </div>
 
     <div class="g2">

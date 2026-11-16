@@ -254,7 +254,7 @@ function renderMembers() {
 
     // Sin importes: el saldo de cada uno está en «Cuentas finales»
     return `<div class="chip" data-name="${m}">
-              <div class="av">${m[0].toUpperCase()}</div>
+              ${htmlAvatar(m)}
               ${m}
               ${editBtn}
               <span class="chip-x" aria-label="Quitar a ${m}" onclick="event.stopPropagation();removeMember('${m}')">${icono('cerrar',11)}</span>
@@ -445,7 +445,7 @@ function renderBalances(){
   bl.innerHTML = mbs.map(([n,v]) => `
     <div class="bal-row">
       <div class="u-d-flex u-ai-center u-gap-8">
-        <div class="av-s">${n[0].toUpperCase()}</div>
+        ${htmlAvatar(n, 'av-s')}
         <span class="u-fw-700" translate="no">${escaparHtml(n)}</span>
       </div>
       <span class="${Number(v) > 0.01 ? 'bal-pos' : Number(v) < -0.01 ? 'bal-neg' : 'bal-zer'}">

@@ -29,6 +29,8 @@
 .avatar-placeholder{width:90px;height:90px;border-radius:50%;background:var(--dark3);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:var(--muted)}
 /* Foto de perfil: se puede tocar para verla en grande */
 .avatar-img.ampliable{cursor:zoom-in}
+.aviso-foto{margin-top:8px;font-size:var(--fs-xs);color:var(--muted);text-align:center}
+.enlace-quitar{background:none;border:0;padding:6px 2px;min-height:var(--alto-sm);color:var(--gold-text);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
 .avatar-img.ampliable:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 .foto-perfil-capa{position:fixed;inset:0;z-index:10060;align-items:center;justify-content:center;
   background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);cursor:zoom-out;animation:fadeIn .18s ease}

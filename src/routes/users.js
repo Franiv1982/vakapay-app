@@ -51,7 +51,7 @@ const upload = multer({
 router.get('/me', requireAuth, async (req, res, next) => {
   try {
     const result = await db.query(`
-      SELECT id, nombre, apellido, email, tel, bio, avatar_url, pago_bizum, pago_iban, created_at, updated_at
+      SELECT id, nombre, apellido, email, tel, bio, avatar_url, (avatar_mini IS NOT NULL) AS tiene_mini, pago_bizum, pago_iban, created_at, updated_at
       FROM users WHERE id = $1
     `, [req.user.id]);
     if (!result.rows[0]) return res.status(404).json({ error: 'Usuario no encontrado' });
@@ -128,14 +128,58 @@ router.patch('/me', requireAuth, async (req, res, next) => {
 });
 
 // ── PUT /users/me/avatar ─────────────────────────────────────────
+// La foto se guarda en base64 en la columna. Con ella puede llegar «mini»: la misma
+// foto en pequeño (la hace la app), que es la que ven los grupos y los amigos.
 router.put('/me/avatar', requireAuth, upload.single('avatar'), async (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'No se recibió ningún archivo' });
-// Se guarda la imagen como base64 dentro de la columna
     const buffer = req.file.buffer || fs.readFileSync(req.file.path);
     const avatarUrl = `data:${req.file.mimetype || 'image/jpeg'};base64,${buffer.toString('base64')}`;
-    await db.query('UPDATE users SET avatar_url = $1, updated_at = NOW() WHERE id = $2', [avatarUrl, req.user.id]);
-    res.json({ avatar_url: avatarUrl });
+    const mini = miniValida(req.body && req.body.mini);
+    await db.query('UPDATE users SET avatar_url = $1, avatar_mini = $2, updated_at = NOW() WHERE id = $3', [avatarUrl, mini, req.user.id]);
+    res.json({ avatar_url: avatarUrl, tiene_mini: !!mini });
+  } catch (err) { next(err); }
+});
+
+// Miniatura: JPEG o PNG en base64, pequeña (la app la hace de 96 px, ~5 KB)
+function miniValida(v) {
+  return typeof v === 'string' && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(v) && v.length <= 40000 ? v : null;
+}
+
+// ── PUT /users/me/avatar-mini ── para fotos subidas antes de existir la miniatura
+router.put('/me/avatar-mini', requireAuth, async (req, res, next) => {
+  try {
+    const mini = miniValida(req.body && req.body.mini);
+    if (!mini) return res.status(400).json({ error: 'Miniatura no válida' });
+    await db.query('UPDATE users SET avatar_mini = $1 WHERE id = $2 AND avatar_url IS NOT NULL', [mini, req.user.id]);
+    res.json({ ok: true });
+  } catch (err) { next(err); }
+});
+
+// ── DELETE /users/me/avatar ── quitar la foto (deja de verse en todas partes)
+router.delete('/me/avatar', requireAuth, async (req, res, next) => {
+  try {
+    await db.query('UPDATE users SET avatar_url = NULL, avatar_mini = NULL, updated_at = NOW() WHERE id = $1', [req.user.id]);
+    res.json({ ok: true });
+  } catch (err) { next(err); }
+});
+
+// ── GET /users/:id/foto ── foto en grande de otra persona, para ampliarla.
+// Solo si compartís un grupo, o si la tienes en tus amigos (mismo email o teléfono).
+router.get('/:id(\\d+)/foto', requireAuth, async (req, res, next) => {
+  try {
+    const r = await db.query(`
+      SELECT u.avatar_url FROM users u
+      WHERE u.id = $1 AND u.avatar_url IS NOT NULL AND (
+        u.id = $2
+        OR EXISTS (SELECT 1 FROM group_members a JOIN group_members b ON a.group_id = b.group_id
+                   WHERE a.user_id = $2 AND b.user_id = u.id)
+        OR EXISTS (SELECT 1 FROM friends f WHERE f.owner_id = $2 AND (
+                     (f.email <> '' AND LOWER(TRIM(f.email)) = LOWER(TRIM(u.email)))
+                     OR (f.phone <> '' AND u.tel IS NOT NULL AND LENGTH(REGEXP_REPLACE(f.phone, '\\D', '', 'g')) >= 9 AND RIGHT(REGEXP_REPLACE(f.phone, '\\D', '', 'g'), 9) = RIGHT(REGEXP_REPLACE(u.tel, '\\D', '', 'g'), 9))))
+      )`, [req.params.id, req.user.id]);
+    if (!r.rows[0]) return res.status(404).json({ error: 'Foto no disponible' });
+    res.json({ avatar: r.rows[0].avatar_url });
   } catch (err) { next(err); }
 });
 

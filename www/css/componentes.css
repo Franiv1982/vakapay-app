@@ -100,3 +100,9 @@
 .modal-chip{display:inline-flex;align-items:center;gap:4px;background:var(--dark3);border:1.5px solid var(--border);border-radius:var(--r-xl);padding:4px 10px 4px 8px;font-size:var(--fs-sm);font-weight:700;cursor:pointer;transition:border-color .2s,background .2s;user-select:none}
 .modal-chip.sel{background:rgba(245,200,0,.11);border-color:var(--gold);color:var(--gold-text)}
 .modal-chip .av{width:19px;height:19px;border-radius:50%;background:var(--gold-dark);color:var(--on-gold);font-size:var(--fs-2xs);font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* Fotos de las personas en los círculos (participantes, saldos, chat) */
+.av.con-foto,.av-s.con-foto,.av-chat.con-foto{padding:0;overflow:hidden;background:var(--dark3)}
+.con-foto img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.av-chat{width:18px;height:18px;border-radius:50%;background:var(--gold-dark);color:var(--on-gold);font-size:9px;font-weight:900;
+  display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin-right:6px;flex-shrink:0}

@@ -132,8 +132,9 @@ function renderFriends(){
   if(friends.length===0){el.innerHTML='<div class="no-items"><div class="ni"><svg class="u-c-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div>Sin amigos añadidos aún</div></div>';return;}
   el.innerHTML=friends.map((f,i)=>{
     const inGroups=groups.filter(g=>Object.prototype.hasOwnProperty.call(g.members, f.name)).map(g=>iconoTipo(g.type, 12)+' '+escaparHtml(g.name));
-    const avatarContent=f.avatar
-      ?`<img class="u-w-100p u-h-100p u-fit-cover u-r-50p" src="${f.avatar}" alt="">`
+    const fotoAmigo=f.fotoCuenta||f.avatar;   // la de su cuenta manda
+    const avatarContent=fotoAmigo
+      ?`<img class="u-w-100p u-h-100p u-fit-cover u-r-50p" src="${fotoAmigo}" alt="">`
       :`<span class="u-fs-md u-fw-900 u-c-gold-text">${f.name[0].toUpperCase()}</span>`;
     return`<div class="friend-item">
       <div class="fi-av">${avatarContent}</div>
@@ -169,7 +170,11 @@ function openFriendModal(idx){
   document.getElementById('editFriendNotes').value=f.notes||'';
   document.getElementById('friendModalTitle').innerHTML='<svg class="u-va-middle u-mr-6" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar: '+f.name;
   const av=document.getElementById('friendModalAvatar');
-  av.innerHTML=f.avatar?`<img class="u-w-100p u-h-100p u-fit-cover" src="${f.avatar}" alt="">`:f.name[0].toUpperCase();
+  const fotoAmigo=f.fotoCuenta||f.avatar;   // la de su cuenta manda
+  av.innerHTML=fotoAmigo?`<img class="u-w-100p u-h-100p u-fit-cover" src="${fotoAmigo}" alt="">`:escaparHtml(f.name[0].toUpperCase());
+  av.dataset.cuenta=f.fotoCuenta&&f.cuentaId?f.cuentaId:'';
+  // Si usa la foto de su cuenta, no se cambia desde aquí: el lápiz se oculta
+  av.nextElementSibling.style.display=av.dataset.cuenta?'none':'';
   rotularFotoAmigo();
   const gc=document.getElementById('editFriendGroups');
   if(groups.length===0){gc.innerHTML='<span class="u-c-muted u-fs-sm">No hay grupos creados aún</span>';}
@@ -449,13 +454,18 @@ function confirmDeleteFriend(idx) {
 // Con foto: tocarla la muestra en grande (como la tuya en Cuenta).
 // Sin foto: tocarla abre la elección de imagen. El lápiz siempre cambia la foto.
 function tocarFotoAmigo() {
-  const img = document.querySelector('#friendModalAvatar img');
-  if (img) abrirFotoPerfil(img.src);
-  else document.getElementById('friendAvatarFile').click();
+  const av = document.getElementById('friendModalAvatar');
+  const img = av.querySelector('img');
+  if (!img) { document.getElementById('friendAvatarFile').click(); return; }
+  if (av.dataset.cuenta) abrirFotoDeCuenta(av.dataset.cuenta, img.src);
+  else abrirFotoPerfil(img.src);
 }
 function rotularFotoAmigo() {
   const av = document.getElementById('friendModalAvatar');
   const conFoto = !!av.querySelector('img');
   av.setAttribute('aria-label', conFoto ? 'Ver la foto en grande' : 'Añadir una foto');
+  const pista = document.getElementById('friendFotoPista');
+  if (pista) pista.textContent = av.dataset.cuenta ? 'Foto de su perfil · toca para ampliar'
+    : conFoto ? 'Toca para ampliar · el lápiz la cambia' : 'Toca para añadir una foto';
   av.style.cursor = conFoto ? 'zoom-in' : 'pointer';
 }

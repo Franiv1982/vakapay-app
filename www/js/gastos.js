@@ -215,7 +215,7 @@ function openEditModal(idx) {
   <div class="modal-chip ${invList.includes(m) ? 'sel' : ''}" 
        data-name="${m}" 
        onclick="this.classList.toggle('sel');updateEditSelectAllBtn()">
-    <div class="av">${m[0].toUpperCase()}</div>${m}
+    ${htmlAvatar(m)}${m}
   </div>`).join('');
   // 6. Cargar ticket si existe
   clearEditOCR();

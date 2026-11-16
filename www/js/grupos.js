@@ -266,7 +266,7 @@ ${e.es_pago ? `
     <div class="card u-p-12 u-mb-16">
       <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_5 u-mb-8"><svg class="u-c-text u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Participantes</div>
       <div class="u-d-flex u-wrap-wrap u-gap-6">
-        ${(e.involved || []).map(p => `<div class="chip u-fs-sm u-p-4-10"><div class="av u-w-20 u-h-20 u-fs-2xs">${escaparHtml(p[0].toUpperCase())}</div>${escaparHtml(p)}</div>`).join('')}
+        ${(e.involved || []).map(p => `<div class="chip u-fs-sm u-p-4-10">${htmlAvatar(p, 'av u-w-20 u-h-20 u-fs-2xs')}${escaparHtml(p)}</div>`).join('')}
       </div>
     </div>
 

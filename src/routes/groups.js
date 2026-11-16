@@ -101,6 +101,12 @@ router.post('/', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// Participantes con la foto pequeña de su cuenta (si la han subido)
+const SQL_MIEMBROS_CON_FOTO = `
+  SELECT gm.*, u.avatar_mini AS foto
+  FROM group_members gm LEFT JOIN users u ON u.id = gm.user_id
+  WHERE gm.group_id = $1 ORDER BY gm.joined_at`;
+
 // ── GET /groups/:id ───────────────────────────────────────────────
 router.get('/:id', requireAuth, async (req, res, next) => {
   try {
@@ -113,7 +119,7 @@ router.get('/:id', requireAuth, async (req, res, next) => {
     const group = gRes.rows[0];
     if (!group) return res.status(404).json({ error: 'Grupo no encontrado' });
 
-    const membersRes  = await db.query('SELECT * FROM group_members WHERE group_id = $1 ORDER BY joined_at', [group.id]);
+    const membersRes  = await db.query(SQL_MIEMBROS_CON_FOTO, [group.id]);
     const expensesRes = await db.query('SELECT * FROM expenses WHERE group_id = $1 ORDER BY expense_date DESC', [group.id]);
 
     // La imagen del comprobante no se envía en el listado (pesa mucho): solo si existe.
@@ -218,7 +224,7 @@ router.get('/:id/members', requireAuth, async (req, res, next) => {
     if (!await ownsGroup(req.params.id, req.user.id)) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
-    const result = await db.query('SELECT * FROM group_members WHERE group_id = $1 ORDER BY joined_at', [req.params.id]);
+    const result = await db.query(SQL_MIEMBROS_CON_FOTO, [req.params.id]);
     res.json(result.rows);
   } catch (err) { next(err); }
 });
