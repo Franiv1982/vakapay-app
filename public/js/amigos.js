@@ -170,6 +170,7 @@ function openFriendModal(idx){
   document.getElementById('friendModalTitle').innerHTML='<svg class="u-va-middle u-mr-6" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar: '+f.name;
   const av=document.getElementById('friendModalAvatar');
   av.innerHTML=f.avatar?`<img class="u-w-100p u-h-100p u-fit-cover" src="${f.avatar}" alt="">`:f.name[0].toUpperCase();
+  rotularFotoAmigo();
   const gc=document.getElementById('editFriendGroups');
   if(groups.length===0){gc.innerHTML='<span class="u-c-muted u-fs-sm">No hay grupos creados aún</span>';}
   else{gc.innerHTML=groups.map((g,gi)=>{
@@ -336,6 +337,7 @@ function handleFriendAvatarChange(ev){
       canvas.getContext('2d').drawImage(img,0,0,canvas.width,canvas.height);
       const data=canvas.toDataURL('image/jpeg',0.8);
       document.getElementById('friendModalAvatar').innerHTML=`<img class="u-w-100p u-h-100p u-fit-cover" src="${data}" alt="">`;
+      rotularFotoAmigo();
       if(editingFriendIdx!==null)friends[editingFriendIdx]._tmpAvatar=data;
     };
     img.src=e.target.result;
@@ -441,4 +443,19 @@ function confirmDeleteFriend(idx) {
   } else if (editingFriendIdx !== null) {
     openDeleteFriendModal(editingFriendIdx);
   }
+}
+
+// ═══ FOTO DEL AMIGO EN SU FICHA ══════════════════════════════════════
+// Con foto: tocarla la muestra en grande (como la tuya en Cuenta).
+// Sin foto: tocarla abre la elección de imagen. El lápiz siempre cambia la foto.
+function tocarFotoAmigo() {
+  const img = document.querySelector('#friendModalAvatar img');
+  if (img) abrirFotoPerfil(img.src);
+  else document.getElementById('friendAvatarFile').click();
+}
+function rotularFotoAmigo() {
+  const av = document.getElementById('friendModalAvatar');
+  const conFoto = !!av.querySelector('img');
+  av.setAttribute('aria-label', conFoto ? 'Ver la foto en grande' : 'Añadir una foto');
+  av.style.cursor = conFoto ? 'zoom-in' : 'pointer';
 }

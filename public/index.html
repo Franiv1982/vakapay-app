@@ -487,6 +487,13 @@
 </div>
 
 <!-- ═══════════════════════════════════ PAGE: CUENTA ═══ -->
+<!-- Foto ampliada (como en Instagram): la tuya en Cuenta y la de un amigo en su ficha -->
+<div class="modal-overlay foto-perfil-capa" id="fotoPerfilModal" style="display:none" onclick="cerrarFotoPerfil()">
+  <div class="foto-perfil-caja" role="dialog" aria-modal="true" aria-label="Foto en grande" tabindex="-1">
+    <img id="fotoPerfilGrande" class="foto-perfil-grande" alt="Foto de perfil">
+  </div>
+</div>
+
 <div class="page" id="page-cuenta">
 <main>
   <div class="profile-hero">
@@ -679,7 +686,7 @@
 
     <div class="u-d-flex u-dir-column u-ai-center u-gap-10 u-mb-18">
       <div class="avatar-wrap u-w-74 u-h-74">
-        <div class="u-w-74 u-h-74 u-r-50p u-bg-dark3 u-b-3-solid-gold u-ai-center u-jc-center u-fs-1_8rem u-c-muted u-ov-hidden u-cur-pointer" id="friendModalAvatar" style="display:flex" onclick="document.getElementById('friendAvatarFile').click()"></div>
+        <div class="u-w-74 u-h-74 u-r-50p u-bg-dark3 u-b-3-solid-gold u-ai-center u-jc-center u-fs-1_8rem u-c-muted u-ov-hidden u-cur-pointer" id="friendModalAvatar" style="display:flex" onclick="tocarFotoAmigo()"></div>
         <div class="avatar-edit u-w-22 u-h-22 u-fs-xs" onclick="document.getElementById('friendAvatarFile').click()" aria-label="Cambiar foto"><svg class="icono" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></div>
       </div>
       <input type="file" id="friendAvatarFile" accept="image/*" onchange="handleFriendAvatarChange(event)" style="display:none">

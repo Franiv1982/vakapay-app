@@ -36,3 +36,45 @@ test('tras cerrar sesión, la carga muestra tantas tarjetas grises como grupos',
   await page.goto('https://vakapay-app.vercel.app/index.html');
   await expect(page.locator('#groupsList .sk-card')).toHaveCount(2);
 });
+
+test('Cuenta: tocar la foto de perfil la muestra en grande; se cierra tocando, con Escape o con atrás', async ({ page, request }) => {
+  const ana = await crearUsuario(request);
+  const fs = require('fs'), path = require('path');
+  const foto = fs.readFileSync(path.join(__dirname, '../../public/logo_vakapay.png'));
+  await request.put(`${process.env.VP_API_PRUEBAS}/api/v1/users/me/avatar`, {
+    headers: { Authorization: `Bearer ${ana.token}` },
+    multipart: { avatar: { name: 'foto.png', mimeType: 'image/png', buffer: foto } },
+  });
+  await entrar(page, ana);
+  await page.click('[data-page="page-cuenta"]');
+  const capa = page.locator('#fotoPerfilModal');
+  await page.locator('#avatarDisplay').click();
+  await expect(capa).toBeVisible();
+  await capa.click({ position: { x: 10, y: 10 } });
+  await expect(capa).toBeHidden();
+  await page.locator('#avatarDisplay').click();
+  await page.keyboard.press('Escape');
+  await expect(capa).toBeHidden();
+  await page.locator('#avatarDisplay').click();
+  await page.evaluate(() => manejarAtras());
+  await expect(capa).toBeHidden();
+  await expect(page.locator('.page.active')).toHaveId('page-cuenta');
+});
+
+test('Amigos: en la ficha, tocar la foto del amigo la amplía; atrás la cierra y la ficha sigue abierta', async ({ page, request }) => {
+  const { api } = require('./ayudas');
+  const ana = await crearUsuario(request);
+  const { datos: amigo } = await api(request, 'POST', '/friends', { name: 'Pepe' }, ana.token);
+  const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+  await api(request, 'PATCH', `/friends/${amigo.id}`, { avatar_url: PNG }, ana.token);
+  await entrar(page, ana);
+  await page.click('[data-page="page-amigos"]');
+  await page.evaluate(() => openFriendModal(friends.findIndex(f => f.name === 'Pepe')));
+  const foto = page.locator('#friendModalAvatar');
+  await expect(foto).toHaveAttribute('aria-label', 'Ver la foto en grande');
+  await foto.click();
+  await expect(page.locator('#fotoPerfilModal')).toBeVisible();
+  await page.evaluate(() => manejarAtras());
+  await expect(page.locator('#fotoPerfilModal')).toBeHidden();
+  await expect(page.locator('#friendModal')).toBeVisible();
+});
