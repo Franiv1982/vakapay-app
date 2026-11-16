@@ -864,7 +864,7 @@
     </div>
     <div class="u-d-flex u-gap-8 u-mt-12">
       <button class="btn btn-outline u-f-1 u-fs-sm" onclick="closePayModal()">Cancelar</button>
-      <button class="btn btn-gold u-f-1" onclick="confirmPayment(true)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Marcar saldado</button>
+      <button class="btn btn-gold u-f-1" id="btnMarcarSaldado" onclick="confirmPayment(true)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Marcar saldado</button>
     </div>
   </div>
 </div>
@@ -885,7 +885,7 @@
       <img id="proofThumbView" alt="Justificante del pago" class="proof-thumb u-maxh-80">
     </div>
     <div class="u-mt-8">
-      <button class="btn btn-gold btn-full" onclick="sendProof(true)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Confirmar cobro</button>
+      <button class="btn btn-gold btn-full" id="btnConfirmarCobro" onclick="sendProof(true)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Confirmar cobro</button>
       <button class="btn btn-outline btn-full u-mt-8" onclick="closeProofModal()">Cancelar</button>
     </div>
   </div>
