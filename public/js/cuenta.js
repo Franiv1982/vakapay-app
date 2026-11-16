@@ -20,6 +20,7 @@ function loadProfile(){
       const img = document.createElement('img');
       img.id = 'avatarDisplay'; img.className = 'avatar-img';
       img.src = profile.avatar; img.alt = 'Avatar';
+      hacerAmpliable(img);
       img.onerror = function() {
         profile.avatar = null;
         const ph = document.createElement('div');
@@ -167,6 +168,7 @@ async function handleAvatarChange(ev) {
       img.className = 'avatar-img';
       img.src = data;
       img.alt = 'Avatar';
+      hacerAmpliable(img);
       wrap.replaceWith(img);
     } else {
       wrap.src = data;
@@ -338,3 +340,28 @@ async function ejecutarEliminarCuenta() {
   { const _tema = localStorage.getItem('vp_tema'); localStorage.clear(); if (_tema) localStorage.setItem('vp_tema', _tema); }
   location.replace('login.html');
 }
+
+// ═══ FOTO DE PERFIL AMPLIADA ═════════════════════════════════════════
+// Al tocar la foto de Cuenta se ve en grande, redonda y sobre el fondo difuminado,
+// como en Instagram. Se cierra tocando en cualquier sitio, con atrás o con Escape.
+function hacerAmpliable(img) {
+  img.classList.add('ampliable');
+  img.setAttribute('role', 'button');
+  img.tabIndex = 0;
+  img.setAttribute('aria-label', 'Ver tu foto de perfil en grande');
+  img.onclick = () => abrirFotoPerfil(img.src);
+  img.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirFotoPerfil(img.src); } };
+}
+function abrirFotoPerfil(src) {
+  if (!src) return;
+  document.getElementById('fotoPerfilGrande').src = src;
+  document.getElementById('fotoPerfilModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function cerrarFotoPerfil() {
+  document.getElementById('fotoPerfilModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.getElementById('fotoPerfilModal')?.style.display === 'flex') cerrarFotoPerfil();
+});
