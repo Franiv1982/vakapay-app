@@ -31,6 +31,10 @@
 .btn-outline{border-color:var(--line-strong)}
 .btn svg{flex-shrink:0}
 .btn:disabled{opacity:.5;cursor:not-allowed}
+/* Zona bloqueada mientras se guarda (bloquearZona): todo apagado menos el botón «Guardando…» */
+.zona-ocupada{cursor:progress}
+.zona-ocupada :is(input,select,textarea,.chip,.modal-chip,.currency-chip,.pay-method-btn,.proof-area,.fecha-caja,button:not([aria-busy])){opacity:.5}
+.btn[aria-busy="true"]{opacity:1}
 
 .btn-sm{padding:6px 12px;font-size:var(--fs-sm);border-radius:var(--r-sm);min-height:var(--alto-sm)}
 .btn-whatsapp{background:color-mix(in srgb,var(--whatsapp) 12%,transparent);border:1.5px solid var(--whatsapp);color:var(--whatsapp)}

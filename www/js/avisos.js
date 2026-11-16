@@ -64,6 +64,17 @@ function bloquearBoton(btn, texto = 'Guardando…') {
   return () => { delete btn.dataset.ocupado; btn.disabled = false; btn.removeAttribute('aria-busy'); btn.innerHTML = antes; };
 }
 
+// Bloquea una zona entera (formulario o ventana) mientras se guarda: sus campos,
+// chips y botones no responden y se ven apagados, para que no se pueda cambiar
+// nada ni lanzar otra acción a la vez. Devuelve la función que la desbloquea.
+function bloquearZona(el) {
+  if (!el) return () => {};
+  el.inert = true;
+  el.setAttribute('aria-busy', 'true');
+  el.classList.add('zona-ocupada');
+  return () => { el.inert = false; el.removeAttribute('aria-busy'); el.classList.remove('zona-ocupada'); };
+}
+
 // «Reintentar» cuando no se pudieron cargar los grupos
 async function reintentarCarga() {
   const listo = bloquearBoton(document.getElementById('btnReintentarCarga'), 'Cargando…');

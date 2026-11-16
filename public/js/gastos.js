@@ -64,8 +64,9 @@ async function addExpense() {
     const baseAmt = +(amount / rateToUse).toFixed(2);
 
   guardandoGasto = true;
-  const btnGuardar = document.getElementById('btnGuardarGasto');
-  if (btnGuardar) { btnGuardar.disabled = true; btnGuardar.textContent = 'Guardando...'; }
+  // Mientras se guarda, el formulario entero queda quieto (campos, chips y botón)
+  const soltarBoton = bloquearBoton(document.getElementById('btnGuardarGasto'), 'Guardando…');
+  const soltarForm = bloquearZona(document.getElementById('gastoSectionWrap'));
 
   try {
 
@@ -131,16 +132,19 @@ async function addExpense() {
     toast(textoError(err, 'No se pudo guardar el gasto.'), 'e');
   } finally {
     guardandoGasto = false;
-    const btnGuardar = document.getElementById('btnGuardarGasto');
-    if (btnGuardar) { btnGuardar.disabled = false; btnGuardar.textContent = 'Guardar Gasto'; }
+    soltarForm();
+    if (soltarBoton) soltarBoton();
   }
 }
 
-async function deleteExpense(idx) {
-  if (currentGroupIdx === null) return;
+// Devuelve true si se borró. Se busca por su id (no por la posición en la lista,
+// que puede cambiar si la lista se recarga mientras tanto).
+async function deleteExpense(idx, expId) {
+  if (currentGroupIdx === null) return false;
   const g = groups[currentGroupIdx];
+  if (expId != null) idx = g.expenses.findIndex(x => (x.id || x._id) === expId);
   const e = g.expenses[idx];
-  if (!e) return;
+  if (!e) return false;
 
   try {
     await vakaData.deleteExpense(currentGroupIdx, idx);
@@ -149,9 +153,13 @@ async function deleteExpense(idx) {
     renderAll();
     if (typeof renderGroups === 'function') renderGroups();
     toast('Gasto eliminado', 's');
+    return true;
   } catch (err) {
     console.error("Error al eliminar:", err);
     toast(textoError(err, 'No se pudo eliminar el gasto.'), 'e');
+    // Si ya no existía (otra persona lo borró), se recarga el grupo para que desaparezca
+    if (err && err.status === 404 && typeof recargarGrupoDelServidor === 'function') await recargarGrupoDelServidor(g);
+    return false;
   }
 }
 
@@ -241,7 +249,9 @@ function openEditModal(idx) {
   document.body.style.overflow = 'hidden';
 }
 
+let guardandoEdicion = false;   // mientras se guarda la edición, la ventana no se cierra
 function closeEditModal(){
+  if (guardandoEdicion) return;
   document.getElementById('editModal').classList.remove('open');
   document.body.style.overflow='';
   clearEditOCR();
@@ -267,11 +277,7 @@ function toggleEditSelectAll(){
 }
 
 async function saveEditExpense() {
-  if (currentGroupIdx === null || editingExpenseIdx === null) return;
-  
-  // 1. Bloqueo de UI para evitar múltiples clics
-  const saveBtn = document.querySelector('button[onclick="saveEditExpense()"]');
-  if (saveBtn) saveBtn.disabled = true;
+  if (currentGroupIdx === null || editingExpenseIdx === null || guardandoEdicion) return;
 
   const g = groups[currentGroupIdx];
   const old = g.expenses[editingExpenseIdx];
@@ -292,9 +298,16 @@ async function saveEditExpense() {
                    : (window._editTicketDeleted && teniaTicket ? null : undefined);
   const involved = [...document.querySelectorAll('#editInvolvedChips .modal-chip.sel')].map(c => c.dataset.name);
 
-  if (!desc) { toast('Añade una descripción', 'e'); if (saveBtn) saveBtn.disabled = false; return; }
-  if (!amount || amount <= 0) { toast('Monto inválido', 'e'); if (saveBtn) saveBtn.disabled = false; return; }
-  if (involved.length === 0) { toast('Selecciona al menos un consumidor', 'e'); if (saveBtn) saveBtn.disabled = false; return; }
+  if (!desc) { toast('Añade una descripción', 'e'); return; }
+  if (!amount || amount <= 0) { toast('Monto inválido', 'e'); return; }
+  if (involved.length === 0) { toast('Selecciona al menos un consumidor', 'e'); return; }
+
+  // Mientras se guarda: «Guardando…», y ni campos, ni «Eliminar», ni cerrar la ventana
+  const soltarBoton = bloquearBoton(document.getElementById('btnGuardarEdicion'), 'Guardando…');
+  if (!soltarBoton) return;
+  const soltarVentana = bloquearZona(document.querySelector('#editModal .modal-sheet'));
+  guardandoEdicion = true;
+  let guardado = false;
 
   try {
     const expId = old.id || old._id;
@@ -342,24 +355,36 @@ async function saveEditExpense() {
 
     renderAll();
     renderGroups();
-    document.getElementById('editModal').classList.remove('open');
-    document.body.style.overflow = '';
-        toast('Gasto actualizado', 's');
-    await refrescarActividad(); // el servidor ya registró la edición para todo el grupo
-
-    // Si la ficha del gasto está abierta, se vuelve a dibujar con los datos nuevos
-    if (document.getElementById('page-gasto').classList.contains('active')) {
-      const expId = old.id || old._id;
-      const lista = groups[currentGroupIdx].expenses;
-      const nuevoIdx = lista.findIndex(x => (x.id || x._id) === expId);
-      openGasto(nuevoIdx >= 0 ? nuevoIdx : editingExpenseIdx);
-    }
+    guardado = true;
+    toast('Gasto actualizado', 's');
   } catch (err) {
     console.error(err);
     toast(textoError(err, 'No se pudo guardar el cambio.'), 'e');
+    // El gasto ya no existe (alguien lo eliminó): se cierra y se recarga el grupo
+    if (err && err.status === 404) {
+      guardandoEdicion = false; soltarVentana(); soltarBoton();
+      editingExpenseIdx = null;
+      closeEditModal();
+      await recargarGrupoDelServidor(g);
+      if (document.getElementById('page-gasto').classList.contains('active')) goBackToGroup();
+      return;
+    }
   } finally {
-    if (saveBtn) saveBtn.disabled = false;
+    guardandoEdicion = false;
+    soltarVentana();
+    soltarBoton();
   }
+  if (!guardado) return;
+  document.getElementById('editModal').classList.remove('open');
+  document.body.style.overflow = '';
+  // Si la ficha del gasto está abierta, se vuelve a dibujar con los datos nuevos
+  if (document.getElementById('page-gasto').classList.contains('active')) {
+    const expId = old.id || old._id;
+    const lista = groups[currentGroupIdx].expenses;
+    const nuevoIdx = lista.findIndex(x => (x.id || x._id) === expId);
+    openGasto(nuevoIdx >= 0 ? nuevoIdx : editingExpenseIdx);
+  }
+  await refrescarActividad(); // el servidor ya registró la edición para todo el grupo
 }
 // ═══ BORRAR GASTO ════════════════════════════════════════════════════════
 // «Actualizar cuentas»: primero descarga el grupo del servidor (pagos y gastos que
@@ -447,22 +472,33 @@ function openDeleteExpenseModal(idx) {
   document.body.style.overflow = 'hidden';
 }
 
+let borrandoGasto = false;
 function cerrarModalBorrarGasto() {
+  if (borrandoGasto) return;   // no se cierra mientras se borra
   document.getElementById('modal-borrar-gasto').style.display = 'none';
   document.body.style.overflow = '';
   gastoABorrarIdx = null;
 }
 
+// La ventana de confirmación sigue abierta con «Eliminando…» hasta que el servidor
+// responde: así no se puede volver a borrar ni tocar el gasto mientras tanto.
 async function ejecutarBorradoGasto() {
-  if (gastoABorrarIdx === null) return;
-  const idx = gastoABorrarIdx;
+  if (gastoABorrarIdx === null || borrandoGasto) return;
+  const g = groups[currentGroupIdx];
+  const e = g && g.expenses[gastoABorrarIdx];
+  if (!e) { cerrarModalBorrarGasto(); return; }
+  const expId = e.id || e._id;
+  const soltarBoton = bloquearBoton(document.getElementById('btnConfirmarBorrarGasto'), 'Eliminando…');
+  if (!soltarBoton) return;
+  const soltarVentana = bloquearZona(document.querySelector('#modal-borrar-gasto .ventana, #modal-borrar-gasto > div'));
+  borrandoGasto = true;
+  let ok;
+  try { ok = await deleteExpense(gastoABorrarIdx, expId); }
+  finally { borrandoGasto = false; soltarVentana(); soltarBoton(); }
   cerrarModalBorrarGasto();
+  if (!ok) return;
   closeEditModal(); // cierra edición si estaba abierta
-  // El gasto se quita de la lista al instante; el servidor se actualiza en segundo plano
-  const borrado = deleteExpense(idx);
-  renderAll();
   goBackToGroup();
-  await borrado;
 }
 
 function openDeleteFromEdit() {
