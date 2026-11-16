@@ -342,8 +342,9 @@ async function ejecutarEliminarCuenta() {
 }
 
 // ═══ FOTO DE PERFIL AMPLIADA ═════════════════════════════════════════
-// Al tocar la foto de Cuenta se ve en grande, redonda y sobre el fondo difuminado,
-// como en Instagram. Se cierra tocando en cualquier sitio, con atrás o con Escape.
+// Al tocar la foto de Cuenta (o la de un amigo en su ficha) se ve en grande, redonda
+// y sobre el fondo difuminado, como en Instagram. Se cierra tocando en cualquier
+// sitio, con atrás o con Escape.
 function hacerAmpliable(img) {
   img.classList.add('ampliable');
   img.setAttribute('role', 'button');
@@ -360,7 +361,9 @@ function abrirFotoPerfil(src) {
 }
 function cerrarFotoPerfil() {
   document.getElementById('fotoPerfilModal').style.display = 'none';
-  document.body.style.overflow = '';
+  // Si debajo sigue abierta la ficha de un amigo, la página sigue sin desplazarse
+  const otraVentana = [...document.querySelectorAll('.modal-overlay')].some(m => m.id !== 'fotoPerfilModal' && getComputedStyle(m).display !== 'none');
+  if (!otraVentana) document.body.style.overflow = '';
 }
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && document.getElementById('fotoPerfilModal')?.style.display === 'flex') cerrarFotoPerfil();

@@ -60,3 +60,21 @@ test('Cuenta: tocar la foto de perfil la muestra en grande; se cierra tocando, c
   await expect(capa).toBeHidden();
   await expect(page.locator('.page.active')).toHaveId('page-cuenta');
 });
+
+test('Amigos: en la ficha, tocar la foto del amigo la amplía; atrás la cierra y la ficha sigue abierta', async ({ page, request }) => {
+  const { api } = require('./ayudas');
+  const ana = await crearUsuario(request);
+  const { datos: amigo } = await api(request, 'POST', '/friends', { name: 'Pepe' }, ana.token);
+  const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+  await api(request, 'PATCH', `/friends/${amigo.id}`, { avatar_url: PNG }, ana.token);
+  await entrar(page, ana);
+  await page.click('[data-page="page-amigos"]');
+  await page.evaluate(() => openFriendModal(friends.findIndex(f => f.name === 'Pepe')));
+  const foto = page.locator('#friendModalAvatar');
+  await expect(foto).toHaveAttribute('aria-label', 'Ver la foto en grande');
+  await foto.click();
+  await expect(page.locator('#fotoPerfilModal')).toBeVisible();
+  await page.evaluate(() => manejarAtras());
+  await expect(page.locator('#fotoPerfilModal')).toBeHidden();
+  await expect(page.locator('#friendModal')).toBeVisible();
+});
