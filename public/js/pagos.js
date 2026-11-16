@@ -228,6 +228,7 @@ function openPayModal(idx,from,to,amount){
   }).catch(() => { _cobro = null; });
 }
 function closePayModal(){
+  if (_guardandoPago) return;   // no se cierra a medias mientras se guarda el pago
   document.getElementById('payModal').classList.remove('open');
   document.body.style.overflow='';
   _payData=null;
@@ -319,23 +320,29 @@ function miNombreEnGrupo(g) {
 // le debían. Ajusta los saldos de todos y queda en la Actividad del grupo, pero no
 // cuenta como gasto en totales ni estadísticas. Se puede anular borrándolo.
 let _registrandoPago = false;   // evita enviar el mismo pago dos veces (doble pulsación)
+// Devuelve 'ok' (registrado, o rechazado y ya explicado: la deuda ya no existía),
+// 'error' (sin conexión o fallo del servidor: se puede reintentar) u 'ocupado'.
 // extras: deudas de otras personas con el mismo acreedor que paga «from» («Pagar también por…»)
 async function registrarPago({ from, to, amount }, archivoComprobante, extras = []) {
   const g = groups[currentGroupIdx];
-  if (!g || _registrandoPago) return;
+  if (!g) return 'error';
+  if (_registrandoPago) return 'ocupado';
   _registrandoPago = true;
   try {
-    if (!extras.length) { await _registrarPago(g, { from, to, amount }, archivoComprobante); return; }
+    if (!extras.length) return await _registrarPago(g, { from, to, amount }, archivoComprobante);
     let ticket = null;
     if (archivoComprobante) { try { ticket = 'data:image/jpeg;base64,' + await fileToBase64(archivoComprobante); } catch (_) {} }
     const pagos = [{ from, to, amount }, ...extras.map(x => ({ from: x.from, to: x.to, amount: x.amount, pagadoPor: from }))];
     const hechos = [], rechazados = [];
+    let sinRespuesta = false;
     for (const p of pagos) {
       const r = await enviarPago(g, p, ticket);
       if (r.ok) hechos.push(p);
       else if (r.rechazado) rechazados.push(`${p.from}: ${r.error}`);
-      else { rechazados.push(`${p.from}: ${r.error}`); break; }
+      else { rechazados.push(`${p.from}: ${r.error}`); sinRespuesta = true; break; }
     }
+    // Nada guardado por falta de conexión: la ventana sigue abierta para reintentar
+    if (sinRespuesta && !hechos.length) { toast(rechazados[rechazados.length - 1].replace(/^[^:]*: /, ''), 'e'); return 'error'; }
     await recargarGrupoDelServidor(g);
     if (typeof refrescarActividad === 'function') refrescarActividad();
     if (rechazados.length) {
@@ -344,6 +351,7 @@ async function registrarPago({ from, to, amount }, archivoComprobante, extras = 
     } else {
       toast(`${from} saldó ${formatAmountBase(pagos.reduce((s, p) => s + Number(p.amount), 0), getBase())} a ${to} (${pagos.map(p => p.from).join(', ')})`, 's');
     }
+    return 'ok';
   } finally { _registrandoPago = false; }
 }
 // Envía un pago al servidor. Devuelve { ok } o { ok:false, rechazado, error }
@@ -394,16 +402,17 @@ async function _registrarPago(g, { from, to, amount }, archivoComprobante) {
       // se recargan los saldos y la lista de deudas, y se explica por qué
       await recargarGrupoDelServidor(g);
       mostrarModalInfo('Pago no registrado', data.error);
-      return;
+      return 'ok';
     }
-    if (!res.ok) throw new Error(data.error || 'No se pudo registrar el pago');
+    if (!res.ok) { const e = new Error(data.error || 'No se pudo registrar el pago'); e.status = res.status; throw e; }
   } catch (err) {
     toast(textoError(err, 'No se pudo registrar el pago.'), 'e');
-    return;
+    return 'error';
   }
   await recargarGrupoDelServidor(g);
   if (typeof refrescarActividad === 'function') refrescarActividad();
   toast(`Pago de ${from} a ${to} registrado`, 's');
+  return 'ok';
 }
 
 // Recarga el grupo desde el servidor (saldos oficiales) y recalcula las deudas
@@ -427,14 +436,36 @@ async function recargarGrupoDelServidor(g, { aviso = false } = {}) {
   return ok;
 }
 
+// Mientras se guarda un pago, la ventana sigue abierta con «Guardando…» y no se
+// puede cerrar ni volver a pulsar: así se ve que la app está trabajando y no se
+// envía el mismo pago dos veces. Se cierra al terminar; si no hubo conexión,
+// sigue abierta para reintentar.
+let _guardandoPago = false;
+async function guardarPagoDesdeVentana(idBoton, idVentana, datos, archivo, cerrar) {
+  const listo = bloquearBoton(document.getElementById(idBoton), 'Guardando…');
+  if (!listo) return;
+  const ventana = document.getElementById(idVentana);
+  ventana.setAttribute('aria-busy', 'true');
+  ventana.querySelectorAll('button').forEach(b => { if (b.id !== idBoton) b.disabled = true; });
+  _guardandoPago = true;
+  let r;
+  try { r = await registrarPago({ ...datos }, archivo, datos.extras); }
+  finally {
+    _guardandoPago = false;
+    ventana.removeAttribute('aria-busy');
+    ventana.querySelectorAll('button').forEach(b => { if (b.id !== idBoton) b.disabled = false; });
+    listo();
+  }
+  if (r !== 'error') cerrar();
+}
 function confirmPayment(settle){
   if(!_payData)return;
   if(settle){
     const archivo = document.getElementById('pmProofFile')?.files?.[0] || null;
-    registrarPago({ ..._payData }, archivo, _payData.extras);
-  } else {
-    toast('Pago registrado, pendiente de confirmación','i');
+    guardarPagoDesdeVentana('btnMarcarSaldado', 'payModal', _payData, archivo, closePayModal);
+    return;
   }
+  toast('Pago registrado, pendiente de confirmación','i');
   closePayModal();
 }
 
@@ -457,6 +488,7 @@ function openProofModal(idx,from,to,amount){
   document.body.style.overflow='hidden';
 }
 function closeProofModal(){
+  if (_guardandoPago) return;
   document.getElementById('proofModal').classList.remove('open');
   document.body.style.overflow='';
   _proofData=null;
@@ -478,8 +510,11 @@ function sendProof(settle){
   if(!_proofData)return;
   if(settle){
     const archivo = document.getElementById('proofFileInput')?.files?.[0] || null;
-    registrarPago({ ..._proofData }, archivo, _proofData.extras); // el comprobante queda adjunto a cada pago
-  } else {toast('Comprobante enviado al acreedor','s');}
+    // el comprobante queda adjunto a cada pago
+    guardarPagoDesdeVentana('btnConfirmarCobro', 'proofModal', _proofData, archivo, closeProofModal);
+    return;
+  }
+  toast('Comprobante enviado al acreedor','s');
   closeProofModal();
 }
 /* ============================================================

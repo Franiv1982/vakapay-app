@@ -68,3 +68,32 @@ test('importes con formato español: 1.250,50 € en la lista, en Estadísticas 
   await page.click('#sec7');
   await expect(page.locator('#chatLista')).toContainText('1.250,50 €');
 });
+
+test('saldar una deuda: la ventana muestra «Guardando…» hasta que se guarda y no se puede pagar dos veces', async ({ page, request }) => {
+  const ana = await crearUsuario(request);
+  await crearGrupo(request, ana, { gasto: { desc: 'Cena', importe: 40, pagador: 'Luis' } });   // Ana debe 20 € a Luis
+  await entrar(page, ana);
+  await page.locator('.group-card').first().click();
+  await page.click('#sec5');
+  await page.locator('#debtList').getByRole('button', { name: 'Pagar' }).click();
+
+  // El servidor tarda en guardar el pago
+  let soltar;
+  const espera = new Promise(r => { soltar = r; });
+  await page.route('**/expenses', async (route) => {
+    if (route.request().method() === 'POST') await espera;
+    await route.fallback();
+  });
+  const boton = page.locator('#btnMarcarSaldado');
+  await boton.click();
+  await expect(boton).toHaveText('Guardando…');
+  await expect(boton).toBeDisabled();
+  await expect(page.locator('#payModal')).toHaveClass(/open/);
+  await expect(page.locator('#payModal').getByRole('button', { name: 'Cancelar' })).toBeDisabled();
+
+  soltar();
+  await expect(page.locator('#payModal')).not.toHaveClass(/open/);
+  await expect(page.locator('#debtList')).toContainText('cuadradas');
+  await expect(page.locator('#debtList').getByRole('button', { name: 'Pagar' })).toHaveCount(0);
+  await expect(page.getByText('Pago no registrado')).toHaveCount(0);
+});
