@@ -188,6 +188,9 @@ function openFriendModal(idx){
   document.body.style.overflow='hidden';
 }
 function closeFriendModal(){
+  // Lo que no se guardó (foto nueva o «Quitar foto») se descarta al cerrar
+  const f = friends[editingFriendIdx];
+  if (f) { delete f._tmpAvatar; delete f._quitarAvatar; }
   document.getElementById('friendModal').classList.remove('open');
   document.body.style.overflow='';
   editingFriendIdx=null;
@@ -343,7 +346,7 @@ function handleFriendAvatarChange(ev){
       const data=canvas.toDataURL('image/jpeg',0.8);
       document.getElementById('friendModalAvatar').innerHTML=`<img class="u-w-100p u-h-100p u-fit-cover" src="${data}" alt="">`;
       rotularFotoAmigo();
-      if(editingFriendIdx!==null)friends[editingFriendIdx]._tmpAvatar=data;
+      if(editingFriendIdx!==null){friends[editingFriendIdx]._tmpAvatar=data;delete friends[editingFriendIdx]._quitarAvatar;}
     };
     img.src=e.target.result;
   };
@@ -375,10 +378,12 @@ async function saveEditFriend(){
       }
     });
   }
-  friends[editingFriendIdx]={...f,name:newName,email,phone,notes,contact:email||phone||'',avatar:f._tmpAvatar||f.avatar||null};
-  delete friends[editingFriendIdx]._tmpAvatar;
+  const nuevaFoto = f._quitarAvatar ? null : (f._tmpAvatar || f.avatar || null);
+  friends[editingFriendIdx]={...f,name:newName,email,phone,notes,contact:email||phone||'',avatar:nuevaFoto};
+  delete friends[editingFriendIdx]._tmpAvatar; delete friends[editingFriendIdx]._quitarAvatar;
   const cambiosAmigo = { name: newName, email, phone, notes };
-  if (f._tmpAvatar) cambiosAmigo.avatar_url = f._tmpAvatar; // la foto nueva también se guarda en el servidor
+  if (f._quitarAvatar) cambiosAmigo.avatar_url = null;           // «Quitar foto»
+  else if (f._tmpAvatar) cambiosAmigo.avatar_url = f._tmpAvatar; // la foto nueva también se guarda en el servidor
   if (f.id) { try { await vakaData.updateFriend(f.id, cambiosAmigo); } catch(_) { toast('No se pudo guardar en el servidor','e'); } }
 saveFriends();logActivity(`Amigo "${newName}" actualizado`);saveActivity();renderActivity();
   closeFriendModal();renderFriends();renderFriendPicker();updateStats();
@@ -472,7 +477,20 @@ function rotularFotoAmigo() {
   const conFoto = !!av.querySelector('img');
   av.setAttribute('aria-label', conFoto ? 'Ver la foto en grande' : 'Ver la inicial en grande');
   av.style.cursor = 'zoom-in';
+  // «Quitar foto»: solo la que le pusiste tú (la de su cuenta solo la quita él)
+  const quitar = document.getElementById('btnQuitarFotoAmigo');
+  if (quitar) quitar.style.display = conFoto && !av.dataset.cuenta ? '' : 'none';
   const pista = document.getElementById('friendFotoPista');
   if (pista) pista.textContent = av.dataset.cuenta ? 'Foto de su perfil · toca para ampliar'
     : conFoto ? 'Toca para ampliar · el lápiz la cambia' : 'Añade una foto con el lápiz';
+}
+
+// Quita la foto que le pusiste al amigo; se guarda al pulsar «Guardar»
+function quitarFotoAmigo() {
+  const f = friends[editingFriendIdx]; if (!f) return;
+  f._quitarAvatar = true; delete f._tmpAvatar;
+  const av = document.getElementById('friendModalAvatar');
+  av.textContent = String(f.name || '?')[0].toUpperCase();
+  rotularFotoAmigo();
+  anunciar('Foto quitada. Pulsa Guardar para confirmarlo.');
 }

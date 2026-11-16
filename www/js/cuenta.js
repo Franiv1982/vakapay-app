@@ -25,14 +25,14 @@ function loadProfile(){
       img.onerror = function() {
         profile.avatar = null;
         const ph = document.createElement('div');
-        ph.id = 'avatarDisplay'; ph.className = 'avatar-placeholder';
+        ph.id = 'avatarDisplay'; ph.className = 'avatar-placeholder'; hacerInicialAmpliable(ph);
         if (inicial) ph.textContent = inicial; else ph.innerHTML = icono('usuario', 40);
         if (this.parentNode) this.parentNode.replaceChild(ph, this);
       };
       if (wrap.parentNode) wrap.parentNode.replaceChild(img, wrap);
     } else {
       const ph = document.createElement('div');
-      ph.id = 'avatarDisplay'; ph.className = 'avatar-placeholder';
+      ph.id = 'avatarDisplay'; ph.className = 'avatar-placeholder'; hacerInicialAmpliable(ph);
       if (inicial) ph.textContent = inicial; else ph.innerHTML = icono('usuario', 40);
       if (wrap.parentNode) wrap.parentNode.replaceChild(ph, wrap);
     }
@@ -359,6 +359,15 @@ function hacerAmpliable(img) {
   img.setAttribute('aria-label', 'Ver tu foto de perfil en grande');
   img.onclick = () => abrirFotoPerfil(img.src);
   img.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirFotoPerfil(img.src); } };
+}
+// Sin foto: tocar tu inicial la amplía (como con los amigos)
+function hacerInicialAmpliable(ph) {
+  ph.classList.add('ampliable');
+  ph.setAttribute('role', 'button');
+  ph.tabIndex = 0;
+  ph.setAttribute('aria-label', 'Ver tu inicial en grande');
+  ph.onclick = () => abrirInicialAmpliada(profile.nombre || '?');
+  ph.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ph.onclick(); } };
 }
 function abrirFotoPerfil(src) {
   if (!src) return;
