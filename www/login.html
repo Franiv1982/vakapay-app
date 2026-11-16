@@ -300,7 +300,12 @@
     .otp-input { width: 46px; text-align: center; font-size: 1.3rem; padding: 12px 0; }
     #enlace-reenviar.deshabilitado { color: var(--gold-off-text); pointer-events: none; cursor: not-allowed; opacity: .6; }
     .country-code { color:var(--gold-text); font-size:var(--fs-base); font-weight:700; }
-    </style>
+            /* Enlaces legales (registro e inicio) */
+        .aviso-legal{font-size:var(--fs-xs);color:var(--muted);text-align:center;margin:10px 0 0;line-height:1.5}
+        .aviso-legal a,.enlaces-legales a{color:var(--gold-text);font-weight:700}
+        .enlaces-legales{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 8px;margin-top:18px;font-size:var(--fs-xs);color:var(--muted)}
+        .enlaces-legales a{color:var(--muted);font-weight:400;text-decoration:underline;padding:8px 2px}
+</style>
 <link rel="stylesheet" href="css/utilidades.css">
 </head>
 <body>
@@ -317,6 +322,9 @@
             <button class="btn-google" onclick="mostrarAvisoLogin('Próximamente', 'El acceso con Google estará disponible en una próxima versión. Mientras tanto, regístrate con tu email.', 'pronto')">
                 <img src="logo_google.png" alt="Google"> Seguir con Google
             </button>
+            <nav class="enlaces-legales" aria-label="Información legal">
+                <a href="privacidad.html">Política de privacidad</a><span aria-hidden="true">·</span><a href="terminos.html">Términos y condiciones</a>
+            </nav>
         </div></div>
     </div>
 	
@@ -458,6 +466,7 @@
                 <span id="err-pass-confirm" class="error-message"></span>
             </div>
             <button id="btnRegistrarse" class="btn-primary u-mt-10" onclick="handleRegistro()" disabled>Registrarse</button>
+            <p class="aviso-legal">Al registrarte aceptas los <a href="terminos.html" target="_blank" rel="noopener">Términos y condiciones</a> y la <a href="privacidad.html" target="_blank" rel="noopener">Política de privacidad</a>.</p>
             <button class="u-bg-none u-b-1-solid-gold u-c-gold-text u-fs-base u-mt-14 u-cur-pointer u-ls-_4 u-p-8-24 u-r-sm u-d-block u-ml-auto u-mr-auto" onclick="safeBack()">Volver al inicio</button>
         </div>
     </div></div>

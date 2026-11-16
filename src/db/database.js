@@ -175,7 +175,8 @@ const initSchema = async () => {
       ALTER TABLE users ADD COLUMN IF NOT EXISTS reset_attempts INTEGER NOT NULL DEFAULT 0;
       ALTER TABLE expenses ADD COLUMN IF NOT EXISTS ticket TEXT;
       ALTER TABLE expenses ADD COLUMN IF NOT EXISTS member_id INTEGER;
-      ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_mini TEXT;   -- foto de perfil pequeña (96 px) para mostrarla a grupos y amigos   -- en producción ya existía (creada a mano); así una base nueva también la tiene
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_mini TEXT;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS terminos_aceptados_en TIMESTAMP;   -- cuándo aceptó los Términos y la Política (al registrarse)   -- foto de perfil pequeña (96 px) para mostrarla a grupos y amigos   -- en producción ya existía (creada a mano); así una base nueva también la tiene
       ALTER TABLE expenses ADD COLUMN IF NOT EXISTS es_pago BOOLEAN NOT NULL DEFAULT FALSE;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS pago_bizum TEXT;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS pago_iban TEXT;
