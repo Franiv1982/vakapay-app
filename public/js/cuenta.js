@@ -465,3 +465,16 @@ async function quitarFotoPerfil() {
 function recordarVolverACuenta() {
   try { sessionStorage.setItem('vp_volver_a', 'page-cuenta'); } catch (_) {}
 }
+
+// Pie de Cuenta: qué versión de la app tiene cada uno («VakaPay · versión 1.1 (2)»).
+// El número entre paréntesis es el de APP_VERSION_MINIMA en Vercel. La web
+// siempre es la última, así que solo dice «versión web».
+(async function pintarVersionApp() {
+  const el = document.getElementById('versionApp');
+  const App = window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform() && Capacitor.Plugins && Capacitor.Plugins.App;
+  if (!el || !App || !App.getInfo) return;
+  try {
+    const info = await App.getInfo();
+    if (info && info.version) el.textContent = `VakaPay · versión ${info.version}${info.build ? ` (${info.build})` : ''}`;
+  } catch (_) { /* se queda el texto de la web */ }
+})();
