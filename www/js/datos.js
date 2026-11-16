@@ -110,6 +110,10 @@ class VakaDataService {
   memberIds: Array.isArray(g.members)
     ? Object.fromEntries(g.members.filter(m => m.user_id).map(m => [m.display_name, m.user_id]))
     : g.memberIds || {},
+  // Foto pequeña de los participantes con cuenta que la han subido
+  memberFotos: Array.isArray(g.members)
+    ? Object.fromEntries(g.members.filter(m => m.foto).map(m => [m.display_name, m.foto]))
+    : g.memberFotos || {},
   expenses: (g.expenses || []).map(normalizeExpense),
   createdAt: g.created_at || g.createdAt || new Date().toISOString(),
   currency:  g.currency || 'EUR',
@@ -264,7 +268,9 @@ class VakaDataService {
       const raw = await this.#req('GET', '/friends');
       if (Array.isArray(raw)) {
         // La foto guardada en el servidor (avatar_url) es la que se muestra (avatar)
-        const data = raw.map(f => ({ ...f, avatar: (f.avatar_url && f.avatar_url.startsWith('data:')) ? f.avatar_url : (f.avatar || null) }));
+        const data = raw.map(f => ({ ...f, avatar: (f.avatar_url && f.avatar_url.startsWith('data:')) ? f.avatar_url : (f.avatar || null),
+          // Si tiene cuenta y ha subido su foto, esa manda (la tuya queda de reserva)
+          fotoCuenta: f.foto_cuenta || null, cuentaId: f.cuenta_id || null }));
         this.#write(this.#KEYS.friends, data);
         return data;
       }

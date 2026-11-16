@@ -157,7 +157,7 @@ function pintarChat(alFinal = false) {
       : adjunto ? `${adjunto}${m.texto ? `<span class="pie">${escaparHtml(m.texto)}</span>` : ''}`
       : escaparHtml(m.texto);
     html += `<div class="msg ${m.mio ? 'yo' : ''} ${m.borrado ? 'borrado' : ''}" data-id="${m.id}">
-      ${mostrarAutor ? `<div class="autor">${escaparHtml(m.autor || 'Alguien')}</div>` : ''}
+      ${mostrarAutor ? `<div class="autor">${htmlAvatar(m.autor, 'av-chat')}${escaparHtml(m.autor || 'Alguien')}</div>` : ''}
       <div class="burb${adjunto ? ' media' : ''}">${m.borrado ? '' : cita}${cuerpo}<span class="hora">${horaChat(m.created_at)}</span></div>
       ${bloqueReacc}
     </div>`;

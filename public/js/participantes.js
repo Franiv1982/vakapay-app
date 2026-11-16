@@ -162,7 +162,7 @@ function renderFriendPicker() {
     const inGroup = g && Object.prototype.hasOwnProperty.call(g.members, name);
     
     return `<div class="chip friend-pick ${inGroup ? 'sel' : ''}" data-name="${name}" onclick="toggleFriendInGroup('${name}',this)">
-      <div class="av">${name[0].toUpperCase()}</div>${name}
+      ${htmlAvatar(name)}${name}
       ${inGroup ? '<span class="u-c-gold-text u-d-flex">'+icono('check',15)+'</span>' : '<span class="u-c-muted u-fs-sm">+</span>'}
     </div>`;
   }).join('');

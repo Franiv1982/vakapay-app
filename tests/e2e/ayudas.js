@@ -13,7 +13,7 @@ const CLAVE = 'Abcdef1!';
 async function api(request, metodo, ruta, cuerpo, token) {
   for (let intento = 0; intento < 10; intento++) {     // la API crea las tablas al arrancar
     const r = await request.fetch(`${API()}/api/v1${ruta}`, {
-      method: metodo, data: cuerpo,
+      method: metodo, ...(cuerpo == null ? {} : { data: cuerpo }),   // sin cuerpo en GET
       headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     });
     if (r.status() >= 500 && intento < 9) { await new Promise(res => setTimeout(res, 500)); continue; }

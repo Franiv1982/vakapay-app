@@ -48,7 +48,20 @@ const upload = multer({
 // ── GET /friends ──────────────────────────────────────────────────
 router.get('/', requireAuth, async (req, res, next) => {
   try {
-    const result = await db.query('SELECT * FROM friends WHERE owner_id = $1 ORDER BY name ASC', [req.user.id]);
+    // Si el amigo tiene cuenta (mismo email o mismos 9 últimos dígitos del teléfono)
+    // y ha subido foto, se envía su miniatura y su id para poder ampliarla
+    const result = await db.query(`
+      SELECT f.*, c.id AS cuenta_id, c.avatar_mini AS foto_cuenta
+      FROM friends f
+      LEFT JOIN LATERAL (
+        SELECT u.id, u.avatar_mini FROM users u
+        WHERE u.id <> f.owner_id AND u.avatar_mini IS NOT NULL AND (
+          (f.email <> '' AND LOWER(TRIM(f.email)) = LOWER(TRIM(u.email)))
+          OR (f.phone <> '' AND u.tel IS NOT NULL AND LENGTH(REGEXP_REPLACE(f.phone, '\\D', '', 'g')) >= 9
+              AND RIGHT(REGEXP_REPLACE(f.phone, '\\D', '', 'g'), 9) = RIGHT(REGEXP_REPLACE(u.tel, '\\D', '', 'g'), 9)))
+        LIMIT 1
+      ) c ON TRUE
+      WHERE f.owner_id = $1 ORDER BY f.name ASC`, [req.user.id]);
     res.json(result.rows);
   } catch (err) { next(err); }
 });

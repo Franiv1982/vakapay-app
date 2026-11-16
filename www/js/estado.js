@@ -71,3 +71,21 @@ const skChat = () => [['izq', 62], ['der', 48], ['izq', 70], ['izq', 40], ['der'
   <div aria-hidden="true" style="display:flex;justify-content:${lado === 'der' ? 'flex-end' : 'flex-start'};margin:8px 12px;">
     <div class="sk" style="height:38px;width:${w}%;border-radius:var(--r-md);${lado === 'der' ? 'border-bottom-right-radius:4px' : 'border-bottom-left-radius:4px'};"></div>
   </div>`).join('');
+
+// ═══ FOTOS DE LAS PERSONAS ═══════════════════════════════════════════
+// Si una persona con cuenta ha subido su foto, la ven quienes comparten grupo con
+// ella y quienes la tienen en sus amigos (el servidor solo la envía a esos).
+// Si no tiene, se usa la que le hayas puesto tú en tus amigos; si no, su inicial.
+function fotoPersona(nombre, g = groups[currentGroupIdx]) {
+  if (!nombre) return null;
+  const deGrupo = g && g.memberFotos && g.memberFotos[nombre];
+  if (deGrupo) return deGrupo;
+  const amigo = friends.find(f => f.name === nombre);
+  return amigo ? (amigo.fotoCuenta || amigo.avatar || null) : null;
+}
+// Círculo de una persona: su foto o su inicial
+function htmlAvatar(nombre, clase = 'av', g) {
+  const foto = fotoPersona(nombre, g);
+  if (foto && /^data:image\/(jpeg|png|webp);base64,/.test(foto)) return `<div class="${clase} con-foto"><img src="${foto}" alt=""></div>`;
+  return `<div class="${clase}">${escaparHtml(String(nombre || '?')[0].toUpperCase())}</div>`;
+}

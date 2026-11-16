@@ -70,9 +70,11 @@ try {
   bio: me.bio || '',
   pago_bizum: me.pago_bizum || '',
   pago_iban: me.pago_iban || '',
-    avatar: resolverAvatar(me.avatar_url)
+    avatar: resolverAvatar(me.avatar_url),
+  tiene_mini: !!me.tiene_mini
 };
         await vakaData.saveProfile(profile);
+        completarMiniatura();   // fotos subidas antes de existir la versión pequeña
       }
     } catch(_) {
       profile = await vakaData.getProfile() || {};
