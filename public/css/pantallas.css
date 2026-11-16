@@ -160,3 +160,4 @@ button.bar-row{margin-bottom:2px}
 .enlaces-legales{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:4px 8px;margin:18px 0 6px;font-size:var(--fs-xs);color:var(--muted)}
 .enlaces-legales a{color:var(--muted);text-decoration:underline;padding:8px 2px;min-height:var(--alto-sm);display:inline-flex;align-items:center}
 .enlaces-legales a:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.version-app{text-align:center;font-size:var(--fs-xs);color:var(--muted);margin:0 0 10px}

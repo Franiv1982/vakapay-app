@@ -1,5 +1,5 @@
 // Versión mínima de la APK y modo mantenimiento (#73)
-const { test, expect, WEB } = require('./ayudas');
+const { test, expect, crearUsuario, entrar, WEB } = require('./ayudas');
 
 const API_ESTADO = '**/api/v1/estado';
 const responder = (page, datos) => page.route(API_ESTADO, r => r.fulfill({ json: { version_minima: 0, url_descarga: null, mantenimiento: null, ...datos } }));
@@ -8,7 +8,7 @@ const responder = (page, datos) => page.route(API_ESTADO, r => r.fulfill({ json:
 const comoApk = (page, build) => page.addInitScript(b => {
   window.Capacitor = {
     isNativePlatform: () => true,
-    Plugins: { App: { getInfo: async () => ({ build: b, version: '1.0' }), addListener: () => ({ remove() {} }), exitApp() {} } },
+    Plugins: { App: { getInfo: async () => ({ build: b, version: '1.1' }), addListener: () => ({ remove() {} }), exitApp() {} } },
   };
 }, String(build));
 
@@ -58,4 +58,16 @@ test('APK al día y web: sin aviso de versión', async ({ page }) => {
   await page.goto(`${WEB}/login.html`);
   await page.waitForTimeout(500);
   await expect(page.locator('#avisoApp')).toHaveCount(0);
+});
+
+test('el pie de Cuenta dice qué versión es: web o la de la APK', async ({ page, request }) => {
+  const ana = await crearUsuario(request);
+  await entrar(page, ana);
+  await page.click('[data-page="page-cuenta"]');
+  await expect(page.locator('#versionApp')).toHaveText('VakaPay · versión web');
+
+  await comoApk(page, 2);
+  await page.reload();
+  await page.click('[data-page="page-cuenta"]');
+  await expect(page.locator('#versionApp')).toHaveText('VakaPay · versión 1.1 (2)');
 });

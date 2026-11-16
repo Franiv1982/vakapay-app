@@ -1,5 +1,5 @@
 // Grupos y gastos, usando la app como un usuario (escribiendo y pulsando)
-const { test, expect, crearUsuario, crearGrupo, entrar } = require('./ayudas');
+const { test, expect, api, crearUsuario, crearGrupo, entrar } = require('./ayudas');
 
 test('crear un grupo desde el formulario', async ({ page, request }) => {
   const ana = await crearUsuario(request);
@@ -89,11 +89,98 @@ test('saldar una deuda: la ventana muestra «Guardando…» hasta que se guarda 
   await expect(boton).toHaveText('Guardando…');
   await expect(boton).toBeDisabled();
   await expect(page.locator('#payModal')).toHaveClass(/open/);
-  await expect(page.locator('#payModal').getByRole('button', { name: 'Cancelar' })).toBeDisabled();
+  await expect(page.locator('#payModal .modal-sheet')).toHaveAttribute('aria-busy', 'true');   // Cancelar, métodos… quietos
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#payModal')).toHaveClass(/open/);
 
   soltar();
   await expect(page.locator('#payModal')).not.toHaveClass(/open/);
   await expect(page.locator('#debtList')).toContainText('cuadradas');
   await expect(page.locator('#debtList').getByRole('button', { name: 'Pagar' })).toHaveCount(0);
   await expect(page.getByText('Pago no registrado')).toHaveCount(0);
+});
+
+// Retiene las peticiones de ese método a los gastos hasta llamar a la función que devuelve
+async function servidorLento(page, metodo) {
+  let soltar;
+  const espera = new Promise(r => { soltar = r; });
+  await page.route('**/expenses**', async (route) => {
+    if (route.request().method() === metodo) await espera;
+    await route.fallback();
+  });
+  return soltar;
+}
+
+test('registrar un gasto: mientras se guarda, el formulario no se puede tocar', async ({ page, request }) => {
+  const ana = await crearUsuario(request);
+  await crearGrupo(request, ana);
+  await entrar(page, ana);
+  await page.locator('.group-card').first().click();
+  await page.click('#sec3');
+  await page.fill('#expDesc', 'Pan');
+  await page.fill('#expAmount', '4.50');
+  await page.fill('#expDate', '2026-11-12');
+  await page.click('#btnSelectAll');
+  const soltar = await servidorLento(page, 'POST');
+  await page.click('#btnGuardarGasto');
+  await expect(page.locator('#btnGuardarGasto')).toHaveText('Guardando…');
+  await expect(page.locator('#gastoSectionWrap')).toHaveAttribute('aria-busy', 'true');
+  expect(await page.locator('#gastoSectionWrap').evaluate(e => e.inert)).toBe(true);   // chips y campos no responden
+  soltar();
+  await expect(page.locator('#toast')).toContainText('Gasto registrado');
+  await expect(page.locator('#gastoSectionWrap')).not.toHaveAttribute('aria-busy', 'true');
+  await expect(page.locator('#btnGuardarGasto')).toBeEnabled();
+});
+
+test('editar un gasto: mientras se guarda no se puede eliminar ni cerrar; borrar espera al servidor', async ({ page, request }) => {
+  const ana = await crearUsuario(request);
+  await crearGrupo(request, ana, { gasto: { desc: 'Pan', importe: 4 } });
+  await entrar(page, ana);
+  await page.locator('.group-card').first().click();
+  await page.evaluate(() => openEditModal(0));
+  await page.fill('#editDesc', 'Pan y leche');
+
+  let soltar = await servidorLento(page, 'PUT');
+  await page.click('#btnGuardarEdicion');
+  await expect(page.locator('#btnGuardarEdicion')).toHaveText('Guardando…');
+  await expect(page.locator('#editModal .modal-sheet')).toHaveAttribute('aria-busy', 'true');   // «Eliminar» no responde
+  await page.evaluate(() => closeEditModal());                                                    // ni se cierra
+  await expect(page.locator('#editModal')).toHaveClass(/open/);
+  soltar();
+  await expect(page.locator('#editModal')).not.toHaveClass(/open/);
+  await expect(page.locator('#toast')).toContainText('Gasto actualizado');
+
+  // Borrar: «Eliminando…» hasta que responde el servidor, y un solo aviso
+  soltar = await servidorLento(page, 'DELETE');
+  await page.evaluate(() => openDeleteExpenseModal(0));
+  await page.click('#btnConfirmarBorrarGasto');
+  await expect(page.locator('#btnConfirmarBorrarGasto')).toHaveText('Eliminando…');
+  await page.evaluate(() => cerrarModalBorrarGasto());
+  await expect(page.locator('#modal-borrar-gasto')).toBeVisible();
+  soltar();
+  await expect(page.locator('#modal-borrar-gasto')).toBeHidden();
+  await expect(page.locator('#toast')).toContainText('Gasto eliminado');
+  await expect.poll(() => page.evaluate(() => groups[currentGroupIdx].expenses.length)).toBe(0);
+  await expect(page.locator('#modal-error')).toHaveCount(0);
+});
+
+test('servidor: editar y borrar el mismo gasto a la vez no da error 500', async ({ request }) => {
+  const ana = await crearUsuario(request);
+  const g = await crearGrupo(request, ana, { gasto: { desc: 'Pan', importe: 4 } });
+  const { datos } = await api(request, 'GET', `/groups/${g.id}`, null, ana.token);
+  const gasto = datos.expenses[0];
+  const cuerpo = { description: 'Pan y leche', amount: 4, amount_base: 4, currency: 'EUR', category: 'food',
+    payer_name: 'Ana', expense_date: '2026-11-10', involved: ['Ana', 'Luis'] };
+  for (let n = 0; n < 5; n++) {
+    const otro = n === 0 ? gasto : (await api(request, 'POST', `/groups/${g.id}/expenses`, { ...cuerpo, description: 'Pan' }, ana.token)).datos;
+    // Directo, sin la ayuda «api», que repite las peticiones que dan error 500
+    const url = `${process.env.VP_API_PRUEBAS}/api/v1/groups/${g.id}/expenses/${otro.id}`;
+    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${ana.token}` };
+    const [ed, bo] = await Promise.all([
+      request.fetch(url, { method: 'PUT', data: cuerpo, headers }),
+      request.fetch(url, { method: 'DELETE', headers }),
+    ]);
+    expect([200, 404]).toContain(ed.status());
+    expect(bo.status()).toBe(204);
+  }
 });

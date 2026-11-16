@@ -591,6 +591,7 @@
     <span aria-hidden="true">·</span>
     <a href="terminos.html" onclick="recordarVolverACuenta()">Términos y condiciones</a>
   </nav>
+  <p class="version-app" id="versionApp">VakaPay · versión web</p>
 </main>
 </div>
 
@@ -681,7 +682,7 @@
   <!-- Se asegura la llamada a la función de confirmación -->
   <button type="button" class="btn btn-danger u-f-1" onclick="openDeleteFromEdit()">Eliminar</button>
   <!-- Se añade type="button" para evitar comportamiento de formulario accidental -->
-  <button type="button" class="btn btn-gold u-f-1" onclick="saveEditExpense()">Guardar cambios</button>
+  <button type="button" class="btn btn-gold u-f-1" id="btnGuardarEdicion" onclick="saveEditExpense()">Guardar cambios</button>
 </div>
   </div>
 </div>
@@ -959,7 +960,7 @@
 
     <div class="u-d-flex u-gap-12 u-w-100p">
       <button onclick="cerrarModalBorrarGasto()" class="btn btn-outline u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg> No, volver</button>
-      <button onclick="ejecutarBorradoGasto()" class="btn btn-peligro u-f-1"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
+      <button onclick="ejecutarBorradoGasto()" class="btn btn-peligro u-f-1" id="btnConfirmarBorrarGasto"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg> Sí, borrar</button>
     </div>
   </div>
 </div>

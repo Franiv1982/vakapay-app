@@ -444,16 +444,14 @@ let _guardandoPago = false;
 async function guardarPagoDesdeVentana(idBoton, idVentana, datos, archivo, cerrar) {
   const listo = bloquearBoton(document.getElementById(idBoton), 'Guardando…');
   if (!listo) return;
-  const ventana = document.getElementById(idVentana);
-  ventana.setAttribute('aria-busy', 'true');
-  ventana.querySelectorAll('button').forEach(b => { if (b.id !== idBoton) b.disabled = true; });
+  // Toda la ventana quieta: método de pago, comprobante, Cancelar, Cerrar…
+  const soltarVentana = bloquearZona(document.querySelector(`#${idVentana} .modal-sheet`) || document.getElementById(idVentana));
   _guardandoPago = true;
   let r;
   try { r = await registrarPago({ ...datos }, archivo, datos.extras); }
   finally {
     _guardandoPago = false;
-    ventana.removeAttribute('aria-busy');
-    ventana.querySelectorAll('button').forEach(b => { if (b.id !== idBoton) b.disabled = false; });
+    soltarVentana();
     listo();
   }
   if (r !== 'error') cerrar();

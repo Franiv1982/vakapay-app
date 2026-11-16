@@ -291,16 +291,31 @@ router.get('/:expId', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// Editar y borrar un gasto se hacen de uno en uno por grupo (el mismo bloqueo que
+// los pagos): si llegan a la vez, el segundo espera a que acabe el primero y ve
+// el gasto ya cambiado o ya borrado (en vez de fallar a medias con un error 500).
+async function bloquearGrupo(groupId) {
+  const c = await db.pool.connect();
+  try { await c.query('SELECT pg_advisory_lock($1)', [Number(groupId)]); }
+  catch (e) { c.release(); throw e; }
+  return async () => {
+    await c.query('SELECT pg_advisory_unlock($1)', [Number(groupId)]).catch(() => {});
+    c.release();
+  };
+}
+
 // ── PUT /groups/:id/expenses/:expId ──────────────────────────────
 router.put('/:expId', requireAuth, async (req, res, next) => {
+  let soltar = null;
   try {
     const isOwner = await ownsGroup(req.params.id, req.user.id);
     const member = await isMember(req.params.id, req.user.id);
     if (!isOwner && !member) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
+    soltar = await bloquearGrupo(req.params.id);
     const existing = await db.query('SELECT * FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
-    if (!existing.rows[0]) return res.status(404).json({ error: 'Gasto no encontrado' });
+    if (!existing.rows[0]) return res.status(404).json({ error: 'Este gasto ya no existe: puede que alguien lo haya eliminado.' });
     // Los pagos no se editan (cambiaría quién debe a quién): se anulan y se registran de nuevo
     if (existing.rows[0].es_pago) return res.status(400).json({ error: 'Los pagos no se editan: anúlalo y vuelve a registrarlo' });
     // Guardamos cómo era el gasto antes de editarlo, para el historial
@@ -356,6 +371,7 @@ router.put('/:expId', requireAuth, async (req, res, next) => {
     }
     res.json(expense);
   } catch (err) { next(err); }
+  finally { if (soltar) await soltar(); }
 });
 
 // ── PUT /groups/:id/expenses/:expId/ticket ───────────────────────
@@ -423,12 +439,14 @@ router.post('/:expId/confirmar', requireAuth, async (req, res, next) => {
 
 // ── DELETE /groups/:id/expenses/:expId ───────────────────────────
 router.delete('/:expId', requireAuth, async (req, res, next) => {
+  let soltar = null;
   try {
     const isOwner = await ownsGroup(req.params.id, req.user.id);
     const member = await isMember(req.params.id, req.user.id);
     if (!isOwner && !member) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
+    soltar = await bloquearGrupo(req.params.id);
     const expRes = await db.query('SELECT * FROM expenses WHERE id = $1 AND group_id = $2', [req.params.expId, req.params.id]);
     const borrado = expRes.rows[0];
     const rechazo = borrado && porConfirmar(borrado);
@@ -436,7 +454,7 @@ router.delete('/:expId', requireAuth, async (req, res, next) => {
       ? (quien, grupo) => `${quien} ${rechazo ? 'rechazó' : 'anuló'} el pago de ${borrado.payer_name} (${importe(borrado.amount, borrado.currency)}) en "${grupo}"`
           + (rechazo ? `. La deuda vuelve a «Cuentas finales»` : '')
       : (quien, grupo) => `${quien} eliminó "${borrado.description}" · ${importe(borrado.amount, borrado.currency)} en "${grupo}"`;
-    if (!borrado) return res.status(404).json({ error: 'Gasto no encontrado' });
+    if (!borrado) return res.status(404).json({ error: 'Este gasto ya no existe: puede que ya se haya eliminado.' });
     if (!await puedeGestionarPago(req.params.id, req.user.id, borrado)) return res.status(403).json({ error: NO_PUEDE_PAGO });
 
     await db.query('DELETE FROM expenses WHERE id = $1', [req.params.expId]);
@@ -444,6 +462,7 @@ router.delete('/:expId', requireAuth, async (req, res, next) => {
     await logGroupActivity(req.params.id, req.user.id, borrado.es_pago ? 'payment' : 'expense', textoBorrado);
     res.status(204).end();
   } catch (err) { next(err); }
+  finally { if (soltar) await soltar(); }
 });
 
 module.exports = router;
