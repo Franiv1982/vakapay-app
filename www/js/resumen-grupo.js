@@ -345,20 +345,18 @@ function renderExpenses() {
   }
 
   const base = getBase();
-  const sym = SYMBOLS[base] || '€';
   // Los pagos entre participantes no son gastos: no cuentan en el total
   const { total, porPersona } = resumenPorPersona(g);
 
   if (sg) {
     sg.style.display = 'grid';
-    document.getElementById('statTotal').textContent = sym + total.toFixed(2);
-    document.getElementById('statPP').textContent = sym + porPersona.toFixed(2);
+    document.getElementById('statTotal').textContent = formatoImporte(total, base);
+    document.getElementById('statPP').textContent = formatoImporte(porPersona, base);
   }
 
   el.innerHTML = g.expenses.map((e, i) => {
     if (e.es_pago) return '';
     const displayCurrency = e.currency || base;
-    const displaySym = SYMBOLS[displayCurrency] || '€';
     // Normalización de seguridad para evitar "undefined"
     const desc = e.desc || e.description || 'Sin descripción';
     const payer = e.payer || e.payer_name || 'Desconocido';
@@ -374,7 +372,7 @@ function renderExpenses() {
         <div class="gc-meta"><strong>${payer}</strong> saldó deuda · ${fmtDate(date)}</div>
       </div>
       <div class="u-t-right">
-        <div class="exp-amt u-c-success">${displaySym}${amount.toFixed(2)}</div>
+        <div class="exp-amt u-c-success">${formatoImporte(amount, displayCurrency)}</div>
         ${(e.ticket || e.has_ticket) ? '<div class="u-c-text2 u-lh-1" title="Con comprobante">'+icono('ticket',13)+'</div>' : ''}
       </div>
     </div>`;
@@ -386,8 +384,8 @@ function renderExpenses() {
         <div class="gc-meta">Pagó <strong>${payer}</strong> · ${fmtDate(date)}</div>
       </div>
       <div class="u-t-right">
-        <div class="exp-amt">${displaySym}${amount.toFixed(2)}</div>
-        ${displayCurrency !== base ? `<div class="u-fs-xs u-c-muted">≈ ${sym}${(Number(e.baseAmt)||0).toFixed(2)}</div>` : ''}
+        <div class="exp-amt">${formatoImporte(amount, displayCurrency)}</div>
+        ${displayCurrency !== base ? `<div class="u-fs-xs u-c-muted">≈ ${formatoImporte((Number(e.baseAmt)||0), base)}</div>` : ''}
         ${(e.ticket || e.has_ticket) ? '<div class="u-c-text2 u-lh-1" title="Con comprobante">'+icono('ticket',13)+'</div>' : ''}
       </div>
     </div>`;
@@ -440,7 +438,6 @@ function renderBalances(){
   }
 
   const base2 = getBase();
-  const sym2 = SYMBOLS[base2] || '€';
   
   bl.innerHTML = mbs.map(([n,v]) => `
     <div class="bal-row">
@@ -449,7 +446,7 @@ function renderBalances(){
         <span class="u-fw-700" translate="no">${escaparHtml(n)}</span>
       </div>
       <span class="${Number(v) > 0.01 ? 'bal-pos' : Number(v) < -0.01 ? 'bal-neg' : 'bal-zer'}">
-        ${Number(v) > 0.01 ? '+' : ''}${sym2}${Number(v || 0).toFixed(2)}
+        ${formatoImporte(v, base2, { signo: true })}
       </span>
     </div>`).join('');
     

@@ -132,8 +132,7 @@ function textoResumen() {
   if (currentGroupIdx === null) return '';
   const g = groups[currentGroupIdx];
   const pp = resumenPorPersona(g);
-  const sym = SYMBOLS[g.currency || 'EUR'] || '€';
-  const imp = (n, cur) => `${SYMBOLS[cur] || sym}${(Number(n) || 0).toFixed(2)}`;
+  const imp = (n, cur) => formatoImporte(n, cur || g.currency || 'EUR');
   const gastos = g.expenses.filter(e => !e.es_pago);
   let t = `💳 *VakaPay – ${g.name}* ${TYPE_ICONS[g.type] || ''}\n📅 ${fmtDate(g.start)} → ${fmtDate(g.end)}\n\n`;
   t += `💰 Total: ${imp(pp.total)}  |  Por persona: ${imp(pp.porPersona)}`;
@@ -198,7 +197,7 @@ function exportarPDF(){
     doc.setFont('helvetica','normal');
     doc.setFontSize(8); sc(0,0,0);
     doc.text(`• ${m}`, pad+3, y);
-    const balStr = bal>=0 ? `+${bal.toFixed(2)}` : bal.toFixed(2);
+    const balStr = formatoImporte(bal, g.currency||'EUR', { signo: true, pdf: true });
     if(bal>=0) sc(0,130,60); else sc(180,0,0);
     doc.text(balStr, W-pad, y, {align:'right'});
     y += lh;
@@ -215,17 +214,17 @@ function exportarPDF(){
   y += 5;
   doc.setFont('helvetica','normal');
   doc.setFontSize(8); sc(0,0,0);
-  doc.text(`Total gastado: ${g.currency||'EUR'} ${totalGastos.toFixed(2)}`, pad+3, y); y+=lh;
+  doc.text(`Total gastado: ${formatoImporte(totalGastos, g.currency||'EUR', { pdf: true })}`, pad+3, y); y+=lh;
   doc.text(resPP.participantes && resPP.participantes !== mbs.length
     ? `Participantes: ${mbs.length} (${resPP.participantes} en los gastos)`
     : `Participantes: ${mbs.length}`, pad+3, y); y+=lh;
-  doc.text(`Por persona: ${g.currency||'EUR'} ${porPersona.toFixed(2)}`, pad+3, y); y+=lh;
+  doc.text(`Por persona: ${formatoImporte(porPersona, g.currency||'EUR', { pdf: true })}`, pad+3, y); y+=lh;
   doc.text(`Gastos registrados: ${g.expenses.filter(e=>!e.es_pago).length}`, pad+3, y); y+=lh;
   const gastosPdf = g.expenses.filter(e => !e.es_pago);
   if (gastosPdf.length) {
     const mayor = gastosPdf.reduce((m, e) => (Number(e.baseAmt) || 0) > (Number(m.baseAmt) || 0) ? e : m, gastosPdf[0]);
-    doc.text(`Gasto medio: ${g.currency||'EUR'} ${(totalGastos / gastosPdf.length).toFixed(2)}`, pad+3, y); y+=lh;
-    doc.text(`Gasto mayor: ${g.currency||'EUR'} ${(Number(mayor.baseAmt)||0).toFixed(2)} (${mayor.desc || 'Sin descripcion'})`, pad+3, y); y+=lh;
+    doc.text(`Gasto medio: ${formatoImporte((totalGastos / gastosPdf.length), g.currency||'EUR', { pdf: true })}`, pad+3, y); y+=lh;
+    doc.text(`Gasto mayor: ${formatoImporte((Number(mayor.baseAmt)||0), g.currency||'EUR', { pdf: true })} (${mayor.desc || 'Sin descripcion'})`, pad+3, y); y+=lh;
   }
   y += 3;
 
@@ -242,9 +241,9 @@ function exportarPDF(){
     const barX = pad + 55, barW = 70;
     sf(235,235,235); doc.rect(barX, y - 3, barW, 3.2, 'F');            // fondo de la barra
     sf(r, g2, b); doc.rect(barX, y - 3, Math.max(0.5, barW * pct), 3.2, 'F');
-    doc.text(`${g.currency||'EUR'} ${importe.toFixed(2)}`, W - pad - 18, y, {align:'right'});
+    doc.text(`${formatoImporte(importe, g.currency||'EUR', { pdf: true })}`, W - pad - 18, y, {align:'right'});
     doc.setFont('helvetica','bold');
-    doc.text(`${(pct * 100).toFixed(1)}%`, W - pad, y, {align:'right'});
+    doc.text(`${(pct * 100).toFixed(1).replace('.', ',')} %`, W - pad, y, {align:'right'});
     y += lh;
   };
   const seccion = titulo => {
@@ -284,7 +283,7 @@ function exportarPDF(){
     doc.setFontSize(8); sc(20,60,160);
     doc.text(`${i+1}. ${e.desc||'Sin descripcion'}`, pad+3, y);
     sc(0,0,0);
-    doc.text(`${g.currency||'EUR'} ${(Number(e.baseAmt)||0).toFixed(2)}`, W-pad, y, {align:'right'});
+    doc.text(`${formatoImporte((Number(e.baseAmt)||0), g.currency||'EUR', { pdf: true })}`, W-pad, y, {align:'right'});
     y += 5;
     doc.setFont('helvetica','normal');
     doc.setFontSize(7); sc(80,80,80);
@@ -306,7 +305,7 @@ function exportarPDF(){
       doc.setFont('helvetica','normal'); doc.setFontSize(8); sc(0,0,0);
       doc.text(`• ${e.payer || '-'}  pagó a  ${destino}   ${fecha}`, pad+3, y);
       sc(0,130,60);
-      doc.text(`${g.currency||'EUR'} ${(Number(e.baseAmt)||0).toFixed(2)}`, W-pad, y, {align:'right'});
+      doc.text(`${formatoImporte((Number(e.baseAmt)||0), g.currency||'EUR', { pdf: true })}`, W-pad, y, {align:'right'});
       y += lh;
     });
     y += 3;
@@ -342,7 +341,7 @@ function exportarPDF(){
       doc.setFontSize(8); sc(0,0,0);
       doc.text(`• ${t.from}  paga a  ${t.to}`, pad+3, y);
       sc(20,60,160);
-      doc.text(`${g.currency||'EUR'} ${t.amount.toFixed(2)}`, W-pad, y, {align:'right'});
+      doc.text(`${formatoImporte(t.amount, g.currency||'EUR', { pdf: true })}`, W-pad, y, {align:'right'});
       y += lh;
     });
   }

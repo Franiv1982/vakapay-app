@@ -54,3 +54,17 @@ test('registrar, ver, editar y borrar un gasto', async ({ page, request }) => {
   await page.locator('[onclick*="ejecutarBorradoGasto"]').click();
   await expect.poll(() => page.evaluate(() => groups[currentGroupIdx].expenses.map(e => e.desc))).not.toContain('Pan y leche');
 });
+
+test('importes con formato español: 1.250,50 € en la lista, en Estadísticas y en el chat', async ({ page, request }) => {
+  const ana = await crearUsuario(request);
+  await crearGrupo(request, ana, { gasto: { desc: 'Alquiler', importe: 1250.5, cat: 'hotel' } });
+  await entrar(page, ana);
+  await page.locator('.group-card').first().click();
+  await page.click('#sec4');
+  await expect(page.locator('#gastosListSectionWrap')).toContainText('1.250,50 €');
+  await page.click('[data-page="page-stats"]');
+  await expect(page.locator('#skpi1')).toHaveText('1.250,50 €');
+  await page.click('[data-page="page-grupos"]');
+  await page.click('#sec7');
+  await expect(page.locator('#chatLista')).toContainText('1.250,50 €');
+});

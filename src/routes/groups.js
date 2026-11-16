@@ -7,6 +7,7 @@ const { logActivity, registrarEnGrupo, actorName, mensajeSistema } = require('..
 const { agregarAmigoSiNoExiste, sincronizarAmigosGrupo } = require('../utils/contactos');
 const { recalcBalances } = require('./expenses');
 const { pagosSinConfirmar, textoPagoPendiente, porConfirmar } = require('../utils/pagos');
+const { formatoNumero } = require('../utils/importe');
 
 const router = express.Router();
 
@@ -172,8 +173,8 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
       return res.status(422).json({
         titulo: 'Aún no puedes salir del grupo',
         error: balance > 0
-          ? `Aún te deben ${balance.toFixed(2).replace('.', ',')}. Podrás salir cuando te hayan pagado.`
-          : `Debes ${Math.abs(balance).toFixed(2).replace('.', ',')}. Podrás salir cuando hayas pagado.`
+          ? `Aún te deben ${formatoNumero(balance)}. Podrás salir cuando te hayan pagado.`
+          : `Debes ${formatoNumero(Math.abs(balance))}. Podrás salir cuando hayas pagado.`
       });
     }
     // Un pago tuyo que quien cobra aún no ha confirmado también impide salir
@@ -294,8 +295,8 @@ router.delete('/:id/members/:name', requireAuth, async (req, res, next) => {
     if (Math.abs(saldo) > MARGEN_SALDO) {
       return res.status(422).json({
         error: saldo < 0
-          ? `${member.display_name} todavía debe ${Math.abs(saldo).toFixed(2)}. Registra el pago en «Cuentas finales» antes de eliminarlo.`
-          : `A ${member.display_name} todavía le deben ${saldo.toFixed(2)}. Registra el pago en «Cuentas finales» antes de eliminarlo.`,
+          ? `${member.display_name} todavía debe ${formatoNumero(Math.abs(saldo))}. Registra el pago en «Cuentas finales» antes de eliminarlo.`
+          : `A ${member.display_name} todavía le deben ${formatoNumero(saldo)}. Registra el pago en «Cuentas finales» antes de eliminarlo.`,
         saldo_pendiente: saldo,
       });
     }

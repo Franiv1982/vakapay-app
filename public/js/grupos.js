@@ -83,7 +83,7 @@ function fmtDate(raw) {
   return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' });
 }
 function renderGroupsList() {
-  const sym0 = (vakaData && vakaData.settings) ? getCurrencySymbol(vakaData.settings.baseCurrency) : '€';
+  const mon0 = (vakaData && vakaData.settings && vakaData.settings.baseCurrency) || 'EUR';
   const el = document.getElementById('groupsList');
   
   if (!el) return; // Validación de QA para evitar errores si el elemento no existe
@@ -121,15 +121,15 @@ function renderGroupsList() {
         <div class="gc-icon u-pos-relative">${iconoTipo(g.type, 22)}<span class="chat-dot" title="Mensajes nuevos en el chat" style="display:${(typeof chatNoLeidos !== 'undefined' && chatNoLeidos[g.id] > 0) ? 'block' : 'none'}"></span></div>
         <div class="gc-info">
           <div class="gc-name">${g.name}</div>
-          <div class="gc-meta">${nm} participante${nm !== 1 ? 's' : ''} · total ${sym0}${Number(total || 0).toFixed(2)}</div>
+          <div class="gc-meta">${nm} participante${nm !== 1 ? 's' : ''} · total ${formatoImporte(Number(total || 0), mon0)}</div>
         </div>
         ${(() => {
           // Lo que le importa a cada uno: su saldo en el grupo
           const yo = miNombreEnGrupo(g);
           const sd = yo ? Number((g.members || {})[yo]) || 0 : 0;
           if (!yo) return '';
-          if (sd > 0.05) return `<div class="gc-saldo"><small>Te deben</small><b class="verde">${sym0}${sd.toFixed(2)}</b></div>`;
-          if (sd < -0.05) return `<div class="gc-saldo"><small>Debes</small><b class="rojo">${sym0}${Math.abs(sd).toFixed(2)}</b></div>`;
+          if (sd > 0.05) return `<div class="gc-saldo"><small>Te deben</small><b class="verde">${formatoImporte(sd, mon0)}</b></div>`;
+          if (sd < -0.05) return `<div class="gc-saldo"><small>Debes</small><b class="rojo">${formatoImporte(Math.abs(sd), mon0)}</b></div>`;
           return `<div class="gc-saldo"><small>Al día</small><b class="verde">${icono('check',18)}</b></div>`;
         })()}
         <svg class="gc-flecha" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -212,8 +212,6 @@ function openGasto(idx, origen) {
   const puede = puedoGestionarPago(g, e);
   const tieneTicket = !!(e.ticket || e.has_ticket);
   const base = getBase();
-  const sym = SYMBOLS[base] || '€';
-  const displaySym = SYMBOLS[e.currency || base] || '€';
 
   const iconoGasto = e.es_pago ? iconoCat('pago', 20) : iconoCat(e.cat, 20);
   // Pagos: quién pagó por otro («Pagar también por…») y quién lo registró
@@ -243,9 +241,9 @@ function openGasto(idx, origen) {
 
     <div class="u-d-grid u-cols-1fr-1fr u-gap-10 u-mb-16">
       <div class="card u-p-12 u-t-center">
-        <div class="u-fs-xl u-fw-800 u-c-gold-text">${displaySym}${Number(e.amount).toFixed(2)}</div>
+        <div class="u-fs-xl u-fw-800 u-c-gold-text">${formatoImporte(Number(e.amount), (e.currency || base))}</div>
         <div class="u-fs-2xs u-c-muted u-tt-uppercase u-ls-_5">Monto</div>
-        ${e.currency !== base ? `<div class="u-fs-xs u-c-muted">≈ ${sym}${Number(e.baseAmt).toFixed(2)}</div>` : ''}
+        ${e.currency !== base ? `<div class="u-fs-xs u-c-muted">≈ ${formatoImporte(Number(e.baseAmt), base)}</div>` : ''}
       </div>
       <div class="card u-p-12 u-t-center">
         <div class="u-fs-lg u-fw-800 u-c-text" translate="no">${e.es_pago ? `${escaparHtml(e.payer)} → ${escaparHtml((e.involved || [])[0] || '')}` : escaparHtml(e.payer)}</div>
