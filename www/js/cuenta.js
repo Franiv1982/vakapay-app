@@ -362,7 +362,20 @@ function hacerAmpliable(img) {
 }
 function abrirFotoPerfil(src) {
   if (!src) return;
-  document.getElementById('fotoPerfilGrande').src = src;
+  document.getElementById('fotoPerfilInicial').style.display = 'none';
+  const img = document.getElementById('fotoPerfilGrande');
+  img.style.display = ''; img.src = src;
+  document.querySelector('#fotoPerfilModal .foto-perfil-caja').setAttribute('aria-label', 'Foto en grande');
+  document.getElementById('fotoPerfilModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+// Sin foto: se amplía la inicial, igual que una foto
+function abrirInicialAmpliada(nombre) {
+  const letra = String(nombre || '?').trim().charAt(0).toUpperCase() || '?';
+  document.getElementById('fotoPerfilGrande').style.display = 'none';
+  const ini = document.getElementById('fotoPerfilInicial');
+  ini.textContent = letra; ini.style.display = 'flex';
+  document.querySelector('#fotoPerfilModal .foto-perfil-caja').setAttribute('aria-label', `Inicial de ${nombre}`);
   document.getElementById('fotoPerfilModal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
 }

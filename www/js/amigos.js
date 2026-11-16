@@ -137,7 +137,7 @@ function renderFriends(){
       ?`<img class="u-w-100p u-h-100p u-fit-cover u-r-50p" src="${fotoAmigo}" alt="">`
       :`<span class="u-fs-md u-fw-900 u-c-gold-text">${f.name[0].toUpperCase()}</span>`;
     return`<div class="friend-item">
-      <div class="fi-av">${avatarContent}</div>
+      <button type="button" class="fi-av fi-av-boton" onclick="ampliarFotoAmigo(${i})" aria-label="Ver ${fotoAmigo ? 'la foto' : 'la inicial'} de ${escaparHtml(f.name)} en grande">${avatarContent}</button>
       <div class="fi-info">
         <div class="fi-name">${f.name}</div>
         <div class="fi-sub">${[f.email,f.phone].filter(Boolean).join(' · ')||f.contact||'Sin contacto'}</div>
@@ -453,19 +453,26 @@ function confirmDeleteFriend(idx) {
 // ═══ FOTO DEL AMIGO EN SU FICHA ══════════════════════════════════════
 // Con foto: tocarla la muestra en grande (como la tuya en Cuenta).
 // Sin foto: tocarla abre la elección de imagen. El lápiz siempre cambia la foto.
+// Desde la lista: tocar la foto del amigo la amplía (la de su cuenta se pide en grande)
+function ampliarFotoAmigo(i) {
+  const f = friends[i]; if (!f) return;
+  if (f.fotoCuenta && f.cuentaId) abrirFotoDeCuenta(f.cuentaId, f.fotoCuenta);
+  else if (f.avatar) abrirFotoPerfil(f.avatar);
+  else abrirInicialAmpliada(f.name);
+}
 function tocarFotoAmigo() {
   const av = document.getElementById('friendModalAvatar');
   const img = av.querySelector('img');
-  if (!img) { document.getElementById('friendAvatarFile').click(); return; }
+  if (!img) { abrirInicialAmpliada(document.getElementById('editFriendName').value || av.textContent); return; }   // la foto se añade con el lápiz
   if (av.dataset.cuenta) abrirFotoDeCuenta(av.dataset.cuenta, img.src);
   else abrirFotoPerfil(img.src);
 }
 function rotularFotoAmigo() {
   const av = document.getElementById('friendModalAvatar');
   const conFoto = !!av.querySelector('img');
-  av.setAttribute('aria-label', conFoto ? 'Ver la foto en grande' : 'Añadir una foto');
+  av.setAttribute('aria-label', conFoto ? 'Ver la foto en grande' : 'Ver la inicial en grande');
+  av.style.cursor = 'zoom-in';
   const pista = document.getElementById('friendFotoPista');
   if (pista) pista.textContent = av.dataset.cuenta ? 'Foto de su perfil · toca para ampliar'
-    : conFoto ? 'Toca para ampliar · el lápiz la cambia' : 'Toca para añadir una foto';
-  av.style.cursor = conFoto ? 'zoom-in' : 'pointer';
+    : conFoto ? 'Toca para ampliar · el lápiz la cambia' : 'Añade una foto con el lápiz';
 }
