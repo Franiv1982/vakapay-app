@@ -32,8 +32,7 @@ function getBase() {
   return document.getElementById('baseCurrency')?.value || 'EUR';
 }
 function formatAmountBase(amount, currency) {
-  const sym = SYMBOLS[currency || getBase()] || '€';
-  return sym + amount.toFixed(2);
+  return formatoImporte(amount, currency || getBase());
 }
 function onBaseCurrencyChange() {
   renderExpenses();

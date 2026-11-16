@@ -20,12 +20,25 @@ function normalizeMembersField(rawMembers, fallback) {
 }
 
 
-// Traduce los gastos del servidor (description, category, payer_name...)
-// a los nombres que usa el frontend (desc, cat, payer...). Sin esto, los iconos salen como 💡.
+// Importes con el formato de España: 1.234,56 € · −7,00 € · 7,00 US$
+// opciones: { signo: true } pone «+» a los positivos; { pdf: true } usa el guion normal
+// y espacios corrientes (las fuentes del PDF no tienen «−» ni el espacio fino).
+const SIMBOLO_IMPORTE = { EUR: '€', USD: 'US$', GBP: '£', ARS: 'ARS' };
+function formatoImporte(n, moneda = 'EUR', { signo = false, pdf = false } = {}) {
+  const v = Math.round((Number(n) || 0) * 100) / 100;
+  const [ent, dec] = Math.abs(v).toFixed(2).split('.');
+  const miles = ent.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const texto = `${miles},${dec}${pdf ? ' ' : '\u00a0'}${SIMBOLO_IMPORTE[moneda] || moneda || '€'}`;
+  if (v < 0) return (pdf ? '-' : '\u2212') + texto;
+  return (signo && v > 0 ? '+' : '') + texto;
+}
+
 // Texto escrito por la gente → seguro para meterlo en HTML (también en atributos).
 // Declarada aquí, al principio, para que exista desde la primera pantalla que se pinta.
 function escaparHtml(t) { return String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
+// Traduce los gastos del servidor (description, category, payer_name...)
+// a los nombres que usa el frontend (desc, cat, payer...). Sin esto, los iconos salen como 💡.
 function normalizeExpensesField(rawExpenses) {
   return (rawExpenses || [])
     .slice()

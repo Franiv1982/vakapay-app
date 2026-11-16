@@ -65,7 +65,8 @@ function fechaTexto(v) {
   const [y, m, d] = iso.slice(0, 10).split('-');
   return d && m && y ? `${d}/${m}/${y}` : iso;
 }
-const importe = (a, c) => `${Number(a).toFixed(2)} ${c || 'EUR'}`;
+const { formatoImporte, formatoNumero } = require('../utils/importe');
+const importe = (a, c) => formatoImporte(a, c || 'EUR');
 
 // Describe qué cambió entre la versión anterior y la nueva de un gasto
 function describirCambios(antes, despues) {
@@ -139,7 +140,7 @@ async function errorDePago(groupId, de, para, importeBase) {
   if (leDeben < MARGEN_PAGO) return `A ${para} ya no se le debe nada en este grupo. Puede que este pago ya se haya registrado.`;
   const maximo = Math.min(debe, leDeben);
   if (importeBase > maximo + MARGEN_PAGO) {
-    return `El pago (${importeBase.toFixed(2)}) es mayor de lo pendiente (${maximo.toFixed(2)}). Puede que parte ya se haya registrado: vuelve a calcular las deudas.`;
+    return `El pago (${formatoNumero(importeBase)}) es mayor de lo pendiente (${formatoNumero(maximo)}). Puede que parte ya se haya registrado: vuelve a calcular las deudas.`;
   }
   return null;
 }
@@ -400,7 +401,7 @@ router.post('/:expId/confirmar', requireAuth, async (req, res, next) => {
     if (req.body.importe !== undefined && req.body.importe !== null && req.body.importe !== '') {
       recibido = Math.round(Number(req.body.importe) * 100) / 100;
       if (!Number.isFinite(recibido) || recibido <= 0) return res.status(400).json({ error: 'Escribe un importe mayor que cero. Si no recibiste nada, rechaza el pago.' });
-      if (recibido > total + 0.001) return res.status(400).json({ error: `El importe no puede ser mayor que el pago registrado (${total.toFixed(2)})` });
+      if (recibido > total + 0.001) return res.status(400).json({ error: `El importe no puede ser mayor que el pago registrado (${formatoNumero(total)})` });
     }
     const parcial = recibido < total - 0.001;
     // Importe en la divisa original, en proporción

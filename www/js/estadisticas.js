@@ -8,7 +8,6 @@ function renderStats() {
   const pane = document.getElementById('page-stats');
   const mainContent = pane.querySelector('main');
   const base = getBase();
-  const sym = SYMBOLS[base] || '€';
   const g = groups[currentGroupIdx];
 
   // 1. GESTIÓN DEL MENSAJE (SIN BORRAR EL <MAIN>)
@@ -68,10 +67,10 @@ function renderStats() {
   if (sub) sub.textContent = count + ' gastos en este grupo'
   
   if (document.getElementById('skpi1')) {
-    document.getElementById('skpi1').textContent = sym + total.toFixed(2);
+    document.getElementById('skpi1').textContent = formatoImporte(total, base);
     document.getElementById('skpi2').textContent = count;
-    document.getElementById('skpi3').textContent = sym + avg.toFixed(2);
-    document.getElementById('skpi4').textContent = sym + maxE.toFixed(2);
+    document.getElementById('skpi3').textContent = formatoImporte(avg, base);
+    document.getElementById('skpi4').textContent = formatoImporte(maxE, base);
   }
 
   // 5. LLAMADA A TUS FUNCIONES DE DIBUJO
@@ -80,17 +79,17 @@ function renderStats() {
   _statGastos = allExp;
   const catMap = {};
   allExp.forEach(e => { catMap[e.cat] = (catMap[e.cat] || 0) + (Number(e.baseAmt) || 0); });
-  renderDonut(catMap, total, sym);
+  renderDonut(catMap, total, base);
 
   const payerMap = {};
   allExp.forEach(e => { payerMap[e.payer] = (payerMap[e.payer] || 0) + (Number(e.baseAmt) || 0); });
-  renderPayerBars(payerMap, total, sym);
+  renderPayerBars(payerMap, total, base);
 }
 
-function renderDonut(catMap, total, sym) {
+function renderDonut(catMap, total, base) {
   const svg = document.getElementById('donutSvg');
   const legend = document.getElementById('catLegend');
-  document.getElementById('donutCenter').textContent = sym + total.toFixed(2);
+  document.getElementById('donutCenter').textContent = formatoImporte(total, base);
   const cx=80, cy=80, r=58, strokeW=22;
   const circumference = 2 * Math.PI * r;
   const cats = Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
@@ -110,8 +109,8 @@ function renderDonut(catMap, total, sym) {
       offset += dashLen;
       const catLabel = CAT_NOMBRES[cat] || cat;
       const n = _statGastos.filter(e => e.cat === cat).length;
-      legendContent += `<button type="button" class="legend-item stat-sel" onclick="elegirStatCat('${cat}')" aria-expanded="${esta}" aria-label="${catLabel}, ${sym}${amt.toFixed(2)}, ${(pct*100).toFixed(0)}%, ${n} ${n === 1 ? 'gasto' : 'gastos'}"><div class="legend-dot" style="background:${color}"></div><span>${icon} ${catLabel}</span><span class="u-ml-auto u-fw-700 u-fs-sm">${sym}${amt.toFixed(2)}</span><span class="legend-pct u-ml-0 u-minw-34 u-t-right">${(pct*100).toFixed(0)}%</span><span class="stat-chev">${icono('abajo', 16)}</span></button>`;
-      if (esta) legendContent += detalleStat(_statGastos.filter(e => e.cat === cat), sym, 'cat', catLabel);
+      legendContent += `<button type="button" class="legend-item stat-sel" onclick="elegirStatCat('${cat}')" aria-expanded="${esta}" aria-label="${catLabel}, ${formatoImporte(amt, base)}, ${(pct*100).toFixed(0)}%, ${n} ${n === 1 ? 'gasto' : 'gastos'}"><div class="legend-dot" style="background:${color}"></div><span>${icon} ${catLabel}</span><span class="u-ml-auto u-fw-700 u-fs-sm">${formatoImporte(amt, base)}</span><span class="legend-pct u-ml-0 u-minw-34 u-t-right">${(pct*100).toFixed(0)}%</span><span class="stat-chev">${icono('abajo', 16)}</span></button>`;
+      if (esta) legendContent += detalleStat(_statGastos.filter(e => e.cat === cat), base, 'cat', catLabel);
     });
   }
   if(cats.length===0) legendContent = '<div class="u-c-muted u-fs-sm u-t-center u-p-8">Sin gastos aún</div>';
@@ -122,9 +121,10 @@ function renderDonut(catMap, total, sym) {
   // En el centro, lo de la categoría elegida
   const centro = document.getElementById('donutCenter'), rotulo = centro.nextElementSibling;
   if (_statSel.cat && catMap[_statSel.cat] != null) {
-    centro.textContent = sym + catMap[_statSel.cat].toFixed(2);
+    centro.textContent = formatoImporte(catMap[_statSel.cat], base);
     if (rotulo) rotulo.textContent = CAT_NOMBRES[_statSel.cat] || _statSel.cat;
   } else if (rotulo) rotulo.textContent = 'Total';
+  ajustarCentroDona();
 }
 
 // ── Estadísticas: desglose al tocar una categoría o un pagador ──
@@ -137,7 +137,7 @@ function elegirStatPagador(i) {
   _statSel.payer = _statSel.payer === nombre ? null : nombre; renderStats();
 }
 let _statPagadores = [];
-function detalleStat(lista, sym, tipo, titulo) {
+function detalleStat(lista, base, tipo, titulo) {
   const orden = [...lista].sort((a, b) => (b.baseAmt || 0) - (a.baseAmt || 0));
   const total = orden.reduce((t, e) => t + (Number(e.baseAmt) || 0), 0);
   const filas = orden.map(e => {
@@ -148,14 +148,14 @@ function detalleStat(lista, sym, tipo, titulo) {
     return `<button type="button" class="stat-gasto" onclick="openGasto(${e.idx},'stats')">
       <span class="exp-ico ${CAT_CSS[e.cat] || 'c-other'}">${iconoCat(e.cat, 15)}</span>
       <span class="stat-gasto-info"><span class="stat-gasto-nombre u-d-block">${nombre}</span><span class="stat-gasto-meta u-d-block">${meta}</span></span>
-      <span class="stat-gasto-imp">${sym}${(Number(e.baseAmt) || 0).toFixed(2)}</span></button>`;
+      <span class="stat-gasto-imp">${formatoImporte((Number(e.baseAmt) || 0), base)}</span></button>`;
   }).join('');
   const n = orden.length;
   return `<div class="stat-detalle" role="region" aria-label="Gastos de ${escaparHtml(titulo)}">
-    <div class="stat-det-cab">${n} ${n === 1 ? 'gasto' : 'gastos'} · ${sym}${total.toFixed(2)}</div>${filas}</div>`;
+    <div class="stat-det-cab">${n} ${n === 1 ? 'gasto' : 'gastos'} · ${formatoImporte(total, base)}</div>${filas}</div>`;
 }
 
-function renderPayerBars(payerMap, total, sym) {
+function renderPayerBars(payerMap, total, base) {
   const el = document.getElementById('payerBars');
   const sorted = Object.entries(payerMap).sort((a,b)=>b[1]-a[1]);
   if(sorted.length===0){el.innerHTML='<div class="u-c-muted u-fs-sm u-t-center u-p-8">Sin gastos aún</div>';return;}
@@ -165,11 +165,19 @@ function renderPayerBars(payerMap, total, sym) {
   el.innerHTML = sorted.map(([name,amt],i)=>{
     const esta = _statSel.payer === name;
     const suyos = _statGastos.filter(e => (e.payer || e.payer_name) === name);
-    return `<button type="button" class="bar-row stat-sel" onclick="elegirStatPagador(${i})" aria-expanded="${esta}" aria-label="${escaparHtml(name)}, pagó ${sym}${amt.toFixed(2)}, ${suyos.length} ${suyos.length === 1 ? 'gasto' : 'gastos'}">
+    return `<button type="button" class="bar-row stat-sel" onclick="elegirStatPagador(${i})" aria-expanded="${esta}" aria-label="${escaparHtml(name)}, pagó ${formatoImporte(amt, base)}, ${suyos.length} ${suyos.length === 1 ? 'gasto' : 'gastos'}">
       <div class="bar-name">${escaparHtml(name)}</div>
       <div class="bar-track"><div class="bar-fill" style="width:${max?((amt/max)*100).toFixed(1):0}%"></div></div>
-      <div class="bar-val">${sym}${amt.toFixed(2)}</div>
+      <div class="bar-val">${formatoImporte(amt, base)}</div>
       <span class="stat-chev">${icono('abajo', 16)}</span>
-    </button>${esta ? detalleStat(suyos, sym, 'payer', name) : ''}`;
+    </button>${esta ? detalleStat(suyos, base, 'payer', name) : ''}`;
   }).join('');
+}
+
+// El importe del centro de la dona se encoge si es largo, para no salirse del anillo
+function ajustarCentroDona() {
+  const c = document.getElementById('donutCenter'); if (!c) return;
+  const n = c.textContent.length;
+  c.classList.toggle('largo', n > 8 && n <= 11);
+  c.classList.toggle('muy-largo', n > 11);
 }

@@ -99,6 +99,9 @@
 .donut-svg{overflow:visible}
 .donut-label{position:absolute;text-align:center;pointer-events:none}
 .donut-label .dv{font-family:var(--font-display);font-size:var(--fs-xl);color:var(--gold-text);line-height:1}
+/* Importes largos (1.270,50 €): un poco más pequeños para que quepan dentro del anillo */
+.donut-label .dv.largo{font-size:var(--fs-md)}
+.donut-label .dv.muy-largo{font-size:var(--fs-sm)}
 .donut-label .dl{font-size:var(--fs-2xs);color:var(--muted);font-weight:700;text-transform:uppercase}
 .legend-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:var(--fs-sm);font-weight:700;border-bottom:1px solid var(--tint-1)}
 .legend-item:last-child{border:none}

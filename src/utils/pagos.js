@@ -7,6 +7,7 @@
 // si el pago no era real o era menor. Pasado el plazo, se da por confirmado
 // (no hace falta ningún proceso: se mira la fecha límite).
 // ================================================================
+const { formatoNumero } = require('./importe');
 const db = require('../db/database');
 
 const DIAS_CONFIRMAR = 5;
@@ -30,9 +31,9 @@ const fechaCorta = d => {
   return `${String(p.day).padStart(2, '0')}/${String(p.month).padStart(2, '0')}`;
 };
 
-// "Tu pago de 20.00 a Ana está pendiente..." / "El pago de Luis de 20.00 a Ana..."
+// "Tu pago de 20,00 a Ana está pendiente..." / "El pago de Luis de 20.00 a Ana..."
 function textoPagoPendiente(p, { quien = null, accion = 'salir del grupo' } = {}) {
-  const imp = p.importe.toFixed(2);
+  const imp = formatoNumero(p.importe);
   return quien
     ? `El pago de ${quien} de ${imp} a ${p.para} está pendiente de que ${p.para} lo confirme. Podrás eliminarlo cuando lo confirme, o el ${fechaCorta(p.hasta)} si no responde.`
     : `Tu pago de ${imp} a ${p.para} está pendiente de que lo confirme. Podrás ${accion} cuando lo confirme, o el ${fechaCorta(p.hasta)} si no responde.`;

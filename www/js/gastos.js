@@ -433,15 +433,13 @@ function openDeleteExpenseModal(idx) {
   gastoABorrarIdx = idx;
 
   const base = getBase();
-  const sym = SYMBOLS[e.currency] || '€';
-  const symBase = SYMBOLS[base] || '€';
 
   document.getElementById('del-gasto-icon').innerHTML = e.es_pago ? iconoCat('pago', 24) : iconoCat(e.cat, 24);
   document.getElementById('del-gasto-desc').textContent = e.desc;
   document.getElementById('del-gasto-amount').textContent = 
     e.currency !== base 
-      ? `${sym}${Number(e.amount).toFixed(2)} ≈ ${symBase}${Number(e.baseAmt).toFixed(2)}`
-      : `${sym}${Number(e.amount).toFixed(2)}`;
+      ? `${formatoImporte(Number(e.amount), e.currency)} ≈ ${formatoImporte(Number(e.baseAmt), base)}`
+      : `${formatoImporte(Number(e.amount), e.currency)}`;
   document.getElementById('del-gasto-payer').textContent = e.payer;
   document.getElementById('del-gasto-date').textContent = fmtDate(e.date);
 
