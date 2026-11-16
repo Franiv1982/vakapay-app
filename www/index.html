@@ -491,6 +491,7 @@
 <div class="modal-overlay foto-perfil-capa" id="fotoPerfilModal" style="display:none" onclick="cerrarFotoPerfil()">
   <div class="foto-perfil-caja" role="dialog" aria-modal="true" aria-label="Foto en grande" tabindex="-1">
     <img id="fotoPerfilGrande" class="foto-perfil-grande" alt="Foto de perfil">
+    <div id="fotoPerfilInicial" class="foto-perfil-grande foto-perfil-inicial" style="display:none" aria-hidden="true"></div>
   </div>
 </div>
 
@@ -691,7 +692,7 @@
         <div class="avatar-edit u-w-22 u-h-22 u-fs-xs" onclick="document.getElementById('friendAvatarFile').click()" aria-label="Cambiar foto"><svg class="icono" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></div>
       </div>
       <input type="file" id="friendAvatarFile" accept="image/*" onchange="handleFriendAvatarChange(event)" style="display:none">
-      <div class="u-fs-xs u-c-muted" id="friendFotoPista">Toca para añadir una foto</div>
+      <div class="u-fs-xs u-c-muted" id="friendFotoPista">Añade una foto con el lápiz</div>
     </div>
 
     <div class="g2">

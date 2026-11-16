@@ -27,13 +27,23 @@ test('la foto de un participante con cuenta se ve en el grupo, en el chat y en a
 
   await entrar(page, ana);
   await page.locator('.group-card').first().click();
-  await page.evaluate(() => { toggleParticipantesSection(); toggleMemberList(); });
-  await expect(page.locator('#memberChips .chip[data-name="Luis"] .av.con-foto img, .chip[data-name="Luis"] .av.con-foto img').first()).toBeVisible();
+  // Abrir «Participantes» y «En este grupo» (sin cerrarlos si ya estaban abiertos)
+  await page.evaluate(() => {
+    const oculto = id => getComputedStyle(document.getElementById(id)).display === 'none';
+    if (oculto('participantesSectionWrap')) toggleParticipantesSection();
+    if (oculto('memberListWrap')) toggleMemberList();
+  });
+  await expect(page.locator('#memberChips .chip[data-name="Luis"] .av.con-foto img')).toHaveAttribute('src', /^data:image\//);
   await page.click('#sec7');
-  await expect(page.locator('#chatLista .autor .av-chat.con-foto img').first()).toBeVisible();
+  await expect(page.locator('#chatLista .autor .av-chat.con-foto img').first()).toHaveAttribute('src', /^data:image\//);
   await page.evaluate(() => cerrarChat());
   await page.click('[data-page="page-amigos"]');
   await expect(page.locator('.friend-item', { hasText: 'Luis' }).locator('.fi-av img')).toBeVisible();
+  // Desde la lista también se amplía
+  await page.locator('.friend-item', { hasText: 'Luis' }).locator('.fi-av-boton').click();
+  await expect(page.locator('#fotoPerfilModal')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#fotoPerfilModal')).toBeHidden();
 });
 
 test('quitar tu foto: desaparece el aviso y deja de enviarse a los demás', async ({ page, request }) => {
@@ -48,4 +58,25 @@ test('quitar tu foto: desaparece el aviso y deja de enviarse a los demás', asyn
   const { datos } = await api(request, 'GET', '/users/me', null, luis.token);
   expect(datos.avatar_url).toBeNull();
   expect(datos.tiene_mini).toBe(false);
+});
+
+test('amigo sin foto: tocar su inicial (en la lista o en la ficha) la muestra en grande, sin abrir archivos', async ({ page, request }) => {
+  const ana = await crearUsuario(request, 'Ana');
+  await api(request, 'POST', '/friends', { name: 'Marta' }, ana.token);
+  await entrar(page, ana);
+  await page.click('[data-page="page-amigos"]');
+  const inicial = page.locator('#fotoPerfilInicial');
+  await page.locator('.friend-item', { hasText: 'Marta' }).locator('.fi-av-boton').click();
+  await expect(inicial).toBeVisible();
+  await expect(inicial).toHaveText('M');
+  await page.keyboard.press('Escape');
+  await page.evaluate(() => openFriendModal(friends.findIndex(f => f.name === 'Marta')));
+  let selector = false;
+  page.once('filechooser', () => { selector = true; });
+  await page.locator('#friendModalAvatar').click();
+  await expect(inicial).toBeVisible();
+  await page.evaluate(() => manejarAtras());
+  await expect(inicial).toBeHidden();
+  await expect(page.locator('#friendModal')).toBeVisible();
+  expect(selector).toBe(false);
 });
