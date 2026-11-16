@@ -110,6 +110,7 @@ api.use('/friends',  friendsRoutes);
 api.use('/activity', activityRoutes);
 api.use('/invite',   require('./routes/invite'));
 api.use('/ocr',      require('./routes/ocr'));
+api.use('/estado',   require('./routes/estado'));   // versión mínima y mantenimiento
 
 // Vista pública compartida (sin auth, fuera del prefix /api/v1)
 app.use('/shared', require('./routes/groups'));
