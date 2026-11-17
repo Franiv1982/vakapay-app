@@ -514,81 +514,34 @@
     <div class="aviso-foto" id="avisoFotoPerfil" style="display:none">Tu foto la ven tus grupos y tus amigos · <button type="button" class="enlace-quitar" id="btnQuitarFoto" onclick="quitarFotoPerfil()">Quitar foto</button></div>
   </div>
 
-  <div class="card">
-    <div class="u-d-flex u-ai-center u-jc-space-between u-mb-12">
-      <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700"><svg class="u-va-middle u-mr-4" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> Mis Datos</div>
-      <button id="btnEditProfile" class="btn btn-outline btn-sm" onclick="toggleEditProfile()"><svg class="u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar</button>
-    </div>
-
-    <!-- MODO LECTURA -->
-    <div id="profileReadMode">
-      <div class="u-d-flex u-dir-column u-gap-10">
-        <div class="u-d-flex u-jc-space-between u-fs-base">
-          <span class="u-c-muted">Nombre</span>
-          <span class="u-fw-700 u-c-text" id="readNombre">—</span>
-        </div>
-        <div class="u-d-flex u-jc-space-between u-fs-base">
-          
-        </div>
-        <div class="u-d-flex u-jc-space-between u-fs-base">
-          <span class="u-c-muted">Email</span>
-          <span class="u-fw-700 u-c-text" id="readEmail">—</span>
-        </div>
-        <div class="u-d-flex u-jc-space-between u-fs-base">
-          <span class="u-c-muted">Teléfono</span>
-          <span class="u-fw-700 u-c-text" id="readTel">—</span>
-        </div>
-        
-        <div class="u-d-flex u-jc-space-between u-fs-base">
-          <span class="u-c-muted">Cobros</span>
-          <span class="u-fw-700 u-c-text u-t-right u-maxw-60p" id="readCobro">—</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODO EDICIÓN (oculto por defecto) -->
-    <div id="profileEditMode" style="display:none;">
-      <div class="field"><label>Nombre</label><input type="text" id="profNombre" minlength="2" maxlength="40" placeholder="Tu nombre completo" oninput="updateProfilePreview()"></div>
-      <div class="field"><label>Email</label><input type="email" id="profEmail" placeholder="tu@email.com" oninput="updateProfilePreview()"></div>
-      <div class="field"><label>Teléfono</label><input type="tel" id="profTel" placeholder="+34 600 000 000"></div>
-      <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-m-14-0-4">Cómo quieres cobrar (opcional)</div>
-      <div class="u-fs-sm u-c-muted u-mb-10 u-lh-1_4">Solo lo verán quienes te deban dinero en tus grupos, al pulsar «Pagar».</div>
-      <div class="field"><label>Teléfono para Bizum</label><input type="tel" id="profBizum" inputmode="tel" placeholder="ej: 600 000 000"></div>
-      <div class="field"><label>IBAN para transferencias</label><input type="text" id="profIban" autocapitalize="characters" placeholder="ej: ES00 0000 0000 0000 0000 0000" oninput="this.value=this.value.toUpperCase()"></div>
-      <div class="u-d-flex u-gap-10 u-mt-8">
-        <button class="btn btn-outline btn-full" onclick="toggleEditProfile()">Cancelar</button>
-        <button class="btn btn-gold btn-full" onclick="saveProfile()">Guardar</button>
-      </div>
-    </div>
-
-    
-  </div>
-
-  <div class="card u-mt-12">
-    <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-mb-12"><svg class="u-va-middle u-mr-4" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Mis Estadísticas</div>
-    <div class="stat-row">
-      <div class="stat-box"><div class="stat-v" id="statGroups">0</div><div class="stat-l">Grupos</div></div>
-      <div class="stat-box"><div class="stat-v" id="statFriends">0</div><div class="stat-l">Amigos</div></div>
-    </div>
-  </div>
-
-  <div class="card u-mt-12">
-    <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-mb-12 u-d-flex u-ai-center u-gap-6"><svg class="icono" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Apariencia</div>
-    <div class="selector-tema" role="radiogroup" aria-label="Apariencia">
-      <button type="button" data-tema-opcion="auto" onclick="cambiarTema('auto')">Automático</button>
-      <button type="button" data-tema-opcion="oscuro" onclick="cambiarTema('oscuro')">Oscuro</button>
-      <button type="button" data-tema-opcion="claro" onclick="cambiarTema('claro')">Claro</button>
-    </div>
-    <div class="u-fs-xs u-c-muted u-mt-8">Automático sigue el modo del móvil.</div>
-  </div>
-
-  <!-- Notificaciones (#68): una fila que abre su ventana -->
-  <div class="card u-mt-12 tarjeta-fila">
+  <!-- Ajustes de la cuenta: cada fila (en su tarjeta) abre su ventana -->
+  <div class="lista-ajustes">
+    <button type="button" class="fila-ajuste" id="btnMisDatos" onclick="abrirVentanaCuenta('modalMisDatos')" aria-haspopup="dialog">
+      <span class="fila-ajuste-icono"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      <span class="fila-aviso-texto"><span class="fila-aviso-titulo">Mis datos</span><span class="fila-aviso-desc" id="resumenMisDatos">Nombre, email y teléfono</span></span>
+      <svg class="fila-ajuste-flecha" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <button type="button" class="fila-ajuste" id="btnCobros" onclick="abrirVentanaCuenta('modalCobros')" aria-haspopup="dialog">
+      <span class="fila-ajuste-icono"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
+      <span class="fila-aviso-texto"><span class="fila-aviso-titulo">Datos de cobro</span><span class="fila-aviso-desc" id="readCobro">Sin configurar</span></span>
+      <svg class="fila-ajuste-flecha" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+    <button type="button" class="fila-ajuste" id="btnApariencia" onclick="abrirVentanaCuenta('modalApariencia')" aria-haspopup="dialog">
+      <span class="fila-ajuste-icono"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></span>
+      <span class="fila-aviso-texto"><span class="fila-aviso-titulo">Apariencia</span><span class="fila-aviso-desc" id="resumenTema">Automático</span></span>
+      <svg class="fila-ajuste-flecha" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
     <button type="button" class="fila-ajuste" id="btnAvisos" onclick="abrirAvisos()" aria-haspopup="dialog">
       <span class="fila-ajuste-icono"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
       <span class="fila-aviso-texto"><span class="fila-aviso-titulo">Notificaciones</span><span class="fila-aviso-desc" id="avisosResumen">Elige qué avisos recibir</span></span>
       <svg class="fila-ajuste-flecha" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
+  </div>
+
+  <!-- Mis grupos y mis amigos: llevan a su sección -->
+  <div class="accesos-cuenta">
+    <button type="button" class="acceso-cuenta" onclick="irAPantalla('page-grupos')"><span class="fila-ajuste-icono"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span><span class="acceso-texto"><span class="acceso-num" id="statGroups">0</span><span class="acceso-nombre">Grupos</span></span></button>
+    <button type="button" class="acceso-cuenta" onclick="irAPantalla('page-amigos')"><span class="fila-ajuste-icono"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="acceso-texto"><span class="acceso-num" id="statFriends">0</span><span class="acceso-nombre">Amigos</span></span></button>
   </div>
 
   <div class="card u-mt-12">
@@ -1005,6 +958,50 @@
 </div>
 
 <!-- Modal de Confirmación de Logout -->
+<!-- Ventanas de Cuenta: Mis datos, Datos de cobro y Apariencia -->
+<div class="modal-overlay" id="modalMisDatos" role="dialog" aria-modal="true" aria-labelledby="modalMisDatosTitulo" onclick="if(event.target===this)cerrarVentanaCuenta()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <button class="modal-close u-c-text" onclick="cerrarVentanaCuenta()"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar</button>
+    <div class="modal-title" id="modalMisDatosTitulo"><svg class="u-va-middle u-mr-6" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Mis datos</div>
+    <div class="field"><label>Nombre</label><input type="text" id="profNombre" minlength="2" maxlength="40" placeholder="Tu nombre completo" oninput="updateProfilePreview()"></div>
+    <div class="field"><label>Email</label><input type="email" id="profEmail" placeholder="tu@email.com" oninput="updateProfilePreview()"></div>
+    <div class="field"><label>Teléfono</label><input type="tel" id="profTel" placeholder="+34 600 000 000"></div>
+    <div class="u-d-flex u-gap-10 u-mt-8">
+      <button class="btn btn-outline u-f-1" onclick="cerrarVentanaCuenta()">Cancelar</button>
+      <button class="btn btn-gold u-f-1" id="btnGuardarMisDatos" onclick="saveProfile()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalCobros" role="dialog" aria-modal="true" aria-labelledby="modalCobrosTitulo" onclick="if(event.target===this)cerrarVentanaCuenta()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <button class="modal-close u-c-text" onclick="cerrarVentanaCuenta()"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar</button>
+    <div class="modal-title" id="modalCobrosTitulo"><svg class="u-va-middle u-mr-6" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Datos de cobro</div>
+    <p class="u-fs-sm u-c-muted u-mb-12 u-lh-1_4">Opcional. Solo lo verán quienes te deban dinero en tus grupos, al pulsar «Pagar».</p>
+    <div class="field"><label>Teléfono para Bizum</label><input type="tel" id="profBizum" inputmode="tel" placeholder="ej: 600 000 000"></div>
+    <div class="field"><label>IBAN para transferencias</label><input type="text" id="profIban" autocapitalize="characters" placeholder="ej: ES00 0000 0000 0000 0000 0000" oninput="this.value=this.value.toUpperCase()"></div>
+    <div class="u-d-flex u-gap-10 u-mt-8">
+      <button class="btn btn-outline u-f-1" onclick="cerrarVentanaCuenta()">Cancelar</button>
+      <button class="btn btn-gold u-f-1" id="btnGuardarCobros" onclick="saveProfile()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modalApariencia" role="dialog" aria-modal="true" aria-labelledby="modalAparienciaTitulo" onclick="if(event.target===this)cerrarVentanaCuenta()">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <button class="modal-close u-c-text" onclick="cerrarVentanaCuenta()"><svg class="icono" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cerrar</button>
+    <div class="modal-title" id="modalAparienciaTitulo"><svg class="u-va-middle u-mr-6" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>Apariencia</div>
+    <div class="opciones-tema" role="radiogroup" aria-label="Apariencia">
+      <button type="button" role="radio" data-tema-opcion="auto" onclick="elegirTema('auto')"><span>Automático<small>Sigue el modo del móvil</small></span></button>
+      <button type="button" role="radio" data-tema-opcion="oscuro" onclick="elegirTema('oscuro')"><span>Oscuro</span></button>
+      <button type="button" role="radio" data-tema-opcion="claro" onclick="elegirTema('claro')"><span>Claro</span></button>
+    </div>
+  </div>
+</div>
+
 <!-- Ventana de Notificaciones (Cuenta) -->
 <div class="modal-overlay" id="avisosModal" role="dialog" aria-modal="true" aria-labelledby="avisosTitulo" onclick="if(event.target===this)cerrarAvisos()">
   <div class="modal-sheet">

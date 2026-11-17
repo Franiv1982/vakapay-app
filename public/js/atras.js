@@ -5,12 +5,6 @@
 // gesto o tecla de atrás del navegador): ventana → chat → gasto → grupo →
 // Mis grupos → «¿Deseas salir?».
 function manejarAtras() {
-    // Editando «Mis datos»: atrás es como «Cancelar»
-    const edPerfil = document.getElementById('profileEditMode');
-    const hayVentana = [...document.querySelectorAll('.modal-overlay, #modalLogout, #visorTicketModal, #origenImagenModal')].some(m => getComputedStyle(m).display !== 'none');
-    if (!hayVentana && edPerfil && edPerfil.style.display !== 'none' && document.getElementById('page-cuenta')?.classList.contains('active')) {
-      toggleEditProfile(); return;
-    }
     // Chat abierto: primero se cierra su menú/diálogo, después el chat
     if (typeof chatAtras === 'function' && chatAtras()) return;
     // Visores a pantalla completa (comprobante, elegir cámara/galería): se cierran primero
@@ -22,7 +16,8 @@ function manejarAtras() {
     // amigo) se cierran con su propia función: ocultarlos con style.display='none'
     // los dejaba ocultos para siempre, y al volver a abrirlos no aparecían pero
     // la página quedaba sin scroll.
-    const cierres = { payModal: closePayModal, proofModal: closeProofModal, editModal: closeEditModal, friendModal: closeFriendModal };
+    const cierres = { payModal: closePayModal, proofModal: closeProofModal, editModal: closeEditModal, friendModal: closeFriendModal,
+      modalMisDatos: cerrarVentanaCuenta, modalCobros: cerrarVentanaCuenta, modalApariencia: cerrarVentanaCuenta, avisosModal: cerrarAvisos };
     const openModal = [...document.querySelectorAll('.modal-overlay')]
       .find(m => getComputedStyle(m).display !== 'none');
     if (openModal) {
@@ -73,8 +68,7 @@ if (esAppNativa && Capacitor.Plugins.App) {
     let d = hayPaginaAnterior ? 1 : 0;                    // 1 = guarda en «Mis grupos» (para «¿Deseas salir?»)
     if (pagina && pagina !== 'page-grupos') d = 2;        // grupo, Amigos, Estadísticas…
     if (pagina === 'page-gasto' || chat) d = 3;           // dentro del grupo
-    const editandoPerfil = pagina === 'page-cuenta' && document.getElementById('profileEditMode')?.style.display !== 'none';
-    return d + (ventana || editandoPerfil ? 1 : 0);
+    return d + (ventana ? 1 : 0);
   };
   const sincronizarHistorial = () => {
     if (saliendoDeLaWeb) return;
