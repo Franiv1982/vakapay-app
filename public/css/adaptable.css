@@ -59,7 +59,7 @@
   body.chat-abierto{padding-right:400px}
   body.chat-abierto .hbadge{display:none !important}
   @media (hover:hover){/* Ratón */
-  .group-card:hover{border-color:rgba(245,200,0,.55);transform:translateY(-1px)}}
+  .group-card:hover,.lista-ajustes .fila-ajuste:hover,.acceso-cuenta:hover{border-color:rgba(245,200,0,.55);transform:translateY(-1px)}}
   @media (hover:hover){.sec-title:hover h2{color:var(--gold-text)}}
   @media (hover:hover){.btn:hover{filter:brightness(1.08)}}
 }
