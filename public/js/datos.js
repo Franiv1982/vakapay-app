@@ -336,13 +336,15 @@ async logActivity(msg, groupName = null) {
   return act[0];
 }
   
-  async updateGroupName(idx, newName) {
-    const gs = groups;
-    const g = gs[idx];
-    
-    // Primero el servidor: si no lo confirma, se lanza el error y el nombre no cambia
-    if (g.id) await this.#req('PATCH', `/groups/${g.id}`, { name: newName });
-    g.name = newName;
+  // Cambia nombre, tipo o fechas del grupo. Primero el servidor: si no lo
+  // confirma, se lanza el error y en el móvil no cambia nada.
+  async updateGroup(idx, cambios) {
+    const g = groups[idx];
+    if (g.id) await this.#req('PATCH', `/groups/${g.id}`, cambios);
+    if (cambios.name !== undefined) g.name = cambios.name;
+    if (cambios.type !== undefined) g.type = cambios.type;
+    if (cambios.date_start !== undefined) g.start = cambios.date_start;
+    if (cambios.date_end !== undefined) g.end = cambios.date_end;
     return true;
   }
 

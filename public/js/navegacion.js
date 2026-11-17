@@ -180,7 +180,7 @@ function switchGroupFromDropdown(idx) {
 // ═══ TIPO DE GRUPO ═══════════════════════════════════════════════════════
 
 function selectType(el){
-  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('#newGroupForm .type-btn').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');selectedType=el.dataset.type;
 }
 
