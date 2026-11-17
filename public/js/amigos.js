@@ -180,14 +180,16 @@ function openFriendModal(idx){
   if(groups.length===0){gc.innerHTML='<span class="u-c-muted u-fs-sm">No hay grupos creados aún</span>';}
   else{gc.innerHTML=groups.map((g,gi)=>{
     const inGroup=Object.prototype.hasOwnProperty.call(g.members, f.name);
-    return`<div class="modal-chip ${inGroup?'sel':''}" data-gidx="${gi}" onclick="toggleFriendGroupChip(this,'${f.name.replace(/'/g,'\\\'')}')">`+
+    return`<div class="modal-chip ${inGroup?'sel':''}" role="button" tabindex="0" aria-pressed="${inGroup}" data-gidx="${gi}" data-estaba="${inGroup?1:0}" onclick="toggleFriendGroupChip(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFriendGroupChip(this);}">`+
       `<span class="u-fs-md">${iconoTipo(g.type, 14)}</span>${g.name}</div>`;
   }).join('');}
   document.getElementById('friendModal').style.display = '';
   document.getElementById('friendModal').classList.add('open');
   document.body.style.overflow='hidden';
 }
+let guardandoAmigo = false;   // mientras se guarda, la ficha no se cierra ni se toca
 function closeFriendModal(){
+  if (guardandoAmigo) return;
   // Lo que no se guardó (foto nueva o «Quitar foto») se descarta al cerrar
   const f = friends[editingFriendIdx];
   if (f) { delete f._tmpAvatar; delete f._quitarAvatar; }
@@ -298,39 +300,51 @@ async function refrescarGruposYAmigos() {
   refrescarActividad();
 }
 
-// Ficha del amigo → «Grupos vinculados»: añadir o quitar del grupo (se guarda en el servidor)
-async function toggleFriendGroupChip(el, friendName) {
-  if (el.dataset.ocupado) return;
+// Ficha del amigo → «Grupos vinculados»: marcar o desmarcar grupos.
+// No se guarda nada al tocar: los cambios se aplican al pulsar «Guardar».
+// Lo que no se puede hacer (quitarle de un grupo donde tiene gastos o donde está
+// con su cuenta) se avisa al momento y el grupo sigue marcado.
+function toggleFriendGroupChip(el) {
+  const f = friends[editingFriendIdx];
+  if (!f) return;
   const g = groups[parseInt(el.dataset.gidx)];
-  const f = friends.find(x => x.name === friendName) || {};
-  el.dataset.ocupado = '1'; el.style.opacity = '.5';
-  try {
-    if (el.classList.contains('sel')) {
-      if (g.expenses.some(e => (e.payer || e.payer_name) === friendName || (e.involved || []).includes(friendName))) {
-        toast('Tiene gastos en ese grupo, no se puede desvincular', 'e'); return;
-      }
-      if (g.memberIds && g.memberIds[friendName]) {
-        toast(`${friendName} tiene cuenta y está en el grupo con ella; no se puede quitar desde aquí`, 'e'); return;
-      }
-      const r = await fetch(`${API_BASE}/api/v1/groups/${g.id}/members/${encodeURIComponent(friendName)}`, {
-        method: 'DELETE', headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
-      });
-      if (!r.ok) { toast('Solo quien creó el grupo puede quitar participantes', 'e'); return; }
-      delete g.members[friendName];
-      el.classList.remove('sel');
-      toast(`${friendName} quitado de "${g.name}"`, 's');
-    } else {
-      const res = await agregarAmigoAGrupo(g, friendName, { email: f.email || '', phone: f.phone || '' });
-      if (!res.ok) { toast(res.error || 'No se pudo añadir al grupo', 'e'); return; }
-      el.classList.add('sel');
-      toast(res.yaEstaba ? `${friendName} ya estaba en "${g.name}"` : `${friendName} añadido a "${g.name}"`, 's');
+  if (el.classList.contains('sel') && el.dataset.estaba === '1') {
+    if (g.expenses.some(e => (e.payer || e.payer_name) === f.name || (e.involved || []).includes(f.name))) {
+      toast(`${f.name} tiene gastos en «${g.name}»: no se puede quitar del grupo`, 'e'); return;
     }
-    await refrescarGruposYAmigos();
-  } catch (_) {
-    toast('Sin conexión. Inténtalo de nuevo.', 'e');
-  } finally {
-    delete el.dataset.ocupado; el.style.opacity = '';
+    if (g.memberIds && g.memberIds[f.name]) {
+      toast(`${f.name} está en «${g.name}» con su cuenta: no se puede quitar desde aquí`, 'e'); return;
+    }
   }
+  const sel = el.classList.toggle('sel');
+  el.setAttribute('aria-pressed', sel ? 'true' : 'false');
+}
+
+// Aplica en el servidor los grupos marcados o desmarcados en la ficha.
+// Devuelve { hechos: ['añadido a «X»', …], fallos: ['«Y»: motivo', …] }
+async function aplicarGruposDelAmigo(f) {
+  const hechos = [], fallos = [];
+  for (const el of document.querySelectorAll('#editFriendGroups .modal-chip')) {
+    const estaba = el.dataset.estaba === '1', ahora = el.classList.contains('sel');
+    if (estaba === ahora) continue;
+    const g = groups[parseInt(el.dataset.gidx)];
+    try {
+      if (ahora) {
+        const res = await agregarAmigoAGrupo(g, f.name, { email: f.email || '', phone: f.phone || '' });
+        if (res.ok) { hechos.push(`añadido a «${g.name}»`); el.dataset.estaba = '1'; }
+        else fallos.push(`«${g.name}»: ${res.error || 'no se pudo añadir'}`);
+      } else {
+        const r = await fetch(`${API_BASE}/api/v1/groups/${g.id}/members/${encodeURIComponent(f.name)}`, {
+          method: 'DELETE', headers: { 'Authorization': `Bearer ${vakaData.getToken()}` }
+        });
+        if (r.ok) { delete g.members[f.name]; hechos.push(`quitado de «${g.name}»`); el.dataset.estaba = '0'; }
+        else fallos.push(`«${g.name}»: solo quien creó el grupo puede quitar participantes`);
+      }
+    } catch (_) {
+      fallos.push(`«${g.name}»: sin conexión`);
+    }
+  }
+  return { hechos, fallos };
 }
 function handleFriendAvatarChange(ev){
   const file=ev.target.files[0];if(!file)return;
@@ -353,20 +367,47 @@ function handleFriendAvatarChange(ev){
   reader.readAsDataURL(file);
 }
 async function saveEditFriend(){
-  if(editingFriendIdx===null)return;
-  const f=friends[editingFriendIdx];
+  if(editingFriendIdx===null||guardandoAmigo)return;
+  const idx=editingFriendIdx;
+  const f=friends[idx];
   const firstName=document.getElementById('editFriendName').value.trim();
   const lastName=document.getElementById('editFriendLastName').value.trim();
   const email=document.getElementById('editFriendEmail').value.trim();
   const phone=document.getElementById('editFriendPhone').value.trim();
   const notes=document.getElementById('editFriendNotes').value.trim();
- if(!firstName){toast('El nombre no puede estar vacío','e');return;}
+  if(!firstName){toast('El nombre no puede estar vacío','e');return;}
   if(firstName.length>20){toast('El nombre no puede superar 20 caracteres','e');return;}
   if(lastName.length>20){toast('El apellido no puede superar 20 caracteres','e');return;}
   const newName=lastName?firstName+' '+lastName:firstName;
   const oldName=f.name;
-  const dupEdit = buscarAmigoDuplicado({ name: newName, email, phone }, editingFriendIdx);
+  const dupEdit = buscarAmigoDuplicado({ name: newName, email, phone }, idx);
   if (dupEdit) { mostrarModalDuplicado({ titulo: 'Ya tienes este contacto', nombre: dupEdit.amigo.name, motivo: dupEdit.motivo, valor: _valorDup(dupEdit, { email, phone }) }); return; }
+
+  // Mientras se guarda: «Guardando…», la ficha entera quieta y sin poder cerrarla
+  const soltarBoton = bloquearBoton(document.getElementById('btnGuardarAmigo'), 'Guardando…');
+  if (!soltarBoton) return;
+  const soltarFicha = bloquearZona(document.querySelector('#friendModal .modal-sheet'));
+  guardandoAmigo = true;
+  let grupos = { hechos: [], fallos: [] }, guardado = false;
+  try {
+    // 1. Grupos marcados o desmarcados (con el nombre de antes, que es el que tiene en ellos)
+    grupos = await aplicarGruposDelAmigo(f);
+    // 2. Datos del amigo
+    const cambiosAmigo = { name: newName, email, phone, notes };
+    if (f._quitarAvatar) cambiosAmigo.avatar_url = null;            // «Quitar foto»
+    else if (f._tmpAvatar) cambiosAmigo.avatar_url = f._tmpAvatar;  // la foto nueva también se guarda en el servidor
+    if (f.id) await vakaData.updateFriend(f.id, cambiosAmigo);
+    guardado = true;
+  } catch (err) {
+    toast(textoError(err, 'No se pudieron guardar los datos del amigo.'), 'e');
+  } finally {
+    guardandoAmigo = false;
+    soltarFicha();
+    soltarBoton();
+  }
+  if (grupos.hechos.length || grupos.fallos.length) await refrescarGruposYAmigos();
+  if (!guardado) return;   // la ficha sigue abierta para reintentar
+
   if(newName!==oldName){
     groups.forEach(g=>{
       if(Object.prototype.hasOwnProperty.call(g.members, oldName)){
@@ -379,15 +420,16 @@ async function saveEditFriend(){
     });
   }
   const nuevaFoto = f._quitarAvatar ? null : (f._tmpAvatar || f.avatar || null);
-  friends[editingFriendIdx]={...f,name:newName,email,phone,notes,contact:email||phone||'',avatar:nuevaFoto};
-  delete friends[editingFriendIdx]._tmpAvatar; delete friends[editingFriendIdx]._quitarAvatar;
-  const cambiosAmigo = { name: newName, email, phone, notes };
-  if (f._quitarAvatar) cambiosAmigo.avatar_url = null;           // «Quitar foto»
-  else if (f._tmpAvatar) cambiosAmigo.avatar_url = f._tmpAvatar; // la foto nueva también se guarda en el servidor
-  if (f.id) { try { await vakaData.updateFriend(f.id, cambiosAmigo); } catch(_) { toast('No se pudo guardar en el servidor','e'); } }
-saveFriends();logActivity(`Amigo "${newName}" actualizado`);saveActivity();renderActivity();
+  const actual = friends.findIndex(x => x.id === f.id);
+  const i = actual >= 0 ? actual : idx;
+  friends[i]={...friends[i],name:newName,email,phone,notes,contact:email||phone||'',avatar:nuevaFoto};
+  delete friends[i]._tmpAvatar; delete friends[i]._quitarAvatar;
+  saveFriends();logActivity(`Amigo "${newName}" actualizado`);saveActivity();renderActivity();
   closeFriendModal();renderFriends();renderFriendPicker();updateStats();
-  toast('Amigo actualizado','s');
+  // Un solo aviso con todo lo que se hizo; si algo no se pudo, se dice
+  const resumen = ['Amigo actualizado', ...grupos.hechos].join(' · ');
+  if (grupos.fallos.length) toast(`${resumen}. No se pudo: ${grupos.fallos.join('; ')}`, 'e');
+  else toast(resumen, 's');
 }
 
 // ─── MODAL BORRAR AMIGO ──────────────────────────────────────────

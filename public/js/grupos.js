@@ -480,52 +480,88 @@ function ejecutarBorradoFinal() {
 
 // ═══ EDITAR GRUPO ═══════════════════════════════════════════════════════════════════════════════════════════════
 let editingGroupIdx = null;
+let guardandoGrupo = false;
 
+// Ventana «Editar grupo»: tipo, nombre y fechas. Solo quien creó el grupo.
 function openEditGroupModal(idx) {
   editingGroupIdx = idx;
   const g = groups[idx];
-  const inputNombre = document.getElementById('edit-group-name');
+  document.getElementById('edit-group-name').value = g.name;
+  document.getElementById('edit-group-start').value = (g.start || '').slice(0, 10);
+  document.getElementById('edit-group-end').value = (g.end || '').slice(0, 10);
+  document.querySelectorAll('#edit-group-types .type-btn').forEach(b => {
+    const activo = b.dataset.type === g.type;
+    b.classList.toggle('active', activo);
+    b.setAttribute('aria-pressed', activo ? 'true' : 'false');
+  });
+  document.getElementById('modal-editar-grupo').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
 
-  if (inputNombre) {
-    inputNombre.value = g.name;
-    document.getElementById('modal-editar-grupo').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-  }
+function elegirTipoEdicion(el) {
+  document.querySelectorAll('#edit-group-types .type-btn').forEach(b => {
+    b.classList.toggle('active', b === el);
+    b.setAttribute('aria-pressed', b === el ? 'true' : 'false');
+  });
 }
 
 function cerrarModalEditar() {
+  if (guardandoGrupo) return;   // no se cierra a medias mientras se guarda
   document.getElementById('modal-editar-grupo').style.display = 'none';
   document.body.style.overflow = '';
   editingGroupIdx = null;
 }
 
 async function guardarCambiosGrupo() {
-  if (editingGroupIdx === null) return;
+  if (editingGroupIdx === null || guardandoGrupo) return;
+  const g = groups[editingGroupIdx];
+  const nombre = document.getElementById('edit-group-name').value.trim();
+  const ini = document.getElementById('edit-group-start').value;
+  const fin = document.getElementById('edit-group-end').value;
+  const tipo = document.querySelector('#edit-group-types .type-btn.active')?.dataset.type || g.type;
 
-  const inputNombre = document.getElementById('edit-group-name');
-  const nuevoNombre = inputNombre.value.trim();
+  if (!nombre) { toast('El nombre del grupo no puede estar vacío', 'e'); return; }
+  if (!ini || !fin) { toast('Elige la fecha de inicio y la de fin del grupo', 'e'); return; }
+  if (fin < ini) { toast('La fecha de fin no puede ser anterior a la de inicio', 'e'); return; }
 
-  if (!nuevoNombre) {
-    toast('El nombre del grupo no puede estar vacío', 'e');
-    return;
-  }
+  // Solo se envía lo que cambió
+  const cambios = {};
+  if (nombre !== g.name) cambios.name = nombre;
+  if (tipo !== g.type) cambios.type = tipo;
+  if (ini !== (g.start || '').slice(0, 10)) cambios.date_start = ini;
+  if (fin !== (g.end || '').slice(0, 10)) cambios.date_end = fin;
+  if (!Object.keys(cambios).length) { cerrarModalEditar(); return; }
 
-  const nombreAnterior = groups[editingGroupIdx].name;
-  if (nuevoNombre === nombreAnterior) { cerrarModalEditar(); return; }
-  const listo = bloquearBoton(document.getElementById('btnGuardarGrupo'), 'Guardando…');
-  if (!listo) return;
+  // Mientras se guarda: «Guardando…» y la ventana entera quieta
+  const soltarBoton = bloquearBoton(document.getElementById('btnGuardarGrupo'), 'Guardando…');
+  if (!soltarBoton) return;
+  const soltarVentana = bloquearZona(document.querySelector('#modal-editar-grupo .ventana'));
+  guardandoGrupo = true;
+  let ok = false;
   try {
-    await vakaData.updateGroupName(editingGroupIdx, nuevoNombre);   // antes solo cambiaba en este móvil
+    await vakaData.updateGroup(editingGroupIdx, cambios);
+    ok = true;
   } catch (err) {
-    listo();
-    toast(err.status === 404 ? 'Solo quien creó el grupo puede cambiarle el nombre.' : textoError(err, 'No se pudo cambiar el nombre.'), 'e');
-    return;
+    toast(err.status === 404 ? 'Solo quien creó el grupo puede cambiarlo.' : textoError(err, 'No se pudieron guardar los cambios.'), 'e');
+  } finally {
+    guardandoGrupo = false;
+    soltarVentana();
+    soltarBoton();
   }
-  listo();
-  await logActivity(`Grupo "${nombreAnterior}" renombrado a "${nuevoNombre}"`);
+  if (!ok) return;
 
-  if (typeof renderGroupsList === 'function') renderGroupsList();
-  if (typeof renderAll === 'function' && currentGroupIdx === editingGroupIdx) renderAll();
+  const idx = editingGroupIdx;
   cerrarModalEditar();
-  toast("Nombre del grupo cambiado", "s");
+  if (typeof renderGroupsList === 'function') renderGroupsList();
+  if (currentGroupIdx === idx) {
+    // Cabecera del grupo abierto: título, tipo y fechas nuevos
+    const g2 = groups[idx];
+    pintarTituloGrupo(g2);
+    document.getElementById('detMeta').textContent = fmtDate(g2.start) + ' → ' + fmtDate(g2.end);
+    const badge = document.getElementById('hbadge');
+    if (badge) badge.innerHTML = iconoTipo(g2.type, 13) + ' ' + escaparHtml(g2.name);
+    if (typeof renderAll === 'function') renderAll();
+  }
+  toast('Grupo actualizado', 's');
+  if (typeof refrescarActividad === 'function') refrescarActividad();   // el servidor anotó qué cambió
 }

@@ -54,3 +54,4 @@ input[type="date"]::-webkit-datetime-edit-year-field{padding:0 1px}
 .type-btn .tl{font-size:var(--fs-2xs);font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}
 .type-btn.active{border-color:var(--gold);background:rgba(245,200,0,.09)}
 .type-btn.active .tl{color:var(--gold-text)}
+button.type-btn{font-family:inherit;color:inherit;width:100%}

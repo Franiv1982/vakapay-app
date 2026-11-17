@@ -184,3 +184,38 @@ test('servidor: editar y borrar el mismo gasto a la vez no da error 500', async 
     expect(bo.status()).toBe(204);
   }
 });
+
+test('editar grupo: se cambian tipo, nombre y fechas; las fechas no pueden dejar gastos fuera', async ({ page, request }) => {
+  const ana = await crearUsuario(request);
+  const g = await crearGrupo(request, ana, { nombre: 'Cena', gasto: { desc: 'Pizza', importe: 30 } });   // gasto del 10/11/2026
+  // Servidor: no deja fechas que dejen el gasto fuera, ni tipos inventados
+  const fuera = await api(request, 'PATCH', `/groups/${g.id}`, { date_end: '2026-11-05' }, ana.token);
+  expect(fuera.status).toBe(409);
+  expect(fuera.datos.error).toContain('10/11/2026');
+  expect((await api(request, 'PATCH', `/groups/${g.id}`, { type: 'crucero' }, ana.token)).status).toBe(400);
+
+  await entrar(page, ana);
+  await page.locator('.group-card').first().click();
+  await page.evaluate(() => openEditGroupModal(currentGroupIdx));
+  await expect(page.locator('#edit-group-types .type-btn.active')).toHaveAttribute('data-type', 'casa');
+  await page.locator('#edit-group-types .type-btn[data-type="pareja"]').click();
+  await page.fill('#edit-group-name', 'Escapada');
+  await page.fill('#edit-group-start', '2026-11-01');
+  await page.fill('#edit-group-end', '2026-11-30');
+
+  let soltar;
+  const espera = new Promise(r => { soltar = r; });
+  await page.route(`**/groups/${g.id}`, async (route) => { if (route.request().method() === 'PATCH') await espera; await route.fallback(); });
+  await page.click('#btnGuardarGrupo');
+  await expect(page.locator('#btnGuardarGrupo')).toHaveText('Guardando…');
+  expect(await page.locator('#modal-editar-grupo .ventana').evaluate(e => e.inert)).toBe(true);
+  soltar();
+  await expect(page.locator('#toast')).toContainText('Grupo actualizado');
+  await expect(page.locator('#modal-editar-grupo')).toBeHidden();
+  await expect(page.locator('#detMeta')).toContainText('01/11/2026');
+
+  const { datos } = await api(request, 'GET', `/groups/${g.id}`, null, ana.token);
+  expect(datos).toMatchObject({ name: 'Escapada', type: 'pareja', date_start: '2026-11-01', date_end: '2026-11-30' });
+  const act = await api(request, 'GET', '/activity', null, ana.token);
+  expect(JSON.stringify(act.datos)).toContain('tipo Casa → Pareja');
+});

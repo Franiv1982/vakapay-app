@@ -11,6 +11,11 @@ const { formatoNumero } = require('../utils/importe');
 
 const router = express.Router();
 
+// Tipos de grupo (los mismos que al crearlo) y fechas para los mensajes
+const TIPOS_GRUPO = { viaje: 'Viaje', casa: 'Casa', pareja: 'Pareja', otros: 'Otros' };
+const isoDia = d => (d instanceof Date ? d.toISOString() : String(d || '')).slice(0, 10);
+const fechaLarga = d => { const [a, m, dd] = isoDia(d).split('-'); return `${dd}/${m}/${a}`; };
+
 // Restos de redondeo de hasta 5 céntimos se consideran saldados
 const MARGEN_SALDO = 0.05;
 
@@ -141,18 +146,66 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
     if (!await ownsGroup(req.params.id, req.user.id)) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
-    const { name, type, date_start, date_end, closed_at } = req.body;
+    const actual = (await db.query('SELECT * FROM groups WHERE id = $1', [req.params.id])).rows[0];
+    const { closed_at } = req.body;
+    const cambios = {};
+
+    if (req.body.name !== undefined) {
+      const name = String(req.body.name || '').trim();
+      if (!name) return res.status(400).json({ error: 'El nombre del grupo no puede estar vacío' });
+      if (name.length > 20) return res.status(400).json({ error: 'El nombre del grupo no puede superar 20 caracteres' });
+      cambios.name = name;
+    }
+    if (req.body.type !== undefined) {
+      if (!TIPOS_GRUPO[req.body.type]) return res.status(400).json({ error: 'Tipo de grupo no válido' });
+      cambios.type = req.body.type;
+    }
+    for (const k of ['date_start', 'date_end']) {
+      if (req.body[k] === undefined) continue;
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(String(req.body[k])) || isNaN(new Date(req.body[k]))) {
+        return res.status(400).json({ error: 'Fecha no válida' });
+      }
+      cambios[k] = req.body[k];
+    }
+    if (cambios.date_start || cambios.date_end) {
+      const ini = cambios.date_start || isoDia(actual.date_start);
+      const fin = cambios.date_end || isoDia(actual.date_end);
+      if (fin < ini) return res.status(400).json({ error: 'La fecha de fin no puede ser anterior a la de inicio' });
+      // Los gastos ya registrados tienen que seguir dentro de las fechas del grupo
+      // (los pagos no cuentan: se pueden hacer después de que acabe)
+      const r = await db.query(`
+        SELECT MIN(LEFT(expense_date, 10)) AS primero, MAX(LEFT(expense_date, 10)) AS ultimo
+        FROM expenses WHERE group_id = $1 AND NOT COALESCE(es_pago, false)`, [req.params.id]);
+      const { primero, ultimo } = r.rows[0] || {};
+      if (primero && (isoDia(primero) < ini || isoDia(ultimo) > fin)) {
+        return res.status(409).json({
+          error: `Hay gastos del ${fechaLarga(primero)} al ${fechaLarga(ultimo)}: las fechas del grupo tienen que incluirlos. Cambia o borra esos gastos primero.`,
+        });
+      }
+    }
+
     const fields = [], values = [];
     let i = 1;
-    if (name       !== undefined) { fields.push(`name = $${i++}`);       values.push(name); }
-    if (type       !== undefined) { fields.push(`type = $${i++}`);       values.push(type); }
-    if (date_start !== undefined) { fields.push(`date_start = $${i++}`); values.push(date_start); }
-    if (date_end   !== undefined) { fields.push(`date_end = $${i++}`);   values.push(date_end); }
-    if (closed_at  !== undefined) { fields.push(`closed_at = $${i++}`);  values.push(closed_at); }
+    for (const [k, v] of Object.entries(cambios)) { fields.push(`${k} = $${i++}`); values.push(v); }
+    if (closed_at !== undefined) { fields.push(`closed_at = $${i++}`); values.push(closed_at); }
     if (!fields.length) return res.status(400).json({ error: 'Nada que actualizar' });
 
     values.push(req.params.id);
     const result = await db.query(`UPDATE groups SET ${fields.join(', ')} WHERE id = $${i} RETURNING *`, values);
+
+    // Actividad para todo el grupo: qué cambió
+    const partes = [];
+    if (cambios.name && cambios.name !== actual.name) partes.push(`nombre «${actual.name}» → «${cambios.name}»`);
+    if (cambios.type && cambios.type !== actual.type) partes.push(`tipo ${TIPOS_GRUPO[actual.type] || actual.type} → ${TIPOS_GRUPO[cambios.type]}`);
+    const iniNuevo = cambios.date_start || isoDia(actual.date_start), finNuevo = cambios.date_end || isoDia(actual.date_end);
+    if (iniNuevo !== isoDia(actual.date_start) || finNuevo !== isoDia(actual.date_end)) {
+      partes.push(`fechas ${fechaLarga(actual.date_start)} – ${fechaLarga(actual.date_end)} → ${fechaLarga(iniNuevo)} – ${fechaLarga(finNuevo)}`);
+    }
+    if (partes.length) {
+      const quien = await actorName(req.params.id, req.user.id);
+      await registrarEnGrupo(req.params.id, 'group', (uid, nombreGrupo) =>
+        `${uid === req.user.id ? 'Cambiaste' : `${quien} cambió`} el grupo "${nombreGrupo}": ${partes.join('; ')}`);
+    }
     res.json(result.rows[0]);
   } catch (err) { next(err); }
 });
