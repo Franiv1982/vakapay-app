@@ -123,3 +123,12 @@
 .interruptor:checked::after{transform:translateX(18px)}
 .interruptor:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .interruptor:disabled{opacity:.6;cursor:progress}
+
+/* Cuenta: fila que abre una ventana (Notificaciones) */
+.tarjeta-fila{padding:0;overflow:hidden}
+.fila-ajuste{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;background:none;border:none;color:var(--text);font-family:inherit;text-align:left;cursor:pointer}
+.fila-ajuste:hover{background:var(--tint-1)}
+.fila-ajuste:focus-visible{outline:2px solid var(--gold);outline-offset:-2px;border-radius:var(--r-lg)}
+.fila-ajuste-icono{flex-shrink:0;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--gold-soft);color:var(--gold-text)}
+.fila-ajuste .fila-aviso-texto{flex:1}
+.fila-ajuste-flecha{flex-shrink:0;color:var(--muted)}
