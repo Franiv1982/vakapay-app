@@ -104,10 +104,16 @@ test('APK: registra el móvil, Cuenta muestra las preferencias y tocar un aviso 
 
   // Cuenta → Notificaciones: desactivar «Nuevos gastos» se guarda en la cuenta
   await page.click('[data-page="page-cuenta"]');
+  await expect(page.locator('#avisosResumen')).toHaveText('Todas activadas');
+  await page.click('#btnAvisos');
+  await expect(page.locator('#avisosModal')).toHaveClass(/open/);
   const gastos = page.locator('input[data-aviso="gastos"]');
   await expect(gastos).toBeChecked();
   await gastos.click();
   await expect.poll(async () => (await api(request, 'GET', '/users/me/avisos', null, luis.token)).datos.gastos).toBe(false);
+  await expect(page.locator('#avisosResumen')).toHaveText('3 de 4 activadas');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#avisosModal')).not.toHaveClass(/open/);
 
   // Tocar un aviso del chat abre el chat de ese grupo
   await page.evaluate(id => window.__push.pushNotificationActionPerformed({ notification: { data: { tipo: 'chat', grupo_id: String(id), destino: 'chat' } } }), g.id);

@@ -105,7 +105,28 @@ function pintarAvisos(prefs) {
     const c = document.querySelector(`input[data-aviso="${t}"]`);
     if (c) c.checked = prefs[t] !== false;
   }
+  // Resumen en la fila de Cuenta: «Todas activadas», «3 de 4 activadas»…
+  const activas = TIPOS_AVISO.filter(t => prefs[t] !== false).length;
+  const resumen = document.getElementById('avisosResumen');
+  if (resumen) resumen.textContent = activas === TIPOS_AVISO.length ? 'Todas activadas'
+    : activas === 0 ? 'Todas desactivadas' : `${activas} de ${TIPOS_AVISO.length} activadas`;
 }
+
+// Ventana de Notificaciones (se abre desde la fila de Cuenta)
+function abrirAvisos() {
+  document.getElementById('avisosModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  cargarAvisos();
+  setTimeout(() => document.querySelector('#avisosModal input[data-aviso]')?.focus({ preventScroll: true }), 50);
+}
+function cerrarAvisos() {
+  document.getElementById('avisosModal').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('btnAvisos')?.focus({ preventScroll: true });
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && document.getElementById('avisosModal')?.classList.contains('open')) cerrarAvisos();
+});
 async function cargarAvisos() {
   pintarNotaAvisos();
   try { pintarAvisos(await apiAvisos('GET', '/avisos')); } catch (_) { /* sin conexión: se quedan como están */ }
