@@ -58,38 +58,57 @@ function loadProfile(){
   updateReadMode();
 }
 
-function toggleEditProfile() {
-  const readMode = document.getElementById('profileReadMode');
-  const editMode = document.getElementById('profileEditMode');
-  const btn = document.getElementById('btnEditProfile');
-  const isEditing = editMode.style.display !== 'none';
+// ═══ VENTANAS DE CUENTA (Mis datos · Datos de cobro · Apariencia) ═════════
+// Cada fila de Cuenta abre su ventana. Al abrir, los campos se rellenan con lo
+// guardado; «Cancelar», «Cerrar», tocar fuera o atrás la cierran sin guardar.
+let ventanaCuenta = null, guardandoPerfil = false;
+function abrirVentanaCuenta(id) {
+  loadProfile();   // siempre con los datos guardados
+  ventanaCuenta = id;
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (id === 'modalApariencia') pintarResumenTema();
+  const primero = document.querySelector(`#${id} input, #${id} .opciones-tema .activa`);
+  setTimeout(() => primero?.focus({ preventScroll: true }), 50);
+}
+function cerrarVentanaCuenta() {
+  if (guardandoPerfil || !ventanaCuenta) return;
+  const id = ventanaCuenta;
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+  ventanaCuenta = null;
+  loadProfile();   // lo escrito sin guardar no se queda
+  const fila = { modalMisDatos: 'btnMisDatos', modalCobros: 'btnCobros', modalApariencia: 'btnApariencia' }[id];
+  document.getElementById(fila)?.focus({ preventScroll: true });
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && ventanaCuenta) cerrarVentanaCuenta(); });
 
-  if (isEditing) {
-    // Volver a lectura — restaurar valores originales
-    loadProfile();
-    readMode.style.display = 'block';
-    editMode.style.display = 'none';
-    btn.style.display = '';
-    btn.focus({ preventScroll: true });   // el foco vuelve a «Editar» (lector de pantalla y teclado)
-    btn.innerHTML = '<svg class="u-va-middle u-mr-4" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar';
-  } else {
-    loadProfile();   // al entrar a editar, siempre con los datos guardados
-    readMode.style.display = 'none';
-    editMode.style.display = 'block';
-    // Mientras se edita, arriba no hay botón: se sale con «Cancelar» o «Guardar» de abajo
-    // (o con atrás). Así no hay dos botones que hagan lo mismo.
-    btn.style.display = 'none';
-    document.getElementById('profNombre')?.focus({ preventScroll: true });
-  }
+// Apariencia: elegir aplica al momento; la fila muestra la elegida
+const NOMBRE_TEMA = { auto: 'Automático', oscuro: 'Oscuro', claro: 'Claro' };
+function elegirTema(t) { cambiarTema(t); pintarResumenTema(); }
+function pintarResumenTema() {
+  const t = (window.temaActual && temaActual()) || 'auto';
+  const r = document.getElementById('resumenTema');
+  if (r) r.textContent = NOMBRE_TEMA[t] || 'Automático';
+  document.querySelectorAll('.opciones-tema [data-tema-opcion]').forEach(b => {
+    const activa = b.dataset.temaOpcion === t;
+    b.classList.toggle('activa', activa);
+    b.setAttribute('aria-checked', activa ? 'true' : 'false');
+  });
+}
+document.addEventListener('DOMContentLoaded', pintarResumenTema);
+
+// «Grupos ›» y «Amigos ›»: van a su sección
+function irAPantalla(id) {
+  const boton = document.querySelector(`.nav-btn[data-page="${id}"]`);
+  if (boton) boton.click(); else switchPage(id);
 }
 
 function updateReadMode() {
   const p = profile;
   if (!p) return;
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
-  set('readNombre', p.nombre || p.name || '—');
-  set('readEmail', p.email);
-  set('readTel', p.tel);
+  set('resumenMisDatos', [p.nombre || p.name, p.tel].filter(Boolean).join(' · ') || 'Nombre, email y teléfono');
   const cobros = [p.pago_bizum ? 'Bizum' : '', p.pago_iban ? 'Transferencia' : ''].filter(Boolean);
   set('readCobro', cobros.length ? cobros.join(' · ') : 'Sin configurar');
 }
@@ -114,17 +133,25 @@ async function saveProfile() {
   }
   if (data.pago_bizum && !/^\+?[\d\s-]{9,20}$/.test(data.pago_bizum)) return toast('El teléfono para Bizum no es válido', 'e');
   if (data.pago_iban && !ibanValido(data.pago_iban)) return toast('El IBAN no es válido. Revisa que esté completo.', 'e');
+  // Mientras se guarda: «Guardando…» y la ventana quieta, sin poder cerrarla
+  const id = ventanaCuenta;
+  const soltarBoton = bloquearBoton(document.querySelector(`#${id} .btn-gold`), 'Guardando…');
+  if (!soltarBoton) return;
+  const soltarVentana = bloquearZona(document.querySelector(`#${id} .modal-sheet`));
+  guardandoPerfil = true;
   try {
     profile = await vakaData.saveProfile(data);
+    guardandoPerfil = false; soltarVentana(); soltarBoton();
+    cerrarVentanaCuenta();
     updateProfilePreview();
     updateReadMode();
-    toggleEditProfile();
     await logActivity('Perfil actualizado');
     renderActivity();
     toast('Perfil guardado', 's');
     // Si cambió el nombre, en los grupos ya aparece con el nuevo: se recargan
     if (typeof refrescarGruposYAmigos === 'function') refrescarGruposYAmigos();
   } catch (error) {
+    guardandoPerfil = false; soltarVentana(); soltarBoton();
     toast(error.status === 400 && error.message ? error.message : textoError(error, 'No se pudo guardar el perfil.'), 'e');
     console.error("Error en saveProfile:", error);
   }
