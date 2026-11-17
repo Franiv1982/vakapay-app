@@ -238,6 +238,8 @@ const initSchema = async () => {
       );
       CREATE INDEX IF NOT EXISTS dispositivos_usuario ON dispositivos (user_id);
       ALTER TABLE users ADD COLUMN IF NOT EXISTS avisos JSONB NOT NULL DEFAULT '{}'::jsonb;  -- {"chat": false} = desactivado
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS google_sub TEXT;   -- cuenta de Google vinculada (#69)
+      CREATE UNIQUE INDEX IF NOT EXISTS users_google_sub ON users (google_sub) WHERE google_sub IS NOT NULL;
       ALTER TABLE friends DROP COLUMN IF EXISTS notes;   -- las notas de amigos se quitaron (solo las veía su dueño)
     `);
     console.log('✅ Schema PostgreSQL inicializado u optimizado');

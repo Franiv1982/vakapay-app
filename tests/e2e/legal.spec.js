@@ -15,7 +15,7 @@ test('enlaces: en el registro y al pie del inicio; desde Cuenta se vuelve a Cuen
   await page.goto(`${WEB}/login.html`);
   await expect(page.locator('#page-login-inicio .enlaces-legales a[href="privacidad.html"]')).toBeVisible();
   await page.getByRole('button', { name: 'Regístrate' }).click();
-  await expect(page.locator('.aviso-legal a[href="terminos.html"]')).toBeVisible();
+  await expect(page.locator('#page-registro .aviso-legal a[href="terminos.html"]')).toBeVisible();
 
   const ana = await crearUsuario(request);
   await entrar(page, ana);

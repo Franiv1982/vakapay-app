@@ -4,7 +4,7 @@ const bcrypt   = require('bcryptjs');
 const { normalizarTelefono } = require('../utils/telefono');
 const db       = require('../db/database');
 const crypto   = require('crypto');
-const { signToken, requireAuth, textoBloqueo, olvidarEstado } = require('../middleware/auth');
+const { signToken, requireAuth, textoBloqueo, olvidarEstado, firmarBillete, leerBillete } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -140,6 +140,97 @@ router.post('/login', async (req, res, next) => {
     const { password_hash, reset_otp, reset_otp_expires, reset_attempts, login_fallos, login_bloqueado_hasta, minutos_bloqueo, bloqueado, bloqueo_motivo,
             sesiones_desde, reset_pedidos, reset_pedidos_desde, ocr_usos, ocr_dia, ...safeUser } = user;
     res.json({ token, user: safeUser });
+  } catch (err) { next(err); }
+});
+
+// Datos del usuario que se pueden devolver a la app (sin contraseña, códigos, contadores…)
+function usuarioSeguro(user) {
+  const { password_hash, reset_otp, reset_otp_expires, reset_attempts, login_fallos, login_bloqueado_hasta, minutos_bloqueo, bloqueado, bloqueo_motivo,
+          sesiones_desde, reset_pedidos, reset_pedidos_desde, ocr_usos, ocr_dia, google_sub, avisos, ...seguro } = user;
+  return seguro;
+}
+
+// ══ INICIAR SESIÓN CON GOOGLE (#69) ══════════════════════════════
+// La app (web o APK) abre la ventana de Google y recibe un «ID token» firmado
+// por Google. Aquí se comprueba esa firma y que el token es para VakaPay
+// (GOOGLE_CLIENT_ID en Vercel; varios separados por comas si hiciera falta).
+//  · Si ya hay cuenta con ese email (o vinculada a ese Google) → se entra.
+//  · Si no → { registro_pendiente, billete }: la app pide teléfono y aceptar
+//    Términos y Privacidad, y termina con POST /auth/google/registro.
+const clientesGoogle = () => String(process.env.GOOGLE_CLIENT_ID || '').split(',').map(s => s.trim()).filter(Boolean);
+let _verificadorGoogle = null;
+async function identidadGoogle(credencial) {
+  // En las pruebas automáticas no se llama a Google: «prueba:<json en base64>»
+  if (process.env.NODE_ENV === 'test' && String(credencial).startsWith('prueba:')) {
+    return JSON.parse(Buffer.from(String(credencial).slice(7), 'base64').toString('utf8'));
+  }
+  if (!clientesGoogle().length) throw Object.assign(new Error('El acceso con Google no está configurado'), { status: 503 });
+  if (!_verificadorGoogle) { const { OAuth2Client } = require('google-auth-library'); _verificadorGoogle = new OAuth2Client(); }
+  try {
+    const ticket = await _verificadorGoogle.verifyIdToken({ idToken: String(credencial), audience: clientesGoogle() });
+    return ticket.getPayload();
+  } catch (_) {
+    throw Object.assign(new Error('Google no ha confirmado tu identidad. Inténtalo de nuevo.'), { status: 401 });
+  }
+}
+
+// GET /auth/google-config — si el botón de Google está disponible y con qué ID de cliente
+router.get('/google-config', (req, res) => {
+  const [id] = clientesGoogle();
+  res.json({ disponible: !!id, client_id: id || null });
+});
+
+// POST /auth/google { credential }
+router.post('/google', async (req, res, next) => {
+  try {
+    if (!req.body.credential) return res.status(400).json({ error: 'Falta la identificación de Google' });
+    const g = await identidadGoogle(req.body.credential);
+    const email = normEmail(g.email);
+    if (!g.sub || !email || g.email_verified === false || g.email_verified === 'false') {
+      return res.status(400).json({ error: 'Tu cuenta de Google no tiene un email verificado.' });
+    }
+    const r = await db.query(
+      'SELECT * FROM users WHERE google_sub = $1 OR LOWER(TRIM(email)) = $2 ORDER BY (google_sub = $1) DESC NULLS LAST, id LIMIT 1',
+      [g.sub, email]);
+    const user = r.rows[0];
+    if (user) {
+      if (user.bloqueado) return res.status(403).json({ error: textoBloqueo(user.bloqueo_motivo), cuenta_bloqueada: true });
+      // Misma persona: Google ha verificado que el email es suyo. Se vincula para la próxima vez.
+      if (!user.google_sub) await db.query('UPDATE users SET google_sub = $1 WHERE id = $2', [g.sub, user.id]);
+      return res.json({ token: signToken(user), user: usuarioSeguro(user) });
+    }
+    const nombre = String(g.name || [g.given_name, g.family_name].filter(Boolean).join(' ') || '').trim().slice(0, 40);
+    res.json({
+      registro_pendiente: true,
+      billete: firmarBillete({ google_sub: g.sub, email, nombre }),
+      nombre, email,
+    });
+  } catch (err) {
+    if (err.status) return res.status(err.status).json({ error: err.message });
+    next(err);
+  }
+});
+
+// POST /auth/google/registro { billete, nombre, tel, acepta } — primera vez con Google
+router.post('/google/registro', async (req, res, next) => {
+  try {
+    const b = leerBillete(req.body.billete);
+    if (!b || !b.google_sub) return res.status(400).json({ error: 'Han pasado demasiados minutos. Vuelve a pulsar «Seguir con Google».' });
+    if (req.body.acepta !== true) return res.status(400).json({ error: 'Para crear la cuenta tienes que aceptar los Términos y la Política de privacidad.', campo: 'acepta' });
+    const nom = validarTextoPerfil('nombre', req.body.nombre);
+    if (!nom.ok || !String(nom.valor || '').trim()) return res.status(400).json({ error: nom.error || 'Escribe tu nombre', campo: 'nombre' });
+    const telefono = normalizarTelefono(req.body.tel);
+    if (!telefono.ok) return res.status(400).json({ error: telefono.error, campo: 'tel' });
+
+    const existe = await db.query('SELECT id FROM users WHERE google_sub = $1 OR LOWER(TRIM(email)) = $2', [b.google_sub, b.email]);
+    if (existe.rows[0]) return res.status(409).json({ error: 'Ya existe una cuenta con ese email. Vuelve a pulsar «Seguir con Google» para entrar.' });
+
+    const result = await db.query(`
+      INSERT INTO users (nombre, apellido, email, password_hash, tel, google_sub, terminos_aceptados_en)
+      VALUES ($1, '', $2, NULL, $3, $4, NOW()) RETURNING id, nombre, apellido, email, tel, created_at
+    `, [nom.valor, b.email, telefono.valor, b.google_sub]);
+    const user = result.rows[0];
+    res.status(201).json({ token: signToken(user), user });
   } catch (err) { next(err); }
 });
 

@@ -106,6 +106,19 @@ class VakaDataService {
     return data;
   }
 
+  // Seguir con Google (#69): entra si ya hay cuenta; si no, devuelve { registro_pendiente, billete }
+  async loginGoogle(credential) {
+    const data = await this.#fetch('POST', '/auth/google', { credential });
+    if (data.token) { this.setToken(data.token); this.#write(this.#KEYS.profile, data.user); }
+    return data;
+  }
+  async registroGoogle({ billete, nombre, tel, acepta }) {
+    const data = await this.#fetch('POST', '/auth/google/registro', { billete, nombre, tel, acepta });
+    this.setToken(data.token);
+    this.#write(this.#KEYS.profile, data.user);
+    return data;
+  }
+
   async login({ email, password }) {
     const data = await this.#fetch('POST', '/auth/login', { email, password });
     this.setToken(data.token);
