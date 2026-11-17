@@ -3,6 +3,8 @@
 
 // ═══ NAVEGACIÓN ENTRE PANTALLAS ══════════════════════════════════════════
 function switchPage(id, btn) {
+  // Al salir de Amigos, lo que quedó a medias en «Añadir amigo» se descarta
+  if (id !== 'page-amigos' && document.getElementById('page-amigos')?.classList.contains('active') && typeof limpiarFormAmigo === 'function') limpiarFormAmigo();
   // 1. GESTIÓN DE CLASES ACTIVAS (Páginas y Botones)
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));

@@ -43,12 +43,12 @@ async function completarAmigo(amigo, { email, phone }) {
 }
 
 // Añade el amigo salvo que ya exista; si existe, completa el email o teléfono que le falten
-async function agregarAmigoSiNoExiste(ownerId, { name, email = '', phone = '', notes = '' }) {
+async function agregarAmigoSiNoExiste(ownerId, { name, email = '', phone = '' }) {
   const dup = await buscarAmigoDuplicado(ownerId, { name, email, phone });
   if (dup) { await completarAmigo(dup.amigo, { email, phone }); return dup.amigo; }
   const r = await db.query(
-    'INSERT INTO friends (owner_id, name, email, phone, notes) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-    [ownerId, name, email || '', phone || '', notes]
+    'INSERT INTO friends (owner_id, name, email, phone) VALUES ($1, $2, $3, $4) RETURNING *',
+    [ownerId, name, email || '', phone || '']
   );
   return r.rows[0];
 }
@@ -56,9 +56,8 @@ async function agregarAmigoSiNoExiste(ownerId, { name, email = '', phone = '', n
 // Cada participante con cuenta tiene en Amigos a todos los demás del grupo
 // (tengan cuenta o no). No duplica: si ya existe por email, teléfono o nombre, lo completa.
 async function sincronizarAmigosGrupo(groupId) {
-  const g = await db.query('SELECT name FROM groups WHERE id = $1', [groupId]);
+  const g = await db.query('SELECT 1 FROM groups WHERE id = $1', [groupId]);
   if (!g.rows[0]) return;
-  const nota = `Del grupo "${g.rows[0].name}"`;
   const miembros = (await db.query(`
     SELECT gm.display_name, gm.user_id, u.email, u.tel
     FROM group_members gm LEFT JOIN users u ON u.id = gm.user_id
@@ -73,8 +72,8 @@ async function sincronizarAmigosGrupo(groupId) {
       const dup = buscarEnLista(mios, datos);
       if (dup) { await completarAmigo(dup.amigo, datos); continue; }
       const r = await db.query(
-        'INSERT INTO friends (owner_id, name, email, phone, notes) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-        [yo.user_id, datos.name, datos.email, datos.phone, nota]
+        'INSERT INTO friends (owner_id, name, email, phone) VALUES ($1, $2, $3, $4) RETURNING *',
+        [yo.user_id, datos.name, datos.email, datos.phone]
       );
       mios.push(r.rows[0]);
     }

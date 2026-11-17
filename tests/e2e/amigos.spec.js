@@ -36,3 +36,26 @@ test('ficha del amigo: sin «Eliminar»; los grupos se aplican al guardar, con l
   const { datos } = await api(request, 'GET', `/groups/${g.id}`, null, ana.token);
   expect(datos.members.map(m => m.display_name)).toContain('Pepe');
 });
+
+test('añadir amigo: «Limpiar» vacía el formulario y al salir de Amigos se vacía solo', async ({ page, request }) => {
+  const ana = await crearUsuario(request);
+  await entrar(page, ana);
+  await page.click('[data-page="page-amigos"]');
+  const limpiar = page.locator('#btnLimpiarAmigo');
+  await expect(limpiar).toBeHidden();
+  await page.fill('#friendName', 'Marta');
+  await page.fill('#friendEmail', 'marta@correo.es');
+  await expect(limpiar).toBeVisible();
+  await limpiar.click();
+  await expect(page.locator('#friendName')).toHaveValue('');
+  await expect(page.locator('#friendEmail')).toHaveValue('');
+  await expect(limpiar).toBeHidden();
+
+  // A medias y se va a otra pantalla: al volver está vacío
+  await page.fill('#friendName', 'Marta');
+  await page.click('[data-page="page-cuenta"]');
+  await page.click('[data-page="page-amigos"]');
+  await expect(page.locator('#friendName')).toHaveValue('');
+  // Las notas ya no existen
+  await expect(page.locator('#editFriendNotes')).toHaveCount(0);
+});

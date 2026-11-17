@@ -469,7 +469,11 @@
         <option value="">— Sin vincular —</option>
       </select>
     </div>
-    <button class="btn btn-gold btn-full" onclick="addFriend()">+ Añadir Amigo</button>
+    <div class="u-d-flex u-gap-8">
+      <!-- «Limpiar» solo aparece cuando hay algo escrito (p. ej. cargado desde Contactos) -->
+      <button type="button" class="btn btn-outline" id="btnLimpiarAmigo" style="display:none" onclick="limpiarFormAmigo()">Limpiar</button>
+      <button class="btn btn-gold u-f-1" onclick="addFriend()">+ Añadir Amigo</button>
+    </div>
   </div>
   <div id="friendsList"><div class="no-items"><div class="ni"><svg class="u-c-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div>Sin amigos añadidos aún</div></div></div>
 </main>
@@ -720,7 +724,6 @@
     </div>
     <div class="field"><label>Email</label><input type="email" id="editFriendEmail" placeholder="amigo@email.com"></div>
     <div class="field"><label>Teléfono</label><input type="tel" id="editFriendPhone" placeholder="+34 600 000 000"></div>
-    <div class="field"><label>Notas (opcional)</label><textarea id="editFriendNotes" placeholder="Ej: compañero de trabajo, piso compartido..."></textarea></div>
 
     <div class="field">
       <label>Grupos vinculados</label>

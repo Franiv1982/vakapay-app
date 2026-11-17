@@ -315,7 +315,7 @@ router.post('/:id/members', requireAuth, async (req, res, next) => {
     // Quien lo añade lo guarda en Amigos con el email/teléfono de la agenda (si vienen);
     // después, todos los del grupo con cuenta lo tienen también en Amigos
     try {
-      await agregarAmigoSiNoExiste(req.user.id, { name: display_name, email: String(email).trim(), phone: String(phone).trim(), notes: 'Añadido desde grupo' });
+      await agregarAmigoSiNoExiste(req.user.id, { name: display_name, email: String(email).trim(), phone: String(phone).trim() });
       await sincronizarAmigosGrupo(req.params.id);
     } catch (e) { console.error('No se pudieron actualizar los amigos:', e.message); }
 
