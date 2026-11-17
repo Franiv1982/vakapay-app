@@ -283,7 +283,7 @@ class VakaDataService {
         // La foto guardada en el servidor (avatar_url) es la que se muestra (avatar)
         const data = raw.map(f => ({ ...f, avatar: (f.avatar_url && f.avatar_url.startsWith('data:')) ? f.avatar_url : (f.avatar || null),
           // Si tiene cuenta y ha subido su foto, esa manda (la tuya queda de reserva)
-          fotoCuenta: f.foto_cuenta || null, cuentaId: f.cuenta_id || null }));
+          fotoCuenta: f.foto_cuenta || null, cuentaId: f.cuenta_id || null, tieneCuenta: !!f.tiene_cuenta }));
         this.#write(this.#KEYS.friends, data);
         return data;
       }

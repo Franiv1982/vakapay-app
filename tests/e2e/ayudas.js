@@ -24,7 +24,7 @@ async function api(request, metodo, ruta, cuerpo, token) {
 
 const aleatorio = () => Math.random().toString(36).slice(2, 8);
 async function crearUsuario(request, nombre = 'Ana') {
-  const email = `${nombre.toLowerCase()}.${aleatorio()}@prueba.test`;
+  const email = `${nombre.toLowerCase().replace(/[^a-z0-9]/g, "")}.${aleatorio()}@prueba.test`;
   const tel = '+34 6' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0');
   const reg = await api(request, 'POST', '/auth/register', { nombre, apellido: '', email, password: CLAVE, tel });
   if (reg.status >= 300) throw new Error('No se pudo registrar: ' + JSON.stringify(reg.datos));

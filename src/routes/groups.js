@@ -8,6 +8,7 @@ const { agregarAmigoSiNoExiste, sincronizarAmigosGrupo } = require('../utils/con
 const { recalcBalances } = require('./expenses');
 const { pagosSinConfirmar, textoPagoPendiente, porConfirmar } = require('../utils/pagos');
 const { formatoNumero } = require('../utils/importe');
+const { renombrarParticipante } = require('../utils/nombres');
 
 const router = express.Router();
 
@@ -97,7 +98,8 @@ router.post('/', requireAuth, async (req, res, next) => {
 
     const groupId = result.rows[0].id;
     const userRes = await db.query('SELECT nombre FROM users WHERE id = $1', [req.user.id]);
-    const ownerName = userRes.rows[0]?.nombre || req.user.email.split('@')[0];
+    // Quien crea el grupo entra con su primer nombre (como todos los que tienen cuenta)
+    const ownerName = String(userRes.rows[0]?.nombre || '').trim().split(/\s+/)[0] || req.user.email.split('@')[0];
     await db.query(`
       INSERT INTO group_members (group_id, user_id, display_name)
       VALUES ($1, $2, $3)
@@ -468,8 +470,14 @@ router.patch('/:id/members/:name/rename', requireAuth, async (req, res, next) =>
     if (!await ownsGroup(req.params.id, req.user.id)) {
       return res.status(404).json({ error: 'Grupo no encontrado' });
     }
-    const { display_name } = req.body;
+    const display_name = String(req.body.display_name || '').trim();
     if (!display_name) return res.status(400).json({ error: 'Escribe el nombre del participante' });
+    const miembro = (await db.query('SELECT user_id FROM group_members WHERE group_id = $1 AND display_name = $2', [req.params.id, req.params.name])).rows[0];
+    if (!miembro) return res.status(404).json({ error: 'Participante no encontrado' });
+    // Con cuenta: su nombre es el de su cuenta y solo lo cambia él (en Cuenta)
+    if (miembro.user_id) {
+      return res.status(403).json({ error: `${req.params.name} tiene cuenta en VakaPay: en los grupos aparece con el nombre de su cuenta y solo puede cambiarlo él.` });
+    }
 
     const existing = await db.query(
       'SELECT id FROM group_members WHERE group_id = $1 AND LOWER(TRIM(display_name)) = LOWER(TRIM($2)) AND display_name <> $3',
@@ -477,18 +485,7 @@ router.patch('/:id/members/:name/rename', requireAuth, async (req, res, next) =>
     );
     if (existing.rows.length > 0) return res.status(409).json({ error: 'Ya existe un participante con ese nombre' });
 
-    await db.query(
-      'UPDATE group_members SET display_name = $1 WHERE group_id = $2 AND display_name = $3',
-      [display_name, req.params.id, req.params.name]
-    );
-    await db.query(
-      'UPDATE expenses SET payer_name = $1 WHERE group_id = $2 AND payer_name = $3',
-      [display_name, req.params.id, req.params.name]
-    );
-    await db.query(
-      'UPDATE expense_splits SET member_name = $1 WHERE member_name = $2 AND expense_id IN (SELECT id FROM expenses WHERE group_id = $3)',
-      [display_name, req.params.name, req.params.id]
-    );
+    await renombrarParticipante(req.params.id, req.params.name, display_name);
     res.json({ ok: true });
   } catch (err) { next(err); }
 });

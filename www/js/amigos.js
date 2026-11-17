@@ -153,7 +153,7 @@ function renderFriends(){
   if(friends.length===0&&cargandoInicial){el.innerHTML=skFilas(4,true);return;}
   if(friends.length===0){el.innerHTML='<div class="no-items"><div class="ni"><svg class="u-c-text" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div>Sin amigos añadidos aún</div></div>';return;}
   el.innerHTML=friends.map((f,i)=>{
-    const inGroups=groups.filter(g=>Object.prototype.hasOwnProperty.call(g.members, f.name)).map(g=>iconoTipo(g.type, 12)+' '+escaparHtml(g.name));
+    const inGroups=groups.filter(g=>nombreDelAmigoEnGrupo(f, g)).map(g=>iconoTipo(g.type, 12)+' '+escaparHtml(g.name));
     const fotoAmigo=f.fotoCuenta||f.avatar;   // la de su cuenta manda
     const avatarContent=fotoAmigo
       ?`<img class="u-w-100p u-h-100p u-fit-cover u-r-50p" src="${fotoAmigo}" alt="">`
@@ -177,6 +177,17 @@ function renderFriends(){
   }).join('');
 }
 
+// Cómo aparece un amigo en un grupo: si tiene cuenta, se le busca por su cuenta
+// (en el grupo sale con su propio nombre, que puede no ser el de tu agenda);
+// si no, por el nombre. Devuelve el nombre en el grupo o null si no está.
+function nombreDelAmigoEnGrupo(f, g) {
+  if (f.cuentaId && g.memberIds) {
+    const n = Object.keys(g.memberIds).find(k => String(g.memberIds[k]) === String(f.cuentaId));
+    if (n) return n;
+  }
+  return Object.prototype.hasOwnProperty.call(g.members || {}, f.name) ? f.name : null;
+}
+
 // ═══ EDITAR AMIGO ════════════════════════════════════════════════════════
 let editingFriendIdx = null;
 
@@ -196,10 +207,15 @@ function openFriendModal(idx){
   // Si usa la foto de su cuenta, no se cambia desde aquí: el lápiz se oculta
   av.nextElementSibling.style.display=av.dataset.cuenta?'none':'';
   rotularFotoAmigo();
+  // Con cuenta en VakaPay: el nombre es solo de tu agenda y el email y el teléfono,
+  // que lo vinculan con su cuenta, no se cambian aquí
+  const conCuenta=!!f.tieneCuenta;
+  document.getElementById('friendCuentaAviso').style.display=conCuenta?'':'none';
+  ['editFriendEmail','editFriendPhone'].forEach(id=>{const c=document.getElementById(id);c.readOnly=conCuenta;c.setAttribute('aria-readonly',conCuenta?'true':'false');});
   const gc=document.getElementById('editFriendGroups');
   if(groups.length===0){gc.innerHTML='<span class="u-c-muted u-fs-sm">No hay grupos creados aún</span>';}
   else{gc.innerHTML=groups.map((g,gi)=>{
-    const inGroup=Object.prototype.hasOwnProperty.call(g.members, f.name);
+    const inGroup=!!nombreDelAmigoEnGrupo(f, g);
     return`<div class="modal-chip ${inGroup?'sel':''}" role="button" tabindex="0" aria-pressed="${inGroup}" data-gidx="${gi}" data-estaba="${inGroup?1:0}" onclick="toggleFriendGroupChip(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleFriendGroupChip(this);}">`+
       `<span class="u-fs-md">${iconoTipo(g.type, 14)}</span>${g.name}</div>`;
   }).join('');}
@@ -329,10 +345,11 @@ function toggleFriendGroupChip(el) {
   if (!f) return;
   const g = groups[parseInt(el.dataset.gidx)];
   if (el.classList.contains('sel') && el.dataset.estaba === '1') {
-    if (g.expenses.some(e => (e.payer || e.payer_name) === f.name || (e.involved || []).includes(f.name))) {
+    const enGrupo = nombreDelAmigoEnGrupo(f, g) || f.name;
+    if (g.expenses.some(e => (e.payer || e.payer_name) === enGrupo || (e.involved || []).includes(enGrupo))) {
       toast(`${f.name} tiene gastos en «${g.name}»: no se puede quitar del grupo`, 'e'); return;
     }
-    if (g.memberIds && g.memberIds[f.name]) {
+    if (g.memberIds && g.memberIds[enGrupo]) {
       toast(`${f.name} está en «${g.name}» con su cuenta: no se puede quitar desde aquí`, 'e'); return;
     }
   }
@@ -398,7 +415,6 @@ async function saveEditFriend(){
   if(firstName.length>20){toast('El nombre no puede superar 20 caracteres','e');return;}
   if(lastName.length>20){toast('El apellido no puede superar 20 caracteres','e');return;}
   const newName=lastName?firstName+' '+lastName:firstName;
-  const oldName=f.name;
   const dupEdit = buscarAmigoDuplicado({ name: newName, email, phone }, idx);
   if (dupEdit) { mostrarModalDuplicado({ titulo: 'Ya tienes este contacto', nombre: dupEdit.amigo.name, motivo: dupEdit.motivo, valor: _valorDup(dupEdit, { email, phone }) }); return; }
 
@@ -427,17 +443,8 @@ async function saveEditFriend(){
   if (grupos.hechos.length || grupos.fallos.length) await refrescarGruposYAmigos();
   if (!guardado) return;   // la ficha sigue abierta para reintentar
 
-  if(newName!==oldName){
-    groups.forEach(g=>{
-      if(Object.prototype.hasOwnProperty.call(g.members, oldName)){
-        g.members[newName]=g.members[oldName];delete g.members[oldName];
-        g.expenses.forEach(ex=>{
-          if(ex.payer===oldName)ex.payer=newName;
-          ex.involved=ex.involved.map(p=>p===oldName?newName:p);
-        });
-      }
-    });
-  }
+  // El nombre en tu agenda es solo tuyo: no cambia cómo aparece en los grupos
+  // (ahí lo cambia quien creó el grupo, o él mismo si tiene cuenta)
   const nuevaFoto = f._quitarAvatar ? null : (f._tmpAvatar || f.avatar || null);
   const actual = friends.findIndex(x => x.id === f.id);
   const i = actual >= 0 ? actual : idx;

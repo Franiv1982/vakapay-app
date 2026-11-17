@@ -45,17 +45,28 @@ const upload = multer({
     : cb(Object.assign(new Error('Solo se admiten fotos (JPG, PNG, WEBP o GIF)'), { status: 400 })),
 });
 
+// ¿Este amigo tiene cuenta? (mismo email o mismos 9 últimos dígitos del teléfono)
+async function tieneCuentaVinculada(ownerId, f) {
+  const r = await db.query(`
+    SELECT 1 FROM users u WHERE u.id <> $1 AND (
+      ($2 <> '' AND LOWER(TRIM($2)) = LOWER(TRIM(u.email)))
+      OR ($3 <> '' AND u.tel IS NOT NULL AND LENGTH(REGEXP_REPLACE($3, '\\D', '', 'g')) >= 9
+          AND RIGHT(REGEXP_REPLACE($3, '\\D', '', 'g'), 9) = RIGHT(REGEXP_REPLACE(u.tel, '\\D', '', 'g'), 9)))
+    LIMIT 1`, [ownerId, f.email || '', f.phone || '']);
+  return !!r.rows[0];
+}
+
 // ── GET /friends ──────────────────────────────────────────────────
 router.get('/', requireAuth, async (req, res, next) => {
   try {
     // Si el amigo tiene cuenta (mismo email o mismos 9 últimos dígitos del teléfono)
-    // y ha subido foto, se envía su miniatura y su id para poder ampliarla
+    // se indica, y si ha subido foto se envía su miniatura y su id para poder ampliarla
     const result = await db.query(`
-      SELECT f.*, c.id AS cuenta_id, c.avatar_mini AS foto_cuenta
+      SELECT f.*, c.id AS cuenta_id, c.avatar_mini AS foto_cuenta, (c.id IS NOT NULL) AS tiene_cuenta
       FROM friends f
       LEFT JOIN LATERAL (
         SELECT u.id, u.avatar_mini FROM users u
-        WHERE u.id <> f.owner_id AND u.avatar_mini IS NOT NULL AND (
+        WHERE u.id <> f.owner_id AND (
           (f.email <> '' AND LOWER(TRIM(f.email)) = LOWER(TRIM(u.email)))
           OR (f.phone <> '' AND u.tel IS NOT NULL AND LENGTH(REGEXP_REPLACE(f.phone, '\\D', '', 'g')) >= 9
               AND RIGHT(REGEXP_REPLACE(f.phone, '\\D', '', 'g'), 9) = RIGHT(REGEXP_REPLACE(u.tel, '\\D', '', 'g'), 9)))
@@ -109,6 +120,14 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
 
     const { name, email, phone, avatar_url } = req.body;
     const actual = existing.rows[0];
+    // Si tiene cuenta en VakaPay, su email y su teléfono son los que lo vinculan
+    // con ella (y con su foto): no se cambian desde la ficha
+    const digitos = t => String(t || '').replace(/\D/g, '').slice(-9);
+    const cambiaEmail = email !== undefined && String(email).trim().toLowerCase() !== String(actual.email || '').trim().toLowerCase();
+    const cambiaTel = phone !== undefined && digitos(phone) !== digitos(actual.phone);
+    if ((cambiaEmail || cambiaTel) && await tieneCuentaVinculada(req.user.id, actual)) {
+      return res.status(400).json({ error: `${actual.name} tiene cuenta en VakaPay: su email y su teléfono no se cambian desde aquí.` });
+    }
     const dup = await buscarAmigoDuplicado(req.user.id, {
       name:  name  !== undefined ? name  : actual.name,
       email: email !== undefined ? email : actual.email,

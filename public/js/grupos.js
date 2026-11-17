@@ -7,8 +7,9 @@ async function createGroup(){
   if(!nameInput) return;
 
   const name = nameInput.value.trim() || 'Mi Grupo';
-  // Nombre del usuario logueado, que debe quedar como primer participante
-  const myName = (profile && profile.nombre ? profile.nombre.trim() : '') || 'Yo';
+  // Quien crea el grupo entra como primer participante, con su primer nombre
+  // (el servidor lo da de alta al crear el grupo; ver src/utils/nombres.js)
+  const myName = (profile && profile.nombre ? profile.nombre.trim().split(/\s+/)[0] : '') || 'Yo';
   const ini = document.getElementById('dateStart')?.value, fin = document.getElementById('dateEnd')?.value;
   if (!ini || !fin) { toast('Elige la fecha de inicio y la de fin del grupo', 'e'); return; }
   if (fin < ini) { toast('La fecha de fin no puede ser anterior a la de inicio', 'e'); return; }
@@ -36,20 +37,6 @@ async function createGroup(){
     // aunque el backend no lo haya incluido en la respuesta del POST /groups
     if (!grupoFinal.members || Object.keys(grupoFinal.members).length === 0) {
       grupoFinal.members = { [myName]: 0 };
-    }
-
-    // 4. Si el grupo ya tiene ID (se creó bien en el servidor), damos de alta
-    // al creador como miembro real vía la API, igual que con cualquier otro participante
-    if (grupoFinal.id) {
-      try {
-        await fetch(`${API_BASE}/api/v1/groups/${grupoFinal.id}/members`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
-          body: JSON.stringify({ display_name: myName })
-        });
-      } catch(err) {
-        console.warn('No se pudo registrar al creador como miembro en el servidor:', err);
-      }
     }
 
     // 5. Actualizamos la lista global con el grupo que YA tiene ID y participante
