@@ -960,7 +960,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="u-bg-dark3 u-w-xe00cd u-maxw-340 u-p-28-22 u-r-xl u-b-1-solid-line u-t-center">
         
         <div class="u-w-56 u-h-56 u-m-0-auto-16 u-r-50p u-bg-x396b6 u-d-flex u-ai-center u-jc-center"><svg class="u-c-danger" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><line x1="12" y1="15" x2="12" y2="18"/></svg></div>
-        <h2 class="u-c-text u-mb-10 u-fs-1_4rem">Acceso denegado</h2>
+        <h2 class="u-c-text u-mb-10 u-fs-1_4rem" id="login-error-titulo">Acceso denegado</h2>
         <p class="u-c-text u-mb-24 u-fs-base u-op-0_8" id="login-error-texto">El correo electrónico o la contraseña son incorrectos. Por favor, verifica tus datos e inténtalo de nuevo.</p>
         
         <!-- BOTÓN ACEPTAR (VERDE SÓLIDO - CONTINUIDAD) -->
@@ -1159,11 +1159,23 @@ async function iniciarSesion() {
         console.error("❌ Detalle del fallo:", error);   
         // Mensaje según el motivo: bloqueo por intentos, últimos intentos o datos incorrectos
         const texto = document.getElementById('login-error-texto');
+        const titulo = document.getElementById('login-error-titulo');
+        titulo.textContent = 'Acceso denegado';
         if (error.status === 403 && error.data && error.data.cuenta_bloqueada) {
             mostrarAvisoLogin('Cuenta desactivada', error.message, 'error');
             return;
         }
-        if (error.status === 429) {
+        // Fallos que no tienen que ver con los datos: que no parezca una contraseña mal escrita
+        if (!error.status) {                       // sin respuesta: sin internet o conexión bloqueada
+            titulo.textContent = 'No se pudo conectar';
+            texto.textContent = 'No se pudo conectar con el servidor. Revisa tu conexión a internet e inténtalo de nuevo.';
+        } else if (error.status >= 500) {
+            titulo.textContent = 'Problema del servidor';
+            texto.textContent = 'El servidor ha tenido un problema. Tus datos están bien: inténtalo de nuevo en un momento.';
+        } else if (error.status === 400) {
+            titulo.textContent = 'Faltan datos';
+            texto.textContent = error.message || 'Escribe tu correo electrónico y tu contraseña.';
+        } else if (error.status === 429) {
             texto.textContent = error.message;
         } else if (error.status === 401 && error.data && error.data.intentos_restantes <= 2) {
             const n = error.data.intentos_restantes;

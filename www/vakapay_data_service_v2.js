@@ -50,7 +50,9 @@ class VakaDataService {
       body: body ? JSON.stringify(body) : undefined,
     });
     if (res.status === 204) return true;
-    const data = await res.json();
+    // Si el servidor falla sin JSON (página de error), que se vea como error del servidor
+    // con su código, no como «sin conexión»
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) throw Object.assign(new Error(data.error || 'Error del servidor'), { status: res.status, data });
     return data;
   }
