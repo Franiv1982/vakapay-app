@@ -555,7 +555,9 @@ function closeLogoutModal() {
     document.getElementById('modalLogout').style.display = 'none';
 }
 
-function confirmLogout() {
+async function confirmLogout() {
+  // Este móvil deja de recibir los avisos de la cuenta (no se espera más de 2 s)
+  if (typeof olvidarMovilParaAvisos === 'function') await Promise.race([olvidarMovilParaAvisos(), new Promise(r => setTimeout(r, 2000))]);
   localStorage.setItem('intentional_logout', 'true');
   vakaData.setToken(null);
   { // Se conservan el tema y cuántos grupos tenía cada cuenta (para las tarjetas grises de carga)

@@ -6,6 +6,7 @@
 const express = require('express');
 const db      = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
+const push = require('../utils/push');
 
 const router = express.Router({ mergeParams: true });
 
@@ -121,6 +122,19 @@ router.post('/', requireAuth, async (req, res, next) => {
     );
     await marcarLeido(req.params.id, req.user.id, r.rows[0].id);
     res.status(201).json({ id: r.rows[0].id, created_at: r.rows[0].created_at });
+
+    // Aviso push al resto del grupo. Mismo grupo = misma etiqueta: el aviso se
+    // sustituye por el del último mensaje, en vez de acumular uno por mensaje.
+    const groupId = req.params.id, autorId = req.user.id;
+    push.enSegundoPlano(async () => {
+      const grupo = await push.nombreGrupo(groupId);
+      await push.enviar(await push.usuariosDelGrupo(groupId, autorId), 'chat', {
+        titulo: grupo,
+        cuerpo: `${autor}: ${texto || (imagen ? '📷 Foto' : 'GIF')}`,
+        datos: { grupo_id: groupId, destino: 'chat' },
+        etiqueta: `chat-${groupId}`,
+      });
+    });
   } catch (err) { next(err); }
 });
 

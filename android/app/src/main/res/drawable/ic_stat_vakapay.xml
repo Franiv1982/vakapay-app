@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icono pequeño de las notificaciones (#68): la tarjeta del logo de VakaPay.
+     Android lo pinta de un solo color, así que es solo silueta blanca. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <!-- Contorno de la tarjeta -->
+    <path android:fillColor="#FFFFFFFF" android:fillType="evenOdd"
+        android:pathData="M4.5,5h15a2.5,2.5 0,0 1,2.5 2.5v9a2.5,2.5 0,0 1,-2.5 2.5h-15a2.5,2.5 0,0 1,-2.5 -2.5v-9a2.5,2.5 0,0 1,2.5 -2.5zM4.5,6.8a0.7,0.7 0,0 0,-0.7 0.7v9a0.7,0.7 0,0 0,0.7 0.7h15a0.7,0.7 0,0 0,0.7 -0.7v-9a0.7,0.7 0,0 0,-0.7 -0.7z"/>
+    <!-- Chip -->
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M6,9h4a0.6,0.6 0,0 1,0.6 0.6v2.3a0.6,0.6 0,0 1,-0.6 0.6h-4a0.6,0.6 0,0 1,-0.6 -0.6v-2.3a0.6,0.6 0,0 1,0.6 -0.6z"/>
+    <!-- Monedas -->
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M15.6,10.75m-1.75,0a1.75,1.75 0,1 1,3.5 0a1.75,1.75 0,1 1,-3.5 0"/>
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M17.9,10.75m-1.75,0a1.75,1.75 0,1 1,3.5 0a1.75,1.75 0,1 1,-3.5 0"/>
+    <!-- Línea del número -->
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M5.4,14.6h8.2v1.4h-8.2z"/>
+</vector>

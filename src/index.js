@@ -94,6 +94,12 @@ app.get('/.well-known/assetlinks.json', (req, res) => {
   res.json(ASSETLINKS);
 });
 
+// Solo en las pruebas automáticas: ver los avisos push que se habrían enviado
+if (process.env.NODE_ENV === 'test') {
+  const { enviadosEnPruebas } = require('./utils/push');
+  app.get('/__pruebas/push', (req, res) => res.json(enviadosEnPruebas));
+}
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/login.html'));
 });

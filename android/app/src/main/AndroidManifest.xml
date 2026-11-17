@@ -8,6 +8,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!-- Notificaciones push (#68): icono pequeño y color por defecto -->
+        <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/ic_stat_vakapay" />
+        <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="avisos" />
         <activity
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
             android:name=".MainActivity"
@@ -40,6 +43,8 @@
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Notificaciones push (#68): Android 13+ pide permiso para mostrarlas -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
 </manifest>

@@ -578,6 +578,15 @@
     <div class="u-fs-xs u-c-muted u-mt-8">Automático sigue el modo del móvil.</div>
   </div>
 
+  <div class="card u-mt-12" id="tarjetaAvisos">
+    <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-mb-8"><svg class="u-va-middle u-mr-4" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg> Notificaciones</div>
+    <p class="u-fs-sm u-c-muted u-mb-10 u-lh-1_4" id="avisosNota" aria-live="polite">Elige qué avisos quieres recibir en el móvil.</p>
+    <label class="fila-aviso"><span class="fila-aviso-texto"><span class="fila-aviso-titulo">Pagos por confirmar</span><span class="fila-aviso-desc">Te registraron un pago que tienes que confirmar</span></span><input type="checkbox" role="switch" class="interruptor" data-aviso="pagos" checked onchange="cambiarAviso(this)"></label>
+    <label class="fila-aviso"><span class="fila-aviso-texto"><span class="fila-aviso-titulo">Pagos rechazados o corregidos</span><span class="fila-aviso-desc">Rechazaron un pago tuyo o lo confirmaron con otro importe</span></span><input type="checkbox" role="switch" class="interruptor" data-aviso="rechazos" checked onchange="cambiarAviso(this)"></label>
+    <label class="fila-aviso"><span class="fila-aviso-texto"><span class="fila-aviso-titulo">Nuevos gastos</span><span class="fila-aviso-desc">Alguien añadió un gasto en uno de tus grupos</span></span><input type="checkbox" role="switch" class="interruptor" data-aviso="gastos" checked onchange="cambiarAviso(this)"></label>
+    <label class="fila-aviso"><span class="fila-aviso-texto"><span class="fila-aviso-titulo">Mensajes del chat</span><span class="fila-aviso-desc">Un aviso por grupo con el último mensaje</span></span><input type="checkbox" role="switch" class="interruptor" data-aviso="chat" checked onchange="cambiarAviso(this)"></label>
+  </div>
+
   <div class="card u-mt-12">
     <div class="u-fs-xs u-c-text u-tt-uppercase u-ls-_8 u-fw-700 u-mb-12"><svg class="u-va-middle u-mr-4" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Opciones</div>
     <button class="btn btn-outline btn-full" onclick="handleLogout()">Cerrar sesión</button>
@@ -1223,6 +1232,7 @@
 </div>
 
 <script src="js/chat.js"></script>
+<script src="js/notificaciones.js"></script>
 
 <!-- Modal: ¿Quién eres en este grupo? (invitaciones) -->
 <div class="modal-overlay u-z-9999" id="modal-quien-eres" style="display:none">
