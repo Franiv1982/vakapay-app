@@ -4,6 +4,7 @@ const db      = require('../db/database');
 const { requireAuth }  = require('../middleware/auth');
 const { logGroupActivity } = require('../utils/activity');
 const { DIAS_CONFIRMAR, porConfirmar, fechaCorta } = require('../utils/pagos');
+const push = require('../utils/push');
 
 const router = express.Router({ mergeParams: true });
 
@@ -224,10 +225,11 @@ router.post('/', requireAuth, async (req, res, next) => {
 
     // Pago registrado por alguien que no es quien cobra: queda pendiente de que
     // quien cobra lo confirme (si tiene cuenta; si no, nadie podría confirmarlo)
-    let pendiente = false;
+    let pendiente = false, cobraUsuario = null;
     if (es_pago) {
       const cobra = (await db.query('SELECT user_id FROM group_members WHERE group_id = $1 AND display_name = $2', [req.params.id, involved[0]])).rows[0];
       pendiente = !!(cobra && cobra.user_id && Number(cobra.user_id) !== Number(req.user.id));
+      cobraUsuario = cobra && cobra.user_id;
     }
 
     // Pagos: se comprueban y registran de uno en uno por grupo (bloqueo en la base de datos)
@@ -265,6 +267,26 @@ router.post('/', requireAuth, async (req, res, next) => {
         + (pendiente ? `. ${involved[0]}, confírmalo en «Pagos realizados» antes del ${fechaCorta(expense.pago_confirmar_antes)}` : '')
       : `${quien} registró "${description}" · ${importe(amount, currency)} (pagó ${payer_name}) en "${grupo}"`);
     res.status(201).json(expense);
+
+    // Avisos push: a quien tiene que confirmar el pago, o al resto del grupo si es un gasto
+    const groupId = req.params.id, autorId = req.user.id;
+    push.enSegundoPlano(async () => {
+      const grupo = await push.nombreGrupo(groupId);
+      if (es_pago && pendiente) {
+        await push.enviar([cobraUsuario], 'pagos', {
+          titulo: 'Confirma un pago',
+          cuerpo: `${payer_name} te pagó ${importe(amount, currency)} en «${grupo}». Confírmalo antes del ${fechaCorta(expense.pago_confirmar_antes)}.`,
+          datos: { grupo_id: groupId, destino: 'pagos' },
+        });
+      } else if (!es_pago) {
+        const quien = await push.nombreEnGrupo(groupId, autorId);
+        await push.enviar(await push.usuariosDelGrupo(groupId, autorId), 'gastos', {
+          titulo: `Nuevo gasto en «${grupo}»`,
+          cuerpo: `${quien} añadió «${description}»: ${importe(amount, currency)} (pagó ${payer_name}).`,
+          datos: { grupo_id: groupId, destino: 'grupo' },
+        });
+      }
+    });
   } catch (err) { next(err); }
   finally {
     if (candado) {
@@ -434,6 +456,21 @@ router.post('/:expId/confirmar', requireAuth, async (req, res, next) => {
       ? `${quien} confirmó que recibió ${importe(nuevoAmount, gasto.currency)} de ${gasto.payer_name} (registró ${importe(gasto.amount, gasto.currency)}) en "${grupo}". ${gasto.payer_name} sigue debiendo ${importe(Number(gasto.amount) - nuevoAmount, gasto.currency)}`
       : `${quien} confirmó el pago de ${gasto.payer_name} (${importe(gasto.amount, gasto.currency)}) en "${grupo}"`);
     res.json({ ok: true, importe: recibido, parcial });
+
+    // Aviso push a quien pagó (o a quien lo registró, si quien pagó no tiene cuenta)
+    if (parcial) {
+      const groupId = req.params.id;
+      push.enSegundoPlano(async () => {
+        const destino = (await push.usuarioDeMiembro(groupId, gasto.payer_name)) || gasto.member_id;
+        if (!destino || Number(destino) === Number(req.user.id)) return;
+        const grupo = await push.nombreGrupo(groupId);
+        await push.enviar([destino], 'rechazos', {
+          titulo: 'Pago confirmado con otro importe',
+          cuerpo: `${yo.display_name} confirmó ${importe(nuevoAmount, gasto.currency)} de tu pago de ${importe(gasto.amount, gasto.currency)} en «${grupo}». Quedan ${importe(Number(gasto.amount) - nuevoAmount, gasto.currency)} por pagar.`,
+          datos: { grupo_id: groupId, destino: 'grupo' },
+        });
+      });
+    }
   } catch (err) { next(err); }
 });
 
@@ -457,10 +494,31 @@ router.delete('/:expId', requireAuth, async (req, res, next) => {
     if (!borrado) return res.status(404).json({ error: 'Este gasto ya no existe: puede que ya se haya eliminado.' });
     if (!await puedeGestionarPago(req.params.id, req.user.id, borrado)) return res.status(403).json({ error: NO_PUEDE_PAGO });
 
+    // Quién cobraba el pago (antes de borrar: sus repartos se borran con él)
+    const cobraba = rechazo
+      ? (await db.query('SELECT member_name FROM expense_splits WHERE expense_id = $1 LIMIT 1', [borrado.id])).rows[0]?.member_name
+      : null;
     await db.query('DELETE FROM expenses WHERE id = $1', [req.params.expId]);
     await recalcBalances(req.params.id);
     await logGroupActivity(req.params.id, req.user.id, borrado.es_pago ? 'payment' : 'expense', textoBorrado);
     res.status(204).end();
+
+    // Aviso push si quien cobra rechaza un pago pendiente: a quien pagó (o a quien lo registró)
+    if (rechazo) {
+      const groupId = req.params.id, yoId = req.user.id;
+      push.enSegundoPlano(async () => {
+        const quien = await push.nombreEnGrupo(groupId, yoId);
+        if (quien !== cobraba) return;   // lo anuló quien pagó: no hay nada que avisar
+        const destino = (await push.usuarioDeMiembro(groupId, borrado.payer_name)) || borrado.member_id;
+        if (!destino || Number(destino) === Number(yoId)) return;
+        const grupo = await push.nombreGrupo(groupId);
+        await push.enviar([destino], 'rechazos', {
+          titulo: 'Pago rechazado',
+          cuerpo: `${quien} rechazó tu pago de ${importe(borrado.amount, borrado.currency)} en «${grupo}». La deuda vuelve a «Cuentas finales».`,
+          datos: { grupo_id: groupId, destino: 'grupo' },
+        });
+      });
+    }
   } catch (err) { next(err); }
   finally { if (soltar) await soltar(); }
 });

@@ -127,6 +127,52 @@ router.patch('/me', requireAuth, async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// ── Notificaciones push (#68) ────────────────────────────────────
+const { TIPOS: TIPOS_AVISO } = require('../utils/push');
+const TOKEN_MOVIL = /^[\w:.-]{20,4096}$/;
+
+// POST /users/me/dispositivos { token } — la APK registra este móvil para recibir avisos
+router.post('/me/dispositivos', requireAuth, async (req, res, next) => {
+  try {
+    const token = String(req.body.token || '');
+    if (!TOKEN_MOVIL.test(token)) return res.status(400).json({ error: 'Identificador de móvil no válido' });
+    // Si el móvil era de otra cuenta (se cambió de sesión), pasa a esta
+    await db.query(`
+      INSERT INTO dispositivos (token, user_id, plataforma) VALUES ($1, $2, 'android')
+      ON CONFLICT (token) DO UPDATE SET user_id = EXCLUDED.user_id, actualizado = NOW()`, [token, req.user.id]);
+    res.status(204).end();
+  } catch (err) { next(err); }
+});
+
+// DELETE /users/me/dispositivos/:token — al cerrar sesión, este móvil deja de recibir avisos
+router.delete('/me/dispositivos/:token', requireAuth, async (req, res, next) => {
+  try {
+    await db.query('DELETE FROM dispositivos WHERE token = $1 AND user_id = $2', [req.params.token, req.user.id]);
+    res.status(204).end();
+  } catch (err) { next(err); }
+});
+
+// GET /users/me/avisos — qué avisos tiene activados ({ pagos: true, chat: false, … })
+async function leerAvisos(userId) {
+  const r = await db.query('SELECT avisos FROM users WHERE id = $1', [userId]);
+  const guardado = (r.rows[0] && r.rows[0].avisos) || {};
+  return Object.fromEntries(TIPOS_AVISO.map(t => [t, guardado[t] !== false]));
+}
+router.get('/me/avisos', requireAuth, async (req, res, next) => {
+  try { res.json(await leerAvisos(req.user.id)); } catch (err) { next(err); }
+});
+
+// PUT /users/me/avisos { chat: false, … } — activar o desactivar tipos de aviso
+router.put('/me/avisos', requireAuth, async (req, res, next) => {
+  try {
+    const cambios = {};
+    for (const t of TIPOS_AVISO) if (typeof req.body[t] === 'boolean') cambios[t] = req.body[t];
+    if (!Object.keys(cambios).length) return res.status(400).json({ error: 'Nada que cambiar' });
+    await db.query('UPDATE users SET avisos = avisos || $1::jsonb WHERE id = $2', [JSON.stringify(cambios), req.user.id]);
+    res.json(await leerAvisos(req.user.id));
+  } catch (err) { next(err); }
+});
+
 // ── PUT /users/me/avatar ─────────────────────────────────────────
 // La foto se guarda en base64 en la columna. Con ella puede llegar «mini»: la misma
 // foto en pequeño (la hace la app), que es la que ven los grupos y los amigos.

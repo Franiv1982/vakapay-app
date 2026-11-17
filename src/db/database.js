@@ -230,6 +230,15 @@ const initSchema = async () => {
         ultimo_leido INTEGER NOT NULL DEFAULT 0,
         PRIMARY KEY (group_id, user_id)
       );
+      -- Notificaciones push (#68): móviles de cada usuario y avisos que desactivó
+      CREATE TABLE IF NOT EXISTS dispositivos (
+        token       TEXT PRIMARY KEY,                 -- identificador del móvil en Firebase
+        user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        plataforma  TEXT NOT NULL DEFAULT 'android',
+        actualizado TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS dispositivos_usuario ON dispositivos (user_id);
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS avisos JSONB NOT NULL DEFAULT '{}'::jsonb;  -- {"chat": false} = desactivado
     `);
     console.log('✅ Schema PostgreSQL inicializado u optimizado');
     await activarRLS();

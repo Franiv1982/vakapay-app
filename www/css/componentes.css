@@ -110,3 +110,16 @@
 .con-foto img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
 .av-chat{width:18px;height:18px;border-radius:50%;background:var(--gold-dark);color:var(--on-gold);font-size:9px;font-weight:900;
   display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin-right:6px;flex-shrink:0}
+
+/* Cuenta → Notificaciones: filas con interruptor */
+.fila-aviso{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 0;border-top:1px solid var(--line);cursor:pointer}
+.fila-aviso:first-of-type{border-top:none}
+.fila-aviso-texto{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fila-aviso-titulo{font-weight:700;color:var(--text);font-size:var(--fs-base)}
+.fila-aviso-desc{color:var(--muted);font-size:var(--fs-sm);line-height:1.35}
+.interruptor{appearance:none;-webkit-appearance:none;flex-shrink:0;width:46px;height:28px;border-radius:999px;background:var(--line);position:relative;cursor:pointer;transition:background .2s;margin:0}
+.interruptor::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.interruptor:checked{background:var(--gold)}
+.interruptor:checked::after{transform:translateX(18px)}
+.interruptor:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.interruptor:disabled{opacity:.6;cursor:progress}
