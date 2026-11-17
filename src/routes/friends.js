@@ -69,7 +69,7 @@ router.get('/', requireAuth, async (req, res, next) => {
 // ── POST /friends ─────────────────────────────────────────────────
 router.post('/', requireAuth, async (req, res, next) => {
   try {
-    const { name, email = '', phone = '', notes = '' } = req.body;
+    const { name, email = '', phone = '' } = req.body;
     if (!name) return res.status(400).json({ error: 'Escribe un nombre' });
 
     // Evita duplicados: mismo email, teléfono o nombre que un amigo ya guardado
@@ -83,9 +83,9 @@ router.post('/', requireAuth, async (req, res, next) => {
     }
 
     const result = await db.query(`
-      INSERT INTO friends (owner_id, name, email, phone, notes)
-      VALUES ($1, $2, $3, $4, $5) RETURNING *
-    `, [req.user.id, name, email, phone, notes]);
+      INSERT INTO friends (owner_id, name, email, phone)
+      VALUES ($1, $2, $3, $4) RETURNING *
+    `, [req.user.id, name, email, phone]);
 
     logActivity(req.user.id, 'friend', `${name} añadido a tus contactos`);
     res.status(201).json(result.rows[0]);
@@ -107,7 +107,7 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
     const existing = await db.query('SELECT * FROM friends WHERE id = $1 AND owner_id = $2', [req.params.id, req.user.id]);
     if (!existing.rows[0]) return res.status(404).json({ error: 'Amigo no encontrado' });
 
-    const { name, email, phone, notes, avatar_url } = req.body;
+    const { name, email, phone, avatar_url } = req.body;
     const actual = existing.rows[0];
     const dup = await buscarAmigoDuplicado(req.user.id, {
       name:  name  !== undefined ? name  : actual.name,
@@ -129,7 +129,6 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
     if (name  !== undefined) { fields.push(`name = $${i++}`);  values.push(name); }
     if (email !== undefined) { fields.push(`email = $${i++}`); values.push(email); }
     if (phone !== undefined) { fields.push(`phone = $${i++}`); values.push(phone); }
-    if (notes !== undefined) { fields.push(`notes = $${i++}`); values.push(notes); }
     if (!fields.length) return res.status(400).json({ error: 'Nada que actualizar' });
 
     values.push(req.params.id);

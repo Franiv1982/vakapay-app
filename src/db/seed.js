@@ -81,15 +81,15 @@ const insert = db.transaction(() => {
 
   // ── Amigos ───────────────────────────────────────────────────
   const addFriend = db.prepare(`
-    INSERT INTO friends (owner_id, name, email, phone, notes)
-    VALUES (?, ?, ?, ?, ?)
+    INSERT INTO friends (owner_id, name, email, phone)
+    VALUES (?, ?, ?, ?)
   `);
 
-  addFriend.run(userId, 'Ana García',    'ana@ejemplo.com',    '+34 611 222 333', 'Amiga del cole');
-  addFriend.run(userId, 'Carlos López',  'carlos@ejemplo.com', '+34 622 333 444', 'Compañero de trabajo');
+  addFriend.run(userId, 'Ana García',    'ana@ejemplo.com',    '+34 611 222 333');
+  addFriend.run(userId, 'Carlos López',  'carlos@ejemplo.com', '+34 622 333 444');
   addFriend.run(userId, 'María Ruiz',    'maria@ejemplo.com',  '',                '');
-  addFriend.run(userId, 'David Sánchez', '',                   '+34 644 555 666', 'Vecino');
-  addFriend.run(userId, 'Elena Torres',  'elena@ejemplo.com',  '+34 655 666 777', 'Prima');
+  addFriend.run(userId, 'David Sánchez', '',                   '+34 644 555 666');
+  addFriend.run(userId, 'Elena Torres',  'elena@ejemplo.com',  '+34 655 666 777');
 
   // ── Actividad ────────────────────────────────────────────────
   const addActivity = db.prepare(`

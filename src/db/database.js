@@ -49,7 +49,7 @@ const COLUMNAS_TEXTO = {
   group_members: ['display_name'],
   expenses: ['description', 'payer_name', 'category', 'currency', 'pagado_por'],
   expense_splits: ['member_name'],
-  friends: ['name', 'email', 'phone', 'notes'],
+  friends: ['name', 'email', 'phone'],
   activity_log: ['message', 'group_name', 'type'],
   mensajes: ['autor'],
 };
@@ -120,7 +120,6 @@ const initSchema = async () => {
         name       TEXT    NOT NULL,
         email      TEXT,
         phone      TEXT,
-        notes      TEXT,
         avatar_url TEXT,
         added_at   TIMESTAMP NOT NULL DEFAULT NOW(),
         UNIQUE (owner_id, name)
@@ -239,6 +238,7 @@ const initSchema = async () => {
       );
       CREATE INDEX IF NOT EXISTS dispositivos_usuario ON dispositivos (user_id);
       ALTER TABLE users ADD COLUMN IF NOT EXISTS avisos JSONB NOT NULL DEFAULT '{}'::jsonb;  -- {"chat": false} = desactivado
+      ALTER TABLE friends DROP COLUMN IF EXISTS notes;   -- las notas de amigos se quitaron (solo las veía su dueño)
     `);
     console.log('✅ Schema PostgreSQL inicializado u optimizado');
     await activarRLS();

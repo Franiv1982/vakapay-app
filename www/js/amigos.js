@@ -58,7 +58,7 @@ async function addFriend(){
   const dup = buscarAmigoDuplicado({ name: fullName, email, phone });
   if (dup) { mostrarModalDuplicado({ titulo: 'Este amigo ya existe', nombre: dup.amigo.name, motivo: dup.motivo, valor: _valorDup(dup, { email, phone }) }); return; }
   try {
-    const friend = await vakaData.addFriend({name:fullName, email, phone, notes:''});
+    const friend = await vakaData.addFriend({name:fullName, email, phone});
     friends.push({...friend, name:fullName, email, phone, contact:email||phone, addedAt:new Date().toISOString()});
     await saveFriends();
     // «Vincular a un grupo»: se añade también como participante de ese grupo
@@ -77,6 +77,7 @@ async function addFriend(){
     if(document.getElementById('friendEmail')) document.getElementById('friendEmail').value='';
     if(document.getElementById('friendPhone')) document.getElementById('friendPhone').value='';
     document.getElementById('friendGroupLink').value='';
+    actualizarBotonLimpiarAmigo();
     if (!gSel) toast(`${fullName} añadido como amigo`,'s');
     else if (vinculado) toast(`${fullName} añadido como amigo y a "${gSel.name}"`,'s');
     saveActivity();renderActivity();
@@ -94,6 +95,26 @@ async function addFriend(){
 }
 
 // Sección Amigos: rellena el formulario con un contacto de la agenda (solo en la app del móvil)
+// ═══ FORMULARIO «AÑADIR AMIGO»: LIMPIAR ═══════════════════════════════
+// «Limpiar» aparece cuando hay algo escrito (a mano o desde Contactos) y lo
+// vacía. Al salir de la pantalla Amigos también se vacía (ver switchPage).
+const CAMPOS_NUEVO_AMIGO = ['friendName', 'friendLastName', 'friendEmail', 'friendPhone', 'friendGroupLink'];
+function actualizarBotonLimpiarAmigo() {
+  const hay = CAMPOS_NUEVO_AMIGO.some(id => (document.getElementById(id)?.value || '').trim());
+  const b = document.getElementById('btnLimpiarAmigo');
+  if (b) b.style.display = hay ? '' : 'none';
+}
+function limpiarFormAmigo() {
+  CAMPOS_NUEVO_AMIGO.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  actualizarBotonLimpiarAmigo();
+}
+document.addEventListener('DOMContentLoaded', () => {
+  CAMPOS_NUEVO_AMIGO.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.addEventListener('input', actualizarBotonLimpiarAmigo); el.addEventListener('change', actualizarBotonLimpiarAmigo); }
+  });
+});
+
 async function rellenarAmigoDesdeContactos() {
   if (!window.Capacitor || !Capacitor.isNativePlatform() || !Capacitor.Plugins.Contacts) {
     toast('Tu navegador no permite leer los contactos. Escríbelo a mano.', 'e'); return;
@@ -113,6 +134,7 @@ async function rellenarAmigoDesdeContactos() {
     document.getElementById('friendLastName').value = (nombre ? apellido : '').slice(0, 20);
     document.getElementById('friendEmail').value = email;
     document.getElementById('friendPhone').value = tel;
+    actualizarBotonLimpiarAmigo();
     toast('Contacto cargado. Revisa los datos y pulsa Añadir Amigo.', 's');
   } catch (err) {
     if (/cancel/i.test(err?.message || '')) return;
@@ -141,7 +163,6 @@ function renderFriends(){
       <div class="fi-info">
         <div class="fi-name">${f.name}</div>
         <div class="fi-sub">${[f.email,f.phone].filter(Boolean).join(' · ')||f.contact||'Sin contacto'}</div>
-        ${f.notes?`<div class="u-fs-xs u-c-muted u-mt-1 u-fst-italic">${f.notes}</div>`:''}
         ${inGroups.length?`<div class="u-mt-4 u-d-flex u-wrap-wrap u-gap-4">${inGroups.map(g=>`<span class="u-bg-xbdf8a u-b-x1b470 u-r-lg u-p-1-8 u-fs-2xs u-c-gold-text u-fw-700">${g}</span>`).join('')}</div>`:''}
       </div>
       <div class="u-d-flex u-gap-6">
@@ -167,7 +188,6 @@ function openFriendModal(idx){
   document.getElementById('editFriendLastName').value=parts.slice(1).join(' ')||'';
   document.getElementById('editFriendEmail').value=f.email||f.contact||'';
   document.getElementById('editFriendPhone').value=f.phone||'';
-  document.getElementById('editFriendNotes').value=f.notes||'';
   document.getElementById('friendModalTitle').innerHTML='<svg class="u-va-middle u-mr-6" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Editar: '+f.name;
   const av=document.getElementById('friendModalAvatar');
   const fotoAmigo=f.fotoCuenta||f.avatar;   // la de su cuenta manda
@@ -374,7 +394,6 @@ async function saveEditFriend(){
   const lastName=document.getElementById('editFriendLastName').value.trim();
   const email=document.getElementById('editFriendEmail').value.trim();
   const phone=document.getElementById('editFriendPhone').value.trim();
-  const notes=document.getElementById('editFriendNotes').value.trim();
   if(!firstName){toast('El nombre no puede estar vacío','e');return;}
   if(firstName.length>20){toast('El nombre no puede superar 20 caracteres','e');return;}
   if(lastName.length>20){toast('El apellido no puede superar 20 caracteres','e');return;}
@@ -393,7 +412,7 @@ async function saveEditFriend(){
     // 1. Grupos marcados o desmarcados (con el nombre de antes, que es el que tiene en ellos)
     grupos = await aplicarGruposDelAmigo(f);
     // 2. Datos del amigo
-    const cambiosAmigo = { name: newName, email, phone, notes };
+    const cambiosAmigo = { name: newName, email, phone };
     if (f._quitarAvatar) cambiosAmigo.avatar_url = null;            // «Quitar foto»
     else if (f._tmpAvatar) cambiosAmigo.avatar_url = f._tmpAvatar;  // la foto nueva también se guarda en el servidor
     if (f.id) await vakaData.updateFriend(f.id, cambiosAmigo);
@@ -422,7 +441,7 @@ async function saveEditFriend(){
   const nuevaFoto = f._quitarAvatar ? null : (f._tmpAvatar || f.avatar || null);
   const actual = friends.findIndex(x => x.id === f.id);
   const i = actual >= 0 ? actual : idx;
-  friends[i]={...friends[i],name:newName,email,phone,notes,contact:email||phone||'',avatar:nuevaFoto};
+  friends[i]={...friends[i],name:newName,email,phone,contact:email||phone||'',avatar:nuevaFoto};
   delete friends[i]._tmpAvatar; delete friends[i]._quitarAvatar;
   saveFriends();logActivity(`Amigo "${newName}" actualizado`);saveActivity();renderActivity();
   closeFriendModal();renderFriends();renderFriendPicker();updateStats();

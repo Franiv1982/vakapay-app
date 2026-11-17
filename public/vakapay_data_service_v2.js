@@ -283,10 +283,10 @@ class VakaDataService {
     }
   }
 
-  async addFriend({ name, email = '', phone = '', notes = '' }) {
+  async addFriend({ name, email = '', phone = '' }) {
     const friend = await this.#fetchWithFallback(
-      'POST', '/friends', { name, email, phone, notes },
-      { name, email, phone, notes, id: Date.now() }
+      'POST', '/friends', { name, email, phone },
+      { name, email, phone, id: Date.now() }
     );
     const friends = this.#read(this.#KEYS.friends) ?? [];
     friends.push(friend);
