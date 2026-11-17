@@ -501,7 +501,3 @@ async function ejecutarBorradoGasto() {
   goBackToGroup();
 }
 
-function openDeleteFromEdit() {
-  if (editingExpenseIdx === null) return;
-  openDeleteExpenseModal(editingExpenseIdx);
-}
