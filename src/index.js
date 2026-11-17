@@ -84,6 +84,16 @@ app.use((req, res, next) => {
 // Servir avatares subidos
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use(express.static(path.join(__dirname, '../public'), { index: false }));
+// App Links (#70): Android comprueba aquí que la APK firmada con esta huella es la
+// app oficial de este dominio, y entonces abre los enlaces de invitación en la app.
+// Si un día se publica en Google Play, se añade también la huella de «App signing»
+// de Play Console en src/well-known/assetlinks.json.
+const ASSETLINKS = require('./well-known/assetlinks.json');   // con require, Vercel lo incluye
+app.get('/.well-known/assetlinks.json', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.json(ASSETLINKS);
+});
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/login.html'));
 });
