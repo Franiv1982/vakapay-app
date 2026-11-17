@@ -1,5 +1,6 @@
  // src/routes/invite.js
 const express = require('express');
+const { ponerNombreDeCuenta } = require('../utils/nombres');
 const db = require('../db/database');
 const { requireAuth } = require('../middleware/auth');
 const { mensajeSistema, registrarEnGrupo } = require('../utils/activity');
@@ -60,10 +61,13 @@ router.post('/:token/join', requireAuth, async (req, res, next) => {
       const sinCuenta = miembros.find(m => !m.user_id && m.display_name === req.body.reclamar);
       if (!sinCuenta) return res.status(409).json({ error: 'Ese participante ya no está disponible. Elige otro o entra como nuevo.' });
       await db.query('UPDATE group_members SET user_id = $1 WHERE id = $2 AND user_id IS NULL', [req.user.id, sinCuenta.id]);
-      displayName = sinCuenta.display_name;
+      // Con cuenta, en el grupo aparece con el nombre de su cuenta (y sus gastos pasan a ese nombre)
+      const cambio = await ponerNombreDeCuenta(groupId, req.user.id);
+      displayName = cambio ? cambio.nuevo : sinCuenta.display_name;
     } else {
       // 3. Participante nuevo. Si su nombre coincide con alguien sin cuenta, se pregunta antes
-      const deseado = String(req.body.display_name || newUser?.nombre || req.user.email.split('@')[0]).trim().slice(0, 40);
+      // En los grupos, quien tiene cuenta aparece con su primer nombre (ver utils/nombres.js)
+      const deseado = (String(newUser?.nombre || req.body.display_name || '').trim().split(/\s+/)[0] || req.user.email.split('@')[0]).slice(0, 40);
       const coincide = miembros.find(m => !m.user_id && normNombre(m.display_name) === normNombre(deseado));
       if (coincide && !req.body.confirmar_nuevo) {
         return res.status(409).json({
@@ -77,6 +81,8 @@ router.post('/:token/join', requireAuth, async (req, res, next) => {
       displayName = deseado;
       for (let n = 2; usados.has(normNombre(displayName)); n++) displayName = `${deseado} (${n})`;
       await db.query('INSERT INTO group_members (group_id, user_id, display_name) VALUES ($1, $2, $3)', [groupId, req.user.id, displayName]);
+      const cambio = await ponerNombreDeCuenta(groupId, req.user.id);   // «Luis (2)» → «Luis G.»
+      if (cambio) displayName = cambio.nuevo;
     }
 
     // El nuevo tiene en Amigos a todo el grupo, y quienes tienen cuenta le tienen a él
@@ -84,12 +90,14 @@ router.post('/:token/join', requireAuth, async (req, res, next) => {
 
     // Actividad: quien entra y todos los del grupo lo ven
     const reclamado = !!req.body.reclamar;
+    const antes = reclamado && req.body.reclamar !== displayName ? req.body.reclamar : null;   // «Pepe trabajo» → «Pepe»
     await registrarEnGrupo(groupId, 'member', (uid, nombreGrupo) => uid === req.user.id
       ? `Te uniste al grupo "${nombreGrupo}"${reclamado ? ` como ${displayName}` : ''}`
-      : `${displayName} se unió al grupo "${nombreGrupo}" ${reclamado ? 'con su cuenta' : 'con el enlace de invitación'}`);
-    await mensajeSistema(groupId, req.body.reclamar
-      ? `👋 ${displayName} se unió al grupo con su cuenta`
-      : `👋 ${displayName} se unió al grupo`);
+      : antes ? `${antes} se unió al grupo "${nombreGrupo}" con su cuenta como ${displayName}`
+        : `${displayName} se unió al grupo "${nombreGrupo}" ${reclamado ? 'con su cuenta' : 'con el enlace de invitación'}`);
+    await mensajeSistema(groupId, antes
+      ? `👋 ${antes} se unió al grupo con su cuenta como ${displayName}`
+      : reclamado ? `👋 ${displayName} se unió al grupo con su cuenta` : `👋 ${displayName} se unió al grupo`);
     res.status(201).json({ joined: true, group: grupo, display_name: displayName, reclamado: !!req.body.reclamar });
   } catch (err) { next(err); }
 });

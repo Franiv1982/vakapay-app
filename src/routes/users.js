@@ -5,6 +5,7 @@ const { validarTextoPerfil } = require('../utils/perfil');
 const path     = require('path');
 const fs       = require('fs');
 const db       = require('../db/database');
+const { ponerNombreDeCuentaEnTodos } = require('../utils/nombres');
 const { requireAuth } = require('../middleware/auth');
 const { normalizarBizum, normalizarIban } = require('../utils/cobro');
 const { normalizarTelefono } = require('../utils/telefono');
@@ -123,6 +124,8 @@ router.patch('/me', requireAuth, async (req, res, next) => {
     const result = await db.query(`
       UPDATE users SET ${fields.join(', ')} WHERE id = $${i} RETURNING id, nombre, apellido, email, tel, bio, avatar_url, pago_bizum, pago_iban, created_at, updated_at
     `, values);
+    // Si cambió su nombre, en sus grupos pasa a aparecer con el nuevo
+    if (nombre !== undefined || apellido !== undefined) await ponerNombreDeCuentaEnTodos(req.user.id);
     res.json(result.rows[0]);
   } catch (err) { next(err); }
 });

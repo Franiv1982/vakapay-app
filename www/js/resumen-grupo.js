@@ -250,7 +250,8 @@ function renderMembers() {
   ? '<span class="u-c-muted u-fs-sm">Sin participantes aún...</span>'
   : mbs.map(m => {
     const isOwner = profile.id && g.owner_id && profile.id === g.owner_id;
-    const editBtn = isOwner ? `<span class="chip-edit" aria-label="Cambiar el nombre de ${m}" onclick="event.stopPropagation();openRenameMember('${m}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>` : '';
+    // Quien tiene cuenta aparece con el nombre de su cuenta: nadie más lo cambia
+    const editBtn = isOwner && !(g.memberIds && g.memberIds[m]) ? `<span class="chip-edit" aria-label="Cambiar el nombre de ${m}" onclick="event.stopPropagation();openRenameMember('${m}')"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>` : '';
 
     // Sin importes: el saldo de cada uno está en «Cuentas finales»
     return `<div class="chip" data-name="${m}">
@@ -309,19 +310,21 @@ async function ejecutarRenombrarMiembro() {
   if (Object.keys(g.members).includes(trimmed)) {
     toast('Ya existe un participante con ese nombre', 'e'); return;
   }
+  // Primero el servidor; si no lo acepta, no se cambia nada en el móvil
+  try {
+    const r = await fetch(`${API_BASE}/api/v1/groups/${g.id}/members/${encodeURIComponent(oldName)}/rename`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
+      body: JSON.stringify({ display_name: trimmed })
+    });
+    if (!r.ok) { const d = await r.json().catch(() => ({})); toast(d.error || 'No se pudo cambiar el nombre.', 'e'); return; }
+  } catch (_) { toast('Sin conexión. Inténtalo de nuevo.', 'e'); return; }
   g.members[trimmed] = g.members[oldName];
   delete g.members[oldName];
   g.expenses.forEach(ex => {
     if (ex.payer === oldName) ex.payer = trimmed;
     ex.involved = ex.involved.map(p => p === oldName ? trimmed : p);
   });
-  try {
-    await fetch(`${API_BASE}/api/v1/groups/${g.id}/members/${encodeURIComponent(oldName)}/rename`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${vakaData.getToken()}` },
-      body: JSON.stringify({ display_name: trimmed })
-    });
-  } catch(_) {}
   cerrarModalRenombrarMiembro();
   renderMembers();
   renderExpenses();

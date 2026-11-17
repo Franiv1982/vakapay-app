@@ -122,6 +122,8 @@ async function saveProfile() {
     await logActivity('Perfil actualizado');
     renderActivity();
     toast('Perfil guardado', 's');
+    // Si cambió el nombre, en los grupos ya aparece con el nuevo: se recargan
+    if (typeof refrescarGruposYAmigos === 'function') refrescarGruposYAmigos();
   } catch (error) {
     toast(error.status === 400 && error.message ? error.message : textoError(error, 'No se pudo guardar el perfil.'), 'e');
     console.error("Error en saveProfile:", error);

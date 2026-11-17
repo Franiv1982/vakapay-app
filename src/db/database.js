@@ -245,6 +245,7 @@ const initSchema = async () => {
     await limpiarTextosGuardados();
     // Se carga aquí (y no arriba) porque contactos.js usa este mismo módulo
     await require('../utils/contactos').migrarAmigosDeGrupos();
+    await require('../utils/nombres').migrarNombresDeCuenta();
   } catch (err) {
     console.error('❌ Error inicializando schema:', err.message);
   }
