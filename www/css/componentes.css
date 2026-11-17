@@ -127,7 +127,6 @@
 /* Cuenta: fila que abre una ventana (Notificaciones) */
 .tarjeta-fila{padding:0;overflow:hidden}
 .fila-ajuste{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;background:none;border:none;color:var(--text);font-family:inherit;text-align:left;cursor:pointer}
-.fila-ajuste:hover{background:var(--tint-1)}
 .fila-ajuste:focus-visible{outline:2px solid var(--gold);outline-offset:-2px;border-radius:var(--r-lg)}
 .fila-ajuste-icono{flex-shrink:0;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--gold-soft);color:var(--gold-text)}
 .fila-ajuste .fila-aviso-texto{flex:1}
@@ -142,12 +141,14 @@ input[readonly]{opacity:.65;cursor:not-allowed}
 /* Cuenta: cada ajuste en su propia tarjeta (como el resto de la app), que abre su ventana */
 .lista-ajustes{display:flex;flex-direction:column;gap:12px}
 .lista-ajustes .fila-ajuste{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm)}
-.fila-ajuste,.acceso-cuenta{transition:background .15s,border-color .15s,transform .1s}
+.fila-ajuste,.acceso-cuenta{transition:border-color .2s,transform .14s}
+/* Al pasar el ratón, igual que las tarjetas de los grupos: contorno amarillo
+   (en pantallas anchas, además, se elevan un poco; ver adaptable.css) */
+@media (hover:hover){.lista-ajustes .fila-ajuste:hover,.acceso-cuenta:hover{border-color:rgba(245,200,0,.3)}}
 .fila-ajuste:active,.acceso-cuenta:active{transform:scale(.98)}
 /* Accesos a Grupos y Amigos: tarjetas como las de arriba (icono + número), sin flecha */
 .accesos-cuenta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
 .acceso-cuenta{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);color:var(--text);font-family:inherit;text-align:left;cursor:pointer}
-.acceso-cuenta:hover{background:var(--tint-1);border-color:var(--gold-line)}
 .acceso-cuenta:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .acceso-texto{display:flex;flex-direction:column;line-height:1.1}
 .acceso-num{font-family:var(--font-display);font-size:var(--fs-xl);color:var(--gold-text);letter-spacing:1px}
