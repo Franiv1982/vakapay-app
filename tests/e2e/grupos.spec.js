@@ -141,6 +141,7 @@ test('editar un gasto: mientras se guarda no se puede eliminar ni cerrar; borrar
   await page.fill('#editDesc', 'Pan y leche');
 
   let soltar = await servidorLento(page, 'PUT');
+  await expect(page.locator('#editModal').getByRole('button', { name: 'Eliminar' })).toHaveCount(0);   // se borra desde fuera
   await page.click('#btnGuardarEdicion');
   await expect(page.locator('#btnGuardarEdicion')).toHaveText('Guardando…');
   await expect(page.locator('#editModal .modal-sheet')).toHaveAttribute('aria-busy', 'true');   // «Eliminar» no responde

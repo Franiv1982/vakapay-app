@@ -645,12 +645,10 @@
       <div class="modal-chips" id="editInvolvedChips"></div>
     </div>
 
+    <!-- Sin «Eliminar»: el gasto se borra con la papelera, junto al botón de editar -->
     <div class="u-d-flex u-gap-8 u-mt-6">
-  <!-- Se asegura la llamada a la función de confirmación -->
-  <button type="button" class="btn btn-danger u-f-1" onclick="openDeleteFromEdit()">Eliminar</button>
-  <!-- Se añade type="button" para evitar comportamiento de formulario accidental -->
-  <button type="button" class="btn btn-gold u-f-1" id="btnGuardarEdicion" onclick="saveEditExpense()">Guardar cambios</button>
-</div>
+      <button type="button" class="btn btn-gold u-f-1" id="btnGuardarEdicion" onclick="saveEditExpense()">Guardar cambios</button>
+    </div>
   </div>
 </div>
 
