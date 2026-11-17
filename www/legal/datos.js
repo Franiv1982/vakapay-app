@@ -10,5 +10,5 @@ window.DATOS_LEGALES = {
   responsable: 'Hector Francisco Rodriguez',
   email: 'franiv1110@gmail.com',
   pais: 'España',
-  actualizado: '16 de noviembre de 2026',
+  actualizado: '17 de noviembre de 2026',
 };

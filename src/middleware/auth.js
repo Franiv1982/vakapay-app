@@ -76,4 +76,13 @@ function signToken(user) {
 // Olvida el estado guardado de una cuenta (tras cambiar la contraseña, por ejemplo)
 const olvidarEstado = userId => _estado.delete(userId);
 
-module.exports = { requireAuth, signToken, textoBloqueo, olvidarEstado };
+// Billete de corta duración para terminar un registro (p. ej. el de Google):
+// prueba que el servidor ya verificó la identidad, sin crear todavía la cuenta.
+const jwtBillete = require('jsonwebtoken');
+const firmarBillete = (datos, minutos = 15) => jwtBillete.sign({ ...datos, uso: 'registro' }, JWT_SECRET, { expiresIn: `${minutos}m` });
+function leerBillete(billete) {
+  try { const d = jwtBillete.verify(String(billete || ''), JWT_SECRET); return d.uso === 'registro' ? d : null; }
+  catch (_) { return null; }
+}
+
+module.exports = { requireAuth, signToken, textoBloqueo, olvidarEstado, firmarBillete, leerBillete };

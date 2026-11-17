@@ -307,6 +307,12 @@
         .aviso-legal a,.enlaces-legales a{color:var(--gold-text);font-weight:700}
         .enlaces-legales{display:flex;justify-content:center;flex-wrap:wrap;gap:4px 8px;margin-top:18px;font-size:var(--fs-xs);color:var(--muted)}
         .enlaces-legales a{color:var(--muted);font-weight:400;text-decoration:underline;padding:8px 2px}
+        /* Seguir con Google (#69) */
+        .gis-boton{justify-content:center;min-height:44px;margin-top:4px}
+        .etiqueta-g{display:block;text-align:left;font-size:var(--fs-xs);font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:0 0 6px 4px}
+        .acepto-g{display:flex;gap:10px;align-items:flex-start;font-size:var(--fs-sm);color:var(--text2);line-height:1.45;margin:4px 0 6px;cursor:pointer;text-align:left}
+        .acepto-g input{width:20px;height:20px;flex-shrink:0;margin-top:1px;accent-color:var(--gold)}
+        .acepto-g a{color:var(--gold-text);font-weight:700}
 </style>
 <link rel="stylesheet" href="css/utilidades.css">
 </head>
@@ -321,9 +327,13 @@
             <button onclick="switchPage('page-registro')" class="btn-primary">Regístrate</button>
             <button onclick="switchPage('page-login-formulario')" class="btn-outline">Iniciar sesión</button>
             <div class="separator">o bien</div>
-            <button class="btn-google" onclick="mostrarAvisoLogin('Próximamente', 'El acceso con Google estará disponible en una próxima versión. Mientras tanto, regístrate con tu email.', 'pronto')">
-                <img src="logo_google.png" alt="Google"> Seguir con Google
+            <!-- Seguir con Google (#69): en la web se sustituye por el botón oficial de Google;
+                 sin configurar en Vercel, avisa de que llega pronto -->
+            <button class="btn-google" id="btnGoogle" onclick="mostrarAvisoLogin('Próximamente', 'El acceso con Google estará disponible en una próxima versión. Mientras tanto, regístrate con tu email.', 'pronto')">
+                <img src="logo_google.png" alt=""> Seguir con Google
             </button>
+            <div id="gisBoton" class="gis-boton" style="display:none"></div>
+            <p class="aviso-legal">Al continuar con Google aceptas los <a href="terminos.html" target="_blank" rel="noopener">Términos y condiciones</a> y la <a href="privacidad.html" target="_blank" rel="noopener">Política de privacidad</a>.</p>
             <nav class="enlaces-legales" aria-label="Información legal">
                 <a href="privacidad.html">Política de privacidad</a><span aria-hidden="true">·</span><a href="terminos.html">Términos y condiciones</a>
             </nav>
@@ -427,6 +437,27 @@
     </div></div>
 </div>
     <!-- ═══ PÁGINA: REGISTRO ═══ -->
+<!-- ═══ PÁGINA: COMPLETAR REGISTRO CON GOOGLE (#69) ═══ -->
+<div class="page" id="page-registro-google">
+    <div class="auth-box"><div class="u-w-100p u-maxw-460 u-m-0-auto">
+        <h2 class="u-m-0-0-8-0 u-c-text u-fs-xl u-t-center">Completa tu registro</h2>
+        <p class="auth-sub">Entras con Google como <strong id="g-email"></strong>. Solo falta tu teléfono: lo necesitan tus grupos para Bizum y para encontrarte.</p>
+        <div class="auth-form u-d-flex u-dir-column">
+            <div class="input-group">
+                <label class="etiqueta-g" for="g-nombre">Nombre</label>
+                <input type="text" id="g-nombre" maxlength="40" placeholder="Nombre completo" class="auth-input" autocomplete="name" oninput="comprobarRegistroGoogle()">
+            </div>
+            <div class="input-group">
+                <label class="etiqueta-g" for="g-tel">Teléfono</label>
+                <input type="tel" id="g-tel" placeholder="+34 600 000 000" class="auth-input" autocomplete="tel" inputmode="tel" oninput="comprobarRegistroGoogle()">
+            </div>
+            <label class="acepto-g"><input type="checkbox" id="g-acepta" onchange="comprobarRegistroGoogle()"><span>Acepto los <a href="terminos.html" target="_blank" rel="noopener">Términos y condiciones</a> y la <a href="privacidad.html" target="_blank" rel="noopener">Política de privacidad</a></span></label>
+            <button id="btnRegistroGoogle" class="btn-primary u-mt-10" onclick="completarRegistroGoogle()" disabled>Crear cuenta</button>
+            <button class="u-bg-none u-b-1-solid-gold u-c-gold-text u-fs-base u-mt-14 u-cur-pointer u-ls-_4 u-p-8-24 u-r-sm u-d-block u-ml-auto u-mr-auto" onclick="switchPage('page-login-inicio')">Volver al inicio</button>
+        </div>
+    </div></div>
+</div>
+
 <div class="page" id="page-registro">
     <div class="auth-box"><div class="u-w-100p u-maxw-460 u-m-0-auto">
         <h2 class="u-m-0-0-8-0 u-c-text u-fs-xl u-t-center">Crea tu cuenta</h2>
@@ -1040,6 +1071,7 @@ window.addEventListener('pageshow', function(event) {
 
 <script src="libphonenumber-min.js"></script>
 <script src="vakapay_data_service_v2.js"></script>
+<script src="google-login.js"></script>
 	
 <script>
 
