@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.vakapay.app",
+      "sha256_cert_fingerprints": [
+        "1C:D3:E1:E9:ED:B9:A8:4D:97:A7:5F:E0:1C:58:03:89:81:2C:BE:F6:1B:9C:6C:65:6A:C3:1D:91:30:CB:0B:E7"
+      ]
+    }
+  }
+]
