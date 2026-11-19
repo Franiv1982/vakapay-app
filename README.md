@@ -126,6 +126,13 @@ La interfaz llama a la API desplegada (`https://vakapay-app.vercel.app`). Para p
 | `RESEND_API_KEY` | | Emails de recuperación de contraseña |
 | `GIPHY_API_KEY` | | Buscador de GIF del chat |
 | `ANTHROPIC_API_KEY` | | OCR de tickets en el servidor (opcional; por defecto se lee en el móvil) |
+| `GOOGLE_CLIENT_ID` | | «Seguir con Google»: ID de cliente web de Google Cloud |
+| `FIREBASE_SERVICE_ACCOUNT` | | Notificaciones push en la APK: .json de la cuenta de servicio de Firebase (secreto) |
+| `APP_URL_DESCARGA` | | Enlace de descarga de la APK para el aviso de versión nueva |
+| `APP_VERSION_MINIMA` | | versionCode mínimo de la APK; si es más antigua, se pide actualizar |
+| `APP_MANTENIMIENTO` | | Texto del modo mantenimiento (vacío = normal) |
+
+La lista completa, con una explicación de cada una, está en `.env.example`. En producción van en Vercel → Settings → Environment Variables (Production) y se aplican con un Redeploy.
 
 ### App Android
 
